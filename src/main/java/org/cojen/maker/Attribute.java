@@ -99,13 +99,13 @@ abstract class Attribute extends Attributed {
         private final int mMaxStack, mMaxLocals;
         private final byte[] mCode;
         private final int mCodeLen;
-        private final List<ExceptionHandler> mExceptionHandlers;
+        private final List<? extends ExceptionHandler> mExceptionHandlers;
 
         /**
          * @param exceptionHandlers optional
          */
         Code(ConstantPool cp, int maxStack, int maxLocals, byte[] code, int codeLen,
-             List<ExceptionHandler> exceptionHandlers)
+             List<? extends ExceptionHandler> exceptionHandlers)
         {
             super(cp, "Code");
             mMaxStack = maxStack;

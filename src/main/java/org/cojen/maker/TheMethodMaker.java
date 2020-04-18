@@ -71,7 +71,7 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
     private Var mThisVar;
     private Var mClassVar;
 
-    private List<ExceptionHandler> mExceptionHandlers;
+    private List<Handler> mExceptionHandlers;
 
     private Lab mReturnLabel;
 
@@ -179,35 +179,56 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
             varSlot = mThisVar == null ? 0 : 1;
         }
 
+        // Tag visited operations for removing dead code. This is necessary for building the
+        // StackMapTable, since frames are only built for visited labels.
+        mFirstOp.flowThrough();
+        if (mExceptionHandlers != null) {
+            for (Handler h : mExceptionHandlers) {
+                h.mHandlerLab.flowThrough();
+            }
+        }
+
         Set<Var> varSet = new LinkedHashSet<>();
         int opCount = 0;
-        for (Op op = mFirstOp, prev = null; op != null; prev = op, op = op.mNext) {
-            if (op instanceof PushVarOp) {
-                varSet.add(((PushVarOp) op).mVar);
-            } else if (op instanceof StoreVarOp) {
-                var store = (StoreVarOp) op;
-                varSet.add(store.mVar);
+        for (Op op = mFirstOp, prev = null; op != null; ) {
+            visited: {
+                if (!op.mVisited) {
+                    op = op.mNext;
+                    break visited;
+                }
 
-                // Look for store/push pair to the same variable and remove the pair. Just use
-                // the stack variable and avoid extra steps.
-                Op next = store.mNext;
-                if (next instanceof PushVarOp) {
-                    var push = (PushVarOp) next;
-                    Var var = store.mVar;
-                    if (var == push.mVar && var.mPushCount == 1) {
-                        var.mPushCount--;
-                        op = next;
-                        if (prev == null) {
-                            mFirstOp = op.mNext;
-                        } else {
-                            prev.mNext = op.mNext;
+                if (op instanceof PushVarOp) {
+                    varSet.add(((PushVarOp) op).mVar);
+                } else if (op instanceof StoreVarOp) {
+                    var store = (StoreVarOp) op;
+                    varSet.add(store.mVar);
+
+                    // Look for store/push pair to the same variable and remove the pair. Just
+                    // use the stack variable and avoid extra steps.
+                    Op next = store.mNext;
+                    if (next instanceof PushVarOp) {
+                        var push = (PushVarOp) next;
+                        Var var = store.mVar;
+                        if (var == push.mVar && var.mPushCount == 1) {
+                            var.mPushCount--;
+                            op = next.mNext;
+                            break visited;
                         }
-                        continue;
                     }
                 }
+
+                opCount++;
+                prev = op;
+                op = op.mNext;
+                continue;
             }
 
-            opCount++;
+            // Remove dead code.
+            if (prev == null) {
+                mFirstOp = op;
+            } else {
+                prev.mNext = op;
+            }
         }
 
         mCode = new byte[Math.min(65536, opCount * 2)];
@@ -959,7 +980,9 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
 
         // Generated catch class should "catch all" when given type is null. Granted, it's
         // always Throwable, but it matches what's generated for finally blocks.
-        ConstantPool.C_Class fcatchClass = type == null ? null : catchClass;
+        if (type == null) {
+            catchClass = null;
+        }
 
         Lab handlerLab = new Lab(this);
 
@@ -988,27 +1011,7 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
             }
         });
 
-        var handler = new ExceptionHandler() {
-            @Override
-            public int startAddr() {
-                return startLab.mAddress;
-            }
-
-            @Override
-            public int endAddr() {
-                return endLab.mAddress;
-            }
-
-            @Override
-            public int handlerAddr() {
-                return handlerLab.mAddress;
-            }
-
-            @Override
-            public ConstantPool.C_Class catchClass() {
-                return fcatchClass;
-            }
-        };
+        var handler = new Handler(startLab, endLab, handlerLab, catchClass);
 
         if (mExceptionHandlers == null) {
             mExceptionHandlers = new ArrayList<>(4);
@@ -1019,6 +1022,38 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
         Var var = new Var(catchType);
         addStoreOp(var);
         return var;
+    }
+
+    private static class Handler implements ExceptionHandler {
+        final Lab mStartLab, mEndLab, mHandlerLab;
+        final ConstantPool.C_Class mCatchClass;
+
+        Handler(Lab start, Lab end, Lab handler, ConstantPool.C_Class catchClass) {
+            mStartLab = start;
+            mEndLab = end;
+            mHandlerLab = handler;
+            mCatchClass = catchClass;
+        }
+
+        @Override
+        public int startAddr() {
+            return mStartLab.mAddress;
+        }
+
+        @Override
+        public int endAddr() {
+            return mEndLab.mAddress;
+        }
+
+        @Override
+        public int handlerAddr() {
+            return mHandlerLab.mAddress;
+        }
+
+        @Override
+        public ConstantPool.C_Class catchClass() {
+            return mCatchClass;
+        }
     }
 
     @Override
@@ -2123,9 +2158,8 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
 
         addPushOp(primType, var);
 
-        if (op < IAND) {
+        if ((op & 0xff) < IAND) {
             // Second argument to shift instruction is always an int.
-            Type actualType = addPushOp(null, value);
             // Note: Automatic downcast from long could be allowed, but it's not really necessary.
             addPushOp(INT, value);
         } else {
@@ -2199,6 +2233,7 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
 
     abstract static class Op {
         Op mNext;
+        boolean mVisited;
 
         abstract void appendTo(TheMethodMaker m);
 
@@ -2206,6 +2241,22 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
          * Should be called before running another pass over the code.
          */
         void reset() {
+        }
+
+        /**
+         * Recursively flows through unvisited operations and returns the next operation.
+         */
+        Op flow() {
+            return mNext;
+        }
+
+        final void flowThrough() {
+            for (Op op = this; op != null; op = op.flow()) {
+                if (op.mVisited) {
+                    break;
+                }
+                op.mVisited = true;
+            }
         }
     }
 
@@ -2420,6 +2471,15 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
         final int stackPop() {
             return mCode >>> 8;
         }
+
+        @Override
+        Op flow() {
+            int op = op();
+            if ((IRETURN <= op && op <= RETURN) || op == ATHROW) {
+                return null;
+            }
+            return mNext;
+        }
     }
 
     static class BranchOp extends BytecodeOp {
@@ -2460,6 +2520,16 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
                 // Zero the high opcode bit to indicate a wide branch.
                 mCode = (stackPop() << 8) | (flipIf(op) & 0x7f);
             }
+        }
+
+        @Override
+        Op flow() {
+            int op = op();
+            if (op == GOTO || op == GOTO_W) {
+                return mTarget;
+            }
+            mTarget.flowThrough();
+            return mNext;
         }
     }
 
@@ -2502,6 +2572,14 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
                     }
                 }
             }
+        }
+
+        @Override
+        Op flow() {
+            for (Lab lab : mLabels) {
+                lab.flowThrough();
+            }
+            return mDefault;
         }
     }
 
@@ -2952,6 +3030,11 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
         public void switch_(Label defaultLabel, int[] cases, Label... labels) {
             if (cases.length != labels.length) {
                 throw new IllegalArgumentException("Number of cases and labels doesn't match");
+            }
+
+            if (cases.length == 0) {
+                goto_(defaultLabel);
+                return;
             }
 
             Lab defaultLab = target(defaultLabel);
