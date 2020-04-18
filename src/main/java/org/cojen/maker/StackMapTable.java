@@ -73,10 +73,6 @@ class StackMapTable extends Attribute {
         return frame;
     }
 
-    void remove(Frame frame) {
-        mFrames.remove(frame.mAddress);
-    }
-
     /**
      * @return false if table is empty and should not be written
      */

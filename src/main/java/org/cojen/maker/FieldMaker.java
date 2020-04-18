@@ -76,6 +76,7 @@ public interface FieldMaker {
      * Set an initial constant value for this field as an int.
      *
      * @return this
+     * @throws IllegalStateException if not a static field
      */
     public FieldMaker init(int value);
 
@@ -83,6 +84,7 @@ public interface FieldMaker {
      * Set an initial constant value for this field as a float.
      *
      * @return this
+     * @throws IllegalStateException if not a static field
      */
     public FieldMaker init(float value);
 
@@ -90,6 +92,7 @@ public interface FieldMaker {
      * Set an initial constant value for this field as a long.
      *
      * @return this
+     * @throws IllegalStateException if not a static field
      */
     public FieldMaker init(long value);
 
@@ -97,6 +100,7 @@ public interface FieldMaker {
      * Set an initial constant value for this field as a double.
      *
      * @return this
+     * @throws IllegalStateException if not a static field
      */
     public FieldMaker init(double value);
 
@@ -104,6 +108,7 @@ public interface FieldMaker {
      * Set an initial constant value for this field as a String.
      *
      * @return this
+     * @throws IllegalStateException if not a static field
      */
     public FieldMaker init(String value);
 

@@ -16,6 +16,8 @@
 
 package org.cojen.maker;
 
+import java.lang.reflect.Modifier;
+
 /**
  * 
  *
@@ -103,6 +105,9 @@ final class TheFieldMaker extends ClassMember implements FieldMaker {
     }
 
     private void init(ConstantPool.Constant constant) {
+        if (!Modifier.isStatic(mModifiers)) {
+            throw new IllegalStateException("Not static");
+        }
         addAttribute(new Attribute.Constant(mConstants, constant));
     }
 }
