@@ -1,16 +1,14 @@
-# Compiled class file
+/build
+/target
+*~
+/.gitignore~
+.DS_Store
+.idea
+*.ipr
+*.iws
+*.iml
 *.class
-
-# Log file
 *.log
-
-# BlueJ files
-*.ctxt
-
-# Mobile Tools for Java (J2ME)
-.mtj.tmp/
-
-# Package Files #
 *.jar
 *.war
 *.nar
