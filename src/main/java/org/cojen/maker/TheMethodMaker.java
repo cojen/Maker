@@ -133,7 +133,7 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
     }
 
     void finish() {
-        if (mFinished != 0) {
+        if (mFinished != 0 || Modifier.isAbstract(mModifiers)) {
             return;
         }
 
@@ -1961,7 +1961,7 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
                         break;
                     case T_FLOAT:
                         float fv = (float) v;
-                        if ((double) fv == v) {
+                        if (Double.doubleToLongBits(fv) == Double.doubleToLongBits(v)) {
                             value = fv;
                             constantType = FLOAT;
                         }

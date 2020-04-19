@@ -380,4 +380,30 @@ public class MathTest {
             return this;
         }
     }
+
+    @Test
+    public void misc() throws Exception {
+        ClassMaker cm = ClassMaker.begin().public_();
+        MethodMaker mm = cm.addMethod(null, "run").static_().public_();
+
+        var v1 = mm.var(int.class).set(0);
+        v1.inc(1);
+        v1.inc(10_000);
+        v1.inc(1_000_000_000);
+        mm.var(Assert.class).invoke("assertEquals", 1_000_010_001, v1.get());
+
+        var v2 = mm.var(long.class).set(0);
+        v2.inc(1);
+        v2.inc(10_000);
+        v2.inc(1_000_000_000);
+        mm.var(Assert.class).invoke("assertEquals", 1_000_010_001, v2.get());
+
+        var v3 = mm.var(int.class).set(1);
+        mm.var(Assert.class).invoke("assertEquals", ~1, v3.com());
+
+        var v4 = mm.var(boolean.class).set(true);
+        mm.var(Assert.class).invoke("assertEquals", false, v4.not());
+
+        cm.finish().getMethod("run").invoke(null);
+    }
 }

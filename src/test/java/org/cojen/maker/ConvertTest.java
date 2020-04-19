@@ -637,5 +637,51 @@ public class ConvertTest {
         var clazz = cm.finish();
         clazz.getMethod("run").invoke(null);
     }
+
+    @Test
+    public void safeConstants() throws Exception {
+        // Setting a mismatched constant type is allowed if no information is lost.
+
+        verify((byte) 100, mm.var(byte.class).set(100));
+        verify((short) 10_000, mm.var(short.class).set(10_000));
+        verify(10f, mm.var(float.class).set(10));
+        verify(10.0, mm.var(double.class).set(10));
+        verify(10L, mm.var(long.class).set(10));
+ 
+        verify((byte) 100, mm.var(byte.class).set(100L));
+        verify((short) 10_000, mm.var(short.class).set(10_000L));
+        verify(10_000_000, mm.var(int.class).set(10_000_000L));
+        verify(10f, mm.var(float.class).set(10L));
+        verify(10.0d, mm.var(double.class).set(10L));
+
+        verify((byte) 100, mm.var(byte.class).set(100.0f));
+        verify((short) 10_000, mm.var(short.class).set(10_000.0f));
+        verify(10_000_000, mm.var(int.class).set(10_000_000.0f));
+        verify(10.0d, mm.var(double.class).set(10.0f));
+        verify(10L, mm.var(long.class).set(10.0f));
+        verify(0.0d/0.0d, mm.var(float.class).set(0.0f/0.0f));
+
+        verify((byte) 100, mm.var(byte.class).set(100.0d));
+        verify((short) 10_000, mm.var(short.class).set(10_000.0d));
+        verify(10_000_000, mm.var(int.class).set(10_000_000.0d));
+        verify(10L, mm.var(long.class).set(10.0d));
+        verify(10.0f, mm.var(float.class).set(10.0d));
+        verify(0.0f/0.0f, mm.var(float.class).set(0.0d/0.0d));
+        
+        verify((short) -10, mm.var(short.class).set((byte) -10));
+        verify(100, mm.var(int.class).set((byte) 100));
+        verify(10f, mm.var(float.class).set((byte) 10));
+        verify(10.0, mm.var(double.class).set((byte) 10));
+        verify(10L, mm.var(long.class).set((byte) 10));
+
+        verify((byte) 100, mm.var(byte.class).set((short) 100));
+        verify(10_000, mm.var(int.class).set((short) 10_000));
+        verify(10f, mm.var(float.class).set((short) 10));
+        verify(10.0, mm.var(double.class).set((short) 10));
+        verify(10L, mm.var(long.class).set((short) 10));
+
+        var clazz = cm.finish();
+        clazz.getMethod("run").invoke(null);
+    }
 }
 
