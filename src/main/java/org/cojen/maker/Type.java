@@ -593,7 +593,7 @@ abstract class Type {
         private final Type mReturnType;
         private final Type[] mParamTypes;
 
-        private String mDesc;
+        private volatile String mDesc;
 
         Method(boolean isStatic, boolean isBridge,
                Type returnType, String name, Type... paramTypes)
@@ -619,10 +619,11 @@ abstract class Type {
         }
 
         String descriptor() {
-            if (mDesc == null) {
-                mDesc = makeDescriptor(mReturnType, mParamTypes);
+            String desc = mDesc;
+            if (desc == null) {
+                mDesc = desc = makeDescriptor(mReturnType, mParamTypes);
             }
-            return mDesc;
+            return desc;
         }
 
         @Override
@@ -711,7 +712,7 @@ abstract class Type {
 
     private static final class Primitive extends Type {
         private final int mStackMapCode, mTypeCode;
-        private Type mBox;
+        private volatile Type mBox;
 
         private Primitive(int stackMapCode, int typeCode) {
             mStackMapCode = stackMapCode;
@@ -785,21 +786,25 @@ abstract class Type {
 
         @Override
         Type box() {
-            if (mBox == null) {
+            Type box = mBox;
+
+            if (box == null) {
                 switch (mTypeCode) {
-                default:        mBox = from(Void.class); break;
-                case T_BOOLEAN: mBox = from(Boolean.class); break;
-                case T_BYTE:    mBox = from(Byte.class); break;
-                case T_CHAR:    mBox = from(Character.class); break;
-                case T_SHORT:   mBox = from(Short.class); break;
-                case T_INT:     mBox = from(Integer.class); break;
-                case T_FLOAT:   mBox = from(Float.class); break;
-                case T_LONG:    mBox = from(Long.class); break;
-                case T_DOUBLE:  mBox = from(Double.class); break;
+                default:        box = from(Void.class); break;
+                case T_BOOLEAN: box = from(Boolean.class); break;
+                case T_BYTE:    box = from(Byte.class); break;
+                case T_CHAR:    box = from(Character.class); break;
+                case T_SHORT:   box = from(Short.class); break;
+                case T_INT:     box = from(Integer.class); break;
+                case T_FLOAT:   box = from(Float.class); break;
+                case T_LONG:    box = from(Long.class); break;
+                case T_DOUBLE:  box = from(Double.class); break;
                 }
+
+                mBox = box;
             }
 
-            return mBox;
+            return box;
         }
 
         @Override
@@ -956,9 +961,10 @@ abstract class Type {
     private static final class Array extends Obj {
         private final Type mElementType;
 
-        private String mName, mDesc;
+        private volatile String mName;
+        private volatile String mDesc;
 
-        private Class mClass;
+        private volatile Class mClass;
 
         private Array(Type elementType) {
             mElementType = elementType;
@@ -986,18 +992,20 @@ abstract class Type {
 
         @Override
         String name() {
-            if (mName == null) {
-                mName = mElementType.name() + "[]";
+            String name = mName;
+            if (name == null) {
+                mName = name = mElementType.name() + "[]";
             }
-            return mName;
+            return name;
         }
 
         @Override
         String descriptor() {
-            if (mDesc == null) {
-                mDesc = '[' + mElementType.descriptor();
+            String desc = mDesc;
+            if (desc == null) {
+                mDesc = desc = '[' + mElementType.descriptor();
             }
-            return mDesc;
+            return desc;
         }
 
         @Override
@@ -1013,13 +1021,14 @@ abstract class Type {
 
         @Override
         Class clazz() {
-            if (mClass == null) {
+            Class clazz = mClass;
+            if (clazz == null) {
                 Class elementClass = mElementType.clazz();
                 if (elementClass != null) {
-                    mClass = elementClass.arrayType();
+                    mClass = clazz = elementClass.arrayType();
                 }
             }
-            return mClass;
+            return clazz;
         }
 
         @Override
@@ -1046,17 +1055,17 @@ abstract class Type {
 
     private static class Clazz extends Obj {
         private final ClassLoader mLoader;
-        private Class mClass;
-        private String mName;
-        private String mDesc;
-        private Boolean mIsInterface;
+        private volatile Class mClass;
+        private volatile String mName;
+        private volatile String mDesc;
+        private volatile Boolean mIsInterface;
 
-        private Type mSuperType;
-        private Set<Type> mInterfaces;
+        private volatile Type mSuperType;
+        private volatile Set<Type> mInterfaces;
 
-        private ConcurrentHashMap<String, Field> mFields;
+        private volatile ConcurrentHashMap<String, Field> mFields;
 
-        private ConcurrentHashMap<MethodKey, Method> mMethods;
+        private volatile ConcurrentHashMap<MethodKey, Method> mMethods;
 
         Clazz(Class clazz) {
             this(clazz.getClassLoader(), clazz.getName(), null, clazz.isInterface(), null);
@@ -1077,11 +1086,12 @@ abstract class Type {
 
         @Override
         final boolean isInterface() {
-            if (mIsInterface == null) {
+            Boolean is = mIsInterface;
+            if (is == null) {
                 Class clazz = clazz();
-                mIsInterface = clazz == null ? false : clazz.isInterface();
+                mIsInterface = is = clazz == null ? false : clazz.isInterface();
             }
-            return mIsInterface;
+            return is;
         }
 
         @Override
@@ -1101,22 +1111,25 @@ abstract class Type {
 
         @Override
         final String name() {
-            if (mName == null) {
-                int end = mDesc.length();
-                if (mDesc.charAt(end - 1) == ';') {
+            String name = mName;
+            if (name == null) {
+                String desc = mDesc;
+                int end = desc.length();
+                if (desc.charAt(end - 1) == ';') {
                     end--;
                 }
-                mName = mDesc.substring(1, end).replace('/', '.');
+                mName = name = desc.substring(1, end).replace('/', '.');
             }
-            return mName;
+            return name;
         }
 
         @Override
         final String descriptor() {
-            if (mDesc == null) {
-                mDesc = 'L' + mName.replace('.', '/') + ';';
+            String desc = mDesc;
+            if (desc == null) {
+                mDesc = desc = 'L' + mName.replace('.', '/') + ';';
             }
-            return mDesc;
+            return desc;
         }
 
         @Override
@@ -1153,40 +1166,49 @@ abstract class Type {
 
         @Override
         Class clazz() {
-            if (mClass == null) {
+            Class clazz = mClass;
+            if (clazz == null) {
                 try {
-                    mClass = loadClass(mLoader, name());
+                    mClass = clazz = loadClass(mLoader, name());
                 } catch (ClassNotFoundException | LinkageError e) {
                     // Ignore.
                 }
             }
-            return mClass;
+            return clazz;
         }
 
         @Override
         Type superType() {
-            if (mSuperType == null) {
+            Type superType = mSuperType;
+            if (superType == null) {
                 Class clazz = clazz();
                 if (clazz != null) {
                     clazz = clazz.getSuperclass();
                     if (clazz != null) {
-                        mSuperType = from(clazz);
+                        mSuperType = superType = from(clazz);
                     }
                 }
             }
-            return mSuperType;
+            return superType;
         }
 
         @Override
         Set<Type> interfaces() {
-            if (mInterfaces == null) {
-                Class clazz = clazz();
-                if (clazz != null) {
-                    Set<Type> all = allInterfaces(null, clazz);
-                    mInterfaces = all == null ? Collections.emptySet() : all;
+            Set<Type> interfaces = mInterfaces;
+            if (interfaces == null) {
+                synchronized (this) {
+                    interfaces = mInterfaces;
+                    if (interfaces == null) {
+                        Class clazz = clazz();
+                        if (clazz != null) {
+                            Set<Type> all = allInterfaces(null, clazz);
+                            interfaces = all == null ? Collections.emptySet() : all;
+                            mInterfaces = interfaces;
+                        }
+                    }
                 }
             }
-            return mInterfaces;
+            return interfaces;
         }
 
         private static Set<Type> allInterfaces(Set<Type> all, Class clazz) {
@@ -1236,7 +1258,7 @@ abstract class Type {
             return defineField(true, isStatic, type, name);
         }
 
-        private Field defineField(boolean allowExisting, boolean isStatic, Type type, String name) {
+        private Field defineField(boolean invent, boolean isStatic, Type type, String name) {
             var field = new Field(isStatic, type, name);
 
             Field existing;
@@ -1250,12 +1272,14 @@ abstract class Type {
                     return existing;
                 }
                 if (existing == null) {
-                    fields.put(name, field);
+                    if (!invent) {
+                        fields.put(name, field);
+                    }
                     return field;
                 }
             }
 
-            if (allowExisting) {
+            if (invent) {
                 return existing;
             }
 
@@ -1362,7 +1386,7 @@ abstract class Type {
             return defineMethod(true, isStatic, returnType, name, paramTypes);
         }
 
-        private Method defineMethod(boolean allowExisting, boolean isStatic,
+        private Method defineMethod(boolean invent, boolean isStatic,
                                     Type returnType, String name, Type... paramTypes)
         {
             var key = new MethodKey(returnType, name, paramTypes);
@@ -1379,12 +1403,14 @@ abstract class Type {
                     return existing;
                 }
                 if (existing == null) {
-                    methods.put(key, method);
+                    if (!invent) {
+                        methods.put(key, method);
+                    }
                     return method;
                 }
             }
 
-            if (allowExisting) {
+            if (invent) {
                 return existing;
             }
 
@@ -1441,7 +1467,7 @@ abstract class Type {
     }
 
     private static class JavaLang extends Clazz {
-        private Type mUnbox;
+        private volatile Type mUnbox;
 
         JavaLang(Class clazz) {
             super(clazz);
@@ -1449,21 +1475,25 @@ abstract class Type {
 
         @Override
         Type unbox() {
-            if (mUnbox == null) {
+            Type unbox = mUnbox;
+
+            if (unbox == null) {
                 switch (name().substring(10)) {
-                case "Boolean":   mUnbox = BOOLEAN; break;
-                case "Byte":      mUnbox = BYTE; break;
-                case "Short":     mUnbox = SHORT; break;
-                case "Character": mUnbox = CHAR; break;
-                case "Integer":   mUnbox = INT; break;
-                case "Float":     mUnbox = FLOAT; break;
-                case "Double":    mUnbox = DOUBLE; break;
-                case "Long":      mUnbox = LONG; break;
-                case "Void":      mUnbox = VOID; break;
+                case "Boolean":   unbox = BOOLEAN; break;
+                case "Byte":      unbox = BYTE; break;
+                case "Short":     unbox = SHORT; break;
+                case "Character": unbox = CHAR; break;
+                case "Integer":   unbox = INT; break;
+                case "Float":     unbox = FLOAT; break;
+                case "Double":    unbox = DOUBLE; break;
+                case "Long":      unbox = LONG; break;
+                case "Void":      unbox = VOID; break;
                 }
+
+                mUnbox = unbox;
             }
 
-            return mUnbox;
+            return unbox;
         }
     }
 }
