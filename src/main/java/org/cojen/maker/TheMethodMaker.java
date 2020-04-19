@@ -182,9 +182,15 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
         // Tag visited operations for removing dead code. This is necessary for building the
         // StackMapTable, since frames are only built for visited labels.
         mFirstOp.flowThrough();
+
+        // Visit the exception handlers too.
         if (mExceptionHandlers != null) {
-            for (Handler h : mExceptionHandlers) {
-                h.mHandlerLab.flowThrough();
+            Iterator<Handler> it = mExceptionHandlers.iterator();
+            while (it.hasNext()) {
+                Handler h = it.next();
+                if (!h.isVisited()) {
+                    it.remove();
+                }
             }
         }
 
@@ -1053,6 +1059,26 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
         @Override
         public ConstantPool.C_Class catchClass() {
             return mCatchClass;
+        }
+
+        boolean isVisited() {
+            // Check if anything is visited in between the start and end labels.
+            check: {
+                for (Op op = mStartLab.mNext; op != null && op != mEndLab; op = op.mNext) {
+                    if (op.mVisited) {
+                        break check;
+                    }
+                }
+                return false;
+            }
+
+            // Makes sure the labels aren't dropped. They're needed to build the exception table.
+            mStartLab.mVisited = true;
+            mEndLab.mVisited = true;
+
+            mHandlerLab.flowThrough();
+
+            return true;
         }
     }
 

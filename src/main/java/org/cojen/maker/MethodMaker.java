@@ -218,7 +218,7 @@ public interface MethodMaker {
      * Define an exception handler here, which catches exceptions between the given labels. Any
      * code prior to the handler must not flow into it directly.
      *
-     * @param type exception type to cacteh; pass null to catch anything
+     * @param type exception type to catch; pass null to catch anything
      * @return a variable which references the exception instance
      */
     public Variable exceptionHandler(Label start, Label end, Object type);

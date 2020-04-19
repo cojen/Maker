@@ -185,7 +185,10 @@ class ConstantPool {
         if (value instanceof String) {
             return addString((String) value);
         } else if (value instanceof Class) {
-            return addClass(Type.from((Class) value));
+            Class clazz = (Class) value;
+            if (!clazz.isPrimitive()) {
+                return addClass(Type.from(clazz));
+            }
         } else if (value instanceof Number) {
             if (value instanceof Integer) {
                 return addInteger((Integer) value);
