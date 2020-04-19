@@ -1516,7 +1516,8 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         if (code < 20) {
-            return unbox(from);
+            unbox(from);
+            return convertPrimitive(to, code - 15);
         }
 
         throw new AssertionError();
