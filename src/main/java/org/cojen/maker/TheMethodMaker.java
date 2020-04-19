@@ -810,23 +810,13 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
             .append(type.name()).append('.').append(name);
 
         if (!candidates.isEmpty()) {
-            b.append("; remaining candidates: ");
+            b.append(". Remaining candidates: ");
             int amt = 0;
             for (Type.Method m : candidates) {
                 if (amt > 0) {
                     b.append(", ");
                 }
-
-                b.append('(');
-                Type[] params = m.paramTypes();
-                for (int i=0; i<params.length; i++) {
-                    if (i > 0) {
-                        b.append(", ");
-                    }
-                    b.append(params[i].name());
-                }
-                b.append(')');
-
+                b.append(m);
                 amt++;
             }
         }
@@ -2956,27 +2946,32 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
             } else {
                 if (value instanceof Number) {
                     Number num = (Number) value;
-                    if (num.longValue() == 0 || num.doubleValue() == 0
+                    if (num.longValue() == 0 && num.doubleValue() == 0
                         && (Type.from(value.getClass()).unboxTypeCode() != T_OBJECT))
                     {
                         Type unbox = type().unbox();
                         if (unbox != null) {
-                            // Simple zero comparison. Be lenient with the type. Zero is zero.
-                            push(unbox);
-                            addBranchOp(zeroOp, 1, label);
-                            return;
+                            int code = unbox.typeCode();
+                            if (T_BYTE <= code && code <= T_INT) {
+                                // Simple zero comparison. Be lenient with the type. Zero is zero.
+                                push(unbox);
+                                addBranchOp(zeroOp, 1, label);
+                                return;
+                            }
                         }
                     }
                 }
 
                 // Need to push value first to get the type, then swap around.
                 Op savepoint = mLastOp;
-                typeCmp = comparisonType(addPushOp(null, value), eq);
+                Type valueType = addPushOp(null, value);
+                typeCmp = comparisonType(valueType, eq);
                 Op end = mLastOp;
                 Op rest = rollback(savepoint);
                 push(typeCmp);
                 mLastOp.mNext = rest;
                 mLastOp = end;
+                addConversionOp(valueType, typeCmp);
             }
 
             byte cmpOp;

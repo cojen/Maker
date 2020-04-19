@@ -16,6 +16,8 @@
 
 package org.cojen.maker;
 
+import java.util.ArrayList;
+
 import org.junit.*;
 import static org.junit.Assert.*;
 
@@ -31,7 +33,7 @@ public class WideTest {
 
     @Test
     public void wideJump() throws Exception {
-        // Test goto_w opcode.
+        // Test the goto_w opcode.
 
         ClassMaker cm = ClassMaker.begin().public_();
         MethodMaker mm = cm.addMethod(null, "run").static_().public_();
@@ -47,13 +49,57 @@ public class WideTest {
             v1.inc(1000);
         }
 
-        //mm.var(System.class).field("out").invoke("println", v1);
-
         L2.here();
         v1.inc(1);
         v1.ifLt(20_000_000, L1);
 
         mm.var(Assert.class).invoke("assertEquals", 20_000_003, v1);
+
+        var clazz = cm.finish();
+        clazz.getMethod("run").invoke(null);
+    }
+
+    @Test
+    public void wideConstant() throws Exception {
+        // Test the ldc_w opcode.
+
+        ClassMaker cm = ClassMaker.begin(null, ArrayList.class).public_();
+        cm.addConstructor().public_();
+        MethodMaker mm = cm.addMethod(null, "run").public_();
+
+        for (int i=0; i<1000; i++) {
+            mm.invoke("add", 100_000 + i);
+        }
+
+        var clazz = cm.finish();
+        var obj = (ArrayList) clazz.getConstructor().newInstance();
+        clazz.getMethod("run").invoke(obj);
+
+        for (int i=0; i<1000; i++) {
+            assertEquals(100_000 + i, obj.get(i));
+        }
+    }
+
+    @Test
+    public void wideVar() throws Exception {
+        // Test the wide load and store opcodes.
+
+        ClassMaker cm = ClassMaker.begin().public_();
+        MethodMaker mm = cm.addMethod(null, "run").static_().public_();
+
+        Variable prev = null;
+        for (int i=0; i<300; i++) {
+            Variable var = mm.var(int.class);
+            if (i == 0) {
+                var.set(1);
+            } else {
+                prev.inc(1);
+                var.set(prev);
+            }
+            prev = var;
+        }
+
+        mm.var(Assert.class).invoke("assertEquals", 300, prev);
 
         var clazz = cm.finish();
         clazz.getMethod("run").invoke(null);

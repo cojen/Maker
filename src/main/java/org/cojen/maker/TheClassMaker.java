@@ -96,6 +96,7 @@ final class TheClassMaker extends Attributed implements ClassMaker {
             if (className == null) {
                 throw new NullPointerException("Class name is required");
             }
+            // FIXME: Due to Type caching, the className must be unique per ClassLoader.
             mReservation = null;
         }
 
