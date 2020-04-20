@@ -55,7 +55,7 @@ final class Candidate implements Comparator<Type.Method> {
     }
 
     private static int compareTypes(Type thisType, Type otherType) {
-        if (thisType == otherType) {
+        if (thisType.equals(otherType)) {
             return 0;
         }
 

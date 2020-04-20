@@ -53,7 +53,6 @@
   <build>
     <plugins>
 
-      <!-- Disabled by default. The code transforms sometimes cause strange bugs.
       <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
@@ -93,7 +92,6 @@
             </execution>
           </executions>
       </plugin>
-      -->
 
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
