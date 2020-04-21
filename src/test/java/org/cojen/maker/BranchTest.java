@@ -268,4 +268,39 @@ public class BranchTest {
         var clazz = cm.finish();
         clazz.getMethod("run").invoke(null);
     }
+
+    @Test
+    public void multiLabel() throws Exception {
+        // Test use of multiple labels at same address.
+
+        ClassMaker cm = ClassMaker.begin().public_();
+        MethodMaker mm = cm.addMethod(null, "run").static_().public_();
+
+        {
+            var v1 = mm.var(int.class).set(0);
+            Label L1 = mm.label().here();
+            Label L2 = mm.label().here();
+            v1.inc(1);
+            v1.ifEq(1, L1);
+            v1.ifEq(2, L2);
+            mm.var(Assert.class).invoke("assertEquals", 3, v1);
+        }
+
+        {
+            var v1 = mm.var(int.class).set(0);
+            Label L1 = mm.label().here();
+            Label L2 = mm.label();
+            Label L3 = mm.label();
+            v1.inc(1);
+            v1.ifEq(10, L2);
+            v1.ifEq(20, L3);
+            mm.goto_(L1);
+            L2.here();
+            L3.here();
+            mm.var(Assert.class).invoke("assertEquals", 10, v1);
+        }
+
+        var clazz = cm.finish();
+        clazz.getMethod("run").invoke(null);
+    }
 }

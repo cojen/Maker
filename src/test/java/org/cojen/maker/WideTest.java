@@ -33,6 +33,15 @@ public class WideTest {
 
     @Test
     public void wideJump() throws Exception {
+        wideJump(false);
+    }
+
+    @Test
+    public void wideJump2() throws Exception {
+        wideJump(true);
+    }
+
+    private void wideJump(boolean alt) throws Exception {
         // Test the goto_w opcode.
 
         ClassMaker cm = ClassMaker.begin().public_();
@@ -51,7 +60,14 @@ public class WideTest {
 
         L2.here();
         v1.inc(1);
-        v1.ifLt(20_000_000, L1);
+        if (!alt) {
+            v1.ifLt(20_000_000, L1);
+        } else {
+            Label L3 = mm.label();
+            v1.ifGe(20_000_000, L3);
+            mm.goto_(L1);
+            L3.here();
+        }
 
         mm.var(Assert.class).invoke("assertEquals", 20_000_003, v1);
 

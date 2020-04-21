@@ -31,10 +31,26 @@ public class ExceptionTest {
 
     @Test
     public void basic() throws Exception {
+        basic(false);
+    }
+
+    @Test
+    public void basicWithFiller() throws Exception {
+        basic(true);
+    }
+
+    private void basic(boolean filler) throws Exception {
         ClassMaker cm = ClassMaker.begin().public_();
         MethodMaker mm = cm.addMethod(null, "run").static_().public_();
 
         Label L1 = mm.label().here();
+        if (filler) {
+            var v1 = mm.var(long.class).set(0);
+            for (int i=0; i<20; i++) {
+                v1.inc(100);
+            }
+            mm.var(Assert.class).invoke("assertEquals", 2_000, v1);
+        }
         mm.new_(Exception.class, "message").throw_();
         Label L2 = mm.label().here();
 

@@ -121,7 +121,7 @@ class StackMapTable extends Attribute {
         }
     }
 
-    static class Frame implements Comparable<Frame> {
+    static class Frame {
         int mAddress;
         final int[] mLocalCodes;
         final int[] mStackCodes;
@@ -143,11 +143,6 @@ class StackMapTable extends Attribute {
                 throw new IllegalStateException("Frame address changed");
             }
             return mStackCodes == null ? 0 : mStackCodes.length;
-        }
-
-        @Override
-        public int compareTo(Frame other) {
-            return Integer.compare(mAddress, other.mAddress);
         }
 
         void verify(Frame other) {
