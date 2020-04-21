@@ -64,6 +64,12 @@ public class ConcatTest {
                 ("assertEquals", "hello_worldA123.456-999nullint1.2class java.lang.String", v3);
         }
 
+        {
+            var v1 = mm.var(double.class).set(123.456);
+            var v2 = mm.concat('\0', '\u0001', v1);
+            mm.var(Assert.class).invoke("assertEquals", "\0\u0001123.456", v2);
+        }
+
         var clazz = cm.finish();
         clazz.getMethod("run").invoke(null);
     }

@@ -119,4 +119,21 @@ public class FieldTest {
         var obj = clazz.getConstructor().newInstance();
         clazz.getMethod("run").invoke(obj);
     }
+
+    @Test
+    public void chain() throws Exception {
+        ClassMaker cm = ClassMaker.begin().public_();
+        MethodMaker mm = cm.addMethod(null, "run").static_().public_();
+
+        var v1 = mm.new_(FieldTest.class);
+        var v2 = mm.new_(FieldTest.class);
+        var v3 = mm.new_(FieldTest.class);
+        v1.field("next").set(v2);
+        v1.field("next").field("next").set(v3);
+        mm.var(Assert.class).invoke("assertEquals", v3, v1.field("next").field("next"));
+
+        var clazz = cm.finish().getMethod("run").invoke(null);
+    }
+
+    public FieldTest next;
 }

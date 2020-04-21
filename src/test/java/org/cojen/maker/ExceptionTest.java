@@ -52,4 +52,26 @@ public class ExceptionTest {
         var clazz = cm.finish();
         clazz.getMethod("run").invoke(null);
     }
+
+    @Test
+    public void monitor() throws Exception {
+        ClassMaker cm = ClassMaker.begin().public_().implement(Runnable.class);
+        cm.addConstructor().public_();
+
+        MethodMaker mm = cm.addMethod(null, "run").public_();
+
+        mm.this_().monitorEnter();
+        Label L1 = mm.label().here();
+        mm.var(System.class).invoke("getProperties");
+        Label L2 = mm.label().here();
+        mm.this_().monitorExit();
+        mm.return_();
+        var ex = mm.exceptionHandler(L1, L2, null);
+        mm.this_().monitorExit();
+        ex.throw_();
+
+        var clazz = cm.finish();
+        var obj = clazz.getConstructor().newInstance();
+        clazz.getMethod("run").invoke(obj);
+    }
 }

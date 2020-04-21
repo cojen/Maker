@@ -324,24 +324,16 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
             return;
         }
 
-        TheMethodMaker first = list.get(0);
+        final TheMethodMaker first = list.get(0);
         first.positionReturnLabel();
-        TheMethodMaker prev = first;
 
         for (int i=1; i<size; i++) {
             TheMethodMaker next = list.get(i);
-            next.positionReturnLabel();
-
             if (next.mFirstOp != null) {
-                if (prev.mFirstOp == null) {
-                    prev.mFirstOp = next.mFirstOp;
-                } else {
-                    prev.mLastOp.mNext = next.mFirstOp;
-                }
-                prev.mLastOp = next.mLastOp;
+                next.positionReturnLabel();
+                first.mLastOp.mNext = next.mFirstOp;
+                first.mLastOp = next.mLastOp;
             }
-
-            prev = next;
         }
 
         first.finish();
@@ -1141,7 +1133,12 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
 
         ConstantPool.Constant[] bootArgs;
         if (constants == null) {
-            bootArgs = new ConstantPool.Constant[0];
+            if (recipe == null) {
+                bootArgs = new ConstantPool.Constant[0];
+            } else {
+                bootArgs = new ConstantPool.Constant[1];
+                bootArgs[0] = mConstants.addString(new String(recipe));
+            }
         } else {
             bootArgs = new ConstantPool.Constant[1 + constants.size()];
             bootArgs[0] = mConstants.addString(new String(recipe));
@@ -2612,7 +2609,10 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
         void appendTo(TheMethodMaker m) {
             super.appendTo(m);
             m.appendShort(mFieldRef.mIndex);
-            m.stackPush(mFieldRef.mField.type());
+            byte op = op();
+            if (op == GETFIELD || op == GETSTATIC) {
+                m.stackPush(mFieldRef.mField.type());
+            }
         }
     }
 
@@ -2865,7 +2865,7 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
         void pushObject() {
             push();
             Type type = type();
-            if (!type.isPrimitive()) {
+            if (type.isPrimitive()) {
                 addConversionOp(type, type.box());
             }
         }

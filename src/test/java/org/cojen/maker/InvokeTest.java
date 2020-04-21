@@ -187,4 +187,107 @@ public class InvokeTest {
         var mh = MethodHandles.lookup().findStatic(clazz, name, type);
         return new ConstantCallSite(mh);
     }
+
+    @Test
+    public void staticOrInstance() throws Exception {
+        // Matching method might be static or instance.
+
+        ClassMaker cm = ClassMaker.begin().public_();
+        MethodMaker mm = cm.addMethod(null, "run").public_().static_();
+
+        var obj = mm.new_(InvokeTest.class);
+        var v1 = obj.invoke("foo", 10);
+        var v2 = obj.invoke("foo", 10L);
+
+        mm.var(Assert.class).invoke("assertEquals", 11, v1);
+        mm.var(Assert.class).invoke("assertEquals", 9L, v2);
+
+        cm.finish().getMethod("run").invoke(null);
+    }
+
+    public static int foo(int arg) {
+        return arg + 1;
+    }
+
+    public long foo(long arg) {
+        return arg - 1;
+    }
+
+    @Test
+    public void override() throws Exception {
+        ClassMaker cm = ClassMaker.begin(null, InvokeTest.class).public_();
+
+        {
+            MethodMaker mm = cm.addConstructor(int.class).private_();
+            mm.invokeSuperConstructor();
+        }
+
+        {
+            MethodMaker mm = cm.addConstructor().private_();
+            mm.invokeThisConstructor(10); // dummy value
+        }
+
+        {
+            MethodMaker mm = cm.addMethod(int.class, "calc", int.class, int.class).protected_();
+            var v1 = mm.invokeSuper("calc", mm.param(0), mm.param(1));
+            var v2 = mm.var(v1).set(v1);
+            mm.return_(v2.add(10));
+        }
+
+        MethodMaker mm = cm.addMethod(null, "run").public_().static_();
+        var obj = mm.new_(cm.name());
+        var result = obj.invoke("calc", 1, 2);
+        mm.var(Assert.class).invoke("assertEquals", 13, result);
+
+        cm.finish().getMethod("run").invoke(null);
+    }
+
+    protected int calc(int a, int b) {
+        return a + b;
+    }
+
+    @Test
+    public void invokePrimitive() throws Exception {
+        // Invoking a primitive boxes it first.
+
+        ClassMaker cm = ClassMaker.begin(null, InvokeTest.class).public_();
+        MethodMaker mm = cm.addMethod(null, "run").public_().static_();
+        var v1 = mm.var(int.class).set(99);
+        mm.var(Assert.class).invoke("assertEquals", "99", v1.invoke("toString"));
+        mm.var(Assert.class).invoke("assertEquals", 1, mm.invokeStatic(Long.class, "bitCount", 1));
+        var v2 = mm.var(int.class);
+        mm.var(Assert.class).invoke("assertEquals", 1, v2.invoke("bitCount", 1));
+
+        cm.finish().getMethod("run").invoke(null);
+    }
+
+    @Test
+    public void bigStack() throws Exception {
+        ClassMaker cm = ClassMaker.begin(null, InvokeTest.class).public_();
+        MethodMaker mm = cm.addMethod(null, "run").public_().static_();
+
+        var vars = new Variable[48];
+        for (int i=0; i<vars.length; i++) {
+            vars[i] = mm.var(long.class).set(i);
+        }
+
+        // First result is popped.
+        mm.invokeStatic(InvokeTest.class, "big", (Object[]) vars);
+
+        var result = mm.invokeStatic(InvokeTest.class, "big", (Object[]) vars);
+        mm.var(Assert.class).invoke("assertEquals", 47, result);
+
+        cm.finish().getMethod("run").invoke(null);
+    }
+
+    public static long big(long a0, long a1, long a2, long a3, long a4, long a5, long a6, long a7,
+                           long b0, long b1, long b2, long b3, long b4, long b5, long b6, long b7,
+                           long c0, long c1, long c2, long c3, long c4, long c5, long c6, long c7,
+                           long d0, long d1, long d2, long d3, long d4, long d5, long d6, long d7,
+                           long e0, long e1, long e2, long e3, long e4, long e5, long e6, long e7,
+                           long f0, long f1, long f2, long f3, long f4, long f5, long f6, long f7)
+    {
+        return f7;
+    }
+
 }
