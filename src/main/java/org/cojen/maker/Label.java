@@ -23,7 +23,7 @@ package org.cojen.maker;
  */
 public interface Label {
     /**
-     * Sets the position of the label at the location of next code instruction.
+     * Sets the position of the label at the location of the next code instruction.
      *
      * @return this label
      * @throws IllegalStateException if label is already positioned

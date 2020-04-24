@@ -952,7 +952,7 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
     }
 
     @Override
-    public Variable exceptionHandler(Label start, Label end, Object type) {
+    public Variable catch_(Label start, Label end, Object type) {
         Lab startLab = target(start);
         Lab endLab = target(end);
 

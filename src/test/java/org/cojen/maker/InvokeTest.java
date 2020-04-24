@@ -168,7 +168,7 @@ public class InvokeTest {
 
         String expect = "hello" + bootstrap + type;
 
-        var ex = mm.exceptionHandler(start, end, Exception.class);
+        var ex = mm.catch_(start, end, Exception.class);
         var msg = ex.invoke("getMessage");
         mm.var(Assert.class).invoke("assertEquals", expect, msg);
         mm.return_();

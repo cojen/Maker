@@ -96,7 +96,8 @@ public interface MethodMaker {
     public Variable param(int index);
 
     /**
-     * Returns a new variable with the given type.
+     * Returns a new unitialized variable with the given type. Call {@link Variable#set set} to
+     * initialize it immediately.
      *
      * @param type a class, class name, or a variable
      * @throws IllegalArgumentException if the type is unsupported
@@ -104,12 +105,12 @@ public interface MethodMaker {
     public Variable var(Object type);
 
     /**
-     * Define a line number to represent the location of the following method.
+     * Define a line number to represent the location of the next code instruction.
      */
     public void lineNum(int num);
 
     /**
-     * Returns a new label, initially unpositioned. Call {@code Label#here here} to position it
+     * Returns a new label, initially unpositioned. Call {@link Label#here here} to position it
      * immediately.
      */
     public Label label();
@@ -221,7 +222,7 @@ public interface MethodMaker {
      * @param type exception type to catch; pass null to catch anything
      * @return a variable which references the exception instance
      */
-    public Variable exceptionHandler(Label start, Label end, Object type);
+    public Variable catch_(Label start, Label end, Object type);
 
     /**
      * Concatenate variables and constants together into a new String in the same matter as the

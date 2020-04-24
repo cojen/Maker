@@ -118,7 +118,7 @@ public class ArrayTest {
             assertVar.invoke("fail");
             mm.return_();
             Label l2 = mm.label().here();
-            var ex = mm.exceptionHandler(l1, l2, ArrayStoreException.class);
+            var ex = mm.catch_(l1, l2, ArrayStoreException.class);
         }
 
         cm.finish().getMethod("run").invoke(null);
