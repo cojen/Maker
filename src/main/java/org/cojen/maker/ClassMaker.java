@@ -21,6 +21,7 @@ import java.io.DataOutputStream;
 import java.io.OutputStream;
 import java.io.IOException;
 
+import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 
 import java.security.ProtectionDomain;
@@ -88,17 +89,6 @@ public interface ClassMaker {
                                    ClassLoader parentLoader, ProtectionDomain domain)
     {
         return new TheClassMaker(className, superClassName, parentLoader, domain);
-    }
-
-    /**
-     * Make a class which isn't registered with a class loader.
-     *
-     * @param className fully qualified class name
-     * @param superClass super class; pass null to use Object.
-     */
-    public static ClassMaker beginHidden(String className, Class superClass, Class hostClass) {
-        String superClassName = superClass == null ? (String) null : superClass.getName();
-        return new TheClassMaker(className, superClassName, hostClass);
     }
 
     /**
@@ -213,7 +203,24 @@ public interface ClassMaker {
     public Class<?> finish();
 
     /**
+     * Finishes the definition of a new hidden class, using the loader and protection domain of
+     * the given lookup. Hidden classes are automatically unloaded when no longer referenced,
+     * even if the class loader still is.
+     *
+     * <p>This feature is only fully supported in Java 15. Hidden classes created with earlier
+     * versions don't support all the lookup features.
+     *
+     * @param lookup can pass null to use caller lookup
+     * @return the lookup for the class; call lookupClass to obtain the actual class
+     * @throws IllegalStateException if definition is broken
+     */
+    public MethodHandles.Lookup finishHidden(MethodHandles.Lookup lookup)
+        throws IllegalAccessException;
+
+    /**
      * Finishes the definition of the new class and writes it to a stream.
+     *
+     * @throws IllegalStateException if definition is broken
      */
     public default void finishTo(OutputStream out) throws IOException {
         if (!(out instanceof DataOutput)) {
@@ -224,6 +231,8 @@ public interface ClassMaker {
 
     /**
      * Finishes the definition of the new class and writes it to a stream.
+     *
+     * @throws IllegalStateException if definition is broken
      */
     public void finishTo(DataOutput dout) throws IOException;
 }

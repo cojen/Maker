@@ -63,4 +63,24 @@ public class ClinitTest {
         assertEquals("hello!", clazz.getField("test2").get(null));
         assertEquals("world", clazz.getField("test3").get(null));
     }
+
+    @Test
+    public void hidden() throws Exception {
+        ClassMaker cm = ClassMaker.begin().public_();
+
+        cm.addConstructor().public_();
+
+        MethodMaker mm = cm.addClinit();
+        mm.var(ClinitTest.class).field("value").set(1);
+
+        var clazz = cm.finishHidden(null).lookupClass();
+
+        synchronized (ClinitTest.class) {
+            value = 0;
+            clazz.newInstance();
+            assertEquals(1, value);
+        }
+    }
+
+    public static volatile int value;
 }

@@ -25,6 +25,9 @@ import java.io.IOException;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
 
+import java.lang.reflect.Array;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
 import java.security.ProtectionDomain;
@@ -46,8 +49,44 @@ import static java.util.Objects.*;
 final class TheClassMaker extends Attributed implements ClassMaker {
     static final boolean DEBUG = Boolean.getBoolean(ClassMaker.class.getName() + ".DEBUG");
 
+    private static volatile Method cDefineHidden;
+    private static Object cHiddenClassOptions;
+    private static Object cUnsafe;
+
+    private static Method defineHidden() {
+        Method m = cDefineHidden;
+
+        if (m != null) {
+            return m;
+        }
+
+        try {
+            Object options = Array.newInstance
+                (Class.forName("java.lang.invoke.MethodHandles$Lookup$ClassOption"), 0);
+            m = MethodHandles.Lookup.class.getMethod
+                ("defineHiddenClass", byte[].class, boolean.class, options.getClass());
+            cHiddenClassOptions = options;
+            cDefineHidden = m;
+            return m;
+        } catch (Throwable e) {
+        }
+
+        try {
+            var unsafeClass = Class.forName("sun.misc.Unsafe");
+            m = unsafeClass.getMethod
+                ("defineAnonymousClass", Class.class, byte[].class, Object[].class);
+            var field = unsafeClass.getDeclaredField("theUnsafe");
+            field.setAccessible(true);
+            cUnsafe = field.get(null);
+            cDefineHidden = m;
+            return m;
+        } catch (Throwable e) {
+        }
+
+        throw new UnsupportedOperationException("Cannot define hidden classes");
+    }
+
     private final ClassLoader mParentLoader;
-    private final Class mHostClass;
     private final ClassInjector.Reservation mReservation;
 
     final ConstantPool.C_Class mThisClass;
@@ -73,32 +112,12 @@ final class TheClassMaker extends Attributed implements ClassMaker {
     TheClassMaker(String className, String superClassName,
                   ClassLoader parentLoader, ProtectionDomain domain)
     {
-        this(className, superClassName, parentLoader, domain, null);
-    }
-
-    TheClassMaker(String className, String superClassName, Class hostClass) {
-        this(className, superClassName, null, null, hostClass);
-    }
-
-    private TheClassMaker(String className, String superClassName,
-                          ClassLoader parentLoader, ProtectionDomain domain,
-                          Class hostClass)
-    {
         super(new ConstantPool());
 
         mParentLoader = parentLoader;
-        mHostClass = hostClass;
-
-        if (hostClass == null) {
-            mReservation = ClassInjector.reserve(className, parentLoader, domain, false);
-            className = mReservation.mClassName;
-        } else {
-            if (className == null) {
-                throw new NullPointerException("Class name is required");
-            }
-            // FIXME: Due to Type caching, the className must be unique per ClassLoader.
-            mReservation = null;
-        }
+        
+        mReservation = ClassInjector.reserve(className, parentLoader, domain, false);
+        className = mReservation.mClassName;
 
         if (superClassName == null) {
             String rootName = Object.class.getName();
@@ -357,14 +376,41 @@ final class TheClassMaker extends Attributed implements ClassMaker {
 
     @Override
     public Class<?> finish() {
+        return mReservation.mInjector.define(name(), finishBytes());
+    }
+
+    @Override
+    public MethodHandles.Lookup finishHidden(MethodHandles.Lookup lookup)
+        throws IllegalAccessException
+    {
+        Method m = defineHidden();
+        Object options = cHiddenClassOptions;
+
+        if (lookup == null) {
+            lookup = MethodHandles.lookup();
+        }
+
         byte[] bytes = finishBytes();
 
-        if (mReservation != null) {
-            return mReservation.mInjector.define(name(), bytes);
-        } else {
-            // FIXME: Need JDK 15. Anonymous class cannot refer to self.
-            //return UNSAFE.defineAnonymousClass(mHostClass, bytes, null);
-            throw null;
+        try {
+            if (options == null) {
+                var clazz = (Class<?>) m.invoke(cUnsafe, lookup.lookupClass(), bytes, null);
+                return MethodHandles.lookup().in(clazz);
+            } else {
+                return ((MethodHandles.Lookup) m.invoke(lookup, bytes, false, options));
+            }
+        } catch (InvocationTargetException e) {
+            Throwable cause = e.getCause();
+            if (cause instanceof RuntimeException) {
+                throw (RuntimeException) cause;
+            }
+            if (cause instanceof Error) {
+                throw (Error) cause;
+            }
+            if (cause == null) {
+                cause = e;
+            }
+            throw new IllegalStateException(e);
         }
     }
 

@@ -90,14 +90,11 @@ class ClassInjector extends ClassLoader {
 
     Class<?> define(String name, byte[] b) {
         try {
-            Class<?> clazz;
             if (mDomain == null) {
-                clazz = defineClass(name, b, 0, b.length);
+                return defineClass(name, b, 0, b.length);
             } else {
-                clazz = defineClass(name, b, 0, b.length, mDomain);
+                return defineClass(name, b, 0, b.length, mDomain);
             }
-            resolveClass(clazz);
-            return clazz;
         } catch (LinkageError e) {
             // Replace duplicate name definition with a better exception.
             try {
