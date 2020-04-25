@@ -645,110 +645,63 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
             staticMatch = 1; // only static
         }
 
-        Set<Type.Method> candidates =
-            type.findMethods(methodName, args.length, inherit, staticMatch);
+        Op savepoint = mLastOp;
 
-        if (candidates.isEmpty()) {
-            throw noCandidates(type, methodName);
-        }
-
-        if (staticMatch == 0) mixDetect: {
-            // Determine if all candidates are static or non-static.
-            int foundStatic = 0;
-            for (Type.Method candidate : candidates) {
-                if (candidate.isStatic()) {
-                    if (foundStatic < 0) {
-                        break mixDetect;
-                    }
-                    foundStatic = 1;
-                } else {
-                    if (foundStatic > 0) {
-                        break mixDetect;
-                    }
-                    foundStatic = -1;
-                }
-            }
-
-            staticMatch = foundStatic;
-        }
-
-        Op savepoint = null;
-
-        if (staticMatch <= 0) {
-            if (staticMatch == 0) {
-                // Might match on an instance method, in which case it will need to be pushed
-                // before the arguments. Do this after finding the matching method.
-                savepoint = mLastOp;
-            } else if (!isNew) {
-                // All methods are non-static, so push the instance early.
-                instance.pushObject();
-            }
-        }
-
+        // Push all arguments and obtain their actual types.
+        Type[] paramTypes = new Type[args.length];
         for (int i=0; i<args.length; i++) {
-            Type actualType = addPushOp(null, args[i]);
-
-            int bestCost = Integer.MAX_VALUE;
-            Type targetType = null;
-
-            for (Type.Method candidate : candidates) {
-                Type paramType = candidate.paramTypes()[i];
-                int cost = actualType.canConvertTo(paramType);
-                if (cost < bestCost) {
-                    bestCost = cost;
-                    targetType = paramType;
-                }
-            }
-
-            if (targetType == null) {
-                throw noBestCandidate(type, methodName, candidates);
-            }
-
-            Iterator<Type.Method> it = candidates.iterator();
-            while (it.hasNext()) {
-                Type.Method candidate = it.next();
-                if (!candidate.paramTypes()[i].equals(targetType)) {
-                    it.remove();
-                }
-            }
-
-            if (candidates.isEmpty()) {
-                throw noCandidates(type, methodName);
-            }
-
-            addConversionOp(actualType, targetType, bestCost);
+            paramTypes[i] = addPushOp(null, args[i]);
         }
 
-        Iterator<Type.Method> it = candidates.iterator();
+        Set<Type.Method> candidates =
+            type.findMethods(methodName, paramTypes, inherit, staticMatch);
 
         Type.Method method;
-        if (candidates.size() <= 1) {
-            method = it.next();
+        if (candidates.size() == 1) {
+            method = candidates.iterator().next();
         } else {
-            // Try to find one non-bridge method.
-            method = null;
-            while (it.hasNext()) {
-                Type.Method candidate = it.next();
-                if (!candidate.isBridge()) {
-                    if (method == null) {
-                        method = candidate;
-                    } else {
-                        throw noBestCandidate(type, methodName, candidates);
-                    }
-                }
+            rollback(savepoint);
+            if (candidates.isEmpty()) {
+                throw noCandidates(type, methodName);
+            } else {
+                throw noBestCandidate(type, methodName, candidates);
             }
         }
 
-        if (staticMatch == 0 && !method.isStatic()) {
+        if (instance != null && !method.isStatic()) {
             // Need to go back and push the instance before the arguments.
             Op end = mLastOp;
             if (end == savepoint) {
                 instance.pushObject();
+                savepoint = mLastOp;
             } else {
                 Op rest = rollback(savepoint);
                 instance.pushObject();
+                savepoint = mLastOp;
                 mLastOp.mNext = rest;
                 mLastOp = end;
+            }
+        }
+
+        // Convert the parameter types if necessary.
+        convert: {
+            Type[] actualTypes = method.paramTypes();
+            if (actualTypes.length != 0) {
+                check: {
+                    for (int i=0; i<actualTypes.length; i++) {
+                        if (!actualTypes[i].equals(paramTypes[i])) {
+                            break check;
+                        }
+                    }
+                    // Nothing to convert.
+                    break convert;
+                }
+
+                rollback(savepoint);
+
+                for (int i=0; i<args.length; i++) {
+                    addPushOp(actualTypes[i], args[i]);
+                }
             }
         }
 
@@ -1702,7 +1655,7 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
     private Op rollback(Op savepoint) {
         if (savepoint == mLastOp) {
             // Nothing to rollback.
-            throw new IllegalStateException();
+            return null;
         }
         Op start;
         if (savepoint == null) {

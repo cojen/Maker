@@ -16,72 +16,95 @@
 
 package org.cojen.maker;
 
-import java.util.Arrays;
-import java.util.Comparator;
-
 /**
- * Compares candidate invocation methods by best match.
+ * Partial-order comparator for selecting the best method to bind to.
  *
  * @author Brian S O'Neill
  */
-final class Candidate implements Comparator<Type.Method> {
-    static final Candidate THE = new Candidate();
-
+public class Candidate {
     /**
-     * Assumes methods have the same name and number of parameters. Comparison ordering rules:
+     * Compares method which have the same number of parameters, which are known to be all
+     * possible candidates to bind to. For a method to be strictly "better" than another, all
+     * parameter types must be better or equal based on conversion cost.
      *
-     * 1. Primitive parameters before object parameters.
-     * 2. Narrow primitives before wide primitives.
-     * 3. Subclass parameters before superclass parameters.
-     * 4. Non-array parameters first.
-     * 5. Lexicographical parameter class name.
-     * 6. Return type comparison.
-     * 7. Static before non-static method.
+     * @param params actual types supplied to the onvoke method
+     * @return -1 if if method a is better, 1 if b is better, or 0 if neither is strictly better
      */
-    @Override
-    public int compare(Type.Method a, Type.Method b) {
-        int result = Arrays.compare(a.paramTypes(), b.paramTypes(), Candidate::compareTypes);
-        if (result != 0) {
-            return result;
+    public static int compare(Type[] params, Type.Method a, Type.Method b) {
+        Type[] aParams = a.paramTypes();
+        Type[] bParams = b.paramTypes();
+
+        int best = 0;
+
+        for (int i=0; i<params.length; i++) {
+            int cmp = compare(params[i], aParams[i], bParams[i]);
+            if (best == 0) {
+                best = cmp;
+            } else if (cmp != 0 && best != cmp) {
+                return 0;
+            }
         }
-        result = compareTypes(a.returnType(), b.returnType());
-        if (result != 0) {
-            return result;
-        }
-        if (a.isStatic() != b.isStatic()) {
-            return a.isStatic() ? -1 : 1;
-        }
-        return 0;
+
+        return best;
     }
 
-    private static int compareTypes(Type thisType, Type otherType) {
-        if (thisType.equals(otherType)) {
+    public static int compare(Type param, Type aParam, Type bParam) {
+        int aCost = param.canConvertTo(aParam);
+        int bCost = param.canConvertTo(bParam);
+
+        if (aCost != bCost) {
+            return aCost < bCost ? -1 : 1;
+        }
+
+        if (aCost != 0) {
             return 0;
         }
 
-        int result = Integer.compare(thisType.typeCode(), otherType.typeCode());
-        if (result != 0) {
-            return result;
-        }
-
-        if (otherType.isAssignableFrom(thisType)) {
-            return -1;
-        }
-        if (thisType.isAssignableFrom(otherType)) {
+        if (param.equals(aParam)) {
+            return param.equals(bParam) ? 0 : -1;
+        } else if (param.equals(bParam)) {
             return 1;
         }
 
-        if (!thisType.isArray()) {
-            if (otherType.isArray()) {
-                return -1;
+        // Both a and b are supertypes of the actual param.
+
+        if (param.isArray()) {
+            if (aParam.isArray()) {
+                if (bParam.isArray()) {
+                    return compare(root(param), root(aParam), root(bParam));
+                } else {
+                    return -1;
+                }
+            } else {
+                if (bParam.isArray()) {
+                    return 1;
+                } else {
+                    return 0;
+                }
             }
-        } else {
-            if (!otherType.isArray()) {
-                return 1;
-            }
-            return compareTypes(thisType.elementType(), otherType.elementType());
         }
 
-        return thisType.name().compareTo(otherType.name());
+        int aSpec = specialization(aParam);
+        int bSpec = specialization(bParam);
+
+        return aSpec == bSpec ? 0 : (aSpec < bSpec ? 1 : -1);
+    }
+
+    private static Type root(Type type) {
+        while (true) {
+            Type next = type.elementType();
+            if (next == null) {
+                return type;
+            }
+            type = next;
+        }
+    }
+
+    private static int specialization(Type type) {
+        int spec = 0;
+        while ((type = type.superType()) != null) {
+            spec++;
+        }
+        return spec;
     }
 }

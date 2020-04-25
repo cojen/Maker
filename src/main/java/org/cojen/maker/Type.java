@@ -23,6 +23,7 @@ import java.lang.reflect.Modifier;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -473,15 +474,15 @@ abstract class Type {
     }
 
     /**
-     * Returns all the candidate methods that match the given criteria. Caller can remove
-     * elements from the returned set.
+     * Returns all the best candidate methods that match the given criteria. Parameter type
+     * conversion might be required to call any of the methods.
      *
      * @param inherit -1: cannot invoke inherited method, 0: can invoke inherited method,
      * 1: can only invoke super class method
      * @param staticAllowed -1: not static, 0: maybe static, 1: only static
-     * @return results ordered by best match
+     * @return all matching results
      */
-    Set<Method> findMethods(String methodName, int paramCount, int inherit, int staticAllowed) {
+    Set<Method> findMethods(String methodName, Type[] params, int inherit, int staticAllowed) {
         return null;
     }
 
@@ -593,6 +594,8 @@ abstract class Type {
         private final Type mReturnType;
         private final Type[] mParamTypes;
 
+        private int mHash;
+
         private volatile String mDesc;
 
         Method(boolean isStatic, boolean isBridge,
@@ -624,6 +627,18 @@ abstract class Type {
                 mDesc = desc = makeDescriptor(mReturnType, mParamTypes);
             }
             return desc;
+        }
+
+        @Override
+        public int hashCode() {
+            int hash = mHash;
+            if (hash == 0) {
+                hash = name().hashCode();
+                hash = hash * 31 + mReturnType.hashCode();
+                hash = hash * 31 + Arrays.hashCode(mParamTypes);
+                mHash = hash;
+            }
+            return hash;
         }
 
         @Override
@@ -1317,9 +1332,7 @@ abstract class Type {
         }
 
         @Override
-        Set<Method> findMethods(String methodName, int paramCount, int inherit, int staticAllowed) {
-            // Note: If caching support is added, be sure to always return a copy (unless empty).
-
+        Set<Method> findMethods(String methodName, Type[] params, int inherit, int staticAllowed) {
             Type type = this;
 
             if (inherit > 0) {
@@ -1329,20 +1342,21 @@ abstract class Type {
                 }
             }
 
-            return findMethods(type, methodName, paramCount, inherit, staticAllowed);
+            return findMethods(type, methodName, params, inherit, staticAllowed);
         }
 
         private static Set<Method> findMethods(Type type, String methodName,
-                                               int paramCount, int inherit, int staticAllowed)
+                                               Type[] params, int inherit, int staticAllowed)
         {
-            var methods = new TreeSet<>(Candidate.THE);
+            // TODO: Cache the results.
 
-            addMethods(methods, type, methodName, paramCount, staticAllowed);
+            var methods = new LinkedHashSet<Method>(4);
+            addMethods(methods, type, methodName, params.length, staticAllowed);
 
             if (inherit >= 0) {
                 Type superType = type.superType();
                 while (superType != null) {
-                    addMethods(methods, superType, methodName, paramCount, staticAllowed);
+                    addMethods(methods, superType, methodName, params.length, staticAllowed);
                     superType = superType.superType();
                 }
             }
@@ -1351,7 +1365,50 @@ abstract class Type {
                 Set<Type> interfaces = type.interfaces();
                 if (interfaces != null) {
                     for (Type iface : interfaces) {
-                        addMethods(methods, iface, methodName, paramCount, staticAllowed);
+                        addMethods(methods, iface, methodName, params.length, staticAllowed);
+                    }
+                }
+            }
+
+            if (methods.size() > 1) {
+                Iterator<Method> it = methods.iterator();
+                Method best = it.next();
+                var bestSet = new LinkedHashSet<Method>(1);
+                bestSet.add(best);
+
+                while (it.hasNext()) {
+                    Method candidate = it.next();
+                    int cmp = Candidate.compare(params, best, candidate);
+                    if (cmp >= 0) {
+                        if (cmp > 0) {
+                            best = candidate;
+                            bestSet.clear();
+                            bestSet.add(best);
+                        } else {
+                            bestSet.add(candidate);
+                        }
+                    }
+                }
+
+                methods = bestSet;
+            }
+
+            if (methods.size() > 1) {
+                // If any non-bridge methods, remove the bridge methods.
+                int nonBridges = 0, bridges = 0;
+                for (Method m : methods) {
+                    if (m.isBridge()) {
+                        bridges++;
+                    } else {
+                        nonBridges++;
+                    }
+                }
+                if (nonBridges > 0 && bridges > 0) {
+                    Iterator<Method> it = methods.iterator();
+                    while (it.hasNext()) {
+                        if (it.next().isBridge()) {
+                            it.remove();
+                        }
                     }
                 }
             }
@@ -1359,20 +1416,23 @@ abstract class Type {
             return methods;
         }
 
-        private static void addMethods(TreeSet<Method> methods, Type type,
-                                       String methodName, int paramCount, int staticAllowed)
+        private static void addMethods(Set<Method> methods, Type type, String methodName,
+                                       int paramCount, int staticAllowed)
         {
             for (Method m : type.methods().values()) {
-                if (m.name().equals(methodName) && m.paramTypes().length == paramCount) {
-                    if (m.isStatic()) {
-                        if (staticAllowed < 0) {
-                            continue;
-                        }
-                    } else if (staticAllowed > 0) {
+                if (!m.name().equals(methodName) || m.paramTypes().length != paramCount) {
+                    continue;
+                }
+
+                if (m.isStatic()) {
+                    if (staticAllowed < 0) {
                         continue;
                     }
-                    methods.add(m);
+                } else if (staticAllowed > 0) {
+                    continue;
                 }
+
+                methods.add(m);
             }
         }
 

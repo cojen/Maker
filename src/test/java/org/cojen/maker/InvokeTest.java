@@ -16,7 +16,11 @@
 
 package org.cojen.maker;
 
+import java.io.Serializable;
+
 import java.lang.invoke.*;
+
+import java.util.*;
 
 import org.junit.*;
 import static org.junit.Assert.*;
@@ -290,4 +294,159 @@ public class InvokeTest {
         return f7;
     }
 
+    @Test
+    public void invokeInfer() throws Exception {
+        ClassMaker cm = ClassMaker.begin(null, InvokeTest.class).public_();
+        MethodMaker mm = cm.addMethod(null, "run").public_().static_();
+
+        var v1 = mm.var(int.class).set(1);
+        var v2 = mm.var(long.class).set(2);
+
+        {
+            var result = mm.invokeStatic(InvokeTest.class, "methodA", v1, v2);
+            mm.var(Assert.class).invoke("assertEquals", 1, result);
+        }
+
+        {
+            var result = mm.invokeStatic(InvokeTest.class, "methodB", v1, v2);
+            mm.var(Assert.class).invoke("assertEquals", 4, result);
+        }
+
+        try {
+            mm.invokeStatic(InvokeTest.class, "methodA", 1L, 2L);
+            fail();
+        } catch (IllegalStateException e) {
+            // No match.
+        }
+
+        try {
+            mm.invokeStatic(InvokeTest.class, "methodA", 1, 2);
+            fail();
+        } catch (IllegalStateException e) {
+            // No best match.
+        }
+
+        cm.finish().getMethod("run").invoke(null);
+    }
+
+    public static int methodA(int a, long b) {
+        return 1;
+    }
+
+    public static int methodA(long a, int b) {
+        return 2;
+    }
+
+    public static int methodB(long a, int b) {
+        return 3;
+    }
+
+    public static int methodB(int a, long b) {
+        return 4;
+    }
+
+    @Test
+    public void invokeInfer2() throws Exception {
+        ClassMaker cm = ClassMaker.begin(null, InvokeTest.class).public_();
+        MethodMaker mm = cm.addMethod(null, "run").public_().static_();
+
+        var v1 = mm.new_(ArrayList.class);
+
+        try {
+            mm.invokeStatic(InvokeTest.class, "methodC", v1);
+            fail();
+        } catch (IllegalStateException e) {
+            // No best match.
+        }
+
+        {
+            var result = mm.invokeStatic(InvokeTest.class, "methodC", v1.cast(Collection.class));
+            mm.var(Assert.class).invoke("assertEquals", 1, result);
+        }
+
+        cm.finish().getMethod("run").invoke(null);
+    }
+
+    public static int methodC(Collection a) {
+        return 1;
+    }
+
+    public static int methodC(Serializable a) {
+        return 2;
+    }
+
+    @Test
+    public void invokeInfer3() throws Exception {
+        ClassMaker cm = ClassMaker.begin(null, InvokeTest.class).public_();
+        MethodMaker mm = cm.addMethod(null, "run").public_().static_();
+
+        var v1 = mm.new_(ArrayList.class);
+
+        var result = mm.invokeStatic(InvokeTest.class, "methodD", v1);
+        mm.var(Assert.class).invoke("assertEquals", 2, result);
+
+        cm.finish().getMethod("run").invoke(null);
+    }
+
+    public static int methodD(AbstractCollection a) {
+        return 1;
+    }
+
+    public static int methodD(AbstractList a) {
+        return 2;
+    }
+
+    @Test
+    public void invokeInfer4() throws Exception {
+        ClassMaker cm = ClassMaker.begin(null, InvokeTest.class).public_();
+        MethodMaker mm = cm.addMethod(null, "run").public_().static_();
+
+        var v1 = mm.new_(int[].class, 10);
+
+        var result = mm.invokeStatic(InvokeTest.class, "methodE", v1);
+        mm.var(Assert.class).invoke("assertEquals", 1, result);
+
+        cm.finish().getMethod("run").invoke(null);
+    }
+
+    public static int methodE(int[] a) {
+        return 1;
+    }
+
+    public static int methodE(Object a) {
+        return 2;
+    }
+
+    @Test
+    public void invokeInfer5() throws Exception {
+        ClassMaker cm = ClassMaker.begin(null, InvokeTest.class).public_();
+        MethodMaker mm = cm.addMethod(null, "run").public_().static_();
+
+        var v1 = mm.new_(ArrayList[].class, 10);
+
+        var result = mm.invokeStatic(InvokeTest.class, "methodF", v1);
+        mm.var(Assert.class).invoke("assertEquals", 2, result);
+
+        cm.finish().getMethod("run").invoke(null);
+    }
+
+    public static int methodF(Object a) {
+        return 0;
+    }
+
+    public static int methodF(AbstractCollection[] a) {
+        return 1;
+    }
+
+    public static int methodF(AbstractList[] a) {
+        return 2;
+    }
+
+    public static int methodF(Object[] a) {
+        return 3;
+    }
+
+    public static int methodF(Collection[] a) {
+        return 4;
+    }
 }
