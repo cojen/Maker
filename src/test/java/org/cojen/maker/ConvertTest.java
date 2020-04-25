@@ -638,6 +638,17 @@ public class ConvertTest {
         clazz.getMethod("run").invoke(null);
     }
 
+    /* FIXME: race condition?
+[ERROR] safeConstants(org.cojen.maker.ConvertTest)  Time elapsed: 0.069 s  <<< ERROR!
+java.lang.IllegalStateException: No best matching method found for: org.cojen.maker.ConvertTest.verify. Remaining candidates: Method {name=verify, returnType=void, paramTypes=[double, double], isStatic=true, isBridge=false, enclosingType=org.cojen.maker.ConvertTest}, Method {name=verify, returnType=void, paramTypes=[float, float], isStatic=true, isBridge=false, enclosingType=org.cojen.maker.ConvertTest}
+        at org.cojen.maker@1.0.0/org.cojen.maker.TheMethodMaker.noBestCandidate(TheMethodMaker.java:769)
+        at org.cojen.maker@1.0.0/org.cojen.maker.TheMethodMaker.doInvoke(TheMethodMaker.java:667)
+        at org.cojen.maker@1.0.0/org.cojen.maker.TheMethodMaker.doInvokeInstance(TheMethodMaker.java:616)
+        at org.cojen.maker@1.0.0/org.cojen.maker.TheMethodMaker$OwnedVar.invoke(TheMethodMaker.java:3297)
+        at org.cojen.maker@1.0.0/org.cojen.maker.TheMethodMaker$OwnedVar.invoke(TheMethodMaker.java:2801)
+        at org.cojen.maker@1.0.0/org.cojen.maker.ConvertTest.verify(ConvertTest.java:70)
+        at org.cojen.maker@1.0.0/org.cojen.maker.ConvertTest.safeConstants(ConvertTest.java:662)
+    */
     @Test
     public void safeConstants() throws Exception {
         // Setting a mismatched constant type is allowed if no information is lost.
@@ -659,7 +670,7 @@ public class ConvertTest {
         verify(10_000_000, mm.var(int.class).set(10_000_000.0f));
         verify(10.0d, mm.var(double.class).set(10.0f));
         verify(10L, mm.var(long.class).set(10.0f));
-        verify(0.0d/0.0d, mm.var(float.class).set(0.0f/0.0f));
+        verify(0.0d/0.0d, mm.var(float.class).set(0.0f/0.0f)); // FIXME: here
 
         verify((byte) 100, mm.var(byte.class).set(100.0d));
         verify((short) 10_000, mm.var(short.class).set(10_000.0d));
