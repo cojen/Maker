@@ -18,6 +18,7 @@ package org.cojen.maker;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutput;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -114,6 +115,10 @@ final class TheClassMaker extends Attributed implements ClassMaker {
     {
         super(new ConstantPool());
 
+        if (parentLoader == null) {
+            parentLoader = getClass().getClassLoader();
+        }
+
         mParentLoader = parentLoader;
         
         mReservation = ClassInjector.reserve(className, parentLoader, domain, false);
@@ -133,11 +138,7 @@ final class TheClassMaker extends Attributed implements ClassMaker {
         } else {
             Object superClass = superClassName;
             try {
-                if (parentLoader == null) {
-                    superClass = Class.forName(superClassName);
-                } else {
-                    superClass = parentLoader.loadClass(superClassName);
-                }
+                superClass = Class.forName(superClassName, true, parentLoader);
             } catch (ClassNotFoundException e) {
             }
 
@@ -145,11 +146,15 @@ final class TheClassMaker extends Attributed implements ClassMaker {
             mSuperClass = mConstants.addClass(superType);
         }
 
-        mThisClass = mConstants.addClass(Type.from(mParentLoader, className, superType));
+        mThisClass = mConstants.addClass(Type.begin(mParentLoader, className, superType));
     }
 
     @Override
     public void finishTo(DataOutput dout) throws IOException {
+        finishTo(dout, false);
+    }
+
+    private void finishTo(DataOutput dout, boolean hidden) throws IOException {
         if (mFinished) {
             throw new IllegalStateException("Already finished");
         }
@@ -171,6 +176,14 @@ final class TheClassMaker extends Attributed implements ClassMaker {
         if (mMethods != null) {
             for (TheMethodMaker method : mMethods) {
                 method.finish();
+            }
+        }
+
+        if (hidden) {
+            String name = mThisClass.mValue.mValue;
+            int ix = name.lastIndexOf('-');
+            if (ix > 0) {
+                mThisClass.rename(mConstants.addUTF8(name.substring(0, ix)));
             }
         }
 
@@ -376,7 +389,7 @@ final class TheClassMaker extends Attributed implements ClassMaker {
 
     @Override
     public Class<?> finish() {
-        return mReservation.mInjector.define(name(), finishBytes());
+        return mReservation.mInjector.define(name(), finishBytes(false));
     }
 
     @Override
@@ -390,7 +403,7 @@ final class TheClassMaker extends Attributed implements ClassMaker {
             lookup = MethodHandles.lookup();
         }
 
-        byte[] bytes = finishBytes();
+        byte[] bytes = finishBytes(true);
 
         try {
             if (options == null) {
@@ -414,11 +427,14 @@ final class TheClassMaker extends Attributed implements ClassMaker {
         }
     }
 
-    public byte[] finishBytes() {
+    /**
+     * @param hidden when true, class is renamed first to strip off the generated identifier
+     */
+    byte[] finishBytes(boolean hidden) {
         byte[] bytes;
         try {
             ByteArrayOutputStream bout = new ByteArrayOutputStream(1000);
-            finishTo(bout);
+            finishTo(new DataOutputStream(bout), hidden);
             bytes = bout.toByteArray();
         } catch (IOException e) {
             // Not expected.

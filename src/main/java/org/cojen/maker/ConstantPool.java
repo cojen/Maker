@@ -406,7 +406,7 @@ class ConstantPool {
     }
 
     static abstract class C_StringRef extends Constant {
-        final C_UTF8 mValue;
+        C_UTF8 mValue;
 
         C_StringRef(int tag, C_UTF8 value) {
             super(tag);
@@ -443,6 +443,10 @@ class ConstantPool {
         C_Class(C_UTF8 name, Type type) {
             super(7, name);
             mType = type;
+        }
+
+        void rename(C_UTF8 name) {
+            mValue = name;
         }
     }
 

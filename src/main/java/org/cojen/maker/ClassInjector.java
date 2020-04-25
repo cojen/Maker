@@ -43,12 +43,12 @@ class ClassInjector extends ClassLoader {
     private final Map<String, Boolean> mReservedNames = new WeakHashMap<>();
     private final ProtectionDomain mDomain;
 
-    ClassInjector(ClassLoader parent, ProtectionDomain domain) {
+    private ClassInjector(ClassLoader parent, ProtectionDomain domain) {
         super(parent);
         mDomain = prepareDomain(domain, this);
     }
 
-    ClassInjector(ProtectionDomain domain) {
+    private ClassInjector(ProtectionDomain domain) {
         super();
         mDomain = prepareDomain(domain, this);
     }
@@ -66,8 +66,17 @@ class ClassInjector extends ClassLoader {
 
     // Prevent name collisions while multiple threads are defining classes by reserving the name.
     boolean reserveName(String name, boolean explicit) {
-        synchronized (mReservedNames) {
-            if (mReservedNames.put(name, Boolean.TRUE) != null && !explicit) {
+        ClassInjector self = this;
+        while (true) {
+            ClassLoader parent = self.getParent();
+            if (!(parent instanceof ClassInjector)) {
+                break;
+            }
+            self = (ClassInjector) parent;
+        }
+
+        synchronized (self.mReservedNames) {
+            if (self.mReservedNames.put(name, Boolean.TRUE) != null && !explicit) {
                 return false;
             }
         }
@@ -77,15 +86,7 @@ class ClassInjector extends ClassLoader {
         // A duplicate class definition can still be attempted later, which is converted to an
         // IllegalStateException by the define method.
 
-        try {
-            loadClass(name);
-        } catch (ClassNotFoundException e) {
-            return true;
-        } catch (LinkageError e) {
-            // Class by same name exists, but it is broken.
-        }
-
-        return false;
+        return self.findLoadedClass(name) == null;
     }
 
     Class<?> define(String name, byte[] b) {
@@ -164,7 +165,8 @@ class ClassInjector extends ClassLoader {
                 break;
             }
 
-            String mangled = className + '$' + id;
+            // Use '-' instead of '$' to prevent conflicts with inner class names.
+            String mangled = className + '-' + id;
 
             if (injector.reserveName(mangled, false)) {
                 return new Reservation(injector, mangled);

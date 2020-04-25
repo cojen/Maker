@@ -81,6 +81,18 @@ abstract class Type {
         UNINIT_THIS = new Special(SM_UNINIT_THIS),
         UNINIT = new Special(SM_UNINIT);
 
+    /**
+     * Called when making a new class.
+     */
+    static Type begin(ClassLoader loader, String name, Type superType) {
+        ConcurrentHashMap<Object, Type> cache = cache(loader);
+        var type = new NewClazz(loader, name, superType);
+        if (cachePut(cache, name, type) != type) {
+            throw new IllegalStateException("Already being defined: " + name);
+        }
+        return type;
+    }
+
     static Type from(ClassLoader loader, Object type) {
         if (type instanceof Class) {
             return from((Class) type);
@@ -158,7 +170,7 @@ abstract class Type {
 
         if (name.startsWith("java.lang.")) {
             try {
-                return new JavaLang(loadClass(loader, name));
+                return new JavaLang(Class.forName(name, true, loader));
             } catch (ClassNotFoundException e) {
                 // Ignore.
             }
@@ -209,10 +221,6 @@ abstract class Type {
         }
 
         return new Clazz(type);
-    }
-
-    private static Class loadClass(ClassLoader loader, String name) throws ClassNotFoundException {
-        return (loader == null) ? Class.forName(name) : loader.loadClass(name);
     }
 
     static String makeDescriptor(Type returnType, List<Type> paramTypes) {
@@ -1184,7 +1192,7 @@ abstract class Type {
             Class clazz = mClass;
             if (clazz == null) {
                 try {
-                    mClass = clazz = loadClass(mLoader, name());
+                    mClass = clazz = Class.forName(name(), true, mLoader);
                 } catch (ClassNotFoundException | LinkageError e) {
                     // Ignore.
                 }
@@ -1554,6 +1562,19 @@ abstract class Type {
             }
 
             return unbox;
+        }
+    }
+
+    private static class NewClazz extends Clazz {
+        NewClazz(ClassLoader loader, String name, Type superType) {
+            super(loader, name, null, false, superType);
+        }
+
+        @Override
+        Class clazz() {
+            // It doesn't exist yet, so don't try loading it. Doing so causes the ClassLoader
+            // to allocate a lock object, and it might never be reclaimed.
+            return null;
         }
     }
 }
