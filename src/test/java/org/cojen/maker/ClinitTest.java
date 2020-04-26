@@ -77,7 +77,7 @@ public class ClinitTest {
 
         synchronized (ClinitTest.class) {
             value = 0;
-            clazz.newInstance();
+            clazz.getConstructor().newInstance();
             assertEquals(1, value);
         }
     }
