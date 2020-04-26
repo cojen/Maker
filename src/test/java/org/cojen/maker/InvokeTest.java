@@ -258,7 +258,7 @@ public class InvokeTest {
         MethodMaker mm = cm.addMethod(null, "run").public_().static_();
         var v1 = mm.var(int.class).set(99);
         mm.var(Assert.class).invoke("assertEquals", "99", v1.invoke("toString"));
-        mm.var(Assert.class).invoke("assertEquals", 1, mm.invokeStatic(Long.class, "bitCount", 1));
+        mm.var(Assert.class).invoke("assertEquals", 1, mm.var(Long.class).invoke("bitCount", 1));
         var v2 = mm.var(int.class);
         mm.var(Assert.class).invoke("assertEquals", 1, v2.invoke("bitCount", 1));
 
@@ -276,9 +276,9 @@ public class InvokeTest {
         }
 
         // First result is popped.
-        mm.invokeStatic(InvokeTest.class, "big", (Object[]) vars);
+        mm.var(InvokeTest.class).invoke("big", (Object[]) vars);
 
-        var result = mm.invokeStatic(InvokeTest.class, "big", (Object[]) vars);
+        var result = mm.var(InvokeTest.class).invoke("big", (Object[]) vars);
         mm.var(Assert.class).invoke("assertEquals", 47, result);
 
         cm.finish().getMethod("run").invoke(null);
@@ -303,24 +303,24 @@ public class InvokeTest {
         var v2 = mm.var(long.class).set(2);
 
         {
-            var result = mm.invokeStatic(InvokeTest.class, "methodA", v1, v2);
+            var result = mm.var(InvokeTest.class).invoke("methodA", v1, v2);
             mm.var(Assert.class).invoke("assertEquals", 1, result);
         }
 
         {
-            var result = mm.invokeStatic(InvokeTest.class, "methodB", v1, v2);
+            var result = mm.var(InvokeTest.class).invoke("methodB", v1, v2);
             mm.var(Assert.class).invoke("assertEquals", 4, result);
         }
 
         try {
-            mm.invokeStatic(InvokeTest.class, "methodA", 1L, 2L);
+            mm.var(InvokeTest.class).invoke("methodA", 1L, 2L);
             fail();
         } catch (IllegalStateException e) {
             // No match.
         }
 
         try {
-            mm.invokeStatic(InvokeTest.class, "methodA", 1, 2);
+            mm.var(InvokeTest.class).invoke("methodA", 1, 2);
             fail();
         } catch (IllegalStateException e) {
             // No best match.
@@ -353,14 +353,14 @@ public class InvokeTest {
         var v1 = mm.new_(ArrayList.class);
 
         try {
-            mm.invokeStatic(InvokeTest.class, "methodC", v1);
+            mm.var(InvokeTest.class).invoke("methodC", v1);
             fail();
         } catch (IllegalStateException e) {
             // No best match.
         }
 
         {
-            var result = mm.invokeStatic(InvokeTest.class, "methodC", v1.cast(Collection.class));
+            var result = mm.var(InvokeTest.class).invoke("methodC", v1.cast(Collection.class));
             mm.var(Assert.class).invoke("assertEquals", 1, result);
         }
 
@@ -382,7 +382,7 @@ public class InvokeTest {
 
         var v1 = mm.new_(ArrayList.class);
 
-        var result = mm.invokeStatic(InvokeTest.class, "methodD", v1);
+        var result = mm.var(InvokeTest.class).invoke("methodD", v1);
         mm.var(Assert.class).invoke("assertEquals", 2, result);
 
         cm.finish().getMethod("run").invoke(null);
@@ -403,7 +403,7 @@ public class InvokeTest {
 
         var v1 = mm.new_(int[].class, 10);
 
-        var result = mm.invokeStatic(InvokeTest.class, "methodE", v1);
+        var result = mm.var(InvokeTest.class).invoke("methodE", v1);
         mm.var(Assert.class).invoke("assertEquals", 1, result);
 
         cm.finish().getMethod("run").invoke(null);
@@ -424,7 +424,7 @@ public class InvokeTest {
 
         var v1 = mm.new_(ArrayList[].class, 10);
 
-        var result = mm.invokeStatic(InvokeTest.class, "methodF", v1);
+        var result = mm.var(InvokeTest.class).invoke("methodF", v1);
         mm.var(Assert.class).invoke("assertEquals", 2, result);
 
         cm.finish().getMethod("run").invoke(null);

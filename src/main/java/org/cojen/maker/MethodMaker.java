@@ -191,17 +191,6 @@ public interface MethodMaker {
     public Variable invoke(String name, Object... values);
 
     /**
-     * Invoke any static method.
-     *
-     * @param type class name or Class instance
-     * @param name the method name
-     * @param values variables or constants
-     * @return the result of the method, which is null if void
-     * @throws IllegalArgumentException if not given a variable or a constant
-     */
-    public Variable invokeStatic(Object type, String name, Object... values);
-
-    /**
      * Invoke a static or instance super class method on the enclosing object of this method.
      *
      * @param name the method name

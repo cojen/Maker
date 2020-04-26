@@ -513,7 +513,7 @@ final class TheClassMaker extends Attributed implements ClassMaker {
 
         String findMethod = fieldRef.mField.isStatic() ? "findStaticVarHandle" : "findVarHandle";
 
-        varHandle.set(clinit.invokeStatic(MethodHandles.class, "lookup")
+        varHandle.set(clinit.var(MethodHandles.class).invoke("lookup")
                       .invoke(findMethod,
                               clinit.var(Class.class).set(fieldRef.mClass.mType),
                               fieldRef.mNameAndType.mName.mValue,

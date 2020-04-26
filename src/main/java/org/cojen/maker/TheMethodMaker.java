@@ -626,11 +626,6 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
     }
 
     @Override
-    public Variable invokeStatic(Object type, String name, Object... values) {
-        return doInvoke(mClassMaker.typeFrom(type), null, name, 0, values);
-    }
-
-    @Override
     public void invokeSuperConstructor(Object... values) {
         invokeConstructor(mClassMaker.mSuperClass, values);
     }
@@ -1062,7 +1057,7 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
             } else if (value instanceof String) {
                 strValue = (String) value;
             } else {
-                return invokeStatic(String.class, "valueOf", value);
+                return var(String.class).invoke("valueOf", value);
             }
             return var(String.class).set(strValue);
         }
