@@ -1359,12 +1359,12 @@ abstract class Type {
             // TODO: Cache the results.
 
             var methods = new LinkedHashSet<Method>(4);
-            addMethods(methods, type, methodName, params.length, staticAllowed);
+            addMethods(methods, type, methodName, params, staticAllowed);
 
             if (inherit >= 0) {
                 Type superType = type.superType();
                 while (superType != null) {
-                    addMethods(methods, superType, methodName, params.length, staticAllowed);
+                    addMethods(methods, superType, methodName, params, staticAllowed);
                     superType = superType.superType();
                 }
             }
@@ -1373,7 +1373,7 @@ abstract class Type {
                 Set<Type> interfaces = type.interfaces();
                 if (interfaces != null) {
                     for (Type iface : interfaces) {
-                        addMethods(methods, iface, methodName, params.length, staticAllowed);
+                        addMethods(methods, iface, methodName, params, staticAllowed);
                     }
                 }
             }
@@ -1425,10 +1425,13 @@ abstract class Type {
         }
 
         private static void addMethods(Set<Method> methods, Type type, String methodName,
-                                       int paramCount, int staticAllowed)
+                                       Type[] params, int staticAllowed)
         {
-            for (Method m : type.methods().values()) {
-                if (!m.name().equals(methodName) || m.paramTypes().length != paramCount) {
+            outer: for (Method m : type.methods().values()) {
+                Type[] actualParams;
+                if (!m.name().equals(methodName) ||
+                    (actualParams = m.paramTypes()).length != params.length)
+                {
                     continue;
                 }
 
@@ -1438,6 +1441,12 @@ abstract class Type {
                     }
                 } else if (staticAllowed > 0) {
                     continue;
+                }
+
+                for (int i=0; i<params.length; i++) {
+                    if (params[i].canConvertTo(actualParams[i]) == Integer.MAX_VALUE) {
+                        continue outer;
+                    }
                 }
 
                 methods.add(m);
