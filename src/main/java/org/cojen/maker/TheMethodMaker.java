@@ -607,23 +607,27 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
 
     @Override
     public Variable invoke(String name, Object... values) {
+        return doInvoke(name, 0, values);
+    }
+
+    @Override
+    public Variable invokeSuper(String name, Object... values) {
+        return doInvoke(name, 1, values);
+    }
+
+    private Var doInvoke(String name, int inherit, Object... values) {
         Var this_ = mThisVar;
         if (this_ == null && mParams == null) {
             initParams();
             this_ = mThisVar;
         }
 
-        return doInvoke(mClassMaker.mThisClass.mType, this_, name, 0, values);
+        return doInvoke(mClassMaker.mThisClass.mType, this_, name, inherit, values);
     }
 
     @Override
     public Variable invokeStatic(Object type, String name, Object... values) {
         return doInvoke(mClassMaker.typeFrom(type), null, name, 0, values);
-    }
-
-    @Override
-    public Variable invokeSuper(String name, Object... values) {
-        return doInvokeInstance(this_(), name, 1, values);
     }
 
     @Override
@@ -641,19 +645,6 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
             throw new IllegalStateException("Not defining a constructor");
         }
         doInvoke(type.mType, this_(), "<init>", -1, values);
-    }
-
-    /**
-     * @param inherit -1: cannot invoke inherited method, 0: can invoke inherited method,
-     * 1: can only invoke super class method
-     * @param args contains expressions and values
-     */
-    Var doInvokeInstance(OwnedVar instance,
-                         String methodName,
-                         int inherit,
-                         Object[] args)
-    {
-        return doInvoke(instance.type(), instance, methodName, inherit, args);
     }
 
     /**
@@ -3334,7 +3325,7 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
 
         @Override
         public Var invoke(String name, Object... values) {
-            return doInvokeInstance(this, name, 0, values);
+            return doInvoke(type(), this, name, 0, values);
         }
 
         @Override
