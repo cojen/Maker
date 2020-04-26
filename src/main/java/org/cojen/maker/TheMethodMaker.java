@@ -607,7 +607,13 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
 
     @Override
     public Variable invoke(String name, Object... values) {
-        return doInvokeInstance(this_(), name, 0, values);
+        Var this_ = mThisVar;
+        if (this_ == null && mParams == null) {
+            initParams();
+            this_ = mThisVar;
+        }
+
+        return doInvoke(mClassMaker.mThisClass.mType, this_, name, 0, values);
     }
 
     @Override
