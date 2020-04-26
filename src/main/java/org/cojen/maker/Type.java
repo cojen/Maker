@@ -596,7 +596,6 @@ abstract class Type {
         }
     }
 
-    // FIXME: Add support for isVarArgs. Double check that last arg is an array.
     final class Method extends Member {
         private final boolean mIsBridge;
         private final Type mReturnType;

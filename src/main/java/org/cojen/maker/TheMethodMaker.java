@@ -383,6 +383,40 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
     }
 
     @Override
+    public MethodMaker strictfp_() {
+        mModifiers = Modifiers.toStrict(mModifiers);
+        return this;
+    }
+
+    @Override
+    public MethodMaker native_() {
+        mModifiers = Modifiers.toNative(mModifiers);
+        return this;
+    }
+
+    @Override
+    public MethodMaker synthetic() {
+        mModifiers = Modifiers.toSynthetic(mModifiers);
+        return this;
+    }
+
+    @Override
+    public MethodMaker bridge() {
+        mModifiers = Modifiers.toBridge(mModifiers);
+        return this;
+    }
+
+    @Override
+    public MethodMaker varargs() {
+        Type[] params = mMethod.paramTypes();
+        if (params.length == 0 || !params[params.length - 1].isArray()) {
+            throw new IllegalStateException();
+        }
+        mModifiers = Modifiers.toVarArgs(mModifiers);
+        return this;
+    }
+
+    @Override
     public Variable class_() {
         if (mClassVar == null) {
             mClassVar = new ClassVar(mClassMaker.typeFrom(Class.class));

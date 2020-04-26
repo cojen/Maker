@@ -73,6 +73,13 @@ public interface FieldMaker {
     public FieldMaker transient_();
 
     /**
+     * Indicate that this field is synthetic. Fields are non-synthetic by default.
+     *
+     * @return this
+     */
+    public FieldMaker synthetic();
+
+    /**
      * Set an initial constant value for this field as an int.
      *
      * @return this

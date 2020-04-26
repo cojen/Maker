@@ -100,4 +100,8 @@ class Modifiers {
         // Enum re-uses the Modifier.TRANSIENT modifier, which used to only apply to fields.
         return (bitmask | Modifier.TRANSIENT) & (~Modifier.INTERFACE & ~Modifier.VOLATILE);
     }
+
+    static int toSynthetic(int bitmask) {
+        return bitmask | 0x1000;
+    }
 }

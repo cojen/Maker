@@ -120,6 +120,13 @@ public interface ClassMaker {
     public ClassMaker abstract_();
 
     /**
+     * Indicate that this class is synthetic. Classes are non-synthetic by default.
+     *
+     * @return this
+     */
+    public ClassMaker synthetic();
+
+    /**
      * Add an interface that this class implements.
      *
      * @return this

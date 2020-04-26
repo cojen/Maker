@@ -76,6 +76,43 @@ public interface MethodMaker {
     public MethodMaker abstract_();
 
     /**
+     * Switch this method to strictfp mode. Methods are non-strict by default.
+     *
+     * @return this
+     */
+    public MethodMaker strictfp_();
+
+    /**
+     * Switch this method to be native. Methods are non-native by default.
+     *
+     * @return this
+     */
+    public MethodMaker native_();
+
+    /**
+     * Indicate that this method is synthetic. Methods are non-synthetic by default.
+     *
+     * @return this
+     */
+    public MethodMaker synthetic();
+
+    /**
+     * Indicate that this method is a bridge, which overrides an inherited method and returns a
+     * more specialized return type.
+     *
+     * @return this
+     */
+    public MethodMaker bridge();
+
+    /**
+     * Indicate that this method supports a variable number of arguments.
+     *
+     * @return this
+     * @throws IllegalStateException if last parameter type isn't an array
+     */
+    public MethodMaker varargs();
+
+    /**
      * Returns a variable which represents the enclosing class of this method.
      */
     public Variable class_();
@@ -205,7 +242,8 @@ public interface MethodMaker {
 
     /**
      * Allocate a new object. If type is an ordinary object, a matching constructor is
-     * invoked. If type is an array, no constructor is invoked.
+     * invoked. If type is an array, no constructor is invoked, and the given values represent
+     * array dimension sizes.
      *
      * @param type class name or Class instance
      * @param values variables or constants

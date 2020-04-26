@@ -279,6 +279,13 @@ final class TheClassMaker extends Attributed implements ClassMaker {
     }
 
     @Override
+    public ClassMaker synthetic() {
+        checkFinished();
+        mModifiers = Modifiers.toSynthetic(mModifiers);
+        return this;
+    }
+
+    @Override
     public ClassMaker implement(String interfaceName) {
         requireNonNull(interfaceName);
         checkFinished();

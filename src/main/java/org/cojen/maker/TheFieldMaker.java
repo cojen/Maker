@@ -75,6 +75,12 @@ final class TheFieldMaker extends ClassMember implements FieldMaker {
     }
 
     @Override
+    public FieldMaker synthetic() {
+        mModifiers = Modifiers.toSynthetic(mModifiers);
+        return this;
+    }
+
+    @Override
     public FieldMaker init(int value) {
         init(mConstants.addInteger(value));
         return this;
