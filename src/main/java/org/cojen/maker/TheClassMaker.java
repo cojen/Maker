@@ -188,7 +188,12 @@ final class TheClassMaker extends Attributed implements ClassMaker {
         }
 
         dout.writeInt(0xCAFEBABE);
-        dout.writeInt(0x0000_0035); // Java version 9
+
+        // Default to Java version 8. Java 9 added support for modules, and Java 11 added
+        // support for dynamic constants and nests. None of these features are supported by
+        // ClassMaker yet, but when they are, the version number should be bumped up
+        // automatically when the new features are used.
+        dout.writeInt(0x0000_0034);
 
         mConstants.writeTo(dout);
 
