@@ -113,13 +113,15 @@ public class InvokeTest {
             (InvokeTest.class, "boot", MethodType.methodType
              (CallSite.class, MethodHandles.Lookup.class, String.class, MethodType.class));
 
+        MethodHandleInfo info = MethodHandles.lookup().revealDirect(bootstrap);
+
         var assertVar = mm.var(Assert.class);
 
         {
             var v1 = mm.var(int.class).set(1);
             var v2 = mm.var(int.class).set(2);
             var v3 = mm.invokeDynamic
-                (bootstrap, null, "intAdd",
+                (info, null, "intAdd",
                  MethodType.methodType(int.class, int.class, int.class), v1, v2);
             assertVar.invoke("assertEquals", 3, v3);
         }
@@ -128,7 +130,7 @@ public class InvokeTest {
             var v1 = mm.var(double.class).set(1.1);
             var v2 = mm.var(double.class).set(2.1);
             var v3 = mm.invokeDynamic
-                (bootstrap, null, "doubleAdd",
+                (info, null, "doubleAdd",
                  MethodType.methodType(double.class, double.class, double.class), v1, v2);
             assertVar.invoke("assertEquals", 3.2, v3, 0.0);
         }
@@ -164,7 +166,7 @@ public class InvokeTest {
 
         Label start = mm.label().here();
         var v0 = mm.invokeDynamic
-            (bootstrap, new Object[] {info, type}, // pass additional constants for code coverage
+            (info, new Object[] {info, type}, // pass additional constants for code coverage
              "throwIt", type, "hello");
         assertNull(v0);
         mm.return_();
@@ -186,7 +188,8 @@ public class InvokeTest {
     {
         ClassMaker cm = ClassMaker.begin().public_().final_();
         MethodMaker mm = cm.addMethod(name, type).static_().public_();
-        mm.new_(Exception.class, mm.concat(mm.param(0), arg1, arg2)).throw_();
+        MethodHandleInfo info1 = caller.revealDirect(arg1);
+        mm.new_(Exception.class, mm.concat(mm.param(0), info1, arg2)).throw_();
         Class<?> clazz = cm.finish();
         var mh = MethodHandles.lookup().findStatic(clazz, name, type);
         return new ConstantCallSite(mh);

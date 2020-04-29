@@ -16,7 +16,7 @@
 
 package org.cojen.maker;
 
-import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandleInfo;
 import java.lang.invoke.MethodType;
 
 /**
@@ -226,7 +226,7 @@ public interface MethodMaker {
      * @param values variables or constants passed to the dynamic method
      * @return the result of the dynamic method, which is null if void
      */
-    public Variable invokeDynamic(MethodHandle bootstrap, Object[] bootstrapArgs,
+    public Variable invokeDynamic(MethodHandleInfo bootstrap, Object[] bootstrapArgs,
                                   String name, MethodType type, Object... values);
 
     /**

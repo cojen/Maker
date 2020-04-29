@@ -17,7 +17,6 @@
 package org.cojen.maker;
 
 import java.lang.invoke.CallSite;
-import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandleInfo;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
@@ -796,15 +795,14 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
     }
 
     @Override
-    public Var invokeDynamic(MethodHandle bootstrap, Object[] bootstrapArgs,
+    public Var invokeDynamic(MethodHandleInfo bootstrap, Object[] bootstrapArgs,
                              String name, MethodType mtype, Object... values)
     {
         if (mtype.parameterCount() != values.length) {
             throw new IllegalArgumentException("Wrong number of parameters");
         }
 
-        ConstantPool.C_MethodHandle bootHandle = mConstants
-            .addMethodHandle(MethodHandles.lookup().revealDirect(bootstrap));
+        ConstantPool.C_MethodHandle bootHandle = mConstants.addMethodHandle(bootstrap);
 
         ConstantPool.Constant[] bootArgs;
         if (bootstrapArgs == null) {
@@ -2014,10 +2012,8 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
             }
         } else if (value instanceof MethodType) {
             constantType = Type.from(MethodType.class);
-        } else if (value instanceof MethodHandle) {
-            MethodHandleInfo info = MethodHandles.lookup().revealDirect((MethodHandle) value);
-            constantType = Type.from(MethodHandle.class);
-            value = info;
+        } else if (value instanceof MethodHandleInfo) {
+            constantType = Type.from(MethodHandleInfo.class);
         } else {
             throw new IllegalArgumentException("Unsupported constant type");
         }
