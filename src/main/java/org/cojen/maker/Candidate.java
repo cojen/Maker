@@ -21,7 +21,7 @@ package org.cojen.maker;
  *
  * @author Brian S O'Neill
  */
-public class Candidate {
+final class Candidate {
     /**
      * Compares method which have the same number of parameters, which are known to be all
      * possible candidates to bind to. For a method to be strictly "better" than another, all
