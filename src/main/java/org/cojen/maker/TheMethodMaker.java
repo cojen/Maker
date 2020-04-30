@@ -3584,6 +3584,8 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
         final Var mInstance;
         final ConstantPool.C_Field mFieldRef;
 
+        private ConstantPool.C_Dynamic mVarHandle;
+
         FieldVar(Var instance, ConstantPool.C_Field fieldRef) {
             mInstance = instance;
             mFieldRef = fieldRef;
@@ -3800,20 +3802,19 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         private Var vhGet(String name) {
-            FieldVar vh = TheMethodMaker.this.field(mClassMaker.varHandleField(mFieldRef));
-            vh.push();
-
             Type thisType = type();
+            Type vhType = Type.from(VarHandle.class);
+            pushVarHandle(vhType);
 
             int stackPop;
             Type.Method method;
             if (mFieldRef.mField.isStatic()) {
                 stackPop = 1;
-                method = vh.type().inventMethod(false, thisType, name);
+                method = vhType.inventMethod(false, thisType, name);
             } else {
                 stackPop = 2;
                 addOp(new PushVarOp(mInstance));
-                method = vh.type().inventMethod(false, thisType, name, mInstance.type());
+                method = vhType.inventMethod(false, thisType, name, mInstance.type());
             }
 
             ConstantPool.C_Method ref = mConstants.addMethod(method);
@@ -3825,22 +3826,21 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         private void vhSet(String name, Object value) {
-            FieldVar vh = TheMethodMaker.this.field(mClassMaker.varHandleField(mFieldRef));
-            vh.push();
-
             Type thisType = type();
+            Type vhType = Type.from(VarHandle.class);
+            pushVarHandle(vhType);
 
             int stackPop;
             Type.Method method;
             if (mFieldRef.mField.isStatic()) {
                 stackPop = 2;
                 addPushOp(thisType, value);
-                method = vh.type().inventMethod(false, Type.VOID, name, thisType);
+                method = vhType.inventMethod(false, Type.VOID, name, thisType);
             } else {
                 stackPop = 3;
                 addOp(new PushVarOp(mInstance));
                 addPushOp(thisType, value);
-                method = vh.type().inventMethod(false, Type.VOID, name, mInstance.type(), thisType);
+                method = vhType.inventMethod(false, Type.VOID, name, mInstance.type(), thisType);
             }
 
             ConstantPool.C_Method ref = mConstants.addMethod(method);
@@ -3848,10 +3848,9 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         private Variable vhCas(String name, Type retType, Object expectedValue, Object newValue) {
-            FieldVar vh = TheMethodMaker.this.field(mClassMaker.varHandleField(mFieldRef));
-            vh.push();
-
             Type thisType = type();
+            Type vhType = Type.from(VarHandle.class);
+            pushVarHandle(vhType);
 
             if (retType == null) {
                 retType = thisType;
@@ -3863,13 +3862,13 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
                 stackPop = 3;
                 addPushOp(thisType, expectedValue);
                 addPushOp(thisType, newValue);
-                method = vh.type().inventMethod(false, retType, name, thisType, thisType);
+                method = vhType.inventMethod(false, retType, name, thisType, thisType);
             } else {
                 stackPop = 4;
                 addOp(new PushVarOp(mInstance));
                 addPushOp(thisType, expectedValue);
                 addPushOp(thisType, newValue);
-                method = vh.type().inventMethod
+                method = vhType.inventMethod
                     (false, retType, name, mInstance.type(), thisType, thisType);
             }
 
@@ -3882,22 +3881,21 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         private Variable vhGas(String name, Object value) {
-            FieldVar vh = TheMethodMaker.this.field(mClassMaker.varHandleField(mFieldRef));
-            vh.push();
-
             Type thisType = type();
+            Type vhType = Type.from(VarHandle.class);
+            pushVarHandle(vhType);
 
             int stackPop;
             Type.Method method;
             if (mFieldRef.mField.isStatic()) {
                 stackPop = 2;
                 addPushOp(thisType, value);
-                method = vh.type().inventMethod(false, thisType, name, thisType);
+                method = vhType.inventMethod(false, thisType, name, thisType);
             } else {
                 stackPop = 3;
                 addOp(new PushVarOp(mInstance));
                 addPushOp(thisType, value);
-                method = vh.type().inventMethod(false, thisType, name, mInstance.type(), thisType);
+                method = vhType.inventMethod(false, thisType, name, mInstance.type(), thisType);
             }
 
             ConstantPool.C_Method ref = mConstants.addMethod(method);
@@ -3906,6 +3904,37 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
             Var var = new Var(thisType);
             addStoreOp(var);
             return var;
+        }
+
+        private void pushVarHandle(Type vhType) {
+            if (mVarHandle == null) {
+                Type classType = Type.from(Class.class);
+
+                Type[] bootParams = {
+                    Type.from(MethodHandles.Lookup.class),
+                    Type.from(String.class), classType, classType, classType
+                };
+
+                String bootName = mFieldRef.mField.isStatic()
+                    ? "staticFieldVarHandle" : "fieldVarHandle";
+
+                ConstantPool.C_Method ref = mConstants.addMethod
+                    (Type.from(ConstantBootstraps.class).inventMethod
+                     (true, vhType, bootName, bootParams));
+
+                ConstantPool.C_MethodHandle bootHandle =
+                    mConstants.addMethodHandle(MethodHandleInfo.REF_invokeStatic, ref);
+
+                ConstantPool.Constant[] bootArgs = {
+                    mFieldRef.mClass, addLoadableConstant(mFieldRef.mField.type())
+                };
+
+                mVarHandle = mConstants.addDynamicConstant
+                    (mClassMaker.addBootstrapMethod(bootHandle, bootArgs),
+                     mFieldRef.mNameAndType.mName, vhType);
+            }
+
+            addOp(new DynamicConstantOp(mVarHandle, vhType));
         }
     }
 }

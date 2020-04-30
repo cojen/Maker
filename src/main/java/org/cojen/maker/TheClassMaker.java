@@ -24,7 +24,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 
 import java.lang.invoke.MethodHandles;
-import java.lang.invoke.VarHandle;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
@@ -103,9 +102,6 @@ final class TheClassMaker extends Attributed implements ClassMaker {
 
     private ArrayList<TheMethodMaker> mClinitMethods;
 
-    private Map<ConstantPool.C_Field, String> mVarHandles;
-    private MethodMaker mVarHandleClinit;
-
     private Attribute.BootstrapMethods mBootstrapMethods;
 
     private boolean mFinished;
@@ -160,9 +156,6 @@ final class TheClassMaker extends Attributed implements ClassMaker {
         }
 
         mFinished = true;
-
-        mVarHandles = null;
-        mVarHandleClinit = null;
 
         mBootstrapMethods = null;
 
@@ -479,48 +472,6 @@ final class TheClassMaker extends Attributed implements ClassMaker {
 
     Type typeFrom(Object type) {
         return Type.from(mParentLoader, type);
-    }
-
-    /**
-     * Defines (just once) a private static final VarHandle field in this class.
-     *
-     * @param fieldRef field to reference via a VarHandle
-     * @return VarHandle field name
-     */
-    String varHandleField(ConstantPool.C_Field fieldRef) {
-        // TODO: Use ConstantBootstraps instead.
-
-        if (mVarHandles == null) {
-            mVarHandles = new HashMap<>();
-        }
-
-        String varHandleName = mVarHandles.get(fieldRef);
-
-        if (varHandleName != null) {
-            return varHandleName;
-        }
-
-        MethodMaker clinit = mVarHandleClinit;
-        if (clinit == null) {
-            mVarHandleClinit = clinit = addClinit();
-        }
-
-        varHandleName = "VARHANDLE$" + mVarHandles.size();
-        addField(VarHandle.class, varHandleName).private_().static_().final_();
-
-        Field varHandle = clinit.field(varHandleName);
-
-        String findMethod = fieldRef.mField.isStatic() ? "findStaticVarHandle" : "findVarHandle";
-
-        varHandle.set(clinit.var(MethodHandles.class).invoke("lookup")
-                      .invoke(findMethod,
-                              clinit.var(Class.class).set(fieldRef.mClass.mType),
-                              fieldRef.mNameAndType.mName.mValue,
-                              clinit.var(Class.class).set(fieldRef.mField.type()) ));
-
-        mVarHandles.put(fieldRef, varHandleName);
-
-        return varHandleName;
     }
 
     /**
