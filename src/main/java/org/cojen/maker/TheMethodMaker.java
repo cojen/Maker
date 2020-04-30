@@ -1260,7 +1260,7 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
         } else if (value instanceof MethodHandleInfo) {
             pushConstant(mConstants.addMethodHandle((MethodHandleInfo) value), type);
         } else {
-            pushConstant(addLoadableConstant(value), type);
+            throw new AssertionError();
         }
     }
 
@@ -2001,6 +2001,8 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
             constantType = Type.from(MethodHandleInfo.class);
         } else if (value instanceof Enum) {
             constantType = Type.from(value.getClass());
+            addPushFieldOp(new Var(constantType).field(((Enum) value).name()));
+            return addConversionOp(constantType, type);
         } else {
             throw unsupportedConstant(value);
         }
@@ -2072,6 +2074,9 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
         return mClassMaker.addBootstrapMethod(bootHandle, bootArgs);
     }
 
+    /**
+     * Intended for loading bootstrap constants, although it works in other cases too.
+     */
     private ConstantPool.Constant addLoadableConstant(Object arg) {
         ConstantPool.Constant c = mConstants.tryAddLoadableConstant(arg);
         if (c != null) {
