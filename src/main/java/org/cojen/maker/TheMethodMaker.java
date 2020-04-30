@@ -17,6 +17,7 @@
 package org.cojen.maker;
 
 import java.lang.invoke.CallSite;
+import java.lang.invoke.ConstantBootstraps;
 import java.lang.invoke.MethodHandleInfo;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
@@ -32,6 +33,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 import static java.util.Objects.*;
@@ -802,24 +804,7 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
             throw new IllegalArgumentException("Wrong number of parameters");
         }
 
-        ConstantPool.C_MethodHandle bootHandle = mConstants.addMethodHandle(bootstrap);
-
-        ConstantPool.Constant[] bootArgs;
-        if (bootstrapArgs == null) {
-            bootArgs = new ConstantPool.Constant[0];
-        } else {
-            bootArgs = new ConstantPool.Constant[bootstrapArgs.length];
-            for (int i=0; i<bootArgs.length; i++) {
-                ConstantPool.Constant c = mConstants.tryAddLoadableConstant(bootstrapArgs[i]);
-                if (c == null) {
-                    throw new IllegalArgumentException("Unsupported bootstrap constant type");
-                } else {
-                    bootArgs[i] = c;
-                }
-            }
-        }
-
-        int bi = mClassMaker.addBootstrapMethod(bootHandle, bootArgs);
+        int bi = addBootstrapMethod(bootstrap, bootstrapArgs);
         ConstantPool.C_Dynamic dynamic = mConstants.addInvokeDynamic(bi, name, mtype);
 
         for (int i=0; i<values.length; i++) {
@@ -1371,7 +1356,7 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
      * Push a variable to the stack.
      */
     private void pushVar(Var var) {
-        if (var instanceof ClassVar) {
+        if (var != null && var == mClassVar) {
             pushConstant(mClassMaker.mThisClass, var.mType);
             return;
         }
@@ -1717,15 +1702,15 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
         addOp(new FieldOp(op, stackPop, fieldVar.mFieldRef));
     }
 
-    private void addStoreFieldOp(FieldVar fieldVar, Object value) {
-        ConstantPool.C_Field fieldRef = fieldVar.mFieldRef;
-        Type.Field field = fieldRef.mField;
-
-        if (!field.isStatic()) {
+    private void addBeginStoreFieldOp(FieldVar fieldVar) {
+        if (!fieldVar.mFieldRef.mField.isStatic()) {
             addPushOp(null, fieldVar.mInstance);
         }
+    }
 
-        addPushOp(fieldRef.mField.type(), value);
+    private void addFinishStoreFieldOp(FieldVar fieldVar) {
+        ConstantPool.C_Field fieldRef = fieldVar.mFieldRef;
+        Type.Field field = fieldRef.mField;
 
         byte op;
         int stackPop;
@@ -2057,6 +2042,100 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
                 ("Automatic conversion disallowed: " + from.name() + " to " + to.name());
         }
         addOp(new ConversionOp(from, to, code));
+    }
+
+    private void addPushDynamicConstantOp(MethodHandleInfo bootstrap, Object[] bootstrapArgs,
+                                          String name, Type type)
+    {
+        int bi = addBootstrapMethod(bootstrap, bootstrapArgs);
+        addOp(new DynamicConstantOp(mConstants.addDynamicConstant(bi, name, type), type));
+    }
+
+    /**
+     * @return bootstrap index
+     */
+    int addBootstrapMethod(MethodHandleInfo bootstrap, Object[] bootstrapArgs) {
+        ConstantPool.C_MethodHandle bootHandle = mConstants.addMethodHandle(bootstrap);
+
+        ConstantPool.Constant[] bootArgs;
+        if (bootstrapArgs == null) {
+            bootArgs = new ConstantPool.Constant[0];
+        } else {
+            bootArgs = new ConstantPool.Constant[bootstrapArgs.length];
+            for (int i=0; i<bootArgs.length; i++) {
+                bootArgs[i] = addLoadableConstant(bootstrapArgs[i]);
+            }
+        }
+
+        return mClassMaker.addBootstrapMethod(bootHandle, bootArgs);
+    }
+
+    private ConstantPool.Constant addLoadableConstant(Object arg) {
+        ConstantPool.Constant c = mConstants.tryAddLoadableConstant(arg);
+        if (c != null) {
+            return c;
+        }
+
+        if (arg != null && arg == mClassVar) {
+            return mClassMaker.mThisClass;
+        }
+
+        special: {
+            final Type classType = Type.from(Class.class);
+
+            final String method, name;
+            final Type retType, paramType;
+
+            if (arg == null) {
+                method = "nullConstant";
+                name = method; // unused
+                retType = paramType = Type.from(Object.class);
+            } else {
+                Type type;
+                prim: {
+                    if (arg instanceof Type) {
+                        type = (Type) arg;
+                        if (!type.isPrimitive()) {
+                            break special;
+                        }
+                    } else if (arg instanceof Class) {
+                        var clazz = (Class) arg;
+                        if (!clazz.isPrimitive()) {
+                            break special;
+                        }
+                        type = Type.from(clazz);
+                    } else if (arg instanceof Enum) {
+                        method = "enumConstant";
+                        name = ((Enum) arg).name();
+                        retType = Type.from(Enum.class);
+                        paramType = Type.from(arg.getClass());
+                        break prim;
+                    } else {
+                        break special;
+                    }
+                    method = "primitiveClass";
+                    name = type.descriptor();
+                    retType = paramType = classType;
+                }
+            }
+
+            Type[] bootParams = {
+                Type.from(MethodHandles.Lookup.class), Type.from(String.class), classType
+            };
+
+            ConstantPool.C_Method ref = mConstants.addMethod
+                (Type.from(ConstantBootstraps.class).inventMethod
+                 (true, retType, method, bootParams));
+
+            ConstantPool.C_MethodHandle bootHandle =
+                mConstants.addMethodHandle(MethodHandleInfo.REF_invokeStatic, ref);
+
+            return mConstants.addDynamicConstant
+                (mClassMaker.addBootstrapMethod(bootHandle, new ConstantPool.Constant[0]),
+                 name, paramType);
+        }
+
+        throw new IllegalArgumentException("Unsupported bootstrap constant type");
     }
 
     /**
@@ -2653,6 +2732,29 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
         @Override
         void appendTo(TheMethodMaker m) {
             m.pushConstant(mValue, mType);
+        }
+    }
+
+    static class DynamicConstantOp extends Op {
+        final ConstantPool.C_Dynamic mDynamic;
+        final Type mType;
+
+        DynamicConstantOp(ConstantPool.C_Dynamic dynamic, Type type) {
+            mDynamic = dynamic;
+            mType = type;
+        }
+
+        @Override
+        void appendTo(TheMethodMaker m) {
+            int typeCode = mType.typeCode();
+            if (typeCode == T_DOUBLE || typeCode == T_LONG) {
+                int index = mDynamic.mIndex;
+                m.appendOp(LDC2_W, 0);
+                m.appendShort(index);
+                m.stackPush(mType);
+            } else {
+                m.pushConstant(mDynamic, mType);
+            }
         }
     }
 
@@ -3382,6 +3484,7 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
 
         @Override
         public Var name(String name) {
+            Objects.requireNonNull(name);
             if (mNamed) {
                 throw new IllegalStateException("Already named");
             }
@@ -3393,6 +3496,13 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
         @Override
         public Var set(Object value) {
             addPushOp(mType, value);
+            addStoreOp(this);
+            return this;
+        }
+
+        @Override
+        public Var setDynamic(MethodHandleInfo bootstrap, Object[] bootstrapArgs, String name) {
+            addPushDynamicConstantOp(bootstrap, bootstrapArgs, name, mType);
             addStoreOp(this);
             return this;
         }
@@ -3491,7 +3601,18 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
 
         @Override
         public FieldVar set(Object value) {
-            addStoreFieldOp(this, value);
+            addBeginStoreFieldOp(this);
+            addPushOp(type(), value);
+            addFinishStoreFieldOp(this);
+            return this;
+        }
+
+        @Override
+        public FieldVar setDynamic(MethodHandleInfo bootstrap, Object[] bootstrapArgs, String name)
+        {
+            addBeginStoreFieldOp(this);
+            addPushDynamicConstantOp(bootstrap, bootstrapArgs, name, type());
+            addFinishStoreFieldOp(this);
             return this;
         }
 

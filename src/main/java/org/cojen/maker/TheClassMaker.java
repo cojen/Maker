@@ -188,12 +188,7 @@ final class TheClassMaker extends Attributed implements ClassMaker {
         }
 
         dout.writeInt(0xCAFEBABE);
-
-        // Default to Java version 8. Java 9 added support for modules, and Java 11 added
-        // support for dynamic constants and nests. None of these features are supported by
-        // ClassMaker yet, but when they are, the version number should be bumped up
-        // automatically when the new features are used.
-        dout.writeInt(0x0000_0034);
+        dout.writeInt(0x0000_0037); // Java 11.
 
         mConstants.writeTo(dout);
 
@@ -458,9 +453,6 @@ final class TheClassMaker extends Attributed implements ClassMaker {
             try {
                 File tempDir = new File(System.getProperty("java.io.tmpdir"));
                 file = new File(tempDir, file.getPath());
-            } catch (SecurityException e) {
-            }
-            try {
                 file.getParentFile().mkdirs();
                 System.out.println("ClassMaker writing to " + file);
                 try (var out = new FileOutputStream(file)) {
@@ -496,6 +488,8 @@ final class TheClassMaker extends Attributed implements ClassMaker {
      * @return VarHandle field name
      */
     String varHandleField(ConstantPool.C_Field fieldRef) {
+        // TODO: Use ConstantBootstraps instead.
+
         if (mVarHandles == null) {
             mVarHandles = new HashMap<>();
         }

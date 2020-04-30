@@ -20,7 +20,7 @@ import java.io.DataOutput;
 import java.io.IOException;
 
 import java.util.Arrays;
-import java.util.LinkedHashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 /**
@@ -265,12 +265,12 @@ abstract class Attribute extends Attributed {
     }
 
     static class BootstrapMethods extends Attribute {
-        private LinkedHashSet<Entry> mEntries;
+        private LinkedHashMap<Entry, Entry> mEntries;
         private int mLength;
 
         BootstrapMethods(ConstantPool cp) {
             super(cp, "BootstrapMethods");
-            mEntries = new LinkedHashSet<>(8);
+            mEntries = new LinkedHashMap<>(8);
             mLength = 2;
         }
 
@@ -279,9 +279,12 @@ abstract class Attribute extends Attributed {
          */
         int add(ConstantPool.C_MethodHandle method, ConstantPool.Constant[] args) {
             Entry entry = new Entry(method, args);
-            if (mEntries.add(entry)) {
+            Entry existing = mEntries.putIfAbsent(entry, entry);
+            if (existing == null) {
                 entry.mIndex = mEntries.size() - 1;
                 mLength += (2 + 2) + (2 * args.length);
+            } else {
+                entry = existing;
             }
             return entry.mIndex;
         }
@@ -294,7 +297,7 @@ abstract class Attribute extends Attributed {
         @Override
         void writeDataTo(DataOutput dout) throws IOException {
             dout.writeShort(mEntries.size());
-            for (Entry entry : mEntries) {
+            for (Entry entry : mEntries.keySet()) {
                 dout.writeShort(entry.mMethod.mIndex);
                 ConstantPool.Constant[] args = entry.mArgs;
                 dout.writeShort(args.length);

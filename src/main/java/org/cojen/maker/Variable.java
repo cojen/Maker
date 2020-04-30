@@ -16,6 +16,8 @@
 
 package org.cojen.maker;
 
+import java.lang.invoke.MethodHandleInfo;
+
 /**
  * Represents a variable bound to a body of a {@link MethodMaker method}.
  *
@@ -42,6 +44,17 @@ public interface Variable {
      * compatible with the variable type
      */
     public Variable set(Object value);
+
+    /**
+     * Assign a dynamically generated constant to this variable.
+     *
+     * @param bootstrap static bootstrap method
+     * @param bootstrapArgs constants which are passed to the bootstrap method
+     * @param name dynamic constant name
+     * @return this variable
+     * @throws IllegalStateException if this variable cannot be modified
+     */
+    public Variable setDynamic(MethodHandleInfo bootstrap, Object[] bootstrapArgs, String name);
 
     /**
      * Return a new variable with the same type and value as this one.

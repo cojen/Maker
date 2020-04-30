@@ -95,6 +95,10 @@ class ConstantPool {
         if (!type.isObject()) {
             throw new IllegalArgumentException(type.name());
         }
+        return doAddClass(type);
+    }
+
+    private C_Class doAddClass(Type type) {
         String name = type.isArray() ? type.descriptor() : type.name().replace('.', '/');
         return addConstant(new C_Class(addUTF8(name), type));
     }
@@ -181,13 +185,30 @@ class ConstantPool {
         return addConstant(new C_Dynamic(18, bootstrapIndex, nameAndType));
     }
 
+    C_Dynamic addDynamicConstant(int bootstrapIndex, String name, Type type) {
+        return addDynamicConstant(bootstrapIndex, addNameAndType(name, type.descriptor()));
+    }
+
+    C_Dynamic addDynamicConstant(int bootstrapIndex, C_UTF8 name, Type type) {
+        return addDynamicConstant(bootstrapIndex, addNameAndType(name, addUTF8(type.descriptor())));
+    }
+
+    C_Dynamic addDynamicConstant(int bootstrapIndex, C_NameAndType nameAndType) {
+        return addConstant(new C_Dynamic(17, bootstrapIndex, nameAndType));
+    }
+
     Constant tryAddLoadableConstant(Object value) {
         if (value instanceof String) {
             return addString((String) value);
         } else if (value instanceof Class) {
             Class clazz = (Class) value;
             if (!clazz.isPrimitive()) {
-                return addClass(Type.from(clazz));
+                return doAddClass(Type.from(clazz));
+            }
+        } else if (value instanceof Type) {
+            Type type = (Type) value;
+            if (type.isObject()) {
+                return doAddClass(type);
             }
         } else if (value instanceof Number) {
             if (value instanceof Integer) {
@@ -634,7 +655,7 @@ class ConstantPool {
 
         @Override
         public int hashCode() {
-            return mNameAndType.hashCode() * 31 + mTag;
+            return (mNameAndType.hashCode() * 31 + mTag) * 31 + mBootstrapIndex;
         }
 
         @Override
@@ -644,7 +665,8 @@ class ConstantPool {
             }
             if (obj instanceof C_Dynamic) {
                 C_Dynamic other = (C_Dynamic) obj;
-                return mTag == other.mTag && mNameAndType.equals(other.mNameAndType);
+                return mTag == other.mTag && mBootstrapIndex == other.mBootstrapIndex
+                    && mNameAndType.equals(other.mNameAndType);
             }
             return false;
         }
