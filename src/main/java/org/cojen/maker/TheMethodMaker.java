@@ -1260,7 +1260,7 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
         } else if (value instanceof MethodHandleInfo) {
             pushConstant(mConstants.addMethodHandle((MethodHandleInfo) value), type);
         } else {
-            throw new AssertionError();
+            pushConstant(addLoadableConstant(value), type);
         }
     }
 
@@ -1982,7 +1982,7 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
                     }
                 }
             } else {
-                throw new IllegalArgumentException("Unsupported constant type");
+                throw unsupportedConstant(value);
             }
         } else if (value instanceof Boolean) {
             constantType = BOOLEAN;
@@ -1999,8 +1999,10 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
             constantType = Type.from(MethodType.class);
         } else if (value instanceof MethodHandleInfo) {
             constantType = Type.from(MethodHandleInfo.class);
+        } else if (value instanceof Enum) {
+            constantType = Type.from(value.getClass());
         } else {
-            throw new IllegalArgumentException("Unsupported constant type");
+            throw unsupportedConstant(value);
         }
 
         addOp(new PushConstantOp(value, constantType));
@@ -2135,7 +2137,12 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
                  name, paramType);
         }
 
-        throw new IllegalArgumentException("Unsupported bootstrap constant type");
+        throw unsupportedConstant(arg);
+    }
+
+    private static IllegalArgumentException unsupportedConstant(Object value) {
+        return new IllegalArgumentException
+            ("Unsupported constant type: " + (value == null ? "null" : value.getClass()));
     }
 
     /**

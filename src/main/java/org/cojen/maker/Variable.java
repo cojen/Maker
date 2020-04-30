@@ -34,7 +34,7 @@ public interface Variable {
 
     /**
      * Assign a value to this variable, either from another variable or from a constant. A
-     * constant value can be a primitive type (boxed or unboxed), a String, a Class, a
+     * constant value can be a primitive type (boxed or unboxed), a String, a Class, an Enum, a
      * MethodType, or a MethodHandleInfo.
      *
      * @param value a Variable or a constant
