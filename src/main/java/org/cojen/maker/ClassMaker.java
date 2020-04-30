@@ -27,7 +27,8 @@ import java.lang.invoke.MethodType;
 import java.security.ProtectionDomain;
 
 /**
- * Allows new classes to be defined dynamically.
+ * Allows new classes to be defined dynamically. ClassMaker instances and all objects that
+ * interact with them aren't thread-safe.
  *
  * @author Brian S O'Neill
  */

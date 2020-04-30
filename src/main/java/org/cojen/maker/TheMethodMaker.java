@@ -18,6 +18,7 @@ package org.cojen.maker;
 
 import java.lang.invoke.CallSite;
 import java.lang.invoke.ConstantBootstraps;
+import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandleInfo;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
@@ -2960,6 +2961,44 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
+        public Variable setConstant(Object value) {
+            if (value == null) {
+                return set(null);
+            }
+
+            Type type = type();
+
+            if (!type.isAssignableFrom(Type.from(value.getClass()))) {
+                throw new IllegalStateException("Mismatched type");
+            }
+
+            beginSetConstant();
+
+            int slot = mClassMaker.addComplexConstant(value);
+
+            MethodHandleInfo info;
+            try {
+                MethodHandles.Lookup lookup = MethodHandles.lookup();
+                MethodHandle bootstrap = lookup.findStatic
+                    (ConstantsRegistry.class, "remove", MethodType.methodType
+                     (Object.class, MethodHandles.Lookup.class, String.class,
+                      Class.class, Class.class, int.class));
+                info = lookup.revealDirect(bootstrap);
+            } catch (NoSuchMethodException | IllegalAccessException e) {
+                throw new RuntimeException(e);
+            }
+
+            addPushDynamicConstantOp(info, new Object[] {class_(), slot}, "const", type);
+            finishSetConstant();
+
+            return this;
+        }
+
+        protected abstract void beginSetConstant();
+
+        protected abstract void finishSetConstant();
+
+        @Override
         public void ifTrue(Label label) {
             push(Type.BOOLEAN);
             addBranchOp(IFNE, 1, label);
@@ -3513,6 +3552,15 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
+        protected void beginSetConstant() {
+        }
+
+        @Override
+        protected void finishSetConstant() {
+            addStoreOp(this);
+        }
+
+        @Override
         public Var setDynamic(MethodHandleInfo bootstrap, Object[] bootstrapArgs, String name) {
             addPushDynamicConstantOp(bootstrap, bootstrapArgs, name, mType);
             addStoreOp(this);
@@ -3619,6 +3667,16 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
             addPushOp(type(), value);
             addFinishStoreFieldOp(this);
             return this;
+        }
+
+        @Override
+        protected void beginSetConstant() {
+            addBeginStoreFieldOp(this);
+        }
+
+        @Override
+        protected void finishSetConstant() {
+            addFinishStoreFieldOp(this);
         }
 
         @Override

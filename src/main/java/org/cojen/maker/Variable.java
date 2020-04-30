@@ -34,8 +34,8 @@ public interface Variable {
 
     /**
      * Assign a value to this variable, either from another variable or from a constant. A
-     * constant value can be a primitive type (boxed or unboxed), a String, a Class, an Enum, a
-     * MethodType, or a MethodHandleInfo.
+     * constant value can be a primitive type (boxed or unboxed), null, a String, a Class, an
+     * Enum, a MethodType, or a MethodHandleInfo.
      *
      * @param value a Variable or a constant
      * @return this variable
@@ -44,6 +44,19 @@ public interface Variable {
      * compatible with the variable type
      */
     public Variable set(Object value);
+
+    /**
+     * Assign a complex constant to this variable, supported only when the class is built
+     * dynamically instead of loaded from a file. At runtime, the object instance provided here
+     * is exactly the same as referenced by the generated class. For simple constants, the
+     * regular set method is preferred.
+     *
+     * @param value a constant
+     * @return this variable
+     * @throws IllegalStateException if this variable cannot be modified, or if it's not
+     * compatible with the variable type
+     */
+    public Variable setConstant(Object value);
 
     /**
      * Assign a dynamically generated constant to this variable.

@@ -118,8 +118,4 @@ public interface FieldMaker {
      * @throws IllegalStateException if not a static field
      */
     public FieldMaker init(String value);
-
-    // FIXME: Define a "constant" method which accepts any object, which implicitly marks the
-    // field as static and final. The object is registered and loaded using condy, and it only
-    // works for classes generated and loaded at runtime.
 }

@@ -104,7 +104,8 @@ final class TheClassMaker extends Attributed implements ClassMaker {
 
     private Attribute.BootstrapMethods mBootstrapMethods;
 
-    private boolean mFinished;
+    // -1: finished, 0: not finished, 1: has complex constants
+    private int mFinished;
 
     TheClassMaker(String className, String superClassName,
                   ClassLoader parentLoader, ProtectionDomain domain)
@@ -151,11 +152,9 @@ final class TheClassMaker extends Attributed implements ClassMaker {
     }
 
     private void finishTo(DataOutput dout, boolean hidden) throws IOException {
-        if (mFinished) {
-            throw new IllegalStateException("Already finished");
-        }
+        checkFinished();
 
-        mFinished = true;
+        mFinished = -1;
 
         mBootstrapMethods = null;
 
@@ -389,7 +388,12 @@ final class TheClassMaker extends Attributed implements ClassMaker {
 
     @Override
     public Class<?> finish() {
-        return mReservation.mInjector.define(name(), finishBytes(false));
+        boolean hasComplexConstants = mFinished == 1;
+        Class clazz = mReservation.mInjector.define(name(), finishBytes(false));
+        if (hasComplexConstants) {
+            ConstantsRegistry.finish(this, clazz);
+        }
+        return clazz;
     }
 
     @Override
@@ -460,7 +464,7 @@ final class TheClassMaker extends Attributed implements ClassMaker {
     }
 
     private void checkFinished() {
-        if (mFinished) {
+        if (mFinished < 0) {
             throw new IllegalStateException("Class definition is finished");
         }
     }
@@ -483,5 +487,14 @@ final class TheClassMaker extends Attributed implements ClassMaker {
             addAttribute(mBootstrapMethods);
         }
         return mBootstrapMethods.add(method, args);
+    }
+
+    /**
+     * @return slot
+     */
+    int addComplexConstant(Object value) {
+        checkFinished();
+        mFinished = 1;
+        return ConstantsRegistry.add(this, value);
     }
 }
