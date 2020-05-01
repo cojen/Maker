@@ -205,7 +205,7 @@ public class CondyTest {
         var const1 = "hello";
         mm.invoke("add", mm.var(String.class).setConstant(const1));
 
-        var const2 = new Long(8675309);
+        var const2 = Long.valueOf(8675309);
         mm.invoke("add", mm.var(Long.class).setConstant(const2));
 
         var const3 = this;
@@ -232,5 +232,31 @@ public class CondyTest {
         assertTrue(const4 == instance.get(4));
         assertEquals(null, instance.get(5));
         assertTrue(const0 == instance.get(6));
+    }
+
+    @Test
+    public void lazyInit() throws Exception {
+        lazyInit(false);
+    }
+
+    @Test
+    public void lazyInitHidden() throws Exception {
+        lazyInit(true);
+    }
+
+    private void lazyInit(boolean hidden) throws Exception {
+        // The static initializer isn't run immediately when classes are generated, allowing
+        // complex constants to be handed off correctly.
+
+        ClassMaker cm = ClassMaker.begin(null, ArrayList.class).public_();
+        cm.addField(byte[].class, "test").public_().static_().final_();
+
+        MethodMaker mm = cm.addClinit();
+        var const0 = new byte[] {1,2,3};
+        mm.field("test").setConstant(const0);
+
+        Class<?> clazz = hidden ? cm.finishHidden(null).lookupClass() : cm.finish();
+
+        assertTrue(const0 == clazz.getField("test").get(null));
     }
 }

@@ -407,14 +407,16 @@ final class TheClassMaker extends Attributed implements ClassMaker {
             lookup = MethodHandles.lookup();
         }
 
+        boolean hasComplexConstants = mFinished == 1;
         byte[] bytes = finishBytes(true);
 
+        MethodHandles.Lookup result;
         try {
             if (options == null) {
                 var clazz = (Class<?>) m.invoke(cUnsafe, lookup.lookupClass(), bytes, null);
-                return MethodHandles.lookup().in(clazz);
+                result = MethodHandles.lookup().in(clazz);
             } else {
-                return ((MethodHandles.Lookup) m.invoke(lookup, bytes, false, options));
+                result = ((MethodHandles.Lookup) m.invoke(lookup, bytes, false, options));
             }
         } catch (InvocationTargetException e) {
             Throwable cause = e.getCause();
@@ -429,6 +431,12 @@ final class TheClassMaker extends Attributed implements ClassMaker {
             }
             throw new IllegalStateException(e);
         }
+
+        if (hasComplexConstants) {
+            ConstantsRegistry.finish(this, result.lookupClass());
+        }
+
+        return result;
     }
 
     /**
