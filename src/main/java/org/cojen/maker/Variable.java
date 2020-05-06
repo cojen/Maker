@@ -141,7 +141,7 @@ public interface Variable {
      * @param defaultLabel required
      * @throws IllegalArgumentException if the number of cases and labels don't match
      * @throws IllegalStateException if this type cannot be automatically cast to an int
-     * the number of cases and labels don't match
+     * or if the number of cases and labels don't match
      */
     public void switch_(Label defaultLabel, int[] cases, Label... labels);
 
