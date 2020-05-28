@@ -35,9 +35,11 @@ import java.security.ProtectionDomain;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import static java.util.Objects.*;
 
@@ -94,7 +96,7 @@ final class TheClassMaker extends Attributed implements ClassMaker {
 
     private int mModifiers;
 
-    private List<ConstantPool.C_Class> mInterfaces;
+    private Set<ConstantPool.C_Class> mInterfaces;
     private Map<String, TheFieldMaker> mFields;
     private List<TheMethodMaker> mMethods;
 
@@ -282,7 +284,7 @@ final class TheClassMaker extends Attributed implements ClassMaker {
         requireNonNull(interfaceName);
         checkFinished();
         if (mInterfaces == null) {
-            mInterfaces = new ArrayList<>(4);
+            mInterfaces = new LinkedHashSet<>(4);
         }
         mInterfaces.add(mConstants.addClass(typeFrom(interfaceName)));
         return this;
