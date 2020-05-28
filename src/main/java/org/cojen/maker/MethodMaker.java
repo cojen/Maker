@@ -97,8 +97,8 @@ public interface MethodMaker {
     public MethodMaker synthetic();
 
     /**
-     * Indicate that this method is a bridge, which overrides an inherited method and returns a
-     * more specialized return type.
+     * Indicate that this method is a bridge, which implements an inherited method exactly, but
+     * it delegates to another method which returns a more specialized return type.
      *
      * @return this
      */

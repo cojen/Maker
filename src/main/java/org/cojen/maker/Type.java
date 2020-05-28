@@ -488,9 +488,13 @@ abstract class Type {
      * @param inherit -1: cannot invoke inherited method, 0: can invoke inherited method,
      * 1: can only invoke super class method
      * @param staticAllowed -1: not static, 0: maybe static, 1: only static
+     * @param specificReturnType optional
+     * @param specificParamTypes optional
      * @return all matching results
      */
-    Set<Method> findMethods(String methodName, Type[] params, int inherit, int staticAllowed) {
+    Set<Method> findMethods(String methodName, Type[] params, int inherit, int staticAllowed,
+                            Type specificReturnType, Type[] specificParamTypes)
+    {
         return null;
     }
 
@@ -1339,7 +1343,9 @@ abstract class Type {
         }
 
         @Override
-        Set<Method> findMethods(String methodName, Type[] params, int inherit, int staticAllowed) {
+        Set<Method> findMethods(String methodName, Type[] params, int inherit, int staticAllowed,
+                                Type specificReturnType, Type[] specificParamTypes)
+        {
             Type type = this;
 
             if (inherit > 0) {
@@ -1349,11 +1355,14 @@ abstract class Type {
                 }
             }
 
-            return findMethods(type, methodName, params, inherit, staticAllowed);
+            return findMethods(type, methodName, params, inherit, staticAllowed,
+                               specificReturnType, specificParamTypes);
         }
 
         private static Set<Method> findMethods(Type type, String methodName,
-                                               Type[] params, int inherit, int staticAllowed)
+                                               Type[] params, int inherit, int staticAllowed,
+                                               Type specificReturnType,
+                                               Type[] specificParamTypes)
         {
             // TODO: Cache the results.
 
@@ -1398,6 +1407,24 @@ abstract class Type {
                 }
 
                 methods = bestSet;
+            }
+
+            if (methods.size() > 1 && specificReturnType != null) {
+                Iterator<Method> it = methods.iterator();
+                while (it.hasNext()) {
+                    if (!specificReturnType.equals(it.next().returnType())) {
+                        it.remove();
+                    }
+                }
+            }
+
+            if (methods.size() > 1 && specificParamTypes != null) {
+                Iterator<Method> it = methods.iterator();
+                while (it.hasNext()) {
+                    if (!Arrays.equals(specificParamTypes, it.next().paramTypes())) {
+                        it.remove();
+                    }
+                }
             }
 
             if (methods.size() > 1) {

@@ -624,7 +624,7 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
             this_ = mThisVar;
         }
 
-        return doInvoke(mClassMaker.mThisClass.mType, this_, name, inherit, values);
+        return doInvoke(mClassMaker.mThisClass.mType, this_, name, inherit, values, null, null);
     }
 
     @Override
@@ -641,7 +641,7 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
         if (!"<init>".equals(getName())) {
             throw new IllegalStateException("Not defining a constructor");
         }
-        doInvoke(type.mType, this_(), "<init>", -1, values);
+        doInvoke(type.mType, this_(), "<init>", -1, values, null, null);
     }
 
     /**
@@ -649,12 +649,16 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
      * @param inherit -1: cannot invoke inherited method, 0: can invoke inherited method,
      * 1: can only invoke super class method
      * @param args contains expressions and values
+     * @param specificReturnType optional
+     * @param specificParamTypes optional
      */
     Var doInvoke(Type type,
                  OwnedVar instance,
                  String methodName,
                  int inherit,
-                 Object[] args)
+                 Object[] args,
+                 Type specificReturnType,
+                 Type[] specificParamTypes)
     {
         if (type.isPrimitive()) {
             type = type.box();
@@ -682,7 +686,8 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         Set<Type.Method> candidates =
-            type.findMethods(methodName, paramTypes, inherit, staticMatch);
+            type.findMethods(methodName, paramTypes, inherit, staticMatch,
+                             specificReturnType, specificParamTypes);
 
         Type.Method method;
         if (candidates.size() == 1) {
@@ -906,7 +911,7 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
                 }
             });
 
-            doInvoke(type, null, "<init>", -1, values);
+            doInvoke(type, null, "<init>", -1, values, null, null);
         }
 
         Var var = new Var(type);
@@ -3469,7 +3474,26 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
 
         @Override
         public Var invoke(String name, Object... values) {
-            return doInvoke(type(), this, name, 0, values);
+            return doInvoke(type(), this, name, 0, values, null, null);
+        }
+
+        @Override
+        public Var invoke(Object returnType, String name, Object[] types, Object... values) {
+            Type specificReturnType = null;
+            Type[] specificParamTypes = null;
+
+            if (returnType != null) {
+                specificReturnType = mClassMaker.typeFrom(returnType);
+            }
+
+            if (types != null) {
+                specificParamTypes = new Type[types.length];
+                for (int i=0; i<types.length; i++) {
+                    specificParamTypes[i] = mClassMaker.typeFrom(types[i]);
+                }
+            }
+
+            return doInvoke(type(), this, name, 0, values, specificReturnType, specificParamTypes);
         }
 
         @Override

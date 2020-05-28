@@ -364,6 +364,18 @@ public interface Variable {
     public Variable invoke(String name, Object... values);
 
     /**
+     * Invoke a static or instance method on the object referenced by this variable.
+     *
+     * @param returnType method return type
+     * @param name method name
+     * @param types method parameter types
+     * @param values variables or constants
+     * @return the result of the method, which is null if void
+     * @throws IllegalArgumentException if not given a variable or a constant
+     */
+    public Variable invoke(Object returnType, String name, Object[] types, Object... values);
+
+    /**
      * Throw the exception object referred to by this variable.
      *
      * @throws IllegalStateException if not an exception type
