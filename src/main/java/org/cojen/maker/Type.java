@@ -84,9 +84,9 @@ abstract class Type {
     /**
      * Called when making a new class.
      */
-    static Type begin(ClassLoader loader, String name, Type superType) {
+    static Type begin(ClassLoader loader, TheClassMaker maker, String name, Type superType) {
         ConcurrentHashMap<Object, Type> cache = cache(loader);
-        var type = new NewClazz(loader, name, superType);
+        var type = new NewClazz(loader, maker, name, superType);
         if (cachePut(cache, name, type) != type) {
             throw new IllegalStateException("Already being defined: " + name);
         }
@@ -440,6 +440,13 @@ abstract class Type {
      */
     Set<Type> interfaces() {
         return null;
+    }
+
+    /**
+     * Resets the known interfaces, forcing them to be checked again later. Is only useful for
+     * types returned from the begin method.
+     */
+    void resetInterfaces() {
     }
 
     /**
@@ -1087,7 +1094,7 @@ abstract class Type {
         private volatile Boolean mIsInterface;
 
         private volatile Type mSuperType;
-        private volatile Set<Type> mInterfaces;
+        protected volatile Set<Type> mInterfaces;
 
         private volatile ConcurrentHashMap<String, Field> mFields;
 
@@ -1165,6 +1172,8 @@ abstract class Type {
 
         @Override
         boolean isAssignableFrom(Type other) {
+            // TODO: Cache the result?
+
             if (other == NULL || this.equals(other)) {
                 return true;
             }
@@ -1184,8 +1193,20 @@ abstract class Type {
                 return true;
             }
 
-            // FIXME: Examine all types being defined.
-            //System.out.println("isAssignableFrom: " + name() + " <- " + other.name());
+            if (name().equals(other.name())) {
+                return true;
+            }
+
+            Type otherSuperType = other.superType();
+            if (otherSuperType != null && isAssignableFrom(otherSuperType)) {
+                return true;
+            }
+
+            for (Type iface : other.interfaces()) {
+                if (isAssignableFrom(iface)) {
+                    return true;
+                }
+            }
 
             return false;
         }
@@ -1601,8 +1622,11 @@ abstract class Type {
     }
 
     private static class NewClazz extends Clazz {
-        NewClazz(ClassLoader loader, String name, Type superType) {
+        final TheClassMaker mMaker;
+
+        NewClazz(ClassLoader loader, TheClassMaker maker, String name, Type superType) {
             super(loader, name, null, false, superType);
+            mMaker = maker;
         }
 
         @Override
@@ -1610,6 +1634,27 @@ abstract class Type {
             // It doesn't exist yet, so don't try loading it. Doing so causes the ClassLoader
             // to allocate a lock object, and it might never be reclaimed.
             return null;
+        }
+
+        @Override
+        Set<Type> interfaces() {
+            Set<Type> interfaces = mInterfaces;
+            if (interfaces == null) {
+                synchronized (this) {
+                    interfaces = mInterfaces;
+                    if (interfaces == null) {
+                        Set<Type> all = mMaker.allInterfaces(null);
+                        interfaces = all == null ? Collections.emptySet() : all;
+                        mInterfaces = interfaces;
+                    }
+                }
+            }
+            return interfaces;
+        }
+
+        @Override
+        void resetInterfaces() {
+            mInterfaces = null;
         }
     }
 }

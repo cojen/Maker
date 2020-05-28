@@ -145,7 +145,7 @@ final class TheClassMaker extends Attributed implements ClassMaker {
             mSuperClass = mConstants.addClass(superType);
         }
 
-        mThisClass = mConstants.addClass(Type.begin(mParentLoader, className, superType));
+        mThisClass = mConstants.addClass(Type.begin(mParentLoader, this, className, superType));
     }
 
     @Override
@@ -287,7 +287,27 @@ final class TheClassMaker extends Attributed implements ClassMaker {
             mInterfaces = new LinkedHashSet<>(4);
         }
         mInterfaces.add(mConstants.addClass(typeFrom(interfaceName)));
+        mThisClass.mType.resetInterfaces();
         return this;
+    }
+
+    /**
+     * @param can be null initially
+     * @return new or original set
+     */
+    Set<Type> allInterfaces(Set<Type> all) {
+        if (mInterfaces != null) {
+            if (all == null) {
+                all = new LinkedHashSet<>(mInterfaces.size());
+            }
+            for (ConstantPool.C_Class clazz : mInterfaces) {
+                Type type = clazz.mType;
+                all.add(type);
+                all.addAll(type.interfaces());
+            }
+        }
+
+        return all;
     }
 
     @Override
