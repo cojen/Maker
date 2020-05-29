@@ -450,6 +450,13 @@ abstract class Type {
     }
 
     /**
+     * Set the type as being an interface, which is only applicable to types returned from the
+     * begin method.
+     */
+    void toInterface() {
+    }
+
+    /**
      * Returns all fields declared in this type, never null.
      */
     Map<String, Field> fields() {
@@ -1091,7 +1098,7 @@ abstract class Type {
         private volatile Class mClass;
         private volatile String mName;
         private volatile String mDesc;
-        private volatile Boolean mIsInterface;
+        protected volatile Boolean mIsInterface;
 
         private volatile Type mSuperType;
         protected volatile Set<Type> mInterfaces;
@@ -1655,6 +1662,11 @@ abstract class Type {
         @Override
         void resetInterfaces() {
             mInterfaces = null;
+        }
+
+        @Override
+        void toInterface() {
+            mIsInterface = true;
         }
     }
 }

@@ -262,6 +262,7 @@ final class TheClassMaker extends Attributed implements ClassMaker {
     public ClassMaker interface_() {
         checkFinished();
         mModifiers = Modifiers.toInterface(mModifiers);
+        mThisClass.mType.toInterface();
         return this;
     }
 
