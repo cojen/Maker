@@ -262,7 +262,7 @@ final class TheClassMaker extends Attributed implements ClassMaker {
     public ClassMaker interface_() {
         checkFinished();
         mModifiers = Modifiers.toInterface(mModifiers);
-        mThisClass.mType.toInterface();
+        type().toInterface();
         return this;
     }
 
@@ -288,7 +288,7 @@ final class TheClassMaker extends Attributed implements ClassMaker {
             mInterfaces = new LinkedHashSet<>(4);
         }
         mInterfaces.add(mConstants.addClass(typeFrom(interfaceName)));
-        mThisClass.mType.resetInterfaces();
+        type().resetInterfaces();
         return this;
     }
 
@@ -326,7 +326,7 @@ final class TheClassMaker extends Attributed implements ClassMaker {
 
         Type tType = typeFrom(type);
 
-        var fm = new TheFieldMaker(mConstants, mThisClass.mType.defineField(false, tType, name));
+        var fm = new TheFieldMaker(mConstants, type().defineField(false, tType, name));
         mFields.put(name, fm);
 
         return fm;
@@ -367,7 +367,7 @@ final class TheClassMaker extends Attributed implements ClassMaker {
             }
         }
 
-        Type.Method method = mThisClass.mType.defineMethod(false, tRetType, name, tParamTypes);
+        Type.Method method = type().defineMethod(false, tRetType, name, tParamTypes);
 
         TheMethodMaker mm = new TheMethodMaker(this, method);
         mMethods.add(mm);
@@ -406,7 +406,7 @@ final class TheClassMaker extends Attributed implements ClassMaker {
 
     @Override
     public String name() {
-        return mThisClass.mType.name();
+        return type().name();
     }
 
     @Override
@@ -503,6 +503,10 @@ final class TheClassMaker extends Attributed implements ClassMaker {
     @Override
     public String toString() {
         return "ClassMaker {name=" + name() + '}';
+    }
+
+    Type type() {
+        return mThisClass.mType;
     }
 
     Type typeFrom(Object type) {

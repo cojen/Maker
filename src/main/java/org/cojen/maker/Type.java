@@ -1192,15 +1192,11 @@ abstract class Type {
                 return thisClass.isAssignableFrom(otherClass);
             }
 
-            if (isPrimitive() || other.isPrimitive()) {
+            if (other.isPrimitive()) {
                 return false;
             }
 
             if (thisClass == Object.class) {
-                return true;
-            }
-
-            if (name().equals(other.name())) {
                 return true;
             }
 

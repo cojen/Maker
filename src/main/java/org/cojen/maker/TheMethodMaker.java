@@ -480,7 +480,7 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
               because now arbitrary code can be placed before the super call. It can be
               replaced with a static method call if necessary.
             */
-            mThisVar = new Var(mClassMaker.mThisClass.mType);
+            mThisVar = new Var(mClassMaker.type());
             mThisVar.mValid = true;
             mThisVar.mSlot = 0;
             count++;
@@ -578,7 +578,7 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
 
     @Override
     public FieldVar field(String name) {
-        Type type = mClassMaker.mThisClass.mType;
+        Type type = mClassMaker.type();
         Type.Field field = findField(type, name);
 
         Var var = mThisVar;
@@ -624,7 +624,7 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
             this_ = mThisVar;
         }
 
-        return doInvoke(mClassMaker.mThisClass.mType, this_, name, inherit, values, null, null);
+        return doInvoke(mClassMaker.type(), this_, name, inherit, values, null, null);
     }
 
     @Override
