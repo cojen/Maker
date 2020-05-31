@@ -90,6 +90,7 @@ abstract class Type {
         if (cachePut(cache, name, type) != type) {
             throw new IllegalStateException("Already being defined: " + name);
         }
+        maker.mTypeCache = cache;
         return type;
     }
 
