@@ -303,4 +303,33 @@ public class BranchTest {
         var clazz = cm.finish();
         clazz.getMethod("run").invoke(null);
     }
+
+    @Test
+    public void invalidate() throws Exception {
+        // Test that variables are invalidated to prevent broken stack map frames.
+
+        ClassMaker cm = ClassMaker.begin().public_();
+        MethodMaker mm = cm.addMethod(null, "run").static_().public_();
+
+        var v1 = mm.var(int.class).set(1);
+        var v2 = mm.var(int.class).set(2);
+
+        for (int i=0; i<2; i++) {
+            Label l1 = mm.label();
+            v1.ifEq(0, l1);
+
+            var v3 = mm.var(int.class).set(v2.add(1));
+            var v4 = mm.var(int.class).set(v2.add(1));
+            v2.set(v3);
+
+            l1.here();
+
+            var v5 = mm.var(int.class).set(v2.add(1));
+            var v6 = mm.var(int.class).set(v2.add(1));
+            v2.set(v5);
+        }
+
+        var clazz = cm.finish();
+        clazz.getMethod("run").invoke(null);
+    }
 }

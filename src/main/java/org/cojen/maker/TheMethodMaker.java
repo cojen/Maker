@@ -2416,6 +2416,8 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
                     }
                     m.mStackSize = stackSize;
                 }
+
+                m.invalidateVariables(mFrame);
             }
         }
 
@@ -2915,6 +2917,27 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
 
     private StackMapTable.Frame addStackMapFrameForCatch(int address, int smCatchCode) {
         return mStackMapTable.add(address, smCodes(mVars, mVars.length), new int[] {smCatchCode});
+    }
+
+    private void invalidateVariables(StackMapTable.Frame frame) {
+        // Any variables which aren't known by the current frame must be invalidated. These
+        // variables aren't guaranteed to have been assigned for all code paths. Invalidating
+        // them ensures that future frames are defined correctly.
+
+        int[] localCodes = frame.mLocalCodes;
+        int i = 0;
+        if (localCodes != null) {
+            for (; i<localCodes.length; i++) {
+                if (localCodes[i] == SM_TOP) {
+                    mVars[i].mValid = false;
+                }
+            }
+        }
+
+        // Remaining ones are implicitly "top" but were pruned.
+        for (; i < mVars.length; i++) {
+            mVars[i].mValid = false;
+        }
     }
 
     /**
