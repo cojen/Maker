@@ -64,11 +64,6 @@ public interface ClassMaker {
         return begin(className, superClassName, null, null);
     }
 
-    // TODO: Define a static hashtable (with weak refs) to all ClassMakers which have the same
-    // parent loader and protection domain. If necessary, also define a "finishLater" method
-    // which returns a Supplier<Class>. This allows classes being made to refer to other ones
-    // being made, perhaps in a cycle.
-
     /**
      * @param className fully qualified class name; pass null to use default
      * @param superClassName fully qualified super class name; pass null to use Object.
