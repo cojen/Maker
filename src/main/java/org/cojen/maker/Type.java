@@ -510,7 +510,7 @@ abstract class Type {
     Set<Method> findMethods(String methodName, Type[] params, int inherit, int staticAllowed,
                             Type specificReturnType, Type[] specificParamTypes)
     {
-        return null;
+        return Collections.emptySet();
     }
 
     /**
@@ -1075,6 +1075,14 @@ abstract class Type {
         @Override
         Type superType() {
             return from(Object.class);
+        }
+
+        @Override
+        Set<Method> findMethods(String methodName, Type[] params, int inherit, int staticAllowed,
+                                Type specificReturnType, Type[] specificParamTypes)
+        {
+            return superType().findMethods(methodName, params, inherit, staticAllowed,
+                                           specificReturnType, specificParamTypes);
         }
 
         @Override

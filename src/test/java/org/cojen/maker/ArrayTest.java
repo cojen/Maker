@@ -144,4 +144,22 @@ public class ArrayTest {
 
         cm.finish().getMethod("run").invoke(null);
     }
+
+    @Test
+    public void arrayMethods() throws Exception {
+        var assertVar = mm.var(Assert.class);
+        var array = mm.new_(int[].class, 10);
+
+        {
+            var v1 = array.invoke("toString");
+            assertVar.invoke("assertTrue", v1.invoke("startsWith", "[I"));
+        }
+
+        {
+            var v2 = array.invoke("clone");
+            assertVar.invoke("assertTrue", v2.instanceOf(int[].class));
+        }
+
+        cm.finish().getMethod("run").invoke(null);
+    }
 }
