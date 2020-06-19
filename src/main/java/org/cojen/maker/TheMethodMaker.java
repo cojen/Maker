@@ -602,7 +602,7 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
     private Type.Field findField(Type type, String name) {
         Type.Field field = type.findField(name);
         if (field == null) {
-            throw new IllegalStateException("Field not found: " + name);
+            throw new IllegalStateException("Field not found in " + type.name() + ": " + name);
         }
         return field;
     }
