@@ -332,4 +332,22 @@ public class BranchTest {
         var clazz = cm.finish();
         clazz.getMethod("run").invoke(null);
     }
+
+    @Test
+    public void ctor() throws Exception {
+        // Test branch that acts upon "this" in a constructor.
+
+        ClassMaker cm = ClassMaker.begin().public_();
+        cm.addField(int.class, "foo");
+
+        MethodMaker mm = cm.addConstructor(int.class).public_();
+        mm.invokeSuperConstructor();
+        Label cont = mm.label();
+        mm.param(0).ifNe(0, cont);
+        mm.field("foo").set(mm.param(0));
+        cont.here();
+
+        var clazz = cm.finish();
+        clazz.getConstructor(int.class).newInstance(10);
+    }
 }

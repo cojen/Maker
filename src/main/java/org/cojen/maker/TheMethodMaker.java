@@ -461,27 +461,8 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
         int slot = 0;
 
         if (!Modifier.isStatic(mModifiers)) {
-            /*
-              Note: The "this" type is UNINIT_THIS initially in a constructor, until the super
-              constructor is called. Doing this properly requires basic flow analysis, but in
-              practice this isn't necessary. Valid Java programs require that the super call
-              be the first thing, but some code can precede it for processing arguments.
-
-              Traditionally, the only time stack map frames need to be inserted before the
-              super call is when the ternary operator is used. Attempting to do the same thing
-              with MethodMaker won't generate the same code pattern, because local variables
-              need to be used. The only stack map frames generated are same_frame,
-              same_frame_extended, or append_frame. This means that the UNINIT_THIS from the
-              implicit initial frame carries over to the subsequent frames.
-
-              Although the JVM is more lenient with respect to where the super constructor is
-              called, supporting all these use cases isn't necessary because it doesn't have
-              much practical value. The new switch expression feature changes things somewhat,
-              because now arbitrary code can be placed before the super call. It can be
-              replaced with a static method call if necessary.
-            */
             mThisVar = new Var(mClassMaker.type());
-            mThisVar.mValid = true;
+            mThisVar.mValid = !"<init>".equals(getName());
             mThisVar.mSlot = 0;
             count++;
             slot = 1;
@@ -641,7 +622,15 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
         if (!"<init>".equals(getName())) {
             throw new IllegalStateException("Not defining a constructor");
         }
+
         doInvoke(type.mType, this_(), "<init>", -1, values, null, null);
+
+        addOp(new Op() {
+            @Override
+            void appendTo(TheMethodMaker m) {
+                mThisVar.mValid = true;
+            }
+        });
     }
 
     /**
