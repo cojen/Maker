@@ -64,29 +64,27 @@ class ClassInjector extends ClassLoader {
                                     domain.getPrincipals());
     }
 
-    // Prevent name collisions while multiple threads are defining classes by reserving the name.
-    boolean reserveName(String name, boolean explicit) {
-        ClassInjector self = this;
-        while (true) {
-            ClassLoader parent = self.getParent();
-            if (!(parent instanceof ClassInjector)) {
-                break;
-            }
-            self = (ClassInjector) parent;
-        }
-
-        synchronized (self.mReservedNames) {
-            if (self.mReservedNames.put(name, Boolean.TRUE) != null && !explicit) {
-                return false;
+    static ClassInjector lookup(ClassLoader parentLoader, ProtectionDomain domain) {
+        if (parentLoader == null) {
+            parentLoader = ClassMaker.class.getClassLoader();
+            if (parentLoader == null) {
+                parentLoader = ClassLoader.getSystemClassLoader();
             }
         }
 
-        // If explicit and name has already been reserved, don't immediately return false. This
-        // allows the class to be defined if an earlier injected class instance was abandoned.
-        // A duplicate class definition can still be attempted later, which is converted to an
-        // IllegalStateException by the define method.
+        final Object injectorKey = createInjectorKey(parentLoader, domain);
 
-        return self.findLoadedClass(name) == null;
+        ClassInjector injector = cInjectors.get(injectorKey);
+        if (injector == null) {
+            injector = parentLoader == null
+                ? new ClassInjector(domain) : new ClassInjector(parentLoader, domain);
+            ClassInjector existing = cInjectors.putIfAbsent(injectorKey, injector);
+            if (existing != null) {
+                injector = existing;
+            }
+        }
+
+        return injector;
     }
 
     Class<?> define(String name, byte[] b) {
@@ -111,84 +109,64 @@ class ClassInjector extends ClassLoader {
         }
     }
 
-    static Reservation reserve(String className,
-                               ClassLoader parentLoader,
-                               ProtectionDomain domain,
-                               boolean explicit)
-    {
-        if (className == null) {
-            if (explicit) {
+    Reservation reserve(String className, boolean explicit) {
+        if (explicit) {
+            if (className == null) {
                 throw new IllegalArgumentException("Explicit class name not provided");
             }
+            return new Reservation(this, className);
+        } else if (className == null) {
             className = ClassMaker.class.getName();
-        }
-
-        if (parentLoader == null) {
-            parentLoader = ClassMaker.class.getClassLoader();
-            if (parentLoader == null) {
-                parentLoader = ClassLoader.getSystemClassLoader();
-            }
-        }
-
-        final Object injectorKey = createInjectorKey(className, parentLoader, domain);
-
-        ClassInjector injector = cInjectors.get(injectorKey);
-        if (injector == null) {
-            injector = parentLoader == null
-                ? new ClassInjector(domain) : new ClassInjector(parentLoader, domain);
-            ClassInjector existing = cInjectors.putIfAbsent(injectorKey, injector);
-            if (existing != null) {
-                injector = existing;
-            }
-        }
-
-        if (explicit) {
-            return new Reservation(injector, className);
         }
 
         var rnd = ThreadLocalRandom.current();
 
-        for (int tryCount = 0; tryCount < 1000; tryCount++) {
-            long id = rnd.nextInt();
+        // Use a small identifier if possible, making it easier to read stack traces and
+        // decompiled classes.
+        int range = 10;
 
-            // Use a small identifier if possible, making it easier to read stack traces and
-            // decompiled classes.
-            switch (tryCount) {
-            case 0:
-                id &= 0xffL;
-                break;
-            case 1: case 2: case 3: case 4:
-                id &= 0xffffL;
-                break;
-            default:
-                id &= 0xffffffffL;
-                break;
+        for (int tryCount = 0; tryCount < 1000; tryCount++) {
+            // Use '-' instead of '$' to prevent conflicts with inner class names.
+            String mangled = className + '-' + rnd.nextInt(range);
+
+            if (reserveName(mangled, false)) {
+                return new Reservation(this, mangled);
             }
 
-            // Use '-' instead of '$' to prevent conflicts with inner class names.
-            String mangled = className + '-' + id;
-
-            if (injector.reserveName(mangled, false)) {
-                return new Reservation(injector, mangled);
+            if (range < 1_000_000_000) {
+                range *= 10;
             }
         }
 
         throw new InternalError("Unable to create unique class name");
     }
 
-    private static Object createInjectorKey(String className, ClassLoader parentLoader,
-                                            ProtectionDomain domain)
-    {
-        String packageName;
-        {
-            int index = className.lastIndexOf('.');
-            if (index < 0) {
-                packageName = "";
-            } else {
-                packageName = className.substring(0, index);
+    // Prevent name collisions while multiple threads are defining classes by reserving the name.
+    private boolean reserveName(String name, boolean explicit) {
+        ClassInjector self = this;
+        while (true) {
+            ClassLoader parent = self.getParent();
+            if (!(parent instanceof ClassInjector)) {
+                break;
+            }
+            self = (ClassInjector) parent;
+        }
+
+        synchronized (self.mReservedNames) {
+            if (self.mReservedNames.put(name, Boolean.TRUE) != null && !explicit) {
+                return false;
             }
         }
 
+        // If explicit and name has already been reserved, don't immediately return false. This
+        // allows the class to be defined if an earlier injected class instance was abandoned.
+        // A duplicate class definition can still be attempted later, which is converted to an
+        // IllegalStateException by the define method.
+
+        return self.findLoadedClass(name) == null;
+    }
+
+    private static Object createInjectorKey(ClassLoader parentLoader, ProtectionDomain domain) {
         // ProtectionDomain doesn't have an equals method, so break it apart and add the
         // elements to the composite key.
 
@@ -226,7 +204,7 @@ class ClassInjector extends ClassLoader {
         }
 
         Object[] composite = new Object[] {
-            parentLoader, packageName, domainKey, csKey, permsKey, principalsKey
+            parentLoader, domainKey, csKey, permsKey, principalsKey
         };
 
         return new Key(composite);

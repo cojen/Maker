@@ -201,7 +201,7 @@ public interface ClassMaker {
     /**
      * Finishes the definition of the new class.
      *
-     * @throws IllegalStateException if definition is broken
+     * @throws IllegalStateException if already finished or if definition is broken
      */
     public Class<?> finish();
 
@@ -215,7 +215,7 @@ public interface ClassMaker {
      *
      * @param lookup can pass null to use caller lookup
      * @return the lookup for the class; call lookupClass to obtain the actual class
-     * @throws IllegalStateException if definition is broken
+     * @throws IllegalStateException if already finished or if definition is broken
      */
     public MethodHandles.Lookup finishHidden(MethodHandles.Lookup lookup)
         throws IllegalAccessException;
@@ -223,7 +223,7 @@ public interface ClassMaker {
     /**
      * Finishes the definition of the new class and writes it to a stream.
      *
-     * @throws IllegalStateException if definition is broken
+     * @throws IllegalStateException if already finished or if definition is broken
      */
     public default void finishTo(OutputStream out) throws IOException {
         if (!(out instanceof DataOutput)) {
@@ -235,7 +235,7 @@ public interface ClassMaker {
     /**
      * Finishes the definition of the new class and writes it to a stream.
      *
-     * @throws IllegalStateException if definition is broken
+     * @throws IllegalStateException if already finished or if definition is broken
      */
     public void finishTo(DataOutput dout) throws IOException;
 }

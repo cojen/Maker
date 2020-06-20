@@ -123,7 +123,7 @@ final class TheClassMaker extends Attributed implements ClassMaker {
 
         mParentLoader = parentLoader;
         
-        mReservation = ClassInjector.reserve(className, parentLoader, domain, false);
+        mReservation = ClassInjector.lookup(parentLoader, domain).reserve(className, false);
         className = mReservation.mClassName;
 
         if (superClassName == null) {
