@@ -350,4 +350,56 @@ public class BranchTest {
         var clazz = cm.finish();
         clazz.getConstructor(int.class).newInstance(10);
     }
+
+    @Test
+    public void ctorTernary() throws Exception {
+        // Emulates this pattern in a constructor: super(a ? 1 : 2)
+
+        // A branch before calling the super constructor should create a proper stack map table
+        // entry which shows "this" as an uninitialized type.
+
+        ClassMaker cm = ClassMaker.begin(null, java.util.Vector.class).public_();
+        cm.addField(int.class, "init").public_().final_();
+
+        MethodMaker mm = cm.addConstructor(boolean.class).public_();
+
+        var sizeVar = mm.var(int.class);
+        Label L1 = mm.label();
+        mm.param(0).ifFalse(L1);
+        Label L2 = mm.label();
+        sizeVar.set(1);
+        mm.goto_(L2);
+        L1.here();
+        sizeVar.set(2);
+        L2.here();
+
+        mm.invokeSuperConstructor(sizeVar);
+
+        var initVar = mm.field("init");
+        Label L3 = mm.label();
+        mm.param(0).ifFalse(L3);
+        Label L4 = mm.label();
+        initVar.set(1);
+        mm.goto_(L4);
+        L3.here();
+        initVar.set(2);
+        L4.here();
+
+        var clazz = cm.finish();
+        var ctor = clazz.getConstructor(boolean.class);
+        var capacity = clazz.getMethod("capacity");
+        var init = clazz.getField("init");
+
+        {
+            var instance = ctor.newInstance(true);
+            assertEquals(1, capacity.invoke(instance));
+            assertEquals(1, init.get(instance));
+        }
+
+        {
+            var instance = ctor.newInstance(false);
+            assertEquals(2, capacity.invoke(instance));
+            assertEquals(2, init.get(instance));
+        }
+    }
 }
