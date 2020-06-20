@@ -167,54 +167,48 @@ class ClassInjector extends ClassLoader {
     }
 
     private static Object createInjectorKey(ClassLoader parentLoader, ProtectionDomain domain) {
-        // ProtectionDomain doesn't have an equals method, so break it apart and add the
-        // elements to the composite key.
+        if (domain == null) {
+            return parentLoader;
+        }
 
-        Object domainKey = null;
-        Object csKey = null;
+        // ProtectionDomain doesn't have an equals method, so break it apart and add the
+        // elements to a composite key.
+
+        Object csKey = domain.getCodeSource();
         Object permsKey = null;
         Object principalsKey = null;
 
-        if (domain != null) {
-            domainKey = "";
-            csKey = domain.getCodeSource();
-
-            PermissionCollection pc = domain.getPermissions();
-            if (pc != null) {
-                List<Permission> permList = Collections.list(pc.elements());
-                if (permList.size() == 1) {
-                    permsKey = permList.get(0);
-                } else if (permList.size() > 1) {
-                    permsKey = new HashSet<Permission>(permList);
-                }
-            }
-
-            Principal[] principals = domain.getPrincipals();
-            if (principals != null && principals.length > 0) {
-                if (principals.length == 1) {
-                    principalsKey = principals[0];
-                } else {
-                    Set<Principal> principalSet = new HashSet<>(principals.length);
-                    for (Principal principal : principals) {
-                        principalSet.add(principal);
-                    }
-                    principalsKey = principalSet;
-                }
+        PermissionCollection pc = domain.getPermissions();
+        if (pc != null) {
+            List<Permission> permList = Collections.list(pc.elements());
+            if (permList.size() == 1) {
+                permsKey = permList.get(0);
+            } else if (permList.size() > 1) {
+                permsKey = new HashSet<Permission>(permList);
             }
         }
 
-        Object[] composite = new Object[] {
-            parentLoader, domainKey, csKey, permsKey, principalsKey
-        };
+        Principal[] principals = domain.getPrincipals();
+        if (principals != null && principals.length > 0) {
+            if (principals.length == 1) {
+                principalsKey = principals[0];
+            } else {
+                Set<Principal> principalSet = new HashSet<>(principals.length);
+                for (Principal principal : principals) {
+                    principalSet.add(principal);
+                }
+                principalsKey = principalSet;
+            }
+        }
 
-        return new Key(composite);
+        return new Key(parentLoader, csKey, permsKey, principalsKey);
     }
 
     private static class Key {
         private final Object[] mComposite;
         private final int mHash;
 
-        Key(Object[] composite) {
+        Key(Object... composite) {
             mComposite = composite;
             mHash = Arrays.deepHashCode(composite);
         }
