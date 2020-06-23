@@ -1,5 +1,6 @@
 /build
 /target
+/docs
 *~
 /.gitignore~
 .DS_Store
