@@ -48,11 +48,6 @@ class ClassInjector extends ClassLoader {
         mDomain = prepareDomain(domain, this);
     }
 
-    private ClassInjector(ProtectionDomain domain) {
-        super();
-        mDomain = prepareDomain(domain, this);
-    }
-
     private static ProtectionDomain prepareDomain(ProtectionDomain domain, ClassLoader loader) {
         if (domain == null) {
             return null;
@@ -65,19 +60,11 @@ class ClassInjector extends ClassLoader {
     }
 
     static ClassInjector lookup(ClassLoader parentLoader, ProtectionDomain domain) {
-        if (parentLoader == null) {
-            parentLoader = ClassMaker.class.getClassLoader();
-            if (parentLoader == null) {
-                parentLoader = ClassLoader.getSystemClassLoader();
-            }
-        }
-
         final Object injectorKey = createInjectorKey(parentLoader, domain);
 
         ClassInjector injector = cInjectors.get(injectorKey);
         if (injector == null) {
-            injector = parentLoader == null
-                ? new ClassInjector(domain) : new ClassInjector(parentLoader, domain);
+            injector = new ClassInjector(parentLoader, domain);
             ClassInjector existing = cInjectors.putIfAbsent(injectorKey, injector);
             if (existing != null) {
                 injector = existing;

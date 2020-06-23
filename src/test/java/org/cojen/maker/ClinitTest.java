@@ -16,6 +16,8 @@
 
 package org.cojen.maker;
 
+import java.lang.invoke.MethodHandles;
+
 import org.junit.*;
 import static org.junit.Assert.*;
 
@@ -66,14 +68,14 @@ public class ClinitTest {
 
     @Test
     public void hidden() throws Exception {
-        ClassMaker cm = ClassMaker.begin().public_();
+        ClassMaker cm = ClassMaker.begin(null, (String) null, MethodHandles.lookup()).public_();
 
         cm.addConstructor().public_();
 
         MethodMaker mm = cm.addClinit();
         mm.var(ClinitTest.class).field("value").set(1);
 
-        var clazz = cm.finishHidden(null).lookupClass();
+        var clazz = cm.finishHidden().lookupClass();
 
         synchronized (ClinitTest.class) {
             value = 0;

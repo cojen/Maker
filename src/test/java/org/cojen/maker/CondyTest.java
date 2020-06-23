@@ -248,14 +248,14 @@ public class CondyTest {
         // The static initializer isn't run immediately when classes are generated, allowing
         // complex constants to be handed off correctly.
 
-        ClassMaker cm = ClassMaker.begin(null, ArrayList.class).public_();
+        ClassMaker cm = ClassMaker.begin(null, ArrayList.class, MethodHandles.lookup()).public_();
         cm.addField(byte[].class, "test").public_().static_().final_();
 
         MethodMaker mm = cm.addClinit();
         var const0 = new byte[] {1,2,3};
         mm.field("test").setConstant(const0);
 
-        Class<?> clazz = hidden ? cm.finishHidden(null).lookupClass() : cm.finish();
+        Class<?> clazz = hidden ? cm.finishHidden().lookupClass() : cm.finish();
 
         assertTrue(const0 == clazz.getField("test").get(null));
     }

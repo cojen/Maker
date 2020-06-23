@@ -26,6 +26,8 @@ import java.lang.invoke.MethodType;
 
 import java.security.ProtectionDomain;
 
+import java.util.Objects;
+
 /**
  * Allows new classes to be defined dynamically. ClassMaker instances and all objects that
  * interact with them aren't thread-safe.
@@ -84,7 +86,32 @@ public interface ClassMaker {
     public static ClassMaker begin(String className, String superClassName,
                                    ClassLoader parentLoader, ProtectionDomain domain)
     {
-        return new TheClassMaker(className, superClassName, parentLoader, domain);
+        return new TheClassMaker(className, superClassName, parentLoader, domain, null);
+    }
+
+    /**
+     * @param className fully qualified class name; pass null to use default
+     * @param superClass super class; pass null to use Object.
+     * @param lookup finish loading the class using this lookup object
+     */
+    public static ClassMaker begin(String className, Class superClass,
+                                   MethodHandles.Lookup lookup)
+    {
+        String superClassName = superClass == null ? (String) null : superClass.getName();
+        return begin(className, superClassName, lookup);
+    }
+
+    /**
+     * @param className fully qualified class name; pass null to use default
+     * @param superClassName fully qualified super class name; pass null to use Object.
+     * @param lookup finish loading the class using this lookup object
+     */
+    public static ClassMaker begin(String className, String superClassName,
+                                   MethodHandles.Lookup lookup)
+    {
+        Objects.requireNonNull(lookup);
+        ClassLoader loader = lookup.lookupClass().getClassLoader();
+        return new TheClassMaker(className, superClassName, loader, null, lookup);
     }
 
     /**
@@ -207,18 +234,17 @@ public interface ClassMaker {
 
     /**
      * Finishes the definition of a new hidden class, using the loader and protection domain of
-     * the given lookup. Hidden classes are automatically unloaded when no longer referenced,
-     * even if the class loader still is.
+     * the lookup passed to the begin method. Hidden classes are automatically unloaded when no
+     * longer referenced, even if the class loader still is.
      *
      * <p>This feature is only fully supported in Java 15. Hidden classes created with earlier
      * versions don't support all the lookup features.
      *
-     * @param lookup can pass null to use caller lookup
      * @return the lookup for the class; call lookupClass to obtain the actual class
-     * @throws IllegalStateException if already finished or if the definition is broken
+     * @throws IllegalStateException if already finished, or if the definition is broken, or if
+     * no lookup object was passed to the begin method
      */
-    public MethodHandles.Lookup finishHidden(MethodHandles.Lookup lookup)
-        throws IllegalAccessException;
+    public MethodHandles.Lookup finishHidden();
 
     /**
      * Finishes the definition of the new class and writes it to a stream.

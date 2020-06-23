@@ -41,6 +41,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import java.util.concurrent.ThreadLocalRandom;
+
 import static java.util.Objects.*;
 
 /**
@@ -89,6 +91,7 @@ final class TheClassMaker extends Attributed implements ClassMaker {
     }
 
     private final ClassLoader mParentLoader;
+    private final MethodHandles.Lookup mLookup;
     private final ClassInjector.Reservation mReservation;
 
     final ConstantPool.C_Class mThisClass;
@@ -113,15 +116,19 @@ final class TheClassMaker extends Attributed implements ClassMaker {
     private int mFinished;
 
     TheClassMaker(String className, String superClassName,
-                  ClassLoader parentLoader, ProtectionDomain domain)
+                  ClassLoader parentLoader, ProtectionDomain domain, MethodHandles.Lookup lookup)
     {
         super(new ConstantPool());
 
         if (parentLoader == null) {
             parentLoader = getClass().getClassLoader();
+            if (parentLoader == null) {
+                parentLoader = ClassLoader.getSystemClassLoader();
+            }
         }
 
         mParentLoader = parentLoader;
+        mLookup = lookup;
         
         mReservation = ClassInjector.lookup(parentLoader, domain).reserve(className, false);
         className = mReservation.mClassName;
@@ -153,10 +160,13 @@ final class TheClassMaker extends Attributed implements ClassMaker {
 
     @Override
     public void finishTo(DataOutput dout) throws IOException {
-        finishTo(dout, false);
+        finishTo(dout, null);
     }
 
-    private void finishTo(DataOutput dout, boolean hidden) throws IOException {
+    /**
+     * @param renameTo when non-null, rename the class
+     */
+    private void finishTo(DataOutput dout, String renameTo) throws IOException {
         checkFinished();
 
         mFinished = -1;
@@ -176,12 +186,8 @@ final class TheClassMaker extends Attributed implements ClassMaker {
             }
         }
 
-        if (hidden) {
-            String name = mThisClass.mValue.mValue;
-            int ix = name.lastIndexOf('-');
-            if (ix > 0) {
-                mThisClass.rename(mConstants.addUTF8(name.substring(0, ix)));
-            }
+        if (renameTo != null) {
+            mThisClass.rename(mConstants.addUTF8(renameTo.replace('.', '/')));
         }
 
         dout.writeInt(0xCAFEBABE);
@@ -415,9 +421,22 @@ final class TheClassMaker extends Attributed implements ClassMaker {
     @Override
     public Class<?> finish() {
         boolean hasComplexConstants = mFinished == 1;
-
         String name = name();
-        Class clazz = mReservation.mInjector.define(name, finishBytes(false));
+
+        Class clazz;
+        if (mLookup == null) {
+            clazz = mReservation.mInjector.define(name, finishBytes(null));
+        } else {
+            // Synchronize to help prevent name conflicts.
+            synchronized (mParentLoader) {
+                String renameTo = renameIfNecessary(mParentLoader, name);
+                try {
+                    clazz = mLookup.defineClass(finishBytes(renameTo));
+                } catch (IllegalAccessException e) {
+                    throw new IllegalStateException(e);
+                }
+            }
+        }
 
         Type.uncache(mTypeCache, name);
 
@@ -428,27 +447,72 @@ final class TheClassMaker extends Attributed implements ClassMaker {
         return clazz;
     }
 
+    private static String renameIfNecessary(ClassLoader loader, String name) {
+        try {
+            loader.loadClass(name);
+        } catch (ClassNotFoundException e) {
+            // No need to rename.
+            return null;
+        }
+
+        int ix = name.lastIndexOf('-');
+        if (ix > 0) {
+            name = name.substring(0, ix);
+        }
+
+        var rnd = ThreadLocalRandom.current();
+
+        // Use a small identifier if possible, making it easier to read stack traces and
+        // decompiled classes.
+        int range = 10;
+
+        for (int tryCount = 0; tryCount < 1000; tryCount++) {
+            // Use '-' instead of '$' to prevent conflicts with inner class names.
+            String mangled = name + '-' + rnd.nextInt(range);
+
+            try {
+                loader.loadClass(mangled);
+            } catch (ClassNotFoundException e) {
+                return mangled;
+            }
+
+            if (range < 1_000_000_000) {
+                range *= 10;
+            }
+        }
+
+        throw new InternalError("Unable to create unique class name");
+    }
+
     @Override
-    public MethodHandles.Lookup finishHidden(MethodHandles.Lookup lookup)
-        throws IllegalAccessException
-    {
+    public MethodHandles.Lookup finishHidden() {
+        if (mLookup == null) {
+            throw new IllegalStateException("No lookup was provided to the begin method");
+        }
+
         Method m = defineHidden();
         Object options = cHiddenClassOptions;
 
-        if (lookup == null) {
-            lookup = MethodHandles.lookup();
+        boolean hasComplexConstants = mFinished == 1;
+        String name = name();
+
+        String renameTo = null;
+        {
+            int ix = name.lastIndexOf('-');
+            if (ix > 0) {
+                renameTo = name.substring(0, ix);
+            }
         }
 
-        boolean hasComplexConstants = mFinished == 1;
-        byte[] bytes = finishBytes(true);
+        byte[] bytes = finishBytes(renameTo);
 
         MethodHandles.Lookup result;
         try {
             if (options == null) {
-                var clazz = (Class<?>) m.invoke(cUnsafe, lookup.lookupClass(), bytes, null);
+                var clazz = (Class<?>) m.invoke(cUnsafe, mLookup.lookupClass(), bytes, null);
                 result = MethodHandles.lookup().in(clazz);
             } else {
-                result = ((MethodHandles.Lookup) m.invoke(lookup, bytes, false, options));
+                result = ((MethodHandles.Lookup) m.invoke(mLookup, bytes, false, options));
             }
         } catch (InvocationTargetException e) {
             Throwable cause = e.getCause();
@@ -462,9 +526,11 @@ final class TheClassMaker extends Attributed implements ClassMaker {
                 cause = e;
             }
             throw new IllegalStateException(e);
+        } catch (IllegalAccessException e) {
+            throw new IllegalStateException(e);
         }
 
-        Type.uncache(mTypeCache, name());
+        Type.uncache(mTypeCache, name);
 
         if (hasComplexConstants) {
             ConstantsRegistry.finish(this, result.lookupClass());
@@ -474,13 +540,13 @@ final class TheClassMaker extends Attributed implements ClassMaker {
     }
 
     /**
-     * @param hidden when true, class is renamed first to strip off the generated identifier
+     * @param renameTo when non-null, rename the class
      */
-    byte[] finishBytes(boolean hidden) {
+    byte[] finishBytes(String renameTo) {
         byte[] bytes;
         try {
             ByteArrayOutputStream bout = new ByteArrayOutputStream(1000);
-            finishTo(new DataOutputStream(bout), hidden);
+            finishTo(new DataOutputStream(bout), renameTo);
             bytes = bout.toByteArray();
         } catch (IOException e) {
             // Not expected.
