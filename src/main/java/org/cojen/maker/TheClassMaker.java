@@ -232,6 +232,8 @@ final class TheClassMaker extends Attributed implements ClassMaker {
         writeAttributesTo(dout);
 
         mAttributes = null;
+
+        Type.uncache(mTypeCache, name());
     }
 
     static void checkSize(Map<?,?> c, int maxSize, String desc) {
