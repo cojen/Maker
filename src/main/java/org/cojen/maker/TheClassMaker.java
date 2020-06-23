@@ -232,8 +232,6 @@ final class TheClassMaker extends Attributed implements ClassMaker {
         writeAttributesTo(dout);
 
         mAttributes = null;
-
-        Type.uncache(mTypeCache, name());
     }
 
     static void checkSize(Map<?,?> c, int maxSize, String desc) {
@@ -417,10 +415,16 @@ final class TheClassMaker extends Attributed implements ClassMaker {
     @Override
     public Class<?> finish() {
         boolean hasComplexConstants = mFinished == 1;
-        Class clazz = mReservation.mInjector.define(name(), finishBytes(false));
+
+        String name = name();
+        Class clazz = mReservation.mInjector.define(name, finishBytes(false));
+
+        Type.uncache(mTypeCache, name);
+
         if (hasComplexConstants) {
             ConstantsRegistry.finish(this, clazz);
         }
+
         return clazz;
     }
 
@@ -459,6 +463,8 @@ final class TheClassMaker extends Attributed implements ClassMaker {
             }
             throw new IllegalStateException(e);
         }
+
+        Type.uncache(mTypeCache, name());
 
         if (hasComplexConstants) {
             ConstantsRegistry.finish(this, result.lookupClass());
