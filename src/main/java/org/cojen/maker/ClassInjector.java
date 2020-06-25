@@ -74,6 +74,10 @@ class ClassInjector extends ClassLoader {
         return injector;
     }
 
+    ProtectionDomain domain() {
+        return mDomain;
+    }
+
     Class<?> define(String name, byte[] b) {
         try {
             if (mDomain == null) {

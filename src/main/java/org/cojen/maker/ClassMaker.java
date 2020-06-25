@@ -193,6 +193,15 @@ public interface ClassMaker {
     public MethodMaker addClinit();
 
     /**
+     * Add a nested class to this class.
+     *
+     * @param className simple class name; pass null to use default
+     * @param superClass Class or String; pass null to use Object.
+     * @throws IllegalArgumentException if not given a simple class name
+     */
+    public ClassMaker addClass(String className, Object superClass);
+
+    /**
      * Set the source file of this class file by adding a source file attribute.
      *
      * @return this

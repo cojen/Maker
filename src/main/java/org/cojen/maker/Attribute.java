@@ -335,4 +335,57 @@ abstract class Attribute extends Attributed {
             }
         }
     }
+
+    static class NestHost extends Attribute {
+        private final ConstantPool.C_Class mHostClass;
+
+        NestHost(ConstantPool cp, ConstantPool.C_Class hostClass) {
+            super(cp, "NestHost");
+            mHostClass = hostClass;
+        }
+
+        @Override
+        int length() {
+            return 2;
+        }
+
+        @Override
+        void writeDataTo(DataOutput dout) throws IOException {
+            dout.writeShort(mHostClass.mIndex);
+        }
+    }
+
+    static class NestMembers extends Attribute {
+        private ConstantPool.C_Class[] mMembers;
+        private int mSize;
+
+        NestMembers(ConstantPool cp) {
+            super(cp, "NestMembers");
+            mMembers = new ConstantPool.C_Class[8];
+        }
+
+        void add(ConstantPool.C_Class member) {
+            if (mSize >= mMembers.length) {
+                mMembers = Arrays.copyOf(mMembers, mMembers.length << 1);
+            }
+            mMembers[mSize++] = member;
+        }
+
+        int size() {
+            return mSize;
+        }
+
+        @Override
+        int length() {
+            return 2 + mSize * 2;
+        }
+
+        @Override
+        void writeDataTo(DataOutput dout) throws IOException {
+            dout.writeShort(mSize);
+            for (int i=0; i<mSize; i++) {
+                dout.writeShort(mMembers[i].mIndex);
+            }
+        }
+    }
 }

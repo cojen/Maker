@@ -112,6 +112,8 @@ final class TheClassMaker extends Attributed implements ClassMaker {
 
     private Attribute.BootstrapMethods mBootstrapMethods;
 
+    private Attribute.NestMembers mNestMembers;
+
     // -1: finished, 0: not finished, 1: has complex constants
     private int mFinished;
 
@@ -396,6 +398,43 @@ final class TheClassMaker extends Attributed implements ClassMaker {
         mm.useReturnLabel();
         mClinitMethods.add(mm);
         return mm;
+    }
+
+    @Override
+    public TheClassMaker addClass(String className, Object superClass) {
+        checkFinished();
+
+        String prefix = name();
+        int ix = prefix.lastIndexOf('-');
+        if (ix > 0) {
+            prefix = prefix.substring(0, ix);
+        }
+
+        if (className == null) {
+            className = prefix + '$' + (mNestMembers == null ? 0 : mNestMembers.size());
+        } else {
+            if (className.indexOf('.') >= 0) {
+                throw new IllegalArgumentException("Not a simple name: " + className);
+            }
+            className = prefix + '$' + className;
+        }
+
+        ProtectionDomain domain = mReservation.mInjector.domain();
+        var nest = new TheClassMaker(className, superClass, mParentLoader, domain, mLookup);
+        nest.setNestHost(type());
+
+        if (mNestMembers == null) {
+            mNestMembers = new Attribute.NestMembers(mConstants);
+            addAttribute(mNestMembers);
+        }
+
+        mNestMembers.add(mConstants.addClass(nest.type()));
+
+        return nest;
+    }
+
+    private void setNestHost(Type type) {
+        addAttribute(new Attribute.NestHost(mConstants, mConstants.addClass(type)));
     }
 
     @Override
