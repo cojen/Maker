@@ -36,7 +36,7 @@ import java.util.Objects;
  */
 public interface ClassMaker {
     /**
-     * Begin defining a class with an automatically assigned name
+     * Begin defining a class with an automatically assigned name.
      */
     public static ClassMaker begin() {
         return begin(null, (String) null, null, null);
@@ -51,67 +51,46 @@ public interface ClassMaker {
 
     /**
      * @param className fully qualified class name; pass null to use default
-     * @param superClass super class; pass null to use Object.
+     * @param superClass Class or String; pass null to use Object.
      */
-    public static ClassMaker begin(String className, Class superClass) {
-        String superClassName = superClass == null ? (String) null : superClass.getName();
-        return begin(className, superClassName, null, null);
+    public static ClassMaker begin(String className, Object superClass) {
+        return begin(className, superClass, null, null);
     }
 
     /**
      * @param className fully qualified class name; pass null to use default
-     * @param superClassName fully qualified super class name; pass null to use Object.
-     */
-    public static ClassMaker begin(String className, String superClassName) {
-        return begin(className, superClassName, null, null);
-    }
-
-    /**
-     * @param className fully qualified class name; pass null to use default
-     * @param superClassName fully qualified super class name; pass null to use Object.
+     * @param superClass Class or String; pass null to use Object.
      * @param parentLoader parent class loader; pass null to use default
      */
-    public static ClassMaker begin(String className, String superClassName,
+    public static ClassMaker begin(String className, Object superClass,
                                    ClassLoader parentLoader)
     {
-        return begin(className, superClassName, parentLoader, null);
+        return begin(className, superClass, parentLoader, null);
     }
 
     /**
      * @param className fully qualified class name; pass null to use default
-     * @param superClassName fully qualified super class name; pass null to use Object.
+     * @param superClass Class or String; pass null to use Object.
      * @param parentLoader parent class loader; pass null to use default
      * @param domain to define class in; pass null to use default
      */
-    public static ClassMaker begin(String className, String superClassName,
+    public static ClassMaker begin(String className, Object superClass,
                                    ClassLoader parentLoader, ProtectionDomain domain)
     {
-        return new TheClassMaker(className, superClassName, parentLoader, domain, null);
+        return new TheClassMaker(className, superClass, parentLoader, domain, null);
     }
 
     /**
      * @param className fully qualified class name; pass null to use default
-     * @param superClass super class; pass null to use Object.
+     * @param superClass Class or String; pass null to use Object.
      * @param lookup finish loading the class using this lookup object
      */
-    public static ClassMaker begin(String className, Class superClass,
-                                   MethodHandles.Lookup lookup)
-    {
-        String superClassName = superClass == null ? (String) null : superClass.getName();
-        return begin(className, superClassName, lookup);
-    }
-
-    /**
-     * @param className fully qualified class name; pass null to use default
-     * @param superClassName fully qualified super class name; pass null to use Object.
-     * @param lookup finish loading the class using this lookup object
-     */
-    public static ClassMaker begin(String className, String superClassName,
+    public static ClassMaker begin(String className, Object superClass,
                                    MethodHandles.Lookup lookup)
     {
         Objects.requireNonNull(lookup);
         ClassLoader loader = lookup.lookupClass().getClassLoader();
-        return new TheClassMaker(className, superClassName, loader, null, lookup);
+        return new TheClassMaker(className, superClass, loader, null, lookup);
     }
 
     /**

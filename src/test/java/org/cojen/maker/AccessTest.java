@@ -49,7 +49,7 @@ public class AccessTest {
 
     @Test
     public void hasPackageAccess() throws Exception {
-        ClassMaker cm = ClassMaker.begin(null, (String) null, MethodHandles.lookup()).public_();
+        ClassMaker cm = ClassMaker.begin(null, null, MethodHandles.lookup()).public_();
         MethodMaker mm = cm.addMethod(null, "run").public_().static_();
         var result = mm.var(AccessTest.class).invoke("foo", 10);
         mm.var(Assert.class).invoke("assertEquals", 11, result);

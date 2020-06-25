@@ -115,7 +115,7 @@ final class TheClassMaker extends Attributed implements ClassMaker {
     // -1: finished, 0: not finished, 1: has complex constants
     private int mFinished;
 
-    TheClassMaker(String className, String superClassName,
+    TheClassMaker(String className, Object superClass,
                   ClassLoader parentLoader, ProtectionDomain domain, MethodHandles.Lookup lookup)
     {
         super(new ConstantPool());
@@ -133,24 +133,16 @@ final class TheClassMaker extends Attributed implements ClassMaker {
         mReservation = ClassInjector.lookup(parentLoader, domain).reserve(className, false);
         className = mReservation.mClassName;
 
-        if (superClassName == null) {
-            String rootName = Object.class.getName();
-            if (!className.equals(rootName)) {
-                superClassName = rootName;
+        final Type superType;
+        sup: {
+            if (superClass == null) {
+                if (className.equals(Object.class.getName())) {
+                    superType = null;
+                    mSuperClass = null;
+                    break sup;
+                }
+                superClass = Object.class;
             }
-        }
-
-        Type superType;
-        if (superClassName == null) {
-            superType = null;
-            mSuperClass = null;
-        } else {
-            Object superClass = superClassName;
-            try {
-                superClass = Class.forName(superClassName, true, parentLoader);
-            } catch (ClassNotFoundException e) {
-            }
-
             superType = typeFrom(superClass);
             mSuperClass = mConstants.addClass(superType);
         }

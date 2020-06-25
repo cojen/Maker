@@ -68,7 +68,7 @@ public class ClinitTest {
 
     @Test
     public void hidden() throws Exception {
-        ClassMaker cm = ClassMaker.begin(null, (String) null, MethodHandles.lookup()).public_();
+        ClassMaker cm = ClassMaker.begin(null, null, MethodHandles.lookup()).public_();
 
         cm.addConstructor().public_();
 
