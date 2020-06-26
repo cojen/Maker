@@ -100,13 +100,12 @@ class ClassInjector extends ClassLoader {
         }
     }
 
-    Reservation reserve(String className, boolean explicit) {
-        if (explicit) {
-            if (className == null) {
-                throw new IllegalArgumentException("Explicit class name not provided");
-            }
-            return new Reservation(this, className);
-        } else if (className == null) {
+    /**
+     * @param className can be null
+     * @return actual class name
+     */
+    String reserve(String className) {
+        if (className == null) {
             className = ClassMaker.class.getName();
         }
 
@@ -120,8 +119,8 @@ class ClassInjector extends ClassLoader {
             // Use '-' instead of '$' to prevent conflicts with inner class names.
             String mangled = className + '-' + rnd.nextInt(range);
 
-            if (reserveName(mangled, false)) {
-                return new Reservation(this, mangled);
+            if (tryReserve(this, mangled)) {
+                return mangled;
             }
 
             if (range < 1_000_000_000) {
@@ -132,29 +131,30 @@ class ClassInjector extends ClassLoader {
         throw new InternalError("Unable to create unique class name");
     }
 
-    // Prevent name collisions while multiple threads are defining classes by reserving the name.
-    private boolean reserveName(String name, boolean explicit) {
-        ClassInjector self = this;
-        while (true) {
-            ClassLoader parent = self.getParent();
-            if (!(parent instanceof ClassInjector)) {
-                break;
-            }
+    /**
+     * @return false if the name is already taken
+     */
+    private static boolean tryReserve(ClassInjector self, String name) {
+        ClassLoader parent;
+        while ((parent = self.getParent()) instanceof ClassInjector) {
             self = (ClassInjector) parent;
         }
 
         synchronized (self.mReservedNames) {
-            if (self.mReservedNames.put(name, Boolean.TRUE) != null && !explicit) {
+            if (self.mReservedNames.put(name, Boolean.TRUE) != null) {
                 return false;
             }
         }
 
-        // If explicit and name has already been reserved, don't immediately return false. This
-        // allows the class to be defined if an earlier injected class instance was abandoned.
-        // A duplicate class definition can still be attempted later, which is converted to an
-        // IllegalStateException by the define method.
+        if (self.findLoadedClass(name) == null) {
+            try {
+                parent.loadClass(name);
+            } catch (ClassNotFoundException e) {
+                return true;
+            }
+        }
 
-        return self.findLoadedClass(name) == null;
+        return false;
     }
 
     private static Object createInjectorKey(ClassLoader parentLoader, ProtectionDomain domain) {
@@ -218,16 +218,6 @@ class ClassInjector extends ClassLoader {
                 return Arrays.deepEquals(mComposite, ((Key) obj).mComposite);
             }
             return false;
-        }
-    }
-
-    static class Reservation {
-        final ClassInjector mInjector;
-        final String mClassName;
-
-        Reservation(ClassInjector injector, String className) {
-            mInjector = injector;
-            mClassName = className;
         }
     }
 }
