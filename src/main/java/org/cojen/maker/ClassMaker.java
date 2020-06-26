@@ -131,18 +131,10 @@ public interface ClassMaker {
     /**
      * Add an interface that this class implements.
      *
+     * @param iface Class or String
      * @return this
      */
-    public ClassMaker implement(String interfaceName);
-
-    /**
-     * Add an interface that this class implements.
-     *
-     * @return this
-     */
-    public default ClassMaker implement(Class iface) {
-        return implement(iface.getName());
-    }
+    public ClassMaker implement(Object iface);
 
     /**
      * Add a field to the class.

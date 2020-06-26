@@ -284,13 +284,13 @@ final class TheClassMaker extends Attributed implements ClassMaker {
     }
 
     @Override
-    public ClassMaker implement(String interfaceName) {
-        requireNonNull(interfaceName);
+    public ClassMaker implement(Object iface) {
+        requireNonNull(iface);
         checkFinished();
         if (mInterfaces == null) {
             mInterfaces = new LinkedHashSet<>(4);
         }
-        mInterfaces.add(mConstants.addClass(typeFrom(interfaceName)));
+        mInterfaces.add(mConstants.addClass(typeFrom(iface)));
         type().resetInterfaces();
         return this;
     }
