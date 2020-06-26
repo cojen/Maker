@@ -94,6 +94,15 @@ public interface ClassMaker {
     }
 
     /**
+     * Begin defining another class with the same loader, domain, and lookup as this one.
+     *
+     * @param className fully qualified class name; pass null to use default
+     * @param superClass Class or String; pass null to use Object.
+     * @see addClass
+     */
+    public ClassMaker another(String className, Object superClass);
+
+    /**
      * Switch this class to be public. Classes are package-private by default.
      *
      * @return this
@@ -190,6 +199,7 @@ public interface ClassMaker {
      * @param className simple class name; pass null to use default
      * @param superClass Class or String; pass null to use Object.
      * @throws IllegalArgumentException if not given a simple class name
+     * @see another
      */
     public ClassMaker addClass(String className, Object superClass);
 

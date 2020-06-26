@@ -156,6 +156,11 @@ final class TheClassMaker extends Attributed implements ClassMaker {
     }
 
     @Override
+    public ClassMaker another(String className, Object superClass) {
+        return new TheClassMaker(this, className, superClass);
+    }
+
+    @Override
     public void finishTo(DataOutput dout) throws IOException {
         finishTo(dout, false);
     }
