@@ -131,7 +131,9 @@ final class TheClassMaker extends Attributed implements ClassMaker {
         mLookup = lookup;
         mClassInjector = ClassInjector.lookup(parentLoader, domain);
 
-        className = mClassInjector.reserve(className);
+        // Only check the parent loader when it will be used directly. This avoids creating
+        // useless class loading lock objects that never get cleaned up.
+        className = mClassInjector.reserve(className, lookup != null);
 
         final Type superType;
         sup: {

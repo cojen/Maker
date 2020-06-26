@@ -104,7 +104,7 @@ class ClassInjector extends ClassLoader {
      * @param className can be null
      * @return actual class name
      */
-    String reserve(String className) {
+    String reserve(String className, boolean checkParent) {
         if (className == null) {
             className = ClassMaker.class.getName();
         }
@@ -119,7 +119,7 @@ class ClassInjector extends ClassLoader {
             // Use '-' instead of '$' to prevent conflicts with inner class names.
             String mangled = className + '-' + rnd.nextInt(range);
 
-            if (tryReserve(this, mangled)) {
+            if (tryReserve(this, mangled, checkParent)) {
                 return mangled;
             }
 
@@ -134,7 +134,7 @@ class ClassInjector extends ClassLoader {
     /**
      * @return false if the name is already taken
      */
-    private static boolean tryReserve(ClassInjector self, String name) {
+    private static boolean tryReserve(ClassInjector self, String name, boolean checkParent) {
         ClassLoader parent;
         while ((parent = self.getParent()) instanceof ClassInjector) {
             self = (ClassInjector) parent;
@@ -147,10 +147,14 @@ class ClassInjector extends ClassLoader {
         }
 
         if (self.findLoadedClass(name) == null) {
-            try {
-                parent.loadClass(name);
-            } catch (ClassNotFoundException e) {
+            if (!checkParent) {
                 return true;
+            } else {
+                try {
+                    parent.loadClass(name);
+                } catch (ClassNotFoundException e) {
+                    return true;
+                }
             }
         }
 
