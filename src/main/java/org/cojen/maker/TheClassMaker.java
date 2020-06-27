@@ -135,19 +135,8 @@ final class TheClassMaker extends Attributed implements ClassMaker {
         // useless class loading lock objects that never get cleaned up.
         className = mClassInjector.reserve(className, lookup != null);
 
-        final Type superType;
-        sup: {
-            if (superClass == null) {
-                if (className.equals(Object.class.getName())) {
-                    superType = null;
-                    mSuperClass = null;
-                    break sup;
-                }
-                superClass = Object.class;
-            }
-            superType = typeFrom(superClass);
-            mSuperClass = mConstants.addClass(superType);
-        }
+        Type superType = typeFrom(superClass == null ? Object.class : superClass);
+        mSuperClass = mConstants.addClass(superType);
 
         mThisClass = mConstants.addClass(Type.begin(mClassInjector, this, className, superType));
     }
@@ -213,7 +202,7 @@ final class TheClassMaker extends Attributed implements ClassMaker {
         dout.writeShort(flags);
 
         dout.writeShort(mThisClass.mIndex);
-        dout.writeShort(mSuperClass == null ? 0 : mSuperClass.mIndex);
+        dout.writeShort(mSuperClass.mIndex);
 
         if (mInterfaces == null) {
             dout.writeShort(0);

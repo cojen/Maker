@@ -188,11 +188,7 @@ class ClassInjector extends ClassLoader {
             if (principals.length == 1) {
                 principalsKey = principals[0];
             } else {
-                Set<Principal> principalSet = new HashSet<>(principals.length);
-                for (Principal principal : principals) {
-                    principalSet.add(principal);
-                }
-                principalsKey = principalSet;
+                principalsKey = Set.of(principals);
             }
         }
 
