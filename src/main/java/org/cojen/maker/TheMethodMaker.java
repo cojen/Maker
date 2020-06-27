@@ -637,7 +637,7 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
      * @param instance non-null if can invoke an instance method; null if static only
      * @param inherit -1: cannot invoke inherited method, 0: can invoke inherited method,
      * 1: can only invoke super class method
-     * @param args contains expressions and values
+     * @param args contains constants and variables
      * @param specificReturnType optional
      * @param specificParamTypes optional
      */
@@ -815,6 +815,35 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         Var var = new Var(returnType);
+        addStoreOp(var);
+        return var;
+    }
+
+    @Override
+    public Variable invoke(Object returnType, MethodHandle handle, Object... args) {
+        Type retType = returnType == null ? VOID : mClassMaker.typeFrom(returnType);
+
+        Type handleType = Type.from(MethodHandle.class);
+        Var handleVar = new Var(handleType);
+        handleVar.setConstant(handle);
+        addOp(new PushVarOp(handleVar));
+
+        // Push all arguments and obtain their actual types.
+        Type[] paramTypes = new Type[args.length];
+        for (int i=0; i<args.length; i++) {
+            paramTypes[i] = addPushOp(null, args[i]);
+        }
+
+        ConstantPool.C_Method ref = mConstants.addMethod
+            (handleType.inventMethod(false, retType, "invoke", paramTypes));
+
+        addOp(new InvokeOp(INVOKEVIRTUAL, 1 + paramTypes.length, ref));
+
+        if (retType == null) {
+            return null;
+        }
+
+        Var var = new Var(retType);
         addStoreOp(var);
         return var;
     }

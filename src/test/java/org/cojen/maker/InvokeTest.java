@@ -452,4 +452,23 @@ public class InvokeTest {
     public static int methodF(Collection[] a) {
         return 4;
     }
+
+    @Test
+    public void invokeHandle() throws Exception {
+        // Test access to a private method using a MethodHandle.
+
+        ClassMaker cm = ClassMaker.begin().public_();
+        MethodMaker mm = cm.addMethod(int.class, "tunnel").public_().static_();
+
+        MethodHandle handle = MethodHandles.lookup()
+            .findStatic(InvokeTest.class, "secret", MethodType.methodType(int.class, int.class));
+
+        mm.return_(mm.invoke(int.class, handle, 10));
+
+        assertEquals(100, cm.finish().getMethod("tunnel").invoke(null));
+    }
+
+    private static int secret(int a) {
+        return a * a;
+    }
 }

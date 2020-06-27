@@ -16,6 +16,7 @@
 
 package org.cojen.maker;
 
+import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandleInfo;
 import java.lang.invoke.MethodType;
 
@@ -228,6 +229,18 @@ public interface MethodMaker {
      */
     public Variable invokeDynamic(MethodHandleInfo bootstrap, Object[] bootstrapArgs,
                                   String name, MethodType type, Object... values);
+
+    /**
+     * Invoke a method via a {@code MethodHandle}, which only works when the class is built
+     * dynamically instead of loaded from a file.
+     *
+     * @param returnType expected return type
+     * @param handle runtime method handle
+     * @param values variables or constants
+     * @return the result of the method, which is null if void
+     * @throws IllegalArgumentException if not given a variable or a constant
+     */
+    public Variable invoke(Object returnType, MethodHandle handle, Object... values);
 
     /**
      * Allocate a new object. If type is an ordinary object, a matching constructor is
