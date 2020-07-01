@@ -411,7 +411,7 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
     @Override
     public MethodMaker varargs() {
         Type[] params = mMethod.paramTypes();
-        if (params.length == 0 || !params[params.length - 1].isArray()) {
+        if (params.length == 0 || !params[params.length - 1].equals(Type.from(Object[].class))) {
             throw new IllegalStateException();
         }
         mModifiers = Modifiers.toVarArgs(mModifiers);

@@ -507,4 +507,32 @@ public class InvokeTest {
 
         assertEquals(11, cm.finish().getMethod("run", int.class).invoke(null, 10));
     }
+
+    @Test
+    public void varargs() throws Throwable {
+        ClassMaker cm = ClassMaker.begin().public_();
+
+        try {
+            MethodMaker mm = cm.addMethod(null, "wrong").varargs();
+            fail();
+        } catch (IllegalStateException e) {
+        }
+
+        try {
+            MethodMaker mm = cm.addMethod(null, "wrong", int[].class).varargs();
+            fail();
+        } catch (IllegalStateException e) {
+        }
+
+        MethodMaker mm = cm.addMethod(String.class, "eval", int.class, Object[].class)
+            .public_().static_().varargs();
+        mm.return_(mm.concat("eval", mm.param(0),
+                             mm.var(Arrays.class).invoke("asList", mm.param(1))));
+
+        MethodType type = MethodType.methodType(String.class, int.class, Object[].class);
+        MethodHandle mh = MethodHandles.lookup().findStatic(cm.finish(), "eval", type);
+
+        assertTrue(mh.isVarargsCollector());
+        assertEquals("eval5[one, two, three]", mh.invoke(5, "one", "two", "three"));
+    }
 }
