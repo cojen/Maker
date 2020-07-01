@@ -471,4 +471,27 @@ public class InvokeTest {
     private static int secret(int a) {
         return a * a;
     }
+
+    @Test
+    public void invokeSpecific() throws Exception {
+        ClassMaker cm = ClassMaker.begin().public_();
+        MethodMaker mm = cm.addMethod(null, "run").public_().static_();
+        var result = mm.var(InvokeTest.class).invoke(int.class, "foo", null);
+        mm.var(Assert.class).invoke("assertEquals", 10, result);
+        mm.var(InvokeTest.class).invoke((Object) null, "foo", new Object[]{String.class}, "hello");
+        try {
+            cm.finish().getMethod("run").invoke(null);
+            fail();
+        } catch (Exception e) {
+            assertEquals("hello", e.getCause().getMessage());
+        }
+    }
+
+    public static void foo(String msg) throws Exception {
+        throw new Exception(msg);
+    }
+
+    public static int foo() throws Exception {
+        return 10;
+    }
 }
