@@ -234,13 +234,12 @@ public interface MethodMaker {
      * Invoke a method via a {@code MethodHandle}, which only works when the class is built
      * dynamically instead of loaded from a file.
      *
-     * @param returnType expected return type
      * @param handle runtime method handle
      * @param values variables or constants
      * @return the result of the method, which is null if void
      * @throws IllegalArgumentException if not given a variable or a constant
      */
-    public Variable invoke(Object returnType, MethodHandle handle, Object... values);
+    public Variable invoke(MethodHandle handle, Object... values);
 
     /**
      * Allocate a new object. If type is an ordinary object, a matching constructor is

@@ -820,8 +820,8 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
     }
 
     @Override
-    public Variable invoke(Object returnType, MethodHandle handle, Object... args) {
-        Type retType = returnType == null ? VOID : mClassMaker.typeFrom(returnType);
+    public Variable invoke(MethodHandle handle, Object... args) {
+        Type retType = mClassMaker.typeFrom(handle.type().returnType());
 
         Type handleType = Type.from(MethodHandle.class);
         Var handleVar = new Var(handleType);

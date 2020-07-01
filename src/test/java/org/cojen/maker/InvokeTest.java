@@ -463,7 +463,7 @@ public class InvokeTest {
         MethodHandle handle = MethodHandles.lookup()
             .findStatic(InvokeTest.class, "secret", MethodType.methodType(int.class, int.class));
 
-        mm.return_(mm.invoke(int.class, handle, 10));
+        mm.return_(mm.invoke(handle, 10));
 
         assertEquals(100, cm.finish().getMethod("tunnel").invoke(null));
     }
