@@ -820,8 +820,14 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
     }
 
     @Override
-    public Variable invoke(MethodHandle handle, Object... args) {
-        Type retType = mClassMaker.typeFrom(handle.type().returnType());
+    public Variable invoke(MethodHandle handle, Object... values) {
+        MethodType mtype = handle.type();
+
+        if (mtype.parameterCount() != values.length) {
+            throw new IllegalArgumentException("Wrong number of parameters");
+        }
+
+        Type retType = mClassMaker.typeFrom(mtype.returnType());
 
         Type handleType = Type.from(MethodHandle.class);
         Var handleVar = new Var(handleType);
@@ -829,13 +835,13 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
         addOp(new PushVarOp(handleVar));
 
         // Push all arguments and obtain their actual types.
-        Type[] paramTypes = new Type[args.length];
-        for (int i=0; i<args.length; i++) {
-            paramTypes[i] = addPushOp(null, args[i]);
+        Type[] paramTypes = new Type[values.length];
+        for (int i=0; i<values.length; i++) {
+            paramTypes[i] = addPushOp(Type.from(mtype.parameterType(i)), values[i]);
         }
 
         ConstantPool.C_Method ref = mConstants.addMethod
-            (handleType.inventMethod(false, retType, "invoke", paramTypes));
+            (handleType.inventMethod(false, retType, "invokeExact", paramTypes));
 
         addOp(new InvokeOp(INVOKEVIRTUAL, 1 + paramTypes.length, ref));
 
