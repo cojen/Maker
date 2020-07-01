@@ -47,7 +47,7 @@ class ConstantPool {
 
     void writeTo(DataOutput dout) throws IOException {
         int size = mSize;
-        if (size >= 65535) {
+        if (size > 65535) {
             throw new IllegalStateException
                 ("Constant pool entry count cannot exceed 65535: " + size);
         }
