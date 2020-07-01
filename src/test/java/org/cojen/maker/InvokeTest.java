@@ -494,4 +494,17 @@ public class InvokeTest {
     public static int foo() throws Exception {
         return 10;
     }
+
+    @Test
+    public void invokeSelfStatic() throws Exception {
+        ClassMaker cm = ClassMaker.begin().public_();
+
+        MethodMaker mm = cm.addMethod(int.class, "foo", int.class).private_().static_();
+        mm.return_(mm.param(0).add(1));
+
+        mm = cm.addMethod(int.class, "run", int.class).public_().static_();
+        mm.return_(mm.invoke("foo", mm.param(0)));
+
+        assertEquals(11, cm.finish().getMethod("run", int.class).invoke(null, 10));
+    }
 }
