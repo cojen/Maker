@@ -74,4 +74,81 @@ public class TypeTest {
             assertTrue(type2.isAssignableFrom(type1));
         }
     }
+
+    @Test
+    public void findByString() {
+        ClassLoader loader = getClass().getClassLoader();
+
+        String[] prims = {
+            "boolean", "Z", "byte", "B", "short", "S", "char", "C",
+            "int", "I", "float", "F", "double", "D", "long", "J",
+            "void", "V"
+        };
+        for (int i=0; i<prims.length; i+=2) {
+            Type type = Type.from(loader, prims[i]);
+            assertEquals(prims[i], type.name());
+            assertTrue(type.isPrimitive());
+            assertEquals(type, type.unbox());
+            assertEquals(prims[i + 1], type.descriptor());
+            assertFalse(type.isArray());
+
+            // Find by descriptor.
+            assertEquals(type, Type.from(loader, prims[i + 1]));
+        }
+
+        {
+            Type type = Type.from(loader, "null");
+            assertEquals("*null*", type.name());
+            assertEquals("*null*", type.descriptor());
+            assertFalse(type.isPrimitive());
+            assertNull(type.unbox());
+            assertFalse(type.isArray());
+
+            // Find by pseudo descriptor.
+            assertEquals(type, Type.from(loader, ""));
+        }
+
+        {
+            Type type = Type.from(loader, "abc.Foo[]");
+            assertEquals("abc.Foo[]", type.name());
+            assertEquals("[Labc/Foo;", type.descriptor());
+            assertFalse(type.isPrimitive());
+            assertNull(type.unbox());
+            assertTrue(type.isArray());
+
+            // Find by descriptor.
+            assertEquals(type, Type.from(loader, "[Labc/Foo;"));
+        }
+
+        {
+            Type type = Type.from(loader, "java/lang.Void");
+            assertEquals("java.lang.Void", type.name());
+            assertEquals("Ljava/lang/Void;", type.descriptor());
+            assertEquals(Type.from(void.class), type.unbox());
+        }
+
+        {
+            Type type = Type.from(loader, "java.lang.FakeClass");
+            assertEquals("java.lang.FakeClass", type.name());
+            assertEquals("Ljava/lang/FakeClass;", type.descriptor());
+        }
+
+        {
+            Type type = Type.from(loader, "Foo;");
+            assertEquals("Foo", type.name());
+            assertEquals("LFoo;", type.descriptor());
+        }
+
+        {
+            Type type = Type.from(loader, "Labc/Foo");
+            assertEquals("abc.Foo", type.name());
+            assertEquals("Labc/Foo;", type.descriptor());
+        }
+
+        {
+            Type type = Type.from(loader, "LFoo");
+            assertEquals("LFoo", type.name());
+            assertEquals("LLFoo;", type.descriptor());
+        }
+    }
 }

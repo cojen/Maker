@@ -975,7 +975,7 @@ abstract class Type {
         @Override
         public boolean equals(Object obj) {
             if (obj instanceof Special) {
-                return mStackMapCode == ((Primitive) obj).mStackMapCode;
+                return mStackMapCode == ((Special) obj).mStackMapCode;
             }
             return false;
         }
