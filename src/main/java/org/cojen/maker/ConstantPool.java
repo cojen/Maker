@@ -128,10 +128,6 @@ class ConstantPool {
         return addConstant(new C_InterfaceMethod(clazz, nameAndType, method));
     }
 
-    C_MethodType addMethodType(Type.Method method) {
-        return addMethodType(method.descriptor());
-    }
-
     C_MethodType addMethodType(MethodType type) {
         return addMethodType(type.descriptorString());
     }

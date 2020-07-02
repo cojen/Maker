@@ -745,14 +745,7 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
 
         stackPop += method.paramTypes().length;
 
-        ConstantPool.C_Method ref;
-        if (method.enclosingType().isInterface()) {
-            ref = mConstants.addInterfaceMethod(method);
-        } else {
-            ref = mConstants.addMethod(method);
-        }
-
-        addOp(new InvokeOp(op, stackPop, ref));
+        addOp(new InvokeOp(op, stackPop, mConstants.addMethod(method)));
 
         Type returnType = method.returnType();
         if (returnType == null || returnType == VOID) {
