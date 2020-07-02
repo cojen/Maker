@@ -820,7 +820,7 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
             throw new IllegalArgumentException("Wrong number of parameters");
         }
 
-        Type retType = mClassMaker.typeFrom(mtype.returnType());
+        Type returnType = mClassMaker.typeFrom(mtype.returnType());
 
         Type handleType = Type.from(MethodHandle.class);
         Var handleVar = new Var(handleType);
@@ -834,15 +834,15 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         ConstantPool.C_Method ref = mConstants.addMethod
-            (handleType.inventMethod(false, retType, "invokeExact", paramTypes));
+            (handleType.inventMethod(false, returnType, "invokeExact", paramTypes));
 
         addOp(new InvokeOp(INVOKEVIRTUAL, 1 + paramTypes.length, ref));
 
-        if (retType == null) {
+        if (returnType == VOID) {
             return null;
         }
 
-        Var var = new Var(retType);
+        Var var = new Var(returnType);
         addStoreOp(var);
         return var;
     }
@@ -2022,6 +2022,10 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
             constantType = Type.from(MethodType.class);
         } else if (value instanceof MethodHandleInfo) {
             constantType = Type.from(MethodHandleInfo.class);
+            if (type != null && type.equals(Type.from(MethodHandle.class))) {
+                // Conversion to MethodHandle is automatic.
+                constantType = type;
+            }
         } else if (value instanceof Enum) {
             constantType = Type.from(value.getClass());
             addPushFieldOp(new Var(constantType).field(((Enum) value).name()));

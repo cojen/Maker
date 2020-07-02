@@ -473,6 +473,46 @@ public class InvokeTest {
     }
 
     @Test
+    public void invokeHandleKind() throws Exception {
+        // Test a few different kinds of method handles.
+
+        ClassMaker cm = ClassMaker.begin().public_();
+        MethodMaker mm = cm.addMethod(null, "run", InvokeTest.class).public_().static_();
+        var assertVar = mm.var(Assert.class);
+
+        var lookup = MethodHandles.lookup();
+        MethodHandle h1 = lookup.findSetter(InvokeTest.class, "mFoo", int.class);
+        MethodHandle h2 = lookup.findGetter(InvokeTest.class, "mFoo", int.class);
+        MethodHandle h3 = lookup.findStaticSetter(InvokeTest.class, "mBar", int.class);
+        MethodHandle h4 = lookup.findStaticGetter(InvokeTest.class, "mBar", int.class);
+
+        assertNull(mm.invoke(h1, mm.param(0), 10));
+        assertVar.invoke("assertEquals", 10,  mm.invoke(h2, mm.param(0)));
+
+        assertNull(mm.invoke(h3, 20));
+        assertVar.invoke("assertEquals", 20,  mm.invoke(h4));
+
+        // Test constants too. Note that a MethodHandle is set with a MethodHandleInfo.
+
+        var c1 = mm.var(MethodHandle.class).set(lookup.revealDirect(h1));
+        assertVar.invoke("assertEquals", "MethodHandle(InvokeTest,int)void", c1.invoke("toString"));
+
+        var c2 = mm.var(MethodHandle.class).set(lookup.revealDirect(h2));
+        assertVar.invoke("assertEquals", "MethodHandle(InvokeTest)int", c2.invoke("toString"));
+
+        var c3 = mm.var(MethodHandle.class).set(lookup.revealDirect(h3));
+        assertVar.invoke("assertEquals", "MethodHandle(int)void", c3.invoke("toString"));
+
+        var c4 = mm.var(MethodHandle.class).set(lookup.revealDirect(h4));
+        assertVar.invoke("assertEquals", "MethodHandle()int", c4.invoke("toString"));
+
+        cm.finish().getMethod("run", InvokeTest.class).invoke(null, this);
+    }
+
+    public int mFoo;
+    public static int mBar;
+
+    @Test
     public void invokeSpecific() throws Exception {
         ClassMaker cm = ClassMaker.begin().public_();
         MethodMaker mm = cm.addMethod(null, "run").public_().static_();

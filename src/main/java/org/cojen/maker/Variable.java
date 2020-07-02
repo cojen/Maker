@@ -35,7 +35,8 @@ public interface Variable {
     /**
      * Assign a value to this variable, either from another variable or from a constant. A
      * constant value can be a primitive type (boxed or unboxed), null, a String, a Class, an
-     * Enum, a MethodType, or a MethodHandleInfo.
+     * Enum, a MethodType, or a MethodHandleInfo. Note that a MethodHandle can be set with a
+     * MethodHandleInfo, which is converted automatically at link time.
      *
      * @param value a Variable or a constant
      * @return this variable
