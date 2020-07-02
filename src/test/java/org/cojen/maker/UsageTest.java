@@ -458,6 +458,54 @@ public class UsageTest {
         }
     }
 
+    @Test
+    public void doubleFinish() {
+        mClassMaker.finish();
+        try {
+            mClassMaker.finish();
+            fail();
+        } catch (IllegalStateException e) {
+            check(e, "Class definition");
+        }
+    }
+
+    @Test
+    public void doubleField() {
+        mClassMaker.addField(int.class, "foo");
+        try {
+            mClassMaker.addField(String.class, "foo");
+            fail();
+        } catch (IllegalStateException e) {
+            check(e, "Field is");
+        }
+    }
+
+    @Test
+    public void wrongMethod() {
+        try {
+            mClassMaker.addMethod(null, "<clinit>");
+            fail();
+        } catch (IllegalArgumentException e) {
+            check(e, "Use the");
+        }
+        try {
+            mClassMaker.addMethod(null, "<init>");
+            fail();
+        } catch (IllegalArgumentException e) {
+            check(e, "Use the");
+        }
+    }
+
+    @Test
+    public void noLookup() {
+        try {
+            mClassMaker.finishHidden();
+            fail();
+        } catch (IllegalStateException e) {
+            check(e, "No lookup");
+        }
+    }
+
     private static void check(Exception e, String message) {
         String actual = e.getMessage();
         assertTrue(message + "; " + actual, actual.startsWith(message));
