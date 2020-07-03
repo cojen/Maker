@@ -22,13 +22,21 @@ import java.lang.invoke.VarHandle;
  * Represents a field accessible by the body of a {@link MethodMaker method}.
  *
  * @author Brian S O'Neill
+ * @see MethodMaker#field
  */
 public interface Field extends Variable {
+    /**
+     * Fields cannot be renamed, and so this method always throws an {@code
+     * IllegalStateException}.
+     */
     @Override
     public default Field name(String name) {
         throw new IllegalStateException("Already named");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Field set(Object value);
 

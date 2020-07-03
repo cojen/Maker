@@ -17,10 +17,10 @@
 package org.cojen.maker;
 
 /**
- * Allows new fields to be defined dynamically, as part of a class.
+ * Allows new fields to be defined within a class.
  *
  * @author Brian S O'Neill
- * @see ClassMaker
+ * @see ClassMaker#addField
  */
 public interface FieldMaker {
     /**
@@ -80,7 +80,7 @@ public interface FieldMaker {
     public FieldMaker synthetic();
 
     /**
-     * Set an initial constant value for this field as an int.
+     * Set an initial constant value for this field as an {@code int}.
      *
      * @return this
      * @throws IllegalStateException if not a static field
@@ -88,7 +88,7 @@ public interface FieldMaker {
     public FieldMaker init(int value);
 
     /**
-     * Set an initial constant value for this field as a float.
+     * Set an initial constant value for this field as a {@code float}.
      *
      * @return this
      * @throws IllegalStateException if not a static field
@@ -96,7 +96,7 @@ public interface FieldMaker {
     public FieldMaker init(float value);
 
     /**
-     * Set an initial constant value for this field as a long.
+     * Set an initial constant value for this field as a {@code long}.
      *
      * @return this
      * @throws IllegalStateException if not a static field
@@ -104,7 +104,7 @@ public interface FieldMaker {
     public FieldMaker init(long value);
 
     /**
-     * Set an initial constant value for this field as a double.
+     * Set an initial constant value for this field as a {@code double}.
      *
      * @return this
      * @throws IllegalStateException if not a static field
@@ -112,7 +112,7 @@ public interface FieldMaker {
     public FieldMaker init(double value);
 
     /**
-     * Set an initial constant value for this field as a String.
+     * Set an initial constant value for this field as a {@code String}.
      *
      * @return this
      * @throws IllegalStateException if not a static field

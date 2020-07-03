@@ -21,10 +21,10 @@ import java.lang.invoke.MethodHandleInfo;
 import java.lang.invoke.MethodType;
 
 /**
- * Allows new methods to be defined dynamically, as part of a class.
+ * Allows new methods to be defined within a class.
  *
  * @author Brian S O'Neill
- * @see ClassMaker
+ * @see ClassMaker#addMethod
  */
 public interface MethodMaker {
     /**
@@ -220,12 +220,16 @@ public interface MethodMaker {
     public void invokeThisConstructor(Object... values);
 
     /**
+     * Invoke a dynamically generated method. A static bootstrap method must be provided, which
+     * is called when the method needs to be generated.
+     *
      * @param bootstrap static bootstrap method
      * @param bootstrapArgs constants which are passed to the bootstrap method
      * @param name dynamic method name
      * @param type dynamic method type
      * @param values variables or constants passed to the dynamic method
      * @return the result of the dynamic method, which is null if void
+     * @see java.lang.invoke
      */
     public Variable invokeDynamic(MethodHandleInfo bootstrap, Object[] bootstrapArgs,
                                   String name, MethodType type, Object... values);
@@ -246,7 +250,7 @@ public interface MethodMaker {
      * invoked. If type is an array, no constructor is invoked, and the given values represent
      * array dimension sizes.
      *
-     * @param type class name or Class instance
+     * @param type class name or {@code Class} instance
      * @param values variables or constants
      * @return the new object
      * @throws IllegalArgumentException if the type is unsupported, or if the constructor isn't
@@ -264,12 +268,12 @@ public interface MethodMaker {
     public Variable catch_(Label start, Label end, Object type);
 
     /**
-     * Concatenate variables and constants together into a new String in the same matter as the
-     * Java concatenation operator. If no values are given, the returned Variable will refer to
-     * the empty String.
+     * Concatenate variables and constants together into a new {@code String} in the same
+     * matter as the Java concatenation operator. If no values are given, the returned variable
+     * will refer to the empty string.
      *
      * @param values variables or constants
-     * @return the result in a new String variable
+     * @return the result in a new {@code String} variable
      * @throws IllegalArgumentException if not given a variable or a constant
      */
     public Variable concat(Object... values);

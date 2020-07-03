@@ -29,8 +29,8 @@ import java.security.ProtectionDomain;
 import java.util.Objects;
 
 /**
- * Allows new classes to be defined dynamically. ClassMaker instances and all objects that
- * interact with them aren't thread-safe.
+ * Allows new classes to be defined dynamically. {@code ClassMaker} instances and all objects
+ * that interact with them aren't thread-safe.
  *
  * @author Brian S O'Neill
  */
@@ -43,6 +43,9 @@ public interface ClassMaker {
     }
 
     /**
+     * Begin defining a class with the given name. The actual name will have a suffix applied
+     * to ensure uniqueness.
+     *
      * @param className fully qualified class name; pass null to use default
      */
     public static ClassMaker begin(String className) {
@@ -50,6 +53,9 @@ public interface ClassMaker {
     }
 
     /**
+     * Begin defining a class with the given name. The actual name will have a suffix applied
+     * to ensure uniqueness.
+     *
      * @param className fully qualified class name; pass null to use default
      * @param superClass Class or String; pass null to use Object.
      */
@@ -58,6 +64,9 @@ public interface ClassMaker {
     }
 
     /**
+     * Begin defining a class with the given name. The actual name will have a suffix applied
+     * to ensure uniqueness.
+     *
      * @param className fully qualified class name; pass null to use default
      * @param superClass Class or String; pass null to use Object.
      * @param parentLoader parent class loader; pass null to use default
@@ -69,6 +78,9 @@ public interface ClassMaker {
     }
 
     /**
+     * Begin defining a class with the given name. The actual name will have a suffix applied
+     * to ensure uniqueness.
+     *
      * @param className fully qualified class name; pass null to use default
      * @param superClass Class or String; pass null to use Object.
      * @param parentLoader parent class loader; pass null to use default
@@ -81,6 +93,9 @@ public interface ClassMaker {
     }
 
     /**
+     * Begin defining a class with the given name. The actual name will have a suffix applied
+     * to ensure uniqueness.
+     *
      * @param className fully qualified class name; pass null to use default
      * @param superClass Class or String; pass null to use Object.
      * @param lookup finish loading the class using this lookup object
@@ -94,7 +109,8 @@ public interface ClassMaker {
     }
 
     /**
-     * Begin defining another class with the same loader, domain, and lookup as this one.
+     * Begin defining another class with the same loader, domain, and lookup as this one. The
+     * actual class name will have a suffix applied to ensure uniqueness.
      *
      * @param className fully qualified class name; pass null to use default
      * @param superClass Class or String; pass null to use Object.
@@ -230,7 +246,7 @@ public interface ClassMaker {
      * <p>This feature is only fully supported in Java 15. Hidden classes created with earlier
      * versions don't support all the lookup features.
      *
-     * @return the lookup for the class; call lookupClass to obtain the actual class
+     * @return the lookup for the class; call {@code lookupClass} to obtain the actual class
      * @throws IllegalStateException if already finished, or if the definition is broken, or if
      * no lookup object was passed to the begin method
      */

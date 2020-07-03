@@ -22,6 +22,7 @@ import java.lang.invoke.MethodHandleInfo;
  * Represents a variable bound to a body of a {@link MethodMaker method}.
  *
  * @author Brian S O'Neill
+ * @see MethodMaker#var
  */
 public interface Variable {
     /**
@@ -34,9 +35,10 @@ public interface Variable {
 
     /**
      * Assign a value to this variable, either from another variable or from a constant. A
-     * constant value can be a primitive type (boxed or unboxed), null, a String, a Class, an
-     * Enum, a MethodType, or a MethodHandleInfo. Note that a MethodHandle can be set with a
-     * MethodHandleInfo, which is converted automatically at link time.
+     * constant value can be a primitive type (boxed or unboxed), null, a {@code String}, a
+     * {@code Class}, an {@code Enum}, a {@code MethodType}, or a {@code
+     * MethodHandleInfo}. Note that a {@code MethodHandle} can be set with a {@code
+     * MethodHandleInfo}, which is converted automatically at link time.
      *
      * @param value a Variable or a constant
      * @return this variable
@@ -60,13 +62,15 @@ public interface Variable {
     public Variable setConstant(Object value);
 
     /**
-     * Assign a dynamically generated constant to this variable.
+     * Assign a dynamically generated constant to this variable. A static bootstrap method must
+     * be provided, which is called when the constant needs to be generated.
      *
      * @param bootstrap static bootstrap method
      * @param bootstrapArgs constants which are passed to the bootstrap method
      * @param name dynamic constant name
      * @return this variable
      * @throws IllegalStateException if this variable cannot be modified
+     * @see java.lang.invoke
      */
     public Variable setDynamic(MethodHandleInfo bootstrap, Object[] bootstrapArgs, String name);
 
@@ -136,8 +140,8 @@ public interface Variable {
     public void ifLe(Object value, Label label);
 
     /**
-     * Generates a switch statement against this int or Integer variable. None of the labels
-     * need to be positioned yet.
+     * Generates a switch statement against this {@code int} or {@code Integer} variable. None
+     * of the labels need to be positioned yet.
      *
      * @param defaultLabel required
      * @throws IllegalArgumentException if the number of cases and labels don't match
@@ -386,16 +390,16 @@ public interface Variable {
     /**
      * Enter a synchronized block on this variable.
      *
-     * @throws IllegalStateException if this variable isn't an object type, or if variable is a
-     * field
+     * @throws IllegalStateException if this variable isn't an object type, or if this variable
+     * is a field
      */
     public void monitorEnter();
 
     /**
      * Exit a synchronized block on this variable.
      *
-     * @throws IllegalStateException if this variable isn't an object type, or if variable is a
-     * field
+     * @throws IllegalStateException if this variable isn't an object type, or if this variable
+     * is a field
      */
     public void monitorExit();
 }
