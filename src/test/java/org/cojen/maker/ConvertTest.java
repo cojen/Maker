@@ -683,5 +683,123 @@ public class ConvertTest {
         var clazz = cm.finish();
         clazz.getMethod("run").invoke(null);
     }
-}
 
+    @Test
+    public void unsafeConstants() throws Exception {
+        // Setting a mismatched constant type is disallowed if information would be lost.
+
+        try {
+            mm.var(byte.class).set(1000);
+            fail();
+        } catch (IllegalStateException e) {
+        }
+
+        try {
+            mm.var(short.class).set(100_000);
+            fail();
+        } catch (IllegalStateException e) {
+        }
+
+        try {
+            mm.var(float.class).set(Integer.MAX_VALUE - 1);
+            fail();
+        } catch (IllegalStateException e) {
+        }
+
+        try {
+            mm.var(byte.class).set(1000L);
+            fail();
+        } catch (IllegalStateException e) {
+        }
+
+        try {
+            mm.var(short.class).set(100_000L);
+            fail();
+        } catch (IllegalStateException e) {
+        }
+
+        try {
+            mm.var(int.class).set(Long.MAX_VALUE);
+            fail();
+        } catch (IllegalStateException e) {
+        }
+
+        try {
+            mm.var(float.class).set(Long.MAX_VALUE - 1);
+            fail();
+        } catch (IllegalStateException e) {
+        }
+
+        try {
+            mm.var(double.class).set(Long.MAX_VALUE - 1);
+            fail();
+        } catch (IllegalStateException e) {
+        }
+
+        try {
+            mm.var(byte.class).set(10.1f);
+            fail();
+        } catch (IllegalStateException e) {
+        }
+
+        try {
+            mm.var(short.class).set(10.1f);
+            fail();
+        } catch (IllegalStateException e) {
+        }
+
+        try {
+            mm.var(int.class).set(10.1f);
+            fail();
+        } catch (IllegalStateException e) {
+        }
+
+        try {
+            mm.var(long.class).set(10.1f);
+            fail();
+        } catch (IllegalStateException e) {
+        }
+
+        try {
+            mm.var(byte.class).set(10.1);
+            fail();
+        } catch (IllegalStateException e) {
+        }
+
+        try {
+            mm.var(short.class).set(10.1);
+            fail();
+        } catch (IllegalStateException e) {
+        }
+
+        try {
+            mm.var(int.class).set(10.1);
+            fail();
+        } catch (IllegalStateException e) {
+        }
+
+        try {
+            mm.var(float.class).set(Math.PI);
+            fail();
+        } catch (IllegalStateException e) {
+        }
+
+        try {
+            mm.var(long.class).set(10.1);
+            fail();
+        } catch (IllegalStateException e) {
+        }
+
+        try {
+            mm.var(char.class).set((byte) -1);
+            fail();
+        } catch (IllegalStateException e) {
+        }
+
+        try {
+            mm.var(byte.class).set((short) 10_000);
+            fail();
+        } catch (IllegalStateException e) {
+        }
+    }
+}

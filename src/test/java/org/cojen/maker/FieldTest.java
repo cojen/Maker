@@ -48,6 +48,10 @@ public class FieldTest {
 
         fm.static_().final_().init(10.1f);
 
+        cm.addField(double.class, "num4").static_().init(10.2);
+        cm.addField(int.class, "num5").static_().init(10);
+        cm.addField(long.class, "num6").static_().init(Long.MAX_VALUE);
+
         MethodMaker mm = cm.addMethod(null, "run").public_().final_();
 
         var strVar = mm.field("str");
@@ -103,6 +107,9 @@ public class FieldTest {
         assertVar.invoke("assertEquals", 0, num1Var);
 
         assertVar.invoke("assertEquals", 10.1f, mm.field("num3"), 0.0f);
+        assertVar.invoke("assertEquals", 10.2d, mm.field("num4"), 0.0f);
+        assertVar.invoke("assertEquals", 10, mm.field("num5"));
+        assertVar.invoke("assertEquals", Long.MAX_VALUE, mm.field("num6"));
 
         num1Var.inc(10);
         assertVar.invoke("assertEquals", 10, num1Var.getVolatile());

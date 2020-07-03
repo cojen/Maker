@@ -259,4 +259,16 @@ public class CondyTest {
 
         assertTrue(const0 == clazz.getField("test").get(null));
     }
+
+    @Test
+    public void mismatch() {
+        ClassMaker cm = ClassMaker.begin(null);
+        MethodMaker mm = cm.addMethod(null, "test");
+        try {
+            mm.var(String.class).setConstant(new ArrayList());
+            fail();
+        } catch (IllegalStateException e) {
+            assertTrue(e.getMessage().startsWith("Mismatched"));
+        }
+    }
 }

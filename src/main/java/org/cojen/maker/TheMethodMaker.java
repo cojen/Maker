@@ -2053,20 +2053,6 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
         return from;
     }
 
-    /**
-     * Add a conversion operation, except if the types are the same, or if "to" is null.
-     *
-     * @throws IllegalStateException if conversion is disallowed
-     * @return actual type
-     */
-    private Type addConversionOp(Type from, Type to, int code) {
-        if (to != null && !from.equals(to)) {
-            doAddConversionOp(from, to, code);
-            return to;
-        }
-        return from;
-    }
-
     private void doAddConversionOp(Type from, Type to, int code) {
         if (code == Integer.MAX_VALUE) {
             throw new IllegalStateException

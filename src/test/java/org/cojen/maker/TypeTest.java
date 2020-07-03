@@ -151,4 +151,30 @@ public class TypeTest {
             assertEquals("LLFoo;", type.descriptor());
         }
     }
+
+    @Test
+    public void setType() throws Exception {
+        // Test that a variable of type Class can be be assigned by a Type instance. This
+        // feature isn't actually used anywhere at the moment.
+
+        ClassMaker cm = ClassMaker.begin().public_();
+        MethodMaker mm = cm.addMethod(Class[].class, "test").public_().static_();
+
+        var c0 = mm.var(Class.class).set(Type.from(int.class));
+        var c1 = mm.var(Class.class).set(Type.from(Integer.class));
+        var c2 = mm.var(Class.class).set(Type.from(String.class));
+
+        var result = mm.new_(Class[].class, 3);
+        result.aset(0, c0);
+        result.aset(1, c1);
+        result.aset(2, c2);
+
+        mm.return_(result);
+
+        Class[] actual = (Class[]) cm.finish().getMethod("test").invoke(null);
+
+        assertEquals(int.class, actual[0]);
+        assertEquals(Integer.class, actual[1]);
+        assertEquals(String.class, actual[2]);
+    }
 }

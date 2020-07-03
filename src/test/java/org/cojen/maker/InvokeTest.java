@@ -575,4 +575,18 @@ public class InvokeTest {
         assertTrue(mh.isVarargsCollector());
         assertEquals("eval5[one, two, three]", mh.invoke(5, "one", "two", "three"));
     }
+
+    @Test
+    public void methodType() throws Exception {
+        // Test MethodType as a constant.
+
+        ClassMaker cm = ClassMaker.begin().public_();
+        MethodMaker mm = cm.addMethod(MethodType.class, "run").public_().static_();
+
+        MethodType type = MethodType.methodType(String.class, int.class, Object[].class);
+        var v1 = mm.var(MethodType.class).set(type);
+        mm.return_(v1);
+
+        assertEquals(type, cm.finish().getMethod("run").invoke(null));
+    }
 }

@@ -34,7 +34,7 @@ public class UsageTest {
     private ClassMaker mClassMaker;
 
     @Before
-    public void init() {
+    public void setup() {
         mClassMaker = ClassMaker.begin();
     }
 
