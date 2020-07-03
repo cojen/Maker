@@ -52,10 +52,9 @@ abstract class Attribute extends Attributed {
     }
 
     /**
-     * Write just the attribute specific data. The default implementation writes nothing.
+     * Write just the attribute specific data.
      */
-    void writeDataTo(DataOutput dout) throws IOException {
-    }
+    abstract void writeDataTo(DataOutput dout) throws IOException;
 
     static class Constant extends Attribute {
         private final ConstantPool.Constant mConstant;

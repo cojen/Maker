@@ -43,6 +43,7 @@ public class NestTest {
 
         ClassMaker child1 = parent.addClass(null, null).public_();
         ClassMaker child2 = parent.addClass("Child2", null);
+        ClassMaker child3 = parent.addClass(null, null).public_().interface_();
         child2.addConstructor().private_();
 
         parent.addField(int.class, "f0").private_().static_();
@@ -80,6 +81,7 @@ public class NestTest {
         Class<?> parentClass = parent.finish();
         Class<?> child1Class = child1.finish();
         Class<?> child2Class = child2.finish();
+        Class<?> child3Class = child3.finish();
 
         parentClass.getConstructor().newInstance();
         child1Class.getMethod("test1").invoke(null);

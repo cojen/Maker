@@ -70,6 +70,12 @@ public class ConcatTest {
             mm.var(Assert.class).invoke("assertEquals", "\0\u0001123.456", v2);
         }
 
+        {
+            var v1 = mm.concat(Long.MAX_VALUE, (float) Math.PI, (byte) 1);
+            String expect = "" + Long.MAX_VALUE + (float) Math.PI + "1";
+            mm.var(Assert.class).invoke("assertEquals", expect, v1);
+        }
+
         var clazz = cm.finish();
         clazz.getMethod("run").invoke(null);
     }
