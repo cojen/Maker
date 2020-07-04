@@ -234,6 +234,46 @@ public class InvokeTest {
     }
 
     @Test
+    public void invokeDynamicTinyConstant() throws Exception {
+        // Pass tiny primitive constants to the bootstrap method. The implementation is the
+        // same as for complex constats, and so the class cannot be loaded from a file.
+
+        ClassMaker cm = ClassMaker.begin().public_();
+        MethodMaker mm = cm.addMethod(null, "run").public_().static_();
+
+        MethodHandle bootstrap = MethodHandles.lookup().findStatic
+            (InvokeTest.class, "bootTiny", MethodType.methodType
+             (CallSite.class, MethodHandles.Lookup.class, String.class, MethodType.class,
+              byte.class, short.class, char.class));
+
+        MethodHandleInfo info = MethodHandles.lookup().revealDirect(bootstrap);
+        MethodType type = MethodType.methodType(String.class);
+
+        byte a = 12;
+        short b = 3456;
+        char c = 'a';
+
+        var v0 = mm.invokeDynamic(info, new Object[] {a, b, c}, "test", type);
+
+        mm.var(Assert.class).invoke("assertEquals", "123456a", v0);
+
+        cm.finish().getMethod("run").invoke(null);
+    }
+
+    public static CallSite bootTiny(MethodHandles.Lookup caller, String name, MethodType type,
+                                    byte a, short b, char c)
+        throws Exception
+    {
+        // Concat the params.
+        ClassMaker cm = ClassMaker.begin().public_().final_();
+        MethodMaker mm = cm.addMethod(name, type).static_().public_();
+        mm.return_("" + a + b + c);
+        Class<?> clazz = cm.finish();
+        var mh = MethodHandles.lookup().findStatic(clazz, name, type);
+        return new ConstantCallSite(mh);
+    }
+
+    @Test
     public void staticOrInstance() throws Exception {
         // Matching method might be static or instance.
 
