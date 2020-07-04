@@ -2061,6 +2061,22 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
         addOp(new ConversionOp(from, to, code));
     }
 
+    /**
+     * Returns a handle to the ConstantsRegistry.remove bootstrap method.
+     */
+    private static MethodHandleInfo handleToRemoveConstant() {
+        try {
+            MethodHandles.Lookup lookup = MethodHandles.lookup();
+            MethodHandle bootstrap = lookup.findStatic
+                (ConstantsRegistry.class, "remove", MethodType.methodType
+                 (Object.class, MethodHandles.Lookup.class, String.class,
+                  Class.class, Class.class, int.class));
+            return lookup.revealDirect(bootstrap);
+        } catch (NoSuchMethodException | IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     private void addPushDynamicConstantOp(MethodHandleInfo bootstrap, Object[] bootstrapArgs,
                                           String name, Type type)
     {
@@ -2079,8 +2095,10 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
             bootArgs = new ConstantPool.Constant[0];
         } else {
             bootArgs = new ConstantPool.Constant[bootstrapArgs.length];
+            MethodType bootType = bootstrap.getMethodType();
             for (int i=0; i<bootArgs.length; i++) {
-                bootArgs[i] = addLoadableConstant(bootstrapArgs[i]);
+                // +3 to skip these: Lookup caller, String name, and MethodType type
+                bootArgs[i] = addLoadableConstant(bootType.parameterType(i + 3), bootstrapArgs[i]);
             }
         }
 
@@ -2089,8 +2107,10 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
 
     /**
      * Intended for loading bootstrap constants, although it works in other cases too.
+     *
+     * @param argType expected constant type; can pass null to derive from the arg itself
      */
-    private ConstantPool.Constant addLoadableConstant(Object arg) {
+    private ConstantPool.Constant addLoadableConstant(Class argType, Object arg) {
         ConstantPool.Constant c = mConstants.tryAddLoadableConstant(arg);
         if (c != null) {
             return c;
@@ -2100,9 +2120,11 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
             return mClassMaker.mThisClass;
         }
 
-        special: {
-            final Type classType = Type.from(Class.class);
+        // Pass as a dynamic constant. First, try to use the ConstantBootstraps class.
 
+        final Type classType = Type.from(Class.class);
+
+        special: {
             final String method, name;
             final Type retType, paramType;
 
@@ -2116,11 +2138,13 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
                     if (arg instanceof Type) {
                         type = (Type) arg;
                         if (!type.isPrimitive()) {
+                            // Not expected. Should have been handled by tryAddLoadableConstant.
                             break special;
                         }
                     } else if (arg instanceof Class) {
                         var clazz = (Class) arg;
                         if (!clazz.isPrimitive()) {
+                            // Not expected. Should have been handled by tryAddLoadableConstant.
                             break special;
                         }
                         type = Type.from(clazz);
@@ -2155,7 +2179,24 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
                  name, paramType);
         }
 
-        throw unsupportedConstant(arg);
+        if (arg instanceof Variable) {
+            // A variable isn't a constant.
+            throw unsupportedConstant(arg);
+        }
+
+        // Use ConstantsRegistry. In doing so, the generated class cannot be loaded from a file.
+
+        int slot = mClassMaker.addComplexConstant(arg);
+        MethodHandleInfo bootstrap = handleToRemoveConstant();
+
+        int bi = addBootstrapMethod(bootstrap, new Object[] {class_(), slot});
+
+        if (argType == null) {
+            argType = arg.getClass();
+        }
+
+        // Note that "const" isn't used by the bootstrap method. It's a dummy.
+        return mConstants.addDynamicConstant(bi, "const", mClassMaker.typeFrom(argType));
     }
 
     private static IllegalArgumentException unsupportedConstant(Object value) {
@@ -3010,20 +3051,11 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
             beginSetConstant();
 
             int slot = mClassMaker.addComplexConstant(value);
+            MethodHandleInfo bootstrap = handleToRemoveConstant();
 
-            MethodHandleInfo info;
-            try {
-                MethodHandles.Lookup lookup = MethodHandles.lookup();
-                MethodHandle bootstrap = lookup.findStatic
-                    (ConstantsRegistry.class, "remove", MethodType.methodType
-                     (Object.class, MethodHandles.Lookup.class, String.class,
-                      Class.class, Class.class, int.class));
-                info = lookup.revealDirect(bootstrap);
-            } catch (NoSuchMethodException | IllegalAccessException e) {
-                throw new RuntimeException(e);
-            }
+            // Note that "const" isn't used by the bootstrap method. It's a dummy.
+            addPushDynamicConstantOp(bootstrap, new Object[] {class_(), slot}, "const", type);
 
-            addPushDynamicConstantOp(info, new Object[] {class_(), slot}, "const", type);
             finishSetConstant();
 
             return this;
@@ -4061,7 +4093,7 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
                     mConstants.addMethodHandle(MethodHandleInfo.REF_invokeStatic, ref);
 
                 ConstantPool.Constant[] bootArgs = {
-                    mFieldRef.mClass, addLoadableConstant(mFieldRef.mField.type())
+                    mFieldRef.mClass, addLoadableConstant(null, mFieldRef.mField.type())
                 };
 
                 mVarHandle = mConstants.addDynamicConstant
