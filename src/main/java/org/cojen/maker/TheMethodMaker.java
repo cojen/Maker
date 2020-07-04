@@ -3338,6 +3338,17 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
                 // Narrowing conversion.
 
                 Type primType = fromType.unbox();
+
+                if (primType == null) {
+                    if (Type.from(Number.class).isAssignableFrom(fromType)) {
+                        return invoke(toType.name() + "Value");
+                    }
+                    if (fromType.equals(Type.from(Object.class))) {
+                        return cast(Number.class).cast(clazz);
+                    }
+                    throw new IllegalStateException("Unsupported conversion");
+                }
+
                 int toTypeCode = toType.typeCode();
                 byte op = 0;
 

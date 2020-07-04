@@ -639,6 +639,35 @@ public class ConvertTest {
     }
 
     @Test
+    public void objectCastToPrimitive() throws Exception {
+        var v1 = mm.var(Object.class).set(1);
+        var v2 = mm.var(Number.class).set(2.0d);
+        var v3 = mm.var(Float.class).set(3.0f);
+        var v4 = mm.new_(java.math.BigInteger.class, "123");
+
+        var v5 = v1.cast(int.class);
+        var v6 = v2.cast(double.class);
+        var v7 = v3.cast(float.class);
+        var v8 = v2.cast(float.class);
+        var v9 = v4.cast(int.class);
+
+        verify(1, v5);
+        verify(2.0d, v6);
+        verify(3.0f, v7);
+        verify(2.0f, v8);
+        verify(123, v9);
+
+        try {
+            mm.var(String.class).set("hello").cast(int.class);
+            fail();
+        } catch (IllegalStateException e) {
+        }
+
+        var clazz = cm.finish();
+        clazz.getMethod("run").invoke(null);
+    }
+
+    @Test
     public void safeConstants() throws Exception {
         // Setting a mismatched constant type is allowed if no information is lost.
 
