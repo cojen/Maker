@@ -16,8 +16,6 @@
 
 package org.cojen.maker;
 
-import java.io.DataOutput;
-import java.io.DataOutputStream;
 import java.io.OutputStream;
 import java.io.IOException;
 
@@ -257,17 +255,5 @@ public interface ClassMaker {
      *
      * @throws IllegalStateException if already finished or if the definition is broken
      */
-    public default void finishTo(OutputStream out) throws IOException {
-        if (!(out instanceof DataOutput)) {
-            out = new DataOutputStream(out);
-        }
-        finishTo((DataOutput) out);
-    }
-
-    /**
-     * Finishes the definition of the new class and writes it to a stream.
-     *
-     * @throws IllegalStateException if already finished or if the definition is broken
-     */
-    public void finishTo(DataOutput dout) throws IOException;
+    public void finishTo(OutputStream out) throws IOException;
 }

@@ -22,6 +22,7 @@ import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 
 import java.lang.invoke.MethodHandles;
 
@@ -152,7 +153,13 @@ final class TheClassMaker extends Attributed implements ClassMaker {
     }
 
     @Override
-    public void finishTo(DataOutput dout) throws IOException {
+    public void finishTo(OutputStream out) throws IOException {
+        DataOutput dout;
+        if (out instanceof DataOutput) {
+            dout = (DataOutput) out;
+        } else {
+            dout = new DataOutputStream(out);
+        }
         finishTo(dout, false);
     }
 
