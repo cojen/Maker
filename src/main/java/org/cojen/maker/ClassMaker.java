@@ -87,7 +87,7 @@ public interface ClassMaker {
     public static ClassMaker begin(String className, Object superClass,
                                    ClassLoader parentLoader, ProtectionDomain domain)
     {
-        return new TheClassMaker(className, superClass, parentLoader, domain, null);
+        return TheClassMaker.begin(false, className, superClass, parentLoader, domain, null);
     }
 
     /**
@@ -103,14 +103,26 @@ public interface ClassMaker {
     {
         Objects.requireNonNull(lookup);
         ClassLoader loader = lookup.lookupClass().getClassLoader();
-        return new TheClassMaker(className, superClass, loader, null, lookup);
+        return TheClassMaker.begin(false, className, superClass, loader, null, lookup);
+    }
+
+    /**
+     * Begin defining a class with an explicitly specified name. All other classes defined from
+     * this maker will also be explicit.
+     *
+     * @param className fully qualified class name
+     * @param superClass Class or String; pass null to use Object.
+     */
+    public static ClassMaker beginExplicit(String className, Object superClass) {
+        return TheClassMaker.begin(true, className, superClass, null, null, null);
     }
 
     /**
      * Begin defining another class with the same loader, domain, and lookup as this one. The
-     * actual class name will have a suffix applied to ensure uniqueness.
+     * actual class name will have a suffix applied to ensure uniqueness, unless this maker was
+     * created with an explicit name.
      *
-     * @param className fully qualified class name; pass null to use default
+     * @param className fully qualified class name; pass null to use default (unless explicit)
      * @param superClass Class or String; pass null to use Object.
      * @see addClass
      */
@@ -208,7 +220,8 @@ public interface ClassMaker {
     public MethodMaker addClinit();
 
     /**
-     * Add a nested class to this class.
+     * Add a nested class to this class. The actual class name will have a suitable suffix
+     * applied to ensure uniqueness.
      *
      * @param className simple class name; pass null to use default
      * @param superClass Class or String; pass null to use Object.

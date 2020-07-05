@@ -40,6 +40,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import java.util.concurrent.ThreadLocalRandom;
@@ -117,34 +118,46 @@ final class TheClassMaker extends Attributed implements ClassMaker {
     // -1: finished, 0: not finished, 1: has complex constants
     private int mFinished;
 
-    TheClassMaker(String className, Object superClass,
-                  ClassLoader parentLoader, ProtectionDomain domain, MethodHandles.Lookup lookup)
+    static TheClassMaker begin(boolean explicit, String className, Object superClass,
+                               ClassLoader parentLoader, ProtectionDomain domain,
+                               MethodHandles.Lookup lookup)
     {
-        super(new ConstantPool());
-
         if (parentLoader == null) {
-            parentLoader = getClass().getClassLoader();
+            parentLoader = TheClassMaker.class.getClassLoader();
             if (parentLoader == null) {
                 parentLoader = ClassLoader.getSystemClassLoader();
             }
         }
 
-        mLookup = lookup;
-        mClassInjector = ClassInjector.lookup(parentLoader, domain);
+        ClassInjector injector = ClassInjector.lookup(explicit, parentLoader, domain);
 
-        // Only check the parent loader when it will be used directly. This avoids creating
-        // useless class loading lock objects that never get cleaned up.
-        className = mClassInjector.reserve(className, lookup != null);
+        return new TheClassMaker(className, superClass, lookup, injector);
+    }
+
+    private TheClassMaker(String className, Object superClass,
+                          MethodHandles.Lookup lookup, ClassInjector injector)
+    {
+        super(new ConstantPool());
+
+        mLookup = lookup;
+        mClassInjector = injector;
+
+        if (injector.isExplicit()) {
+            Objects.requireNonNull(className);
+        } else {
+            // Only check the parent loader when it will be used directly. This avoids creating
+            // useless class loading lock objects that never get cleaned up.
+            className = injector.reserve(className, lookup != null);
+        }
 
         Type superType = typeFrom(superClass == null ? Object.class : superClass);
         mSuperClass = mConstants.addClass(superType);
 
-        mThisClass = mConstants.addClass(Type.begin(mClassInjector, this, className, superType));
+        mThisClass = mConstants.addClass(Type.begin(injector, this, className, superType));
     }
 
     private TheClassMaker(TheClassMaker from, String className, Object superClass) {
-        this(className, superClass,
-             from.mClassInjector.getParent(), from.mClassInjector.domain(), from.mLookup);
+        this(className, superClass, from.mLookup, from.mClassInjector);
     }
 
     @Override
@@ -187,7 +200,7 @@ final class TheClassMaker extends Attributed implements ClassMaker {
         }
 
         if (hidden) {
-            // Clean up the generated class name. It will given a unique name by the
+            // Clean up the generated class name. It will be given a unique name by the
             // defineHiddenClass or defineAnonymousClass method.
             String name = mThisClass.mValue.mValue;
             int ix = name.lastIndexOf('-');

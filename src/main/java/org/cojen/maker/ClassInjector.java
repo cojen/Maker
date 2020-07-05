@@ -40,11 +40,12 @@ import java.security.ProtectionDomain;
 class ClassInjector extends ClassLoader {
     private static final Map<Object, ClassInjector> cInjectors = new ConcurrentHashMap<>();
 
-    private final Map<String, Boolean> mReservedNames = new WeakHashMap<>();
+    private final Map<String, Boolean> mReservedNames;
     private final ProtectionDomain mDomain;
 
-    private ClassInjector(ClassLoader parent, ProtectionDomain domain) {
+    private ClassInjector(boolean explicit, ClassLoader parent, ProtectionDomain domain) {
         super(parent);
+        mReservedNames = explicit ? null : new WeakHashMap<>();
         mDomain = prepareDomain(domain, this);
     }
 
@@ -59,12 +60,18 @@ class ClassInjector extends ClassLoader {
                                     domain.getPrincipals());
     }
 
-    static ClassInjector lookup(ClassLoader parentLoader, ProtectionDomain domain) {
+    static ClassInjector lookup(boolean explicit,
+                                ClassLoader parentLoader, ProtectionDomain domain)
+    {
+        if (explicit) {
+            return new ClassInjector(true, parentLoader, domain);
+        }
+
         final Object injectorKey = createInjectorKey(parentLoader, domain);
 
         ClassInjector injector = cInjectors.get(injectorKey);
         if (injector == null) {
-            injector = new ClassInjector(parentLoader, domain);
+            injector = new ClassInjector(explicit, parentLoader, domain);
             ClassInjector existing = cInjectors.putIfAbsent(injectorKey, injector);
             if (existing != null) {
                 injector = existing;
@@ -74,16 +81,18 @@ class ClassInjector extends ClassLoader {
         return injector;
     }
 
-    ProtectionDomain domain() {
-        return mDomain;
+    boolean isExplicit() {
+        return mReservedNames == null;
     }
 
     Class<?> define(String name, byte[] b) {
+        Class<?> clazz;
+
         try {
             if (mDomain == null) {
-                return defineClass(name, b, 0, b.length);
+                clazz = defineClass(name, b, 0, b.length);
             } else {
-                return defineClass(name, b, 0, b.length, mDomain);
+                clazz = defineClass(name, b, 0, b.length, mDomain);
             }
         } catch (LinkageError e) {
             // Replace duplicate name definition with a better exception.
@@ -94,10 +103,14 @@ class ClassInjector extends ClassLoader {
             }
             throw e;
         } finally {
-            synchronized (mReservedNames) {
-                mReservedNames.remove(name);
+            if (mReservedNames != null) {
+                synchronized (mReservedNames) {
+                    mReservedNames.remove(name);
+                }
             }
         }
+
+        return clazz;
     }
 
     /**
