@@ -239,9 +239,9 @@ public interface ClassMaker {
     public Class<?> finish();
 
     /**
-     * Finishes the definition of a new hidden class, using the loader and protection domain of
-     * the lookup passed to the begin method. Hidden classes are automatically unloaded when no
-     * longer referenced, even if the class loader still is.
+     * Finishes the definition of a new hidden class, using the lookup passed to the begin
+     * method. Hidden classes are automatically unloaded when no longer referenced, even if the
+     * class loader still is.
      *
      * <p>This feature is only fully supported in Java 15. Hidden classes created with earlier
      * versions don't support all the lookup features.
