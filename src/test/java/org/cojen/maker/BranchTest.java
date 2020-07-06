@@ -402,4 +402,33 @@ public class BranchTest {
             assertEquals(2, init.get(instance));
         }
     }
+
+    @Test
+    public void mergeLocals() throws Exception {
+        // Test that local variable conflicts at branch targets are resolved.
+
+        ClassMaker cm = ClassMaker.begin().public_();
+        MethodMaker mm = cm.addMethod(null, "run", int.class).static_().public_();
+
+        Label end = mm.label();
+        mm.param(0).ifEq(0, end);
+
+        var v1 = mm.param(0).add(1);
+        var v2 = v1.add(1);
+
+        if (true) {
+            Label l2 = mm.label();
+            v1.ifEq(0, l2);
+            v2.ifEq(0, end);
+            l2.here();
+        } else {
+            v1.ifEq(0, end);
+            v2.ifEq(0, end);
+        }
+
+        end.here();
+
+        var clazz = cm.finish();
+        clazz.getMethod("run", int.class).invoke(null, 10);
+    }
 }

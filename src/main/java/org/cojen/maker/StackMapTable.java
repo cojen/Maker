@@ -59,7 +59,7 @@ class StackMapTable extends Attribute {
         if (address >= 0 && mFrames != null) {
             Frame frame = mFrames.get(key);
             if (frame != null) {
-                frame.verify(localCodes, stackCodes);
+                frame.merge(localCodes, stackCodes);
                 return frame;
             }
         }
@@ -115,7 +115,7 @@ class StackMapTable extends Attribute {
         Integer key = frame.mAddress;
         Frame existing = mFrames.get(key);
         if (existing != null) {
-            existing.verify(frame);
+            existing.merge(frame);
         } else {
             mFrames.put(key, frame);
         }
@@ -123,7 +123,7 @@ class StackMapTable extends Attribute {
 
     static class Frame {
         int mAddress;
-        final int[] mLocalCodes;
+        int[] mLocalCodes;
         final int[] mStackCodes;
 
         Frame(int address, int[] localCodes, int[] stackCodes) {
@@ -145,21 +145,42 @@ class StackMapTable extends Attribute {
             return mStackCodes == null ? 0 : mStackCodes.length;
         }
 
-        void verify(Frame other) {
-            verify(other.mLocalCodes, other.mStackCodes);
+        private void merge(Frame other) {
+            merge(other.mLocalCodes, other.mStackCodes);
         }
 
-        void verify(int[] localCodes, int[] stackCodes) {
-            verify(localCodes, localCodes == null ? 0 : localCodes.length,
+        private void merge(int[] localCodes, int[] stackCodes) {
+            merge(localCodes, localCodes == null ? 0 : localCodes.length,
                    stackCodes, stackCodes == null ? 0 : stackCodes.length);
         }
 
-        void verify(int[] localCodes, int localLen, int[] stackCodes, int stackLen) {
-            verify("variables", mLocalCodes, localCodes, localLen);
+        private void merge(int[] localCodes, int localLen, int[] stackCodes, int stackLen) {
+            // Stacks must be identical.
             verify("stack", mStackCodes, stackCodes, stackLen);
+
+            // Apply the intersection of the local variable sets.
+
+            int[] thisCodes = mLocalCodes;
+            int thisLen = thisCodes == null ? 0 : thisCodes.length;
+
+            if (thisLen <= localLen) {
+                localLen = thisLen;
+            } else {
+                // Swap and keep the smaller set.
+                thisCodes = localCodes;
+                localCodes = mLocalCodes;
+                mLocalCodes = thisCodes;
+            }
+
+            // If any mismatches, use the "top" type instead.
+            for (int i=0; i<localLen; i++) {
+                if (thisCodes[i] != localCodes[i]) {
+                    thisCodes[i] = Type.SM_TOP;
+                }
+            }
         }
 
-        private static void verify(String which, int[] expect, int[] actual, int actualLen) {
+        private void verify(String which, int[] expect, int[] actual, int actualLen) {
             if (actual == null || actualLen == 0) {
                 if (expect == null || expect.length == 0) {
                     return;
@@ -178,7 +199,7 @@ class StackMapTable extends Attribute {
             throw new IllegalStateException("Mismatched " + which + " at branch target");
         }
 
-        void writeTo(Frame prev, DataOutput dout) throws IOException {
+        private void writeTo(Frame prev, DataOutput dout) throws IOException {
             int offsetDelta;
             if (prev.mAddress < 0) {
                 if (prev.mAddress == Integer.MIN_VALUE) {
