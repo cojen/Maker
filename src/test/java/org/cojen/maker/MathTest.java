@@ -406,4 +406,13 @@ public class MathTest {
 
         cm.finish().getMethod("run").invoke(null);
     }
+
+    @Test
+    public void nop() throws Exception {
+        // Not really a math test...
+        ClassMaker cm = ClassMaker.begin().public_();
+        MethodMaker mm = cm.addMethod(null, "run").static_().public_();
+        mm.nop();
+        cm.finish().getMethod("run").invoke(null);
+    }
 }

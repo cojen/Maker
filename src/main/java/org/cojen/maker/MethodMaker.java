@@ -277,4 +277,9 @@ public interface MethodMaker {
      * @throws IllegalArgumentException if not given a variable or a constant
      */
     public Variable concat(Object... values);
+
+    /**
+     * Append an instruction which does nothing, which can be useful for debugging.
+     */
+    public void nop();
 }

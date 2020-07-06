@@ -1169,6 +1169,11 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
         return var;
     }
 
+    @Override
+    public void nop() {
+        addOp(new BytecodeOp(NOP, 0));
+    }
+
     /**
      * Track an entry which has just been pushed to the stack.
      */
