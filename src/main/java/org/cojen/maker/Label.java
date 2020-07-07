@@ -17,7 +17,7 @@
 package org.cojen.maker;
 
 /**
- * Represents a label bound to a body of {@link MethodMaker method}.
+ * Represents a label bound to a {@link MethodMaker method} body.
  *
  * @author Brian S O'Neill
  * @see MethodMaker#label
