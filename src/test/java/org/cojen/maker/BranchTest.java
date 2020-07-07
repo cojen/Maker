@@ -358,7 +358,7 @@ public class BranchTest {
         // A branch before calling the super constructor should create a proper stack map table
         // entry which shows "this" as an uninitialized type.
 
-        ClassMaker cm = ClassMaker.begin(null, java.util.Vector.class).public_();
+        ClassMaker cm = ClassMaker.begin(null).extend(java.util.Vector.class).public_();
         cm.addField(int.class, "init").public_().final_();
 
         MethodMaker mm = cm.addConstructor(boolean.class).public_();

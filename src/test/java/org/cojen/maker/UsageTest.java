@@ -39,6 +39,30 @@ public class UsageTest {
     }
 
     @Test
+    public void changeExtend() {
+        mClassMaker.extend(UsageTest.class);
+        try {
+            mClassMaker.extend(UsageTest.class);
+            fail();
+        } catch (IllegalStateException e) {
+            check(e, "Super");
+        }
+    }
+
+    @Test
+    public void changeAutoExtend() {
+        MethodMaker mm = mClassMaker.addConstructor();
+        mm.invokeSuperConstructor();
+
+        try {
+            mClassMaker.extend(UsageTest.class);
+            fail();
+        } catch (IllegalStateException e) {
+            check(e, "Super");
+        }
+    }
+
+    @Test
     public void endReached() {
         MethodMaker mm = mClassMaker.addMethod(int.class, "test");
         try {

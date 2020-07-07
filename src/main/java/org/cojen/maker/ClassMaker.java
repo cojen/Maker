@@ -37,7 +37,7 @@ public interface ClassMaker {
      * Begin defining a class with an automatically assigned name.
      */
     public static ClassMaker begin() {
-        return begin(null, (String) null, null, null);
+        return begin(null, null, null);
     }
 
     /**
@@ -47,7 +47,7 @@ public interface ClassMaker {
      * @param className fully qualified class name; pass null to use default
      */
     public static ClassMaker begin(String className) {
-        return begin(className, (String) null, null, null);
+        return begin(className, null, null);
     }
 
     /**
@@ -55,24 +55,10 @@ public interface ClassMaker {
      * to ensure uniqueness.
      *
      * @param className fully qualified class name; pass null to use default
-     * @param superClass Class or String; pass null to use Object.
-     */
-    public static ClassMaker begin(String className, Object superClass) {
-        return begin(className, superClass, null, null);
-    }
-
-    /**
-     * Begin defining a class with the given name. The actual name will have a suffix applied
-     * to ensure uniqueness.
-     *
-     * @param className fully qualified class name; pass null to use default
-     * @param superClass Class or String; pass null to use Object.
      * @param parentLoader parent class loader; pass null to use default
      */
-    public static ClassMaker begin(String className, Object superClass,
-                                   ClassLoader parentLoader)
-    {
-        return begin(className, superClass, parentLoader, null);
+    public static ClassMaker begin(String className, ClassLoader parentLoader) {
+        return begin(className, parentLoader, null);
     }
 
     /**
@@ -80,14 +66,13 @@ public interface ClassMaker {
      * to ensure uniqueness.
      *
      * @param className fully qualified class name; pass null to use default
-     * @param superClass Class or String; pass null to use Object.
      * @param parentLoader parent class loader; pass null to use default
      * @param domain to define class in; pass null to use default
      */
-    public static ClassMaker begin(String className, Object superClass,
+    public static ClassMaker begin(String className,
                                    ClassLoader parentLoader, ProtectionDomain domain)
     {
-        return TheClassMaker.begin(false, className, superClass, parentLoader, domain, null);
+        return TheClassMaker.begin(false, className, parentLoader, domain, null);
     }
 
     /**
@@ -95,15 +80,12 @@ public interface ClassMaker {
      * to ensure uniqueness.
      *
      * @param className fully qualified class name; pass null to use default
-     * @param superClass Class or String; pass null to use Object.
      * @param lookup finish loading the class using this lookup object
      */
-    public static ClassMaker begin(String className, Object superClass,
-                                   MethodHandles.Lookup lookup)
-    {
+    public static ClassMaker begin(String className, MethodHandles.Lookup lookup) {
         Objects.requireNonNull(lookup);
         ClassLoader loader = lookup.lookupClass().getClassLoader();
-        return TheClassMaker.begin(false, className, superClass, loader, null, lookup);
+        return TheClassMaker.begin(false, className, loader, null, lookup);
     }
 
     /**
@@ -111,10 +93,9 @@ public interface ClassMaker {
      * this maker will also be explicit.
      *
      * @param className fully qualified class name
-     * @param superClass Class or String; pass null to use Object.
      */
-    public static ClassMaker beginExplicit(String className, Object superClass) {
-        return TheClassMaker.begin(true, className, superClass, null, null, null);
+    public static ClassMaker beginExplicit(String className) {
+        return TheClassMaker.begin(true, className, null, null, null);
     }
 
     /**
@@ -123,10 +104,9 @@ public interface ClassMaker {
      * created with an explicit name.
      *
      * @param className fully qualified class name; pass null to use default (unless explicit)
-     * @param superClass Class or String; pass null to use Object.
      * @see addClass
      */
-    public ClassMaker another(String className, Object superClass);
+    public ClassMaker another(String className);
 
     /**
      * Switch this class to be public. Classes are package-private by default.
@@ -162,6 +142,15 @@ public interface ClassMaker {
      * @return this
      */
     public ClassMaker synthetic();
+
+    /**
+     * Add an interface or class that this class extends.
+     *
+     * @param superClass Class or String; pass null to use Object.
+     * @return this
+     * @throws IllegalStateException if already assigned
+     */
+    public ClassMaker extend(Object superClass);
 
     /**
      * Add an interface that this class implements.
@@ -224,11 +213,10 @@ public interface ClassMaker {
      * applied to ensure uniqueness.
      *
      * @param className simple class name; pass null to use default
-     * @param superClass Class or String; pass null to use Object.
      * @throws IllegalArgumentException if not given a simple class name
      * @see another
      */
-    public ClassMaker addClass(String className, Object superClass);
+    public ClassMaker addClass(String className);
 
     /**
      * Set the source file of this class file by adding a source file attribute.

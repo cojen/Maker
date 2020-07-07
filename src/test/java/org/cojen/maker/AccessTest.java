@@ -55,7 +55,7 @@ public class AccessTest {
 
     @Test
     public void hasPackageAccess() throws Exception {
-        ClassMaker cm = ClassMaker.begin(null, null, MethodHandles.lookup()).public_();
+        ClassMaker cm = ClassMaker.begin(null, MethodHandles.lookup()).public_();
         MethodMaker mm = cm.addMethod(null, "run").public_().static_();
         var result = mm.var(AccessTest.class).invoke("foo", 10);
         mm.var(Assert.class).invoke("assertEquals", 11, result);
@@ -72,7 +72,7 @@ public class AccessTest {
     public void protectionDomain() throws Exception {
         ProtectionDomain domain = getClass().getProtectionDomain();
 
-        ClassMaker cm = ClassMaker.begin(null, null, null, domain).public_();
+        ClassMaker cm = ClassMaker.begin(null, null, domain).public_();
         cm.addConstructor().public_();
         Class<?> clazz = cm.finish();
         clazz.getConstructor().newInstance();
@@ -96,7 +96,7 @@ public class AccessTest {
 
         var domain = new ProtectionDomain(null, new Permissions(), null, principals);
 
-        ClassMaker cm = ClassMaker.begin(null, null, null, domain).public_();
+        ClassMaker cm = ClassMaker.begin(null, null, domain).public_();
         cm.addConstructor().public_();
         Class<?> clazz = cm.finish();
         clazz.getConstructor().newInstance();
@@ -108,7 +108,7 @@ public class AccessTest {
                      Collections.list(domain2.getPermissions().elements()));
 
         // Test using the domain again.
-        cm = ClassMaker.begin(null, null, null, domain).public_();
+        cm = ClassMaker.begin(null, null, domain).public_();
         cm.addConstructor().public_();
         Class<?> clazz2 = cm.finish();
         clazz2.getConstructor().newInstance();

@@ -36,7 +36,8 @@ public class MathTest {
     public void cases() throws Exception {
         // Generates a class which reads a set of math operations and saves the results.
 
-        ClassMaker cm = ClassMaker.begin(null, ArrayList.class).public_().sourceFile("MathTest");
+        ClassMaker cm = ClassMaker.begin(null).extend(ArrayList.class)
+            .public_().sourceFile("MathTest");
 
         cm.addConstructor().public_().invokeSuperConstructor();
 

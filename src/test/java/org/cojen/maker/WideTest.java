@@ -79,7 +79,7 @@ public class WideTest {
     public void wideConstant() throws Exception {
         // Test the ldc_w opcode.
 
-        ClassMaker cm = ClassMaker.begin(null, ArrayList.class).public_();
+        ClassMaker cm = ClassMaker.begin(null).extend(ArrayList.class).public_();
         cm.addConstructor().public_();
         MethodMaker mm = cm.addMethod(null, "run").public_();
 

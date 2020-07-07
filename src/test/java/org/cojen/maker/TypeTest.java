@@ -42,7 +42,7 @@ public class TypeTest {
         // Test assignability of types currently being generated.
 
         {
-            var cm = (TheClassMaker) ClassMaker.begin(null, ArrayList.class);
+            var cm = (TheClassMaker) ClassMaker.begin(null).extend(ArrayList.class);
             Type type = cm.type();
 
             assertFalse(type.isAssignableFrom(Type.from(int.class)));
@@ -65,7 +65,7 @@ public class TypeTest {
             Type type1 = cm1.type();
 
             var loader = new URLClassLoader(new URL[0]);
-            Type type2 = Type.begin(loader, cm1, cm1.name(), Type.from(Object.class));
+            Type type2 = Type.begin(loader, cm1, cm1.name());
 
             assertFalse(type1 == type2);
             assertTrue(type1.equals(type2));

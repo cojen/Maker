@@ -96,7 +96,8 @@ final class TheClassMaker extends Attributed implements ClassMaker {
     private final ClassInjector mClassInjector;
 
     final ConstantPool.C_Class mThisClass;
-    final ConstantPool.C_Class mSuperClass;
+
+    private ConstantPool.C_Class mSuperClass;
 
     // Stashed by Type.begin to prevent GC of this type being defined.
     Object mTypeCache;
@@ -118,7 +119,7 @@ final class TheClassMaker extends Attributed implements ClassMaker {
     // -1: finished, 0: not finished, 1: has complex constants
     private int mFinished;
 
-    static TheClassMaker begin(boolean explicit, String className, Object superClass,
+    static TheClassMaker begin(boolean explicit, String className,
                                ClassLoader parentLoader, ProtectionDomain domain,
                                MethodHandles.Lookup lookup)
     {
@@ -131,12 +132,10 @@ final class TheClassMaker extends Attributed implements ClassMaker {
 
         ClassInjector injector = ClassInjector.lookup(explicit, parentLoader, domain);
 
-        return new TheClassMaker(className, superClass, lookup, injector);
+        return new TheClassMaker(className, lookup, injector);
     }
 
-    private TheClassMaker(String className, Object superClass,
-                          MethodHandles.Lookup lookup, ClassInjector injector)
-    {
+    private TheClassMaker(String className, MethodHandles.Lookup lookup, ClassInjector injector) {
         super(new ConstantPool());
 
         mLookup = lookup;
@@ -150,19 +149,16 @@ final class TheClassMaker extends Attributed implements ClassMaker {
             className = injector.reserve(className, lookup != null);
         }
 
-        Type superType = typeFrom(superClass == null ? Object.class : superClass);
-        mSuperClass = mConstants.addClass(superType);
-
-        mThisClass = mConstants.addClass(Type.begin(injector, this, className, superType));
+        mThisClass = mConstants.addClass(Type.begin(injector, this, className));
     }
 
-    private TheClassMaker(TheClassMaker from, String className, Object superClass) {
-        this(className, superClass, from.mLookup, from.mClassInjector);
+    private TheClassMaker(TheClassMaker from, String className) {
+        this(className, from.mLookup, from.mClassInjector);
     }
 
     @Override
-    public ClassMaker another(String className, Object superClass) {
-        return new TheClassMaker(this, className, superClass);
+    public ClassMaker another(String className) {
+        return new TheClassMaker(this, className);
     }
 
     @Override
@@ -181,6 +177,9 @@ final class TheClassMaker extends Attributed implements ClassMaker {
      */
     private void finishTo(DataOutput dout, boolean hidden) throws IOException {
         checkFinished();
+
+        // Ensure that mSuperClass has been assigned.
+        superClass();
 
         mFinished = -1;
 
@@ -309,6 +308,34 @@ final class TheClassMaker extends Attributed implements ClassMaker {
     }
 
     @Override
+    public ClassMaker extend(Object superClass) {
+        requireNonNull(superClass);
+        if (mSuperClass != null) {
+            throw new IllegalStateException("Super class has already been assigned");
+        }
+        doExtend(superClass);
+        return this;
+    }
+
+    private void doExtend(Object superClass) {
+        mSuperClass = mConstants.addClass(typeFrom(superClass));
+        type().resetInherited();
+    }
+
+    ConstantPool.C_Class superClass() {
+        ConstantPool.C_Class superClass = mSuperClass;
+        if (superClass == null) {
+            doExtend(Object.class);
+            superClass = mSuperClass;
+        }
+        return superClass;
+    }
+
+    Type superType() {
+        return superClass().mType;
+    }
+
+    @Override
     public ClassMaker implement(Object iface) {
         requireNonNull(iface);
         checkFinished();
@@ -316,7 +343,7 @@ final class TheClassMaker extends Attributed implements ClassMaker {
             mInterfaces = new LinkedHashSet<>(4);
         }
         mInterfaces.add(mConstants.addClass(typeFrom(iface)));
-        type().resetInterfaces();
+        type().resetInherited();
         return this;
     }
 
@@ -426,7 +453,7 @@ final class TheClassMaker extends Attributed implements ClassMaker {
     }
 
     @Override
-    public TheClassMaker addClass(String className, Object superClass) {
+    public TheClassMaker addClass(String className) {
         checkFinished();
 
         String prefix = name();
@@ -444,7 +471,7 @@ final class TheClassMaker extends Attributed implements ClassMaker {
             className = prefix + '$' + className;
         }
 
-        var nest = new TheClassMaker(this, className, superClass);
+        var nest = new TheClassMaker(this, className);
         nest.setNestHost(type());
 
         if (mNestMembers == null) {

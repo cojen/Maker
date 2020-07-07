@@ -195,7 +195,7 @@ public class CondyTest {
     @Test
     @SuppressWarnings("unchecked")
     public void complexConstants() throws Exception {
-        ClassMaker cm = ClassMaker.begin(null, ArrayList.class).public_();
+        ClassMaker cm = ClassMaker.begin(null).extend(ArrayList.class).public_();
         cm.addConstructor().public_();
         MethodMaker mm = cm.addMethod(null, "run").public_();
 
@@ -248,7 +248,8 @@ public class CondyTest {
         // The static initializer isn't run immediately when classes are generated, allowing
         // complex constants to be handed off correctly.
 
-        ClassMaker cm = ClassMaker.begin(null, ArrayList.class, MethodHandles.lookup()).public_();
+        ClassMaker cm = ClassMaker.begin(null, MethodHandles.lookup())
+            .extend(ArrayList.class).public_();
         cm.addField(byte[].class, "test").public_().static_().final_();
 
         MethodMaker mm = cm.addClinit();

@@ -84,9 +84,9 @@ abstract class Type {
     /**
      * Called when making a new class.
      */
-    static Type begin(ClassLoader loader, TheClassMaker maker, String name, Type superType) {
+    static Type begin(ClassLoader loader, TheClassMaker maker, String name) {
         ConcurrentHashMap<Object, Type> cache = cache(loader);
-        var type = new NewClazz(loader, maker, name, superType);
+        var type = new NewClazz(loader, maker, name);
         if (cachePut(cache, name, type) != type) {
             throw new IllegalStateException("Already being defined: " + name);
         }
@@ -119,22 +119,15 @@ abstract class Type {
      * @param type class name, primitive type, or type descriptor
      */
     static Type from(ClassLoader loader, String type) {
-        return from(loader, type, null);
-    }
-
-    /**
-     * @param type class name, primitive type, or type descriptor
-     */
-    static Type from(ClassLoader loader, String type, Type superType) {
         if (type == null) {
             return NULL;
         }
         ConcurrentHashMap<Object, Type> cache = cache(loader);
         Type t = cache.get(type);
-        return t != null ? t : cachePut(cache, type, find(loader, type, superType));
+        return t != null ? t : cachePut(cache, type, find(loader, type));
     }
 
-    private static Type find(ClassLoader loader, String type, Type superType) {
+    private static Type find(ClassLoader loader, String type) {
         type = type.trim();
 
         switch (type) {
@@ -169,7 +162,7 @@ abstract class Type {
             } else {
                 break isDescriptor;
             }
-            return new Clazz(loader, null, desc, null, superType);
+            return new Clazz(loader, null, desc, null);
         }
 
         if (type.charAt(type.length() - 1) == ';') {
@@ -186,7 +179,7 @@ abstract class Type {
             }
         }
 
-        return new Clazz(loader, name, null, null, superType);
+        return new Clazz(loader, name, null, null);
     }
 
     static Type from(Class type) {
@@ -453,10 +446,10 @@ abstract class Type {
     }
 
     /**
-     * Resets the known interfaces, forcing them to be checked again later. Is only useful for
-     * types returned from the begin method.
+     * Resets the known inherited members, forcing them to be checked again later. Is only
+     * useful for types returned from the begin method.
      */
-    void resetInterfaces() {
+    void resetInherited() {
     }
 
     /**
@@ -1118,7 +1111,7 @@ abstract class Type {
         private volatile String mDesc;
         protected volatile Boolean mIsInterface;
 
-        private volatile Type mSuperType;
+        protected volatile Type mSuperType;
         protected volatile Set<Type> mInterfaces;
 
         private volatile ConcurrentHashMap<String, Field> mFields;
@@ -1126,7 +1119,7 @@ abstract class Type {
         private volatile ConcurrentHashMap<MethodKey, Method> mMethods;
 
         Clazz(Class clazz) {
-            this(clazz.getClassLoader(), clazz.getName(), null, clazz.isInterface(), null);
+            this(clazz.getClassLoader(), clazz.getName(), null, clazz.isInterface());
             mClass = clazz;
         }
 
@@ -1134,12 +1127,11 @@ abstract class Type {
          * @param name can be null if desc isn't null
          * @param desc can be null if name isn't null
          */
-        Clazz(ClassLoader loader, String name, String desc, Boolean isInterface, Type superType) {
+        Clazz(ClassLoader loader, String name, String desc, Boolean isInterface) {
             mLoader = loader;
             mName = name;
             mDesc = desc;
             mIsInterface = isInterface;
-            mSuperType = superType;
         }
 
         @Override
@@ -1645,8 +1637,8 @@ abstract class Type {
     private static class NewClazz extends Clazz {
         final TheClassMaker mMaker;
 
-        NewClazz(ClassLoader loader, TheClassMaker maker, String name, Type superType) {
-            super(loader, name, null, false, superType);
+        NewClazz(ClassLoader loader, TheClassMaker maker, String name) {
+            super(loader, name, null, false);
             mMaker = maker;
         }
 
@@ -1655,6 +1647,15 @@ abstract class Type {
             // It doesn't exist yet, so don't try loading it. Doing so causes the ClassLoader
             // to allocate a lock object, and it might never be reclaimed.
             return null;
+        }
+
+        @Override
+        Type superType() {
+            Type superType = mSuperType;
+            if (superType == null) {
+                mSuperType = superType = mMaker.superType();
+            }
+            return superType;
         }
 
         @Override
@@ -1674,7 +1675,8 @@ abstract class Type {
         }
 
         @Override
-        void resetInterfaces() {
+        void resetInherited() {
+            mSuperType = null;
             mInterfaces = null;
         }
 

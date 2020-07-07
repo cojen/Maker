@@ -36,14 +36,14 @@ public class NestTest {
         ClassMaker parent = ClassMaker.begin().public_();
 
         try {
-            parent.addClass("A.B.C", null);
+            parent.addClass("A.B.C");
             fail();
         } catch (IllegalArgumentException e) {
         }
 
-        ClassMaker child1 = parent.addClass(null, null).public_();
-        ClassMaker child2 = parent.addClass("Child2", null);
-        ClassMaker child3 = parent.addClass(null, null).public_().interface_();
+        ClassMaker child1 = parent.addClass(null).public_();
+        ClassMaker child2 = parent.addClass("Child2");
+        ClassMaker child3 = parent.addClass(null).public_().interface_();
         child2.addConstructor().private_();
 
         parent.addField(int.class, "f0").private_().static_();

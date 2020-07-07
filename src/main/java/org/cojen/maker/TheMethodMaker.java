@@ -610,7 +610,7 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
 
     @Override
     public void invokeSuperConstructor(Object... values) {
-        invokeConstructor(mClassMaker.mSuperClass, values);
+        invokeConstructor(mClassMaker.superClass(), values);
     }
 
     @Override

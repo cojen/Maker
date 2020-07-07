@@ -300,7 +300,7 @@ public class InvokeTest {
 
     @Test
     public void override() throws Exception {
-        ClassMaker cm = ClassMaker.begin(null, InvokeTest.class).public_();
+        ClassMaker cm = ClassMaker.begin(null).extend(InvokeTest.class).public_();
 
         {
             MethodMaker mm = cm.addConstructor(int.class).private_();
@@ -335,7 +335,7 @@ public class InvokeTest {
     public void invokePrimitive() throws Exception {
         // Invoking a primitive boxes it first.
 
-        ClassMaker cm = ClassMaker.begin(null, InvokeTest.class).public_();
+        ClassMaker cm = ClassMaker.begin(null).extend(InvokeTest.class).public_();
         MethodMaker mm = cm.addMethod(null, "run").public_().static_();
         var v1 = mm.var(int.class).set(99);
         mm.var(Assert.class).invoke("assertEquals", "99", v1.invoke("toString"));
@@ -348,7 +348,7 @@ public class InvokeTest {
 
     @Test
     public void bigStack() throws Exception {
-        ClassMaker cm = ClassMaker.begin(null, InvokeTest.class).public_();
+        ClassMaker cm = ClassMaker.begin(null).extend(InvokeTest.class).public_();
         MethodMaker mm = cm.addMethod(null, "run").public_().static_();
 
         var vars = new Variable[48];
@@ -377,7 +377,7 @@ public class InvokeTest {
 
     @Test
     public void invokeInfer() throws Exception {
-        ClassMaker cm = ClassMaker.begin(null, InvokeTest.class).public_();
+        ClassMaker cm = ClassMaker.begin(null).extend(InvokeTest.class).public_();
         MethodMaker mm = cm.addMethod(null, "run").public_().static_();
 
         var v1 = mm.var(int.class).set(1);
@@ -428,7 +428,7 @@ public class InvokeTest {
 
     @Test
     public void invokeInfer2() throws Exception {
-        ClassMaker cm = ClassMaker.begin(null, InvokeTest.class).public_();
+        ClassMaker cm = ClassMaker.begin(null).extend(InvokeTest.class).public_();
         MethodMaker mm = cm.addMethod(null, "run").public_().static_();
 
         var v1 = mm.new_(ArrayList.class);
@@ -458,7 +458,7 @@ public class InvokeTest {
 
     @Test
     public void invokeInfer3() throws Exception {
-        ClassMaker cm = ClassMaker.begin(null, InvokeTest.class).public_();
+        ClassMaker cm = ClassMaker.begin(null).extend(InvokeTest.class).public_();
         MethodMaker mm = cm.addMethod(null, "run").public_().static_();
 
         var v1 = mm.new_(ArrayList.class);
@@ -479,7 +479,7 @@ public class InvokeTest {
 
     @Test
     public void invokeInfer4() throws Exception {
-        ClassMaker cm = ClassMaker.begin(null, InvokeTest.class).public_();
+        ClassMaker cm = ClassMaker.begin(null).extend(InvokeTest.class).public_();
         MethodMaker mm = cm.addMethod(null, "run").public_().static_();
 
         var v1 = mm.new_(int[].class, 10);
@@ -500,7 +500,7 @@ public class InvokeTest {
 
     @Test
     public void invokeInfer5() throws Exception {
-        ClassMaker cm = ClassMaker.begin(null, InvokeTest.class).public_();
+        ClassMaker cm = ClassMaker.begin(null).extend(InvokeTest.class).public_();
         MethodMaker mm = cm.addMethod(null, "run").public_().static_();
 
         var v1 = mm.new_(ArrayList[].class, 10);

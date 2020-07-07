@@ -41,9 +41,9 @@ public class ExplicitTest {
         throws Exception
     {
         if (cm == null) {
-            cm = ClassMaker.beginExplicit(name, null);
+            cm = ClassMaker.beginExplicit(name);
         } else {
-            cm = cm.another(name, null);
+            cm = cm.another(name);
         }
 
         assertEquals(name, cm.name());
@@ -78,7 +78,7 @@ public class ExplicitTest {
 
         if (!dynamic) {
             try {
-                cm.another(name, null);
+                cm.another(name);
                 fail();
             } catch (IllegalStateException e) {
                 assertTrue(e.getMessage().startsWith("Already"));
