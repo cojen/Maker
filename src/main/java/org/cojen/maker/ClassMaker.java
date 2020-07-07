@@ -144,7 +144,7 @@ public interface ClassMaker {
     public ClassMaker synthetic();
 
     /**
-     * Add an interface or class that this class extends.
+     * Set an interface or class that this class extends.
      *
      * @param superClass Class or String; pass null to use Object.
      * @return this
