@@ -31,6 +31,7 @@ import java.util.Objects;
  * that interact with them aren't thread-safe.
  *
  * @author Brian S O'Neill
+ * @see #begin
  */
 public interface ClassMaker {
     /**

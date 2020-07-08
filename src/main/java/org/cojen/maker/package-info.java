@@ -19,9 +19,15 @@
  *
  * <pre>
  * ClassMaker cm = ClassMaker.begin().public_();
+ *
+ * // public static void run()...
  * MethodMaker mm = cm.addMethod(null, "run").public_().static_();
+ *
+ * // System.out.println(...
  * mm.var(System.class).field("out").invoke("println", "hello, world");
- * cm.finish().getMethod("run").invoke(null);
+ *
+ * Class&lt;?&gt; clazz = cm.finish();
+ * clazz.getMethod("run").invoke(null);
  * </pre>
  *
  * @see ClassMaker
