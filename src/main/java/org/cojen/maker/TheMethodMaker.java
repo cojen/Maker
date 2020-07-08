@@ -653,14 +653,12 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
             type = type.box();
         }
 
-        boolean isNew = false;
         int staticMatch;
 
         if (instance != null) {
             staticMatch = 0; // maybe static
         } else if ("<init>".equals(methodName)) {
             // Calling a constructor for new object allocation.
-            isNew = true;
             staticMatch = -1; // not static
         } else {
             staticMatch = 1; // only static
