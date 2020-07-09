@@ -667,4 +667,29 @@ public class InvokeTest {
 
         assertEquals(type, cm.finish().getMethod("run").invoke(null));
     }
+
+    @Test
+    public void uncacheMethod() throws Exception {
+        // Test that when an overloaded method is added, the previous cache entry doesn't
+        // interfere with the new method from being found.
+
+        ClassMaker cm = ClassMaker.begin().public_();
+        cm.addMethod(null, "run", String.class).private_().static_();
+
+        MethodMaker mm = cm.addMethod(null, "run").public_().static_();
+        mm.invoke("run", "hello");
+
+        try {
+            mm.invoke("run", 100);
+            fail();
+        } catch (IllegalStateException e) {
+            assertTrue(e.getMessage().startsWith("No matching"));
+        }
+
+        cm.addMethod(null, "run", int.class).private_().static_();
+
+        mm.invoke("run", 100);
+
+        cm.finish().getMethod("run").invoke(null);
+    }
 }

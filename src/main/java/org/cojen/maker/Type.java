@@ -1117,6 +1117,8 @@ abstract class Type {
 
         private volatile ConcurrentHashMap<MethodKey, Method> mMethods;
 
+        private volatile ConcurrentHashMap<String, Map<FindKey, Set<Method>>> mFindMethods;
+
         Clazz(Class clazz) {
             this(clazz.getClassLoader(), clazz.getName(), null, clazz.isInterface());
             mClass = clazz;
@@ -1388,17 +1390,54 @@ abstract class Type {
                 }
             }
 
-            return findMethods(type, methodName, params, inherit, staticAllowed,
-                               specificReturnType, specificParamTypes);
+            var findMethods = mFindMethods;
+            if (findMethods == null) {
+                synchronized (this) {
+                    findMethods = mFindMethods;
+                    if (findMethods == null) {
+                        mFindMethods = findMethods = new ConcurrentHashMap<>();
+                    }
+                }
+            }
+
+            var subMap = findMethods.get(methodName);
+            if (subMap == null) {
+                subMap = new ConcurrentHashMap<>();
+                var existing = findMethods.putIfAbsent(methodName, subMap);
+                if (existing != null) {
+                    subMap = existing;
+                }
+            }
+
+            var findKey = new FindKey(params, inherit, staticAllowed,
+                                      specificReturnType, specificParamTypes);
+
+            Set<Method> results = subMap.get(findKey);
+
+            if (results != null) {
+                return results;
+            }
+
+            results = doFindMethods(type, methodName, params, inherit, staticAllowed,
+                                    specificReturnType, specificParamTypes);
+
+            subMap.put(findKey, results);
+
+            return results;
         }
 
-        private static Set<Method> findMethods(Type type, String methodName,
-                                               Type[] params, int inherit, int staticAllowed,
-                                               Type specificReturnType,
-                                               Type[] specificParamTypes)
-        {
-            // TODO: Cache the results.
+        private void uncacheFindMethod(String methodName) {
+            var findMethods = mFindMethods;
+            if (findMethods != null) {
+                findMethods.remove(methodName);
+            }
+        }
 
+        private static Set<Method> doFindMethods(Type type, String methodName,
+                                                 Type[] params, int inherit, int staticAllowed,
+                                                 Type specificReturnType,
+                                                 Type[] specificParamTypes)
+        {
             var methods = new LinkedHashSet<Method>(4);
             addMethods(methods, type, methodName, params, staticAllowed);
 
@@ -1541,6 +1580,7 @@ abstract class Type {
                 if (existing == null) {
                     if (!invent) {
                         methods.put(key, method);
+                        uncacheFindMethod(name);
                     }
                     return method;
                 }
@@ -1599,6 +1639,59 @@ abstract class Type {
         @Override
         public int hashCode() {
             return name().hashCode();
+        }
+
+        /**
+         * Composite key used to cache the results of doFindMethods.
+         */
+        private static class FindKey {
+            final Type[] params;
+            final int inherit;
+            final int staticAllowed;
+            final Type specificReturnType;
+            final Type[] specificParamTypes;
+
+            final int hash;
+
+            FindKey(Type[] params, int inherit, int staticAllowed,
+                    Type specificReturnType,
+                    Type[] specificParamTypes)
+            {
+                this.params = params;
+                this.inherit = inherit;
+                this.staticAllowed = staticAllowed;
+                this.specificReturnType = specificReturnType;
+                this.specificParamTypes = specificParamTypes;
+
+                int hash = Arrays.hashCode(params);
+                hash = hash * 31 + Objects.hashCode(specificReturnType);
+                hash = hash * 31 + Arrays.hashCode(specificParamTypes);
+                hash = hash + inherit;
+                hash = hash + (staticAllowed << 1);
+
+                this.hash = hash;
+            }
+
+            @Override
+            public boolean equals(Object obj) {
+                if (this == obj) {
+                    return true;
+                }
+                if (obj instanceof FindKey) {
+                    var other = (FindKey) obj;
+                    return Arrays.equals(params, other.params)
+                        && inherit == other.inherit
+                        && staticAllowed == other.staticAllowed
+                        && Objects.equals(specificReturnType, other.specificReturnType)
+                        && Arrays.equals(specificParamTypes, other.specificParamTypes);
+                }
+                return false;
+            }
+
+            @Override
+            public int hashCode() {
+                return hash;
+            }
         }
     }
 
