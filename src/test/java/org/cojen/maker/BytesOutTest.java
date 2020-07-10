@@ -107,4 +107,22 @@ public class BytesOutTest {
         byte[] expect = bout2.toByteArray();
         assertArrayEquals(expect, result);
     }
+
+    @Test
+    public void writeExpand() throws Exception {
+        var out = new BytesOut(null, 5);
+        out.writeInt(1234567890);
+        out.writeLong(1234567890123456789L);
+        out.writeShort(12345);
+        byte[] result = out.toByteArray();
+
+        var bout = new ByteArrayOutputStream();
+        var dout = new DataOutputStream(bout);
+        dout.writeInt(1234567890);
+        dout.writeLong(1234567890123456789L);
+        dout.writeShort(12345);
+        byte[] expect = bout.toByteArray();
+
+        assertArrayEquals(expect, result);
+    }
 }

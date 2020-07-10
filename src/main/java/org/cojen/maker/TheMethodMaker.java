@@ -27,8 +27,6 @@ import java.lang.invoke.VarHandle;
 
 import java.lang.reflect.Modifier;
 
-import java.nio.ByteOrder;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -41,6 +39,7 @@ import static java.util.Objects.*;
 
 import static org.cojen.maker.Opcodes.*;
 import static org.cojen.maker.Type.*;
+import static org.cojen.maker.BytesOut.*;
 
 /**
  * 
@@ -48,20 +47,6 @@ import static org.cojen.maker.Type.*;
  * @author Brian S O'Neill
  */
 final class TheMethodMaker extends ClassMember implements MethodMaker {
-    private static final VarHandle cShortArrayHandle;
-    private static final VarHandle cIntArrayHandle;
-
-    static {
-        try {
-            cShortArrayHandle = MethodHandles.byteArrayViewVarHandle
-                (short[].class, ByteOrder.BIG_ENDIAN);
-            cIntArrayHandle = MethodHandles.byteArrayViewVarHandle
-                (int[].class, ByteOrder.BIG_ENDIAN);
-        } catch (Throwable e) {
-            throw new ExceptionInInitializerError();
-        }
-    }
-
     private final TheClassMaker mClassMaker;
     private final Type.Method mMethod;
 

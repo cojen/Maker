@@ -29,18 +29,18 @@ import java.io.OutputStream;
  *
  * @author Brian S O'Neill
  */
-class BytesOut {
-    private static final VarHandle cShortArrayBEHandle;
-    private static final VarHandle cIntArrayBEHandle;
-    private static final VarHandle cLongArrayBEHandle;
+final class BytesOut {
+    static final VarHandle cShortArrayHandle;
+    static final VarHandle cIntArrayHandle;
+    static final VarHandle cLongArrayHandle;
 
     static {
         try {
-            cShortArrayBEHandle = MethodHandles.byteArrayViewVarHandle
+            cShortArrayHandle = MethodHandles.byteArrayViewVarHandle
                 (short[].class, ByteOrder.BIG_ENDIAN);
-            cIntArrayBEHandle = MethodHandles.byteArrayViewVarHandle
+            cIntArrayHandle = MethodHandles.byteArrayViewVarHandle
                 (int[].class, ByteOrder.BIG_ENDIAN);
-            cLongArrayBEHandle = MethodHandles.byteArrayViewVarHandle
+            cLongArrayHandle = MethodHandles.byteArrayViewVarHandle
                 (long[].class, ByteOrder.BIG_ENDIAN);
         } catch (Throwable e) {
             throw new ExceptionInInitializerError();
@@ -55,7 +55,7 @@ class BytesOut {
      * Pass an OutputStream instance to behave like BufferedOutputStream, or pass null to act
      * like ByteArrayOutputStream.
      *
-     * @param bufferSize at least 8
+     * @param bufferSize at least 8 when given an OutputStream
      */
     BytesOut(OutputStream out, int bufferSize) {
         mOut = out;
@@ -73,19 +73,19 @@ class BytesOut {
 
     public void writeShort(int v) throws IOException {
         ensureCapacity(2);
-        cShortArrayBEHandle.set(mBuffer, mSize, (short) v);
+        cShortArrayHandle.set(mBuffer, mSize, (short) v);
         mSize += 2;
     }
 
     public void writeInt(int v) throws IOException {
         ensureCapacity(4);
-        cIntArrayBEHandle.set(mBuffer, mSize, v);
+        cIntArrayHandle.set(mBuffer, mSize, v);
         mSize += 4;
     }
 
     public void writeLong(long v) throws IOException {
         ensureCapacity(8);
-        cLongArrayBEHandle.set(mBuffer, mSize, v);
+        cLongArrayHandle.set(mBuffer, mSize, v);
         mSize += 8;
     }
 
@@ -145,7 +145,7 @@ class BytesOut {
             }
         }
 
-        cShortArrayBEHandle.set(mBuffer, start, (short) (mSize - start - 2));
+        cShortArrayHandle.set(mBuffer, start, (short) (mSize - start - 2));
     }
 
     public void write(BytesOut out) throws IOException {

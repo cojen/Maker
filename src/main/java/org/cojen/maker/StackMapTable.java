@@ -78,7 +78,7 @@ class StackMapTable extends Attribute {
             return false;
         }
 
-        var out = new BytesOut(null, Math.max(8, mFrames.size() * 4));
+        var out = new BytesOut(null, mFrames.size() * 4);
 
         try {
             out.writeShort(mFrames.size());
