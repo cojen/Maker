@@ -16,7 +16,6 @@
 
 package org.cojen.maker;
 
-import java.io.DataOutput;
 import java.io.IOException;
 
 import java.util.ArrayList;
@@ -43,14 +42,14 @@ abstract class Attributed {
         mAttributes.add(attr);
     }
 
-    void writeAttributesTo(DataOutput dout) throws IOException {
+    void writeAttributesTo(BytesOut out) throws IOException {
         if (mAttributes == null) {
-            dout.writeShort(0);
+            out.writeShort(0);
         } else {
             TheClassMaker.checkSize(mAttributes, 65535, "Attribute");
-            dout.writeShort(mAttributes.size());
+            out.writeShort(mAttributes.size());
             for (Attribute attr : mAttributes) {
-                attr.writeTo(dout);
+                attr.writeTo(out);
             }
         }
     }

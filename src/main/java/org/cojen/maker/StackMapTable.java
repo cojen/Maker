@@ -16,9 +16,6 @@
 
 package org.cojen.maker;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutput;
-import java.io.DataOutputStream;
 import java.io.IOException;
 
 import java.util.Arrays;
@@ -32,7 +29,7 @@ import java.util.TreeMap;
 class StackMapTable extends Attribute {
     private final Frame mInitFrame;
     private TreeMap<Integer, Frame> mFrames;
-    private byte[] mFinished;
+    private BytesOut mFinished;
 
     /**
      * @param initCodes can be null
@@ -81,18 +78,16 @@ class StackMapTable extends Attribute {
             return false;
         }
 
-        ByteArrayOutputStream bout = new ByteArrayOutputStream();
-        DataOutputStream dout = new DataOutputStream(bout);
+        var out = new BytesOut(null, Math.max(8, mFrames.size() * 4));
 
         try {
-            dout.writeShort(mFrames.size());
+            out.writeShort(mFrames.size());
             Frame prev = mInitFrame;
             for (Frame frame : mFrames.values()) {
-                frame.writeTo(prev, dout);
+                frame.writeTo(prev, out);
                 prev = frame;
             }
-            dout.flush();
-            mFinished = bout.toByteArray();
+            mFinished = out;
         } catch (IOException e) {
             // Not expected.
             throw new IllegalStateException(e);
@@ -103,12 +98,12 @@ class StackMapTable extends Attribute {
 
     @Override
     int length() {
-        return mFinished.length;
+        return mFinished.size();
     }
 
     @Override
-    void writeDataTo(DataOutput dout) throws IOException {
-        dout.write(mFinished);
+    void writeDataTo(BytesOut out) throws IOException {
+        out.write(mFinished);
     }
 
     private void add(Frame frame) {
@@ -199,7 +194,7 @@ class StackMapTable extends Attribute {
             throw new IllegalStateException("Mismatched " + which + " at branch target");
         }
 
-        private void writeTo(Frame prev, DataOutput dout) throws IOException {
+        private void writeTo(Frame prev, BytesOut out) throws IOException {
             int offsetDelta;
             if (prev.mAddress < 0) {
                 if (prev.mAddress == Integer.MIN_VALUE) {
@@ -218,34 +213,34 @@ class StackMapTable extends Attribute {
                     if (offsetDelta < 64) {
                         if (mStackCodes == null || mStackCodes.length == 0) {
                             // same_frame
-                            dout.writeByte(offsetDelta);
+                            out.writeByte(offsetDelta);
                         } else {
                             // same_locals_1_stack_item_frame
-                            dout.writeByte(offsetDelta + 64);
-                            writeCode(dout, mStackCodes[0]);
+                            out.writeByte(offsetDelta + 64);
+                            writeCode(out, mStackCodes[0]);
                         }
                     } else {
                         if (mStackCodes == null || mStackCodes.length == 0) {
                             // same_frame_extended
-                            dout.writeByte(251);
-                            dout.writeShort(offsetDelta);
+                            out.writeByte(251);
+                            out.writeShort(offsetDelta);
                         } else {
                             // same_locals_1_stack_item_frame_extended
-                            dout.writeByte(247);
-                            dout.writeShort(offsetDelta);
-                            writeCode(dout, mStackCodes[0]);
+                            out.writeByte(247);
+                            out.writeShort(offsetDelta);
+                            writeCode(out, mStackCodes[0]);
                         }
                     }
                     return;
                 } else if (localsDiff >= -3 && localsDiff <= 3) {
                     if (mStackCodes == null || mStackCodes.length == 0) {
                         // chop_frame or append_frame
-                        dout.writeByte(251 + localsDiff);
-                        dout.writeShort(offsetDelta);
+                        out.writeByte(251 + localsDiff);
+                        out.writeShort(offsetDelta);
                         if (localsDiff > 0) {
                             int i = mLocalCodes.length - localsDiff;
                             for (; i < mLocalCodes.length; i++) {
-                                writeCode(dout, mLocalCodes[i]);
+                                writeCode(out, mLocalCodes[i]);
                             }
                         }
                         return;
@@ -254,28 +249,28 @@ class StackMapTable extends Attribute {
             }
 
             // full_frame
-            dout.writeByte(255);
-            dout.writeShort(offsetDelta);
-            writeCodes(dout, mLocalCodes);
-            writeCodes(dout, mStackCodes);
+            out.writeByte(255);
+            out.writeShort(offsetDelta);
+            writeCodes(out, mLocalCodes);
+            writeCodes(out, mStackCodes);
         }
 
-        private static void writeCodes(DataOutput dout, int[] codes) throws IOException {
+        private static void writeCodes(BytesOut out, int[] codes) throws IOException {
             if (codes == null) {
-                dout.writeShort(0);
+                out.writeShort(0);
             } else {
-                dout.writeShort(codes.length);
+                out.writeShort(codes.length);
                 for (int code : codes) {
-                    writeCode(dout, code);
+                    writeCode(out, code);
                 }
             }
         }
 
-        private static void writeCode(DataOutput dout, int code) throws IOException {
+        private static void writeCode(BytesOut out, int code) throws IOException {
             int smCode = code & 0xff;
-            dout.writeByte(smCode);
+            out.writeByte(smCode);
             if (smCode == Type.SM_OBJECT || smCode == Type.SM_UNINIT) {
-                dout.writeShort(code >> 8);
+                out.writeShort(code >> 8);
             }
         }
 

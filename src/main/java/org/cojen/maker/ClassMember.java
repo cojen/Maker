@@ -16,7 +16,6 @@
 
 package org.cojen.maker;
 
-import java.io.DataOutput;
 import java.io.IOException;
 
 /**
@@ -36,11 +35,11 @@ abstract class ClassMember extends Attributed {
         mDescriptor = desc;
     }
 
-    final void writeTo(DataOutput dout) throws IOException {
-        dout.writeShort(mModifiers);
-        dout.writeShort(mName.mIndex);
-        dout.writeShort(mDescriptor.mIndex);
-        writeAttributesTo(dout);
+    final void writeTo(BytesOut out) throws IOException {
+        out.writeShort(mModifiers);
+        out.writeShort(mName.mIndex);
+        out.writeShort(mDescriptor.mIndex);
+        writeAttributesTo(out);
     }
 
     String getName() {

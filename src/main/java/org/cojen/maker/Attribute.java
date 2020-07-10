@@ -16,7 +16,6 @@
 
 package org.cojen.maker;
 
-import java.io.DataOutput;
 import java.io.IOException;
 
 import java.util.Arrays;
@@ -45,16 +44,16 @@ abstract class Attribute extends Attributed {
      * This method writes the 16 bit name constant index followed by the 32 bit attribute
      * length, followed by the attribute specific data.
      */
-    final void writeTo(DataOutput dout) throws IOException {
-        dout.writeShort(mAttrName.mIndex);
-        dout.writeInt(length());
-        writeDataTo(dout);
+    final void writeTo(BytesOut out) throws IOException {
+        out.writeShort(mAttrName.mIndex);
+        out.writeInt(length());
+        writeDataTo(out);
     }
 
     /**
      * Write just the attribute specific data.
      */
-    abstract void writeDataTo(DataOutput dout) throws IOException;
+    abstract void writeDataTo(BytesOut out) throws IOException;
 
     static class Constant extends Attribute {
         private final ConstantPool.Constant mConstant;
@@ -70,8 +69,8 @@ abstract class Attribute extends Attributed {
         }
 
         @Override
-        void writeDataTo(DataOutput dout) throws IOException {
-            dout.writeShort(mConstant.mIndex);
+        void writeDataTo(BytesOut out) throws IOException {
+            out.writeShort(mConstant.mIndex);
         }
     }
 
@@ -89,8 +88,8 @@ abstract class Attribute extends Attributed {
         }
 
         @Override
-        void writeDataTo(DataOutput dout) throws IOException {
-            dout.writeShort(mSourcefile.mIndex);
+        void writeDataTo(BytesOut out) throws IOException {
+            out.writeShort(mSourcefile.mIndex);
         }
     }
 
@@ -132,26 +131,26 @@ abstract class Attribute extends Attributed {
         }
 
         @Override
-        void writeDataTo(DataOutput dout) throws IOException {
-            dout.writeShort(mMaxStack);
-            dout.writeShort(mMaxLocals);
-            dout.writeInt(mCodeLen);
-            dout.write(mCode, 0, mCodeLen);
+        void writeDataTo(BytesOut out) throws IOException {
+            out.writeShort(mMaxStack);
+            out.writeShort(mMaxLocals);
+            out.writeInt(mCodeLen);
+            out.write(mCode, 0, mCodeLen);
 
             if (mExceptionHandlers == null) {
-                dout.writeShort(0);
+                out.writeShort(0);
             } else {
-                dout.writeShort(mExceptionHandlers.size());
+                out.writeShort(mExceptionHandlers.size());
                 for (ExceptionHandler handler : mExceptionHandlers) {
-                    dout.writeShort(handler.startAddr());
-                    dout.writeShort(handler.endAddr());
-                    dout.writeShort(handler.handlerAddr());
+                    out.writeShort(handler.startAddr());
+                    out.writeShort(handler.endAddr());
+                    out.writeShort(handler.handlerAddr());
                     ConstantPool.C_Class catchClass = handler.catchClass();
-                    dout.writeShort(catchClass == null ? 0 : catchClass.mIndex);
+                    out.writeShort(catchClass == null ? 0 : catchClass.mIndex);
                 }
             }
 
-            writeAttributesTo(dout);
+            writeAttributesTo(out);
         }
     }
 
@@ -189,12 +188,12 @@ abstract class Attribute extends Attributed {
         }
 
         @Override
-        void writeDataTo(DataOutput dout) throws IOException {
-            dout.writeShort(mLength);
+        void writeDataTo(BytesOut out) throws IOException {
+            out.writeShort(mLength);
             for (int i=0; i<mLength; i++) {
                 int entry = mTable[i];
-                dout.writeShort(entry >>> 16);
-                dout.writeShort(entry);
+                out.writeShort(entry >>> 16);
+                out.writeShort(entry);
             }
         }
     }
@@ -233,17 +232,17 @@ abstract class Attribute extends Attributed {
         }
 
         @Override
-        void writeDataTo(DataOutput dout) throws IOException {
-            dout.writeShort(mSize);
+        void writeDataTo(BytesOut out) throws IOException {
+            out.writeShort(mSize);
             for (int i=0; i<mSize; i++) {
                 Entry entry = mEntries[i];
                 int start = entry.mStartOffset;
-                dout.writeShort(start);
+                out.writeShort(start);
                 int end = Math.min(mMaxOffset, entry.mEndOffset);
-                dout.writeShort(Math.min(65535, Math.max(0, end - start)));
-                dout.writeShort(entry.mName.mIndex);
-                dout.writeShort(entry.mType.mIndex);
-                dout.writeShort(entry.mSlot);
+                out.writeShort(Math.min(65535, Math.max(0, end - start)));
+                out.writeShort(entry.mName.mIndex);
+                out.writeShort(entry.mType.mIndex);
+                out.writeShort(entry.mSlot);
             }
         }
 
@@ -294,14 +293,14 @@ abstract class Attribute extends Attributed {
         }
 
         @Override
-        void writeDataTo(DataOutput dout) throws IOException {
-            dout.writeShort(mEntries.size());
+        void writeDataTo(BytesOut out) throws IOException {
+            out.writeShort(mEntries.size());
             for (Entry entry : mEntries.keySet()) {
-                dout.writeShort(entry.mMethod.mIndex);
+                out.writeShort(entry.mMethod.mIndex);
                 ConstantPool.Constant[] args = entry.mArgs;
-                dout.writeShort(args.length);
+                out.writeShort(args.length);
                 for (int i=0; i<args.length; i++) {
-                    dout.writeShort(args[i].mIndex);
+                    out.writeShort(args[i].mIndex);
                 }
             }
         }
@@ -349,8 +348,8 @@ abstract class Attribute extends Attributed {
         }
 
         @Override
-        void writeDataTo(DataOutput dout) throws IOException {
-            dout.writeShort(mHostClass.mIndex);
+        void writeDataTo(BytesOut out) throws IOException {
+            out.writeShort(mHostClass.mIndex);
         }
     }
 
@@ -380,10 +379,10 @@ abstract class Attribute extends Attributed {
         }
 
         @Override
-        void writeDataTo(DataOutput dout) throws IOException {
-            dout.writeShort(mSize);
+        void writeDataTo(BytesOut out) throws IOException {
+            out.writeShort(mSize);
             for (int i=0; i<mSize; i++) {
-                dout.writeShort(mMembers[i].mIndex);
+                out.writeShort(mMembers[i].mIndex);
             }
         }
     }

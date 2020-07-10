@@ -16,7 +16,6 @@
 
 package org.cojen.maker;
 
-import java.io.DataOutput;
 import java.io.IOException;
 
 import java.lang.invoke.MethodHandleInfo;
@@ -43,15 +42,15 @@ class ConstantPool {
         mSize = 1; // constant 0 is reserved
     }
 
-    void writeTo(DataOutput dout) throws IOException {
+    void writeTo(BytesOut out) throws IOException {
         int size = mSize;
         if (size > 65535) {
             throw new IllegalStateException
                 ("Constant pool entry count cannot exceed 65535: " + size);
         }
-        dout.writeShort(size);
+        out.writeShort(size);
         for (Constant c : mConstants.keySet()) {
-            c.writeTo(dout);
+            c.writeTo(out);
         }
     }
 
@@ -255,8 +254,8 @@ class ConstantPool {
             mTag = tag;
         }
 
-        void writeTo(DataOutput dout) throws IOException {
-            dout.writeByte(mTag);
+        void writeTo(BytesOut out) throws IOException {
+            out.writeByte(mTag);
         }
     }
 
@@ -286,9 +285,9 @@ class ConstantPool {
         }
 
         @Override
-        void writeTo(DataOutput dout) throws IOException {
-            super.writeTo(dout);
-            dout.writeUTF(mValue);
+        void writeTo(BytesOut out) throws IOException {
+            super.writeTo(out);
+            out.writeUTF(mValue);
         }
     }
 
@@ -318,9 +317,9 @@ class ConstantPool {
         }
     
         @Override
-        void writeTo(DataOutput dout) throws IOException {
-            super.writeTo(dout);
-            dout.writeInt(mValue);
+        void writeTo(BytesOut out) throws IOException {
+            super.writeTo(out);
+            out.writeInt(mValue);
         }
     }
 
@@ -350,9 +349,9 @@ class ConstantPool {
         }
     
         @Override
-        void writeTo(DataOutput dout) throws IOException {
-            super.writeTo(dout);
-            dout.writeFloat(mValue);
+        void writeTo(BytesOut out) throws IOException {
+            super.writeTo(out);
+            out.writeFloat(mValue);
         }
     }
 
@@ -382,9 +381,9 @@ class ConstantPool {
         }
     
         @Override
-        void writeTo(DataOutput dout) throws IOException {
-            super.writeTo(dout);
-            dout.writeLong(mValue);
+        void writeTo(BytesOut out) throws IOException {
+            super.writeTo(out);
+            out.writeLong(mValue);
         }
     }
 
@@ -414,9 +413,9 @@ class ConstantPool {
         }
     
         @Override
-        void writeTo(DataOutput dout) throws IOException {
-            super.writeTo(dout);
-            dout.writeDouble(mValue);
+        void writeTo(BytesOut out) throws IOException {
+            super.writeTo(out);
+            out.writeDouble(mValue);
         }
     }
 
@@ -446,9 +445,9 @@ class ConstantPool {
         }
 
         @Override
-        void writeTo(DataOutput dout) throws IOException {
-            super.writeTo(dout);
-            dout.writeShort(mValue.mIndex);
+        void writeTo(BytesOut out) throws IOException {
+            super.writeTo(out);
+            out.writeShort(mValue.mIndex);
         }
     }
 
@@ -499,10 +498,10 @@ class ConstantPool {
         }
 
         @Override
-        void writeTo(DataOutput dout) throws IOException {
-            super.writeTo(dout);
-            dout.writeShort(mName.mIndex);
-            dout.writeShort(mTypeDesc.mIndex);
+        void writeTo(BytesOut out) throws IOException {
+            super.writeTo(out);
+            out.writeShort(mName.mIndex);
+            out.writeShort(mTypeDesc.mIndex);
         }
     }
 
@@ -535,10 +534,10 @@ class ConstantPool {
         }
     
         @Override
-        void writeTo(DataOutput dout) throws IOException {
-            super.writeTo(dout);
-            dout.writeShort(mClass.mIndex);
-            dout.writeShort(mNameAndType.mIndex);
+        void writeTo(BytesOut out) throws IOException {
+            super.writeTo(out);
+            out.writeShort(mClass.mIndex);
+            out.writeShort(mNameAndType.mIndex);
         }
     }
 
@@ -596,9 +595,9 @@ class ConstantPool {
         }
 
         @Override
-        void writeTo(DataOutput dout) throws IOException {
-            super.writeTo(dout);
-            dout.writeShort(mTypeDesc.mIndex);
+        void writeTo(BytesOut out) throws IOException {
+            super.writeTo(out);
+            out.writeShort(mTypeDesc.mIndex);
         }
     }
 
@@ -630,10 +629,10 @@ class ConstantPool {
         }
 
         @Override
-        void writeTo(DataOutput dout) throws IOException {
-            super.writeTo(dout);
-            dout.writeByte(mKind);
-            dout.writeShort(mRef.mIndex);
+        void writeTo(BytesOut out) throws IOException {
+            super.writeTo(out);
+            out.writeByte(mKind);
+            out.writeShort(mRef.mIndex);
         }
     }
 
@@ -666,10 +665,10 @@ class ConstantPool {
         }
     
         @Override
-        void writeTo(DataOutput dout) throws IOException {
-            super.writeTo(dout);
-            dout.writeShort(mBootstrapIndex);
-            dout.writeShort(mNameAndType.mIndex);
+        void writeTo(BytesOut out) throws IOException {
+            super.writeTo(out);
+            out.writeShort(mBootstrapIndex);
+            out.writeShort(mNameAndType.mIndex);
         }
     }
 }

@@ -16,9 +16,6 @@
 
 package org.cojen.maker;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutput;
-import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -156,116 +153,6 @@ final class TheClassMaker extends Attributed implements ClassMaker {
     @Override
     public ClassMaker another(String className) {
         return new TheClassMaker(this, className);
-    }
-
-    @Override
-    public void finishTo(OutputStream out) throws IOException {
-        DataOutput dout;
-        if (out instanceof DataOutput) {
-            dout = (DataOutput) out;
-        } else {
-            dout = new DataOutputStream(out);
-        }
-        finishTo(dout, false);
-    }
-
-    /**
-     * @param hidden when true, rename the class
-     */
-    private void finishTo(DataOutput dout, boolean hidden) throws IOException {
-        checkFinished();
-
-        // Ensure that mSuperClass has been assigned.
-        superClass();
-
-        mFinished = -1;
-
-        mBootstrapMethods = null;
-
-        TheMethodMaker.finish(mClinitMethods);
-        mClinitMethods = null;
-
-        checkSize(mInterfaces, 65535, "Interface");
-        checkSize(mFields, 65535, "Field");
-        checkSize(mMethods, 65535, "Method");
-
-        if (mMethods != null) {
-            for (TheMethodMaker method : mMethods) {
-                method.finish();
-            }
-        }
-
-        if (hidden) {
-            // Clean up the generated class name. It will be given a unique name by the
-            // defineHiddenClass or defineAnonymousClass method.
-            String name = mThisClass.mValue.mValue;
-            int ix = name.lastIndexOf('-');
-            if (ix > 0) {
-                mThisClass.rename(mConstants.addUTF8(name.substring(0, ix)));
-            }
-        }
-
-        dout.writeInt(0xCAFEBABE);
-        dout.writeInt(0x0000_0037); // Java 11.
-
-        mConstants.writeTo(dout);
-
-        int flags = mModifiers;
-        if (!Modifier.isInterface(flags)) {
-            // Set the ACC_SUPER flag for classes only.
-            flags |= Modifier.SYNCHRONIZED;
-        }
-        dout.writeShort(flags);
-
-        dout.writeShort(mThisClass.mIndex);
-        dout.writeShort(mSuperClass.mIndex);
-
-        if (mInterfaces == null) {
-            dout.writeShort(0);
-        } else {
-            dout.writeShort(mInterfaces.size());
-            for (ConstantPool.C_Class iface : mInterfaces) {
-                dout.writeShort(iface.mIndex);
-            }
-            mInterfaces = null;
-        }
-
-        if (mFields == null) {
-            dout.writeShort(0);
-        } else {
-            dout.writeShort(mFields.size());
-            for (TheFieldMaker field : mFields.values()) {
-                field.writeTo(dout);
-            }
-            mFields = null;
-        }
-
-        if (mMethods == null) {
-            dout.writeShort(0);
-        } else {
-            dout.writeShort(mMethods.size());
-            for (TheMethodMaker method : mMethods) {
-                method.writeTo(dout);
-            }
-            mMethods = null;
-        }
-
-        writeAttributesTo(dout);
-
-        mAttributes = null;
-    }
-
-    static void checkSize(Map<?,?> c, int maxSize, String desc) {
-        if (c != null) {
-            checkSize(c.keySet(), maxSize, desc);
-        }
-    }
-
-    static void checkSize(Collection<?> c, int maxSize, String desc) {
-        if (c != null && c.size() > maxSize) {
-            throw new IllegalStateException
-                (desc + " count cannot exceed " + maxSize + ": " + c.size());
-        }
     }
 
     @Override
@@ -569,12 +456,17 @@ final class TheClassMaker extends Attributed implements ClassMaker {
         return result;
     }
 
-    byte[] finishBytes(boolean hidden) {
+    @Override
+    public byte[] finishBytes() {
+        return finishBytes(false);
+    }
+
+    private byte[] finishBytes(boolean hidden) {
         byte[] bytes;
         try {
-            ByteArrayOutputStream bout = new ByteArrayOutputStream(1000);
-            finishTo(new DataOutputStream(bout), hidden);
-            bytes = bout.toByteArray();
+            var out = new BytesOut(null, 1000);
+            finishTo(out, hidden);
+            bytes = out.toByteArray();
         } catch (IOException e) {
             // Not expected.
             throw new RuntimeException(e);
@@ -596,6 +488,112 @@ final class TheClassMaker extends Attributed implements ClassMaker {
         }
 
         return bytes;
+    }
+
+    @Override
+    public void finishTo(OutputStream out) throws IOException {
+        var bout = new BytesOut(out, 1000);
+        finishTo(bout, false);
+        bout.flush();
+    }
+
+    /**
+     * @param hidden when true, rename the class
+     */
+    private void finishTo(BytesOut out, boolean hidden) throws IOException {
+        checkFinished();
+
+        // Ensure that mSuperClass has been assigned.
+        superClass();
+
+        mFinished = -1;
+
+        mBootstrapMethods = null;
+
+        TheMethodMaker.finish(mClinitMethods);
+        mClinitMethods = null;
+
+        checkSize(mInterfaces, 65535, "Interface");
+        checkSize(mFields, 65535, "Field");
+        checkSize(mMethods, 65535, "Method");
+
+        if (mMethods != null) {
+            for (TheMethodMaker method : mMethods) {
+                method.finish();
+            }
+        }
+
+        if (hidden) {
+            // Clean up the generated class name. It will be given a unique name by the
+            // defineHiddenClass or defineAnonymousClass method.
+            String name = mThisClass.mValue.mValue;
+            int ix = name.lastIndexOf('-');
+            if (ix > 0) {
+                mThisClass.rename(mConstants.addUTF8(name.substring(0, ix)));
+            }
+        }
+
+        out.writeInt(0xCAFEBABE);
+        out.writeInt(0x0000_0037); // Java 11.
+
+        mConstants.writeTo(out);
+
+        int flags = mModifiers;
+        if (!Modifier.isInterface(flags)) {
+            // Set the ACC_SUPER flag for classes only.
+            flags |= Modifier.SYNCHRONIZED;
+        }
+        out.writeShort(flags);
+
+        out.writeShort(mThisClass.mIndex);
+        out.writeShort(mSuperClass.mIndex);
+
+        if (mInterfaces == null) {
+            out.writeShort(0);
+        } else {
+            out.writeShort(mInterfaces.size());
+            for (ConstantPool.C_Class iface : mInterfaces) {
+                out.writeShort(iface.mIndex);
+            }
+            mInterfaces = null;
+        }
+
+        if (mFields == null) {
+            out.writeShort(0);
+        } else {
+            out.writeShort(mFields.size());
+            for (TheFieldMaker field : mFields.values()) {
+                field.writeTo(out);
+            }
+            mFields = null;
+        }
+
+        if (mMethods == null) {
+            out.writeShort(0);
+        } else {
+            out.writeShort(mMethods.size());
+            for (TheMethodMaker method : mMethods) {
+                method.writeTo(out);
+            }
+            mMethods = null;
+        }
+
+        writeAttributesTo(out);
+
+        mAttributes = null;
+    }
+
+    static void checkSize(Map<?,?> c, int maxSize, String desc) {
+        if (c != null) {
+            checkSize(c.keySet(), maxSize, desc);
+        }
+    }
+
+    static void checkSize(Collection<?> c, int maxSize, String desc) {
+        if (c != null && c.size() > maxSize) {
+            throw new IllegalStateException
+                (desc + " count cannot exceed " + maxSize + ": " + c.size());
+        }
     }
 
     private void checkFinished() {

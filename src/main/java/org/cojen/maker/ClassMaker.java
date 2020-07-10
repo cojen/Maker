@@ -253,6 +253,13 @@ public interface ClassMaker {
     public MethodHandles.Lookup finishHidden();
 
     /**
+     * Finishes the definition of the new class into a byte array.
+     *
+     * @throws IllegalStateException if already finished or if the definition is broken
+     */
+    public byte[] finishBytes();
+
+    /**
      * Finishes the definition of the new class and writes it to a stream.
      *
      * @throws IllegalStateException if already finished or if the definition is broken
