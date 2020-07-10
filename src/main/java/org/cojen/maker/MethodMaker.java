@@ -126,7 +126,7 @@ public interface MethodMaker {
     public Variable this_();
 
     /**
-     * Returns a variable which accesses a parameter to the method being built.
+     * Returns a variable which accesses a parameter of the method being built.
      *
      * @param index zero based index
      * @throws IndexOutOfBoundsException if index is out of bounds
