@@ -147,7 +147,7 @@ public interface ClassMaker {
     /**
      * Set an interface or class that this class extends.
      *
-     * @param superClass Class or String; pass null to use Object.
+     * @param superClass non-null Class or String
      * @return this
      * @throws IllegalStateException if already assigned
      */
