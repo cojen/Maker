@@ -14,3 +14,5 @@ mm.var(System.class).field("out").invoke("println", "hello, world");
 Class<?> clazz = cm.finish();
 clazz.getMethod("run").invoke(null);
 ```
+
+More complex examples can be found [here](example/main/java/org/cojen/example).
