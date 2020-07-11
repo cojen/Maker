@@ -199,7 +199,7 @@ public class ComparatorMaker<T> {
     public Comparator<T> finish() {
         // FIXME: cache it?
 
-        ClassMaker cm = ClassMaker.begin(getClass().getName(), null, MethodHandles.lookup());
+        ClassMaker cm = ClassMaker.begin(getClass().getName(), MethodHandles.lookup());
         cm.implement(Comparator.class);
         cm.addConstructor().public_();
 
