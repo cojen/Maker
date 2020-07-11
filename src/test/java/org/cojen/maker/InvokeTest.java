@@ -609,8 +609,62 @@ public class InvokeTest {
         throw new Exception(msg);
     }
 
-    public static int foo() throws Exception {
+    public static int foo() {
         return 10;
+    }
+
+    @Test
+    public void invokeSpecific2() throws Exception {
+        ClassMaker cm = ClassMaker.begin().public_();
+        MethodMaker mm = cm.addMethod(null, "run").public_().static_();
+
+        {
+            var result = mm.var(InvokeTest.class).invoke
+                (String.class, "foo2", new Object[]{int.class, long.class}, 1, 2);
+
+            mm.var(Assert.class).invoke("assertEquals", "hello12", result);
+        }
+
+        {
+            var result = mm.var(InvokeTest.class).invoke
+                (String.class, "foo2", new Object[]{long.class, int.class}, 1, 2);
+
+            mm.var(Assert.class).invoke("assertEquals", "world12", result);
+        }
+
+        cm.finish().getMethod("run").invoke(null);
+    }
+
+    public static String foo2(int a, long b) {
+        return "hello" + a + b;
+    }
+
+    public static String foo2(long a, int b) {
+        return "world" + a + b;
+    }
+
+    @Test
+    public void invokeSpecific3() throws Exception {
+        ClassMaker cm = ClassMaker.begin().public_().extend(InvokeTest.class);
+
+        {
+            MethodMaker mm = cm.addMethod(long.class, "foo").public_().static_();
+            mm.return_(Long.MAX_VALUE);
+        }
+
+        MethodMaker mm = cm.addMethod(null, "run").public_().static_();
+
+        try {
+            mm.invoke("foo");
+            fail();
+        } catch (IllegalStateException e) {
+            assertTrue(e.getMessage().startsWith("No best"));
+        }
+
+        var result = mm.var(cm.name()).invoke(long.class, "foo", new Object[0]);
+        mm.var(Assert.class).invoke("assertEquals", Long.MAX_VALUE, result);
+
+        cm.finish().getMethod("run").invoke(null);
     }
 
     @Test
@@ -619,6 +673,9 @@ public class InvokeTest {
 
         MethodMaker mm = cm.addMethod(int.class, "foo", int.class).private_().static_();
         mm.return_(mm.param(0).add(1));
+
+        mm = cm.addMethod(int.class, "foo", long.class).private_();
+        mm.return_(mm.param(0).add(-1).cast(int.class));
 
         mm = cm.addMethod(int.class, "run", int.class).public_().static_();
         mm.return_(mm.invoke("foo", mm.param(0)));

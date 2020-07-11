@@ -90,7 +90,9 @@ public class TypeTest {
             assertTrue(type.isPrimitive());
             assertEquals(type, type.unbox());
             assertEquals(prims[i + 1], type.descriptor());
-            assertFalse(type.isArray());
+            assertEquals(type, type.box().unbox());
+
+            verifyNonObject(type);
 
             // Find by descriptor.
             assertEquals(type, Type.from(loader, prims[i + 1]));
@@ -102,7 +104,10 @@ public class TypeTest {
             assertEquals("*null*", type.descriptor());
             assertFalse(type.isPrimitive());
             assertNull(type.unbox());
-            assertFalse(type.isArray());
+            assertEquals(type, type.box());
+            assertNull(type.clazz());
+
+            verifyNonObject(type);
 
             // Find by pseudo descriptor.
             assertEquals(type, Type.from(loader, ""));
@@ -115,9 +120,11 @@ public class TypeTest {
             assertFalse(type.isPrimitive());
             assertNull(type.unbox());
             assertTrue(type.isArray());
+            assertFalse(type.isInterface());
 
             // Find by descriptor.
             assertEquals(type, Type.from(loader, "[Labc/Foo;"));
+            assertEquals(type, Type.from(loader, "[Labc/Foo"));
         }
 
         {
@@ -131,6 +138,8 @@ public class TypeTest {
             Type type = Type.from(loader, "java.lang.FakeClass");
             assertEquals("java.lang.FakeClass", type.name());
             assertEquals("Ljava/lang/FakeClass;", type.descriptor());
+            assertFalse(type.isInterface());
+            type.toInterface();
         }
 
         {
@@ -150,6 +159,48 @@ public class TypeTest {
             assertEquals("LFoo", type.name());
             assertEquals("LLFoo;", type.descriptor());
         }
+    }
+
+    private static void verifyNonObject(Type type) {
+        assertFalse(type.isArray());
+        assertNull(type.elementType());
+        assertFalse(type.isInterface());
+
+        assertNull(type.superType());
+        assertNull(type.interfaces());
+        assertTrue(type.fields().isEmpty());
+        assertTrue(type.methods().isEmpty());
+
+        try {
+            type.defineField(false, type, "x");
+            fail();
+        } catch (IllegalStateException e) {
+        }
+        try {
+            type.inventField(false, type, "x");
+            fail();
+        } catch (IllegalStateException e) {
+        }
+
+        try {
+            type.defineMethod(false, type, "x");
+            fail();
+        } catch (IllegalStateException e) {
+        }
+        try {
+            type.inventMethod(false, type, "x");
+            fail();
+        } catch (IllegalStateException e) {
+        }
+
+        assertTrue(type.findMethods("x", new Type[0], 0, 0, null, null).isEmpty());
+        assertNull(type.findMethod("x", new Type[0]));
+
+        assertTrue(type.isAssignableFrom(type));
+        Type object = Type.from(Object.class);
+        assertFalse(type.isAssignableFrom(object));
+        
+        assertEquals(type == Type.NULL, object.isAssignableFrom(type));
     }
 
     @Test
@@ -176,5 +227,20 @@ public class TypeTest {
         assertEquals(int.class, actual[0]);
         assertEquals(Integer.class, actual[1]);
         assertEquals(String.class, actual[2]);
+    }
+
+    @Test
+    public void nonTypes() throws Exception {
+        ClassLoader loader = getClass().getClassLoader();
+        assertEquals(Type.NULL, Type.from(loader, (String) null));
+        assertEquals(Type.NULL, Type.from(loader, (Object) null));
+        assertEquals(Type.NULL, Type.from((Class) null));
+
+        try {
+            Type.from(loader, this);
+            fail();
+        } catch (IllegalArgumentException e) {
+            assertTrue(e.getMessage().startsWith("Unknown"));
+        }
     }
 }

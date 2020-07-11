@@ -431,4 +431,64 @@ public class BranchTest {
         var clazz = cm.finish();
         clazz.getMethod("run", int.class).invoke(null, 10);
     }
+
+    @Test
+    public void chop() throws Exception {
+        // Define a branch pattern which creates a chop frame.
+
+        ClassMaker cm = ClassMaker.begin().public_();
+        MethodMaker mm = cm.addMethod(int.class, "run", int.class).static_().public_();
+
+        Label end = mm.label();
+        mm.param(0).ifEq(0, end);
+
+        var result = mm.var(int.class);
+        Label L1 = mm.label();
+        mm.param(0).ifEq(1, L1);
+        result.set(mm.param(0).sub(1));
+        Label L2 = mm.label();
+        mm.goto_(L2);
+        L1.here();
+        result.set(mm.param(0).add(1));
+        L2.here();
+        mm.return_(result);
+
+        end.here();
+        mm.return_(mm.param(0));
+
+        var clazz = cm.finish();
+        var method =  clazz.getMethod("run", int.class);
+        assertEquals(0, method.invoke(null, 0));
+        assertEquals(2, method.invoke(null, 1));
+        assertEquals(1, method.invoke(null, 2));
+    }
+
+    @Test
+    public void chop2() throws Exception {
+        // Define a branch pattern which creates a chop frame, resulting in nothing.
+
+        ClassMaker cm = ClassMaker.begin().public_();
+        MethodMaker mm = cm.addMethod(int.class, "run").static_().public_();
+
+        Label end = mm.label();
+        mm.var(System.class).field("out").ifEq(null, end);
+
+        var result = mm.var(int.class);
+        Label L1 = mm.label();
+        mm.var(System.class).field("err").ifEq(null, L1);
+        result.set(1);
+        Label L2 = mm.label();
+        mm.goto_(L2);
+        L1.here();
+        result.set(2);
+        L2.here();
+        mm.return_(result);
+
+        end.here();
+        mm.return_(0);
+
+        var clazz = cm.finish();
+        var method =  clazz.getMethod("run");
+        assertEquals(1, method.invoke(null));
+    }
 }

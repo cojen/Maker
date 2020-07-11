@@ -259,11 +259,6 @@ abstract class Type {
     abstract boolean isInterface();
 
     /**
-     * Returns true if type is an object or an interface, but not an array.
-     */
-    abstract boolean isClass();
-
-    /**
      * Returns true if type is an array and has no methods.
      */
     abstract boolean isArray();
@@ -536,8 +531,7 @@ abstract class Type {
     public String toString() {
         return "Type {name=" + name() + ", descriptor=" + descriptor() +
             ", isPrimitive=" + isPrimitive() + ", isInterface=" + isInterface() +
-            ", isClass=" + isClass() + ", isArray=" + isArray() +
-            ", elementType=" + toString(elementType()) +
+            ", isArray=" + isArray() + ", elementType=" + toString(elementType()) +
             ", stackMapCode=" + stackMapCode() + ", typeCode=" + typeCode() +
             ", box=" + toString(box()) + ", unbox=" + toString(unbox()) +
             '}';
@@ -772,11 +766,6 @@ abstract class Type {
         }
 
         @Override
-        boolean isClass() {
-            return false;
-        }
-
-        @Override
         boolean isArray() {
             return false;
         }
@@ -906,11 +895,6 @@ abstract class Type {
         }
 
         @Override
-        boolean isClass() {
-            return false;
-        }
-
-        @Override
         boolean isArray() {
             return false;
         }
@@ -1014,11 +998,6 @@ abstract class Type {
 
         @Override
         boolean isInterface() {
-            return false;
-        }
-
-        @Override
-        boolean isClass() {
             return false;
         }
 
@@ -1143,11 +1122,6 @@ abstract class Type {
                 mIsInterface = is = clazz == null ? false : clazz.isInterface();
             }
             return is;
-        }
-
-        @Override
-        final boolean isClass() {
-            return true;
         }
 
         @Override
