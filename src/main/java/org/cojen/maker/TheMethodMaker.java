@@ -2446,10 +2446,15 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
 
             if (mFrame != null) {
                 int stackSize = mFrame.setAddress(m.mStackMapTable, mAddress);
-                if (stackSize != m.mStackSize) {
-                    if (stackSize > m.mStackSize && mTrackOffsets != null) {
+                int growth = stackSize - m.mStackSize;
+                if (growth > 0) {
+                    if (mTrackOffsets != null || growth > 1) {
                         throw new IllegalStateException("False stack growth");
                     }
+                    // This label is being used for an exception handler catch location. Don't
+                    // adjust the stack because the next operation should do that. See the
+                    // operation appended by the catch_ method after calling handlerLab.here().
+                } else if (growth < 0) {
                     m.mStackSize = stackSize;
                 }
 

@@ -90,4 +90,19 @@ public class ExceptionTest {
         var obj = clazz.getConstructor().newInstance();
         clazz.getMethod("run").invoke(obj);
     }
+
+    @Test
+    public void tiny() throws Exception {
+        ClassMaker cm = ClassMaker.begin().public_().implement(Runnable.class);
+        MethodMaker mm = cm.addMethod(void.class, "run").public_().static_();
+
+        Label L1 = mm.label().here();
+        mm.return_();
+        Label L2 = mm.label().here();
+        var ex = mm.catch_(L1, L2, Exception.class);
+        mm.return_();
+
+        var clazz = cm.finish();
+        clazz.getMethod("run").invoke(null);
+    }
 }
