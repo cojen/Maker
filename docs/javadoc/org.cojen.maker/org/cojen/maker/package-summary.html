@@ -80,7 +80,11 @@ loadScripts(document, 'script');</script>
 
  Class&lt;?&gt; clazz = cm.finish();
  clazz.getMethod("run").invoke(null);
- </pre></div>
+ </pre>
+
+ <p>The classes which implement the interfaces in this package aren't designed to be
+ thread-safe. Only one thread at a time should be interacting with a <code>ClassMaker</code>
+ instance and any of the objects vended by it.</div>
 <dl>
 <dt><span class="seeLabel">See Also:</span></dt>
 <dd><a href="ClassMaker.html" title="interface in org.cojen.maker"><code>ClassMaker</code></a></dd>
@@ -102,7 +106,7 @@ loadScripts(document, 'script');</script>
 <tr class="altColor">
 <th class="colFirst" scope="row"><a href="ClassMaker.html" title="interface in org.cojen.maker">ClassMaker</a></th>
 <td class="colLast">
-<div class="block">Allows new classes to be defined dynamically.</div>
+<div class="block">Allows new classes and interfaces to be defined dynamically.</div>
 </td>
 </tr>
 <tr class="rowColor">

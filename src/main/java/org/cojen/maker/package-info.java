@@ -30,6 +30,10 @@
  * clazz.getMethod("run").invoke(null);
  * </pre>
  *
+ * <p>The classes which implement the interfaces in this package aren't designed to be
+ * thread-safe. Only one thread at a time should be interacting with a {@code ClassMaker}
+ * instance and any of the objects vended by it.
+ *
  * @see ClassMaker
  */
 package org.cojen.maker;

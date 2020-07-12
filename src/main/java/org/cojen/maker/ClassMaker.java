@@ -27,8 +27,7 @@ import java.security.ProtectionDomain;
 import java.util.Objects;
 
 /**
- * Allows new classes to be defined dynamically. {@code ClassMaker} instances and all objects
- * that interact with them aren't thread-safe.
+ * Allows new classes and interfaces to be defined dynamically.
  *
  * @author Brian S O'Neill
  * @see #begin
