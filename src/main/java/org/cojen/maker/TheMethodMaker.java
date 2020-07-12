@@ -940,7 +940,7 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
             catchClass = null;
         }
 
-        Lab handlerLab = new Lab(this);
+        var handlerLab = new HandlerLab(this, catchType);
 
         // Insert an operation at the start of the handled block, to capture the set of defined
         // local variables.
@@ -960,13 +960,6 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
 
         handlerLab.here();
 
-        addOp(new Op() {
-            @Override
-            void appendTo(TheMethodMaker m) {
-                m.stackPush(catchType);
-            }
-        });
-
         var handler = new Handler(startLab, endLab, handlerLab, catchClass);
 
         if (mExceptionHandlers == null) {
@@ -981,10 +974,11 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
     }
 
     private static class Handler implements ExceptionHandler {
-        final Lab mStartLab, mEndLab, mHandlerLab;
+        final Lab mStartLab, mEndLab;
+        final HandlerLab mHandlerLab;
         final ConstantPool.C_Class mCatchClass;
 
-        Handler(Lab start, Lab end, Lab handler, ConstantPool.C_Class catchClass) {
+        Handler(Lab start, Lab end, HandlerLab handler, ConstantPool.C_Class catchClass) {
             mStartLab = start;
             mEndLab = end;
             mHandlerLab = handler;
@@ -2373,11 +2367,20 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         final void flowThrough() {
-            for (Op op = this; op != null; op = op.flow()) {
+            Op op = this;
+            while (true) {
                 if (op.mVisited) {
                     break;
                 }
                 op.mVisited = true;
+                Op next = op.flow();
+                if (next == null) {
+                    break;
+                }
+                if (next instanceof HandlerLab) {
+                    throw new IllegalStateException("Code flows into an exception handler");
+                }
+                op = next;
             }
         }
     }
@@ -2572,6 +2575,24 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
                 // First time used as a target, so capture the stack map state.
                 mFrame = m.addStackMapFrame(mAddress);
             }
+        }
+    }
+
+    /**
+     * Exception handler catch label.
+     */
+    static class HandlerLab extends Lab {
+        private final Type mCatchType;
+
+        HandlerLab(TheMethodMaker owner, Type catchType) {
+            super(owner);
+            mCatchType = catchType;
+        }
+
+        @Override
+        void appendTo(TheMethodMaker m) {
+            super.appendTo(m);
+            m.stackPush(mCatchType);
         }
     }
 

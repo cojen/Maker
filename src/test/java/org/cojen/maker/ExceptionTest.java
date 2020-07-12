@@ -105,4 +105,25 @@ public class ExceptionTest {
         var clazz = cm.finish();
         clazz.getMethod("run").invoke(null);
     }
+
+    @Test
+    public void flowIntoHandler() throws Exception {
+        // Detect direct flow into an exception handler.
+
+        ClassMaker cm = ClassMaker.begin().public_().implement(Runnable.class);
+        MethodMaker mm = cm.addMethod(void.class, "run").public_().static_();
+
+        Label L1 = mm.label().here();
+        mm.nop();
+        Label L2 = mm.label().here();
+        var ex = mm.catch_(L1, L2, Exception.class);
+        mm.return_();
+
+        try {
+            cm.finish();
+            fail();
+        } catch (IllegalStateException e) {
+            assertTrue(e.getMessage().contains("handler"));
+        }
+    }
 }
