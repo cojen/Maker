@@ -448,6 +448,14 @@ public class UsageTest {
         } catch (IllegalStateException e) {
             check(e, "Already named");
         }
+
+        try {
+            mm.class_().name("foo");
+            fail();
+        } catch (IllegalStateException e) {
+            check(e, "Already named");
+        }
+
         mClassMaker.addField(int.class, "foo");
         var field = mm.field("foo");
         try {
@@ -457,7 +465,6 @@ public class UsageTest {
             check(e, "Already named");
         }
     }
-
 
     @Test
     public void monitorFail() {

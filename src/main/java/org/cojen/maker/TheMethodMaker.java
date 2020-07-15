@@ -3759,6 +3759,11 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
         ClassVar(Type type) {
             super(type);
         }
+
+        @Override
+        public Var name(String name) {
+            throw new IllegalStateException("Already named");
+        }
     }
 
     /**

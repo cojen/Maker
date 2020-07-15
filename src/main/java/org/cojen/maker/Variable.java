@@ -373,7 +373,7 @@ public interface Variable {
      *
      * @param returnType method return type
      * @param name method name
-     * @param types method parameter types
+     * @param types method parameter types (can be null if none)
      * @param values variables or constants
      * @return the result of the method, which is null if void
      * @throws IllegalArgumentException if not given a variable or a constant
