@@ -396,10 +396,11 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
     @Override
     public MethodMaker varargs() {
         Type[] params = mMethod.paramTypes();
-        if (params.length == 0 || !params[params.length - 1].equals(Type.from(Object[].class))) {
+        if (params.length == 0 || !params[params.length - 1].isArray()) {
             throw new IllegalStateException();
         }
         mModifiers = Modifiers.toVarArgs(mModifiers);
+        mMethod.makeVarargs();
         return this;
     }
 
@@ -691,22 +692,46 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
         // Convert the parameter types if necessary.
         convert: {
             Type[] actualTypes = method.paramTypes();
-            if (actualTypes.length != 0) {
-                check: {
-                    for (int i=0; i<actualTypes.length; i++) {
-                        if (!actualTypes[i].equals(paramTypes[i])) {
-                            break check;
-                        }
-                    }
-                    // Nothing to convert.
-                    break convert;
-                }
+            int len = actualTypes.length;
 
+            if (!method.isVarargs() ||
+                // Also check if method is varargs but array can be passed as-is.
+                (len == paramTypes.length &&
+                 paramTypes[len - 1].canConvertTo(actualTypes[len - 1]) != Integer.MAX_VALUE))
+            {
+                if (len != 0) {
+                    check: {
+                        for (int i=0; i<len; i++) {
+                            if (!actualTypes[i].equals(paramTypes[i])) {
+                                break check;
+                            }
+                        }
+                        // Nothing to convert.
+                        break convert;
+                    }
+
+                    rollback(savepoint);
+                    
+                    for (int i=0; i<args.length; i++) {
+                        addPushOp(actualTypes[i], args[i]);
+                    }
+                }
+            } else {
                 rollback(savepoint);
 
-                for (int i=0; i<args.length; i++) {
+                int firstLen = len - 1;
+                int i = 0;
+                for (; i < firstLen; i++) {
                     addPushOp(actualTypes[i], args[i]);
                 }
+
+                var vararg = new_(actualTypes[firstLen], args.length - i);
+
+                for (; i<args.length; i++) {
+                    vararg.aset(i - firstLen, args[i]);
+                }
+
+                addPushOp(null, vararg);
             }
         }
 
@@ -832,8 +857,10 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
 
     @Override
     public Variable new_(Object objType, Object... values) {
-        Type type = mClassMaker.typeFrom(objType);
+        return new_(mClassMaker.typeFrom(objType), values);
+    }
 
+    private Variable new_(Type type, Object... values) {
         if (type.isArray()) {
             if (values == null || values.length == 0) {
                 throw new IllegalArgumentException("At least one dimension required");

@@ -614,12 +614,13 @@ abstract class Type {
         private final boolean mIsBridge;
         private final Type mReturnType;
         private final Type[] mParamTypes;
+        private boolean mVarargs;
 
         private int mHash;
 
         private volatile String mDesc;
 
-        Method(boolean isStatic, boolean isBridge,
+        Method(boolean isStatic, boolean isBridge, boolean varargs,
                Type returnType, String name, Type... paramTypes)
         {
             super(isStatic, name);
@@ -628,6 +629,7 @@ abstract class Type {
             mIsBridge = isBridge;
             mReturnType = returnType;
             mParamTypes = paramTypes;
+            mVarargs = varargs;
         }
 
         boolean isBridge() {
@@ -640,6 +642,14 @@ abstract class Type {
 
         Type[] paramTypes() {
             return mParamTypes;
+        }
+
+        boolean isVarargs() {
+            return mVarargs;
+        }
+
+        void makeVarargs() {
+            mVarargs = true;
         }
 
         String descriptor() {
@@ -1500,10 +1510,7 @@ abstract class Type {
                                        Type[] params, int staticAllowed)
         {
             outer: for (Method m : type.methods().values()) {
-                Type[] actualParams;
-                if (!m.name().equals(methodName) ||
-                    (actualParams = m.paramTypes()).length != params.length)
-                {
+                if (!m.name().equals(methodName)) {
                     continue;
                 }
 
@@ -1515,9 +1522,36 @@ abstract class Type {
                     continue;
                 }
 
-                for (int i=0; i<params.length; i++) {
-                    if (params[i].canConvertTo(actualParams[i]) == Integer.MAX_VALUE) {
-                        continue outer;
+                Type[] actualParams = m.paramTypes();
+
+                if (!m.isVarargs()) {
+                    if (actualParams.length != params.length) {
+                        continue;
+                    }
+
+                    for (int i=0; i<params.length; i++) {
+                        if (params[i].canConvertTo(actualParams[i]) == Integer.MAX_VALUE) {
+                            continue outer;
+                        }
+                    }
+                } else {
+                    if (params.length < actualParams.length - 1) {
+                        continue;
+                    }
+
+                    Type varType = actualParams[actualParams.length - 1].elementType();
+
+                    for (int i=0; i<params.length; i++) {
+                        Type actual = (i < actualParams.length - 1) ? actualParams[i] : varType;
+                        if (params[i].canConvertTo(actual) == Integer.MAX_VALUE) {
+                            if (i == actualParams.length - 1) {
+                                if (params[i].canConvertTo(actualParams[i]) != Integer.MAX_VALUE) {
+                                    // Pass along array parameter as-is.
+                                    break;
+                                }
+                            }
+                            continue outer;
+                        }
                     }
                 }
 
@@ -1539,7 +1573,7 @@ abstract class Type {
                                     Type returnType, String name, Type... paramTypes)
         {
             var key = new MethodKey(returnType, name, paramTypes);
-            var method = new Method(isStatic, false, returnType, name, paramTypes);
+            var method = new Method(isStatic, false, false, returnType, name, paramTypes);
 
             Method existing;
             synchronized (this) {
@@ -1588,6 +1622,7 @@ abstract class Type {
         {
             boolean isBridge = Modifier.isVolatile(method.getModifiers());
             boolean isStatic = Modifier.isStatic(method.getModifiers());
+            boolean varargs  = method.isVarArgs();
 
             Class<?>[] params = method.getParameterTypes();
             var paramTypes = new Type[params.length];
@@ -1596,7 +1631,7 @@ abstract class Type {
             }
 
             var key = new MethodKey(returnType, name, paramTypes);
-            methods.put(key, new Method(isStatic, isBridge, returnType, name, paramTypes));
+            methods.put(key, new Method(isStatic, isBridge, varargs, returnType, name, paramTypes));
         }
 
         @Override

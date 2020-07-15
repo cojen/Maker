@@ -693,12 +693,6 @@ public class InvokeTest {
         } catch (IllegalStateException e) {
         }
 
-        try {
-            MethodMaker mm = cm.addMethod(null, "wrong", int[].class).varargs();
-            fail();
-        } catch (IllegalStateException e) {
-        }
-
         MethodMaker mm = cm.addMethod(String.class, "eval", int.class, Object[].class)
             .public_().static_().varargs();
         mm.return_(mm.concat("eval", mm.param(0),
@@ -709,6 +703,139 @@ public class InvokeTest {
 
         assertTrue(mh.isVarargsCollector());
         assertEquals("eval5[one, two, three]", mh.invoke(5, "one", "two", "three"));
+    }
+
+    @Test
+    public void invokeVarargs() throws Exception {
+        ClassMaker cm = ClassMaker.begin().public_();
+        MethodMaker mm = cm.addMethod(null, "run").public_().static_();
+
+        var result = mm.var(InvokeTest.class).invoke("concat", "hello", "world", "!!!");
+        mm.var(Assert.class).invoke("assertEquals", "helloworld!!!", result);
+
+        cm.finish().getMethod("run").invoke(null);
+    }
+
+    public static String concat(String first, String... rest) {
+        var b = new StringBuilder(first);
+        for (String s : rest) {
+            b.append(s);
+        }
+        return b.toString();
+    }
+
+    @Test
+    public void invokeVarargsConvert() throws Exception {
+        ClassMaker cm = ClassMaker.begin().public_();
+        MethodMaker mm = cm.addMethod(null, "run").public_().static_();
+
+        var result = mm.var(InvokeTest.class).invoke("concat2", "hello", "world", 123);
+        mm.var(Assert.class).invoke("assertEquals", "helloworld123", result);
+
+        cm.finish().getMethod("run").invoke(null);
+    }
+
+    public static String concat2(String first, Object... rest) {
+        var b = new StringBuilder(first);
+        for (Object s : rest) {
+            b.append(s);
+        }
+        return b.toString();
+    }
+
+    @Test
+    public void invokeVarargsConvert2() throws Exception {
+        ClassMaker cm = ClassMaker.begin().public_();
+        MethodMaker mm = cm.addMethod(null, "run").public_().static_();
+
+        {
+            var result = mm.var(InvokeTest.class).invoke("sum");
+            mm.var(Assert.class).invoke("assertEquals", 0, result);
+        }
+
+        {
+            var result = mm.var(InvokeTest.class).invoke("sum", 1, 2L, (byte) 3);
+            mm.var(Assert.class).invoke("assertEquals", 6, result);
+        }
+
+        cm.finish().getMethod("run").invoke(null);
+    }
+
+    public static long sum(long... numbers) {
+        long sum = 0;
+        for (long num : numbers) {
+            sum += num;
+        }
+        return sum;
+    }
+
+    @Test
+    public void invokeVarargsNot() throws Exception {
+        ClassMaker cm = ClassMaker.begin().public_();
+        MethodMaker mm = cm.addMethod(null, "run").public_().static_();
+
+        try {
+            mm.var(InvokeTest.class).invoke("useless", 1);
+            fail();
+        } catch (IllegalStateException e) {
+        }
+
+        var numbers = mm.var(long[].class).setConstant(new long[] {1, 2});
+        var result = mm.var(InvokeTest.class).invoke("sum", numbers);
+        mm.var(Assert.class).invoke("assertEquals", 3, result);
+
+        cm.finish().getMethod("run").invoke(null);
+    }
+
+    public static void useless(int a, int b, int... rest) {
+    }
+
+    @Test
+    public void invokeVarargsOverload() throws Exception {
+        ClassMaker cm = ClassMaker.begin().public_();
+        MethodMaker mm = cm.addMethod(null, "run").public_().static_();
+
+        var result = mm.var(InvokeTest.class).invoke("combine", 3, 4);
+        mm.var(Assert.class).invoke("assertEquals", 7, result);
+
+        cm.finish().getMethod("run").invoke(null);
+    }
+
+    public static int combine(int a, int b) {
+        return a + b;
+    }
+
+    public static int combine(int a, int... rest) {
+        fail();
+        return 0;
+    }
+
+    @Test
+    public void invokeSelfVarargs() throws Exception {
+        ClassMaker cm = ClassMaker.begin().public_();
+
+        {
+            MethodMaker mm = cm.addMethod(int.class, "add", int[].class)
+                .private_().static_().varargs();
+            var sum = mm.var(int.class).set(0);
+            var len = mm.param(0).alength();
+            Label start = mm.label().here();
+            Label cont = mm.label();
+            len.ifGt(0, cont);
+            mm.return_(sum);
+            cont.here();
+            len.inc(-1);
+            sum.set(sum.add(mm.param(0).aget(len)));
+            mm.goto_(start);
+        }
+
+        {
+            MethodMaker mm = cm.addMethod(null, "run").public_().static_();
+            var result = mm.invoke("add", 1, 2, 3);
+            mm.var(Assert.class).invoke("assertEquals", 6, result);
+        }
+
+        cm.finish().getMethod("run").invoke(null);
     }
 
     @Test
