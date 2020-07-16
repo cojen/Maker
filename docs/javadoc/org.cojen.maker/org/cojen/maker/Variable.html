@@ -160,19 +160,27 @@ loadScripts(document, 'script');</script>
 </tr>
 <tr class="rowColor" id="i5">
 <td class="colFirst"><code><a href="Variable.html" title="interface in org.cojen.maker">Variable</a></code></td>
+<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#bootstrap(java.lang.String,java.lang.Object...)">bootstrap</a></span>&#8203;(<a href="https://docs.oracle.com/en/java/javase/14/docs/api/java.base/java/lang/String.html?is-external=true" title="class or interface in java.lang" class="externalLink">String</a>&nbsp;name,
+<a href="https://docs.oracle.com/en/java/javase/14/docs/api/java.base/java/lang/Object.html?is-external=true" title="class or interface in java.lang" class="externalLink">Object</a>...&nbsp;args)</code></th>
+<td class="colLast">
+<div class="block">Specify a static bootstrap method for dynamically generating methods or constants.</div>
+</td>
+</tr>
+<tr class="altColor" id="i6">
+<td class="colFirst"><code><a href="Variable.html" title="interface in org.cojen.maker">Variable</a></code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#cast(java.lang.Object)">cast</a></span>&#8203;(<a href="https://docs.oracle.com/en/java/javase/14/docs/api/java.base/java/lang/Object.html?is-external=true" title="class or interface in java.lang" class="externalLink">Object</a>&nbsp;clazz)</code></th>
 <td class="colLast">
 <div class="block">Cast this variable to another type, and assign the result to a new variable.</div>
 </td>
 </tr>
-<tr class="altColor" id="i6">
+<tr class="rowColor" id="i7">
 <td class="colFirst"><code><a href="Variable.html" title="interface in org.cojen.maker">Variable</a></code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#com()">com</a></span>()</code></th>
 <td class="colLast">
 <div class="block">Compute the two's complement of this variable and assign the result to a new variable.</div>
 </td>
 </tr>
-<tr class="rowColor" id="i7">
+<tr class="altColor" id="i8">
 <td class="colFirst"><code><a href="Variable.html" title="interface in org.cojen.maker">Variable</a></code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#div(java.lang.Object)">div</a></span>&#8203;(<a href="https://docs.oracle.com/en/java/javase/14/docs/api/java.base/java/lang/Object.html?is-external=true" title="class or interface in java.lang" class="externalLink">Object</a>&nbsp;value)</code></th>
 <td class="colLast">
@@ -180,21 +188,21 @@ loadScripts(document, 'script');</script>
  new variable.</div>
 </td>
 </tr>
-<tr class="altColor" id="i8">
+<tr class="rowColor" id="i9">
 <td class="colFirst"><code><a href="Field.html" title="interface in org.cojen.maker">Field</a></code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#field(java.lang.String)">field</a></span>&#8203;(<a href="https://docs.oracle.com/en/java/javase/14/docs/api/java.base/java/lang/String.html?is-external=true" title="class or interface in java.lang" class="externalLink">String</a>&nbsp;name)</code></th>
 <td class="colLast">
 <div class="block">Access a static or instance field from the object referred to by this variable.</div>
 </td>
 </tr>
-<tr class="rowColor" id="i9">
+<tr class="altColor" id="i10">
 <td class="colFirst"><code><a href="Variable.html" title="interface in org.cojen.maker">Variable</a></code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#get()">get</a></span>()</code></th>
 <td class="colLast">
 <div class="block">Return a new variable with the same type and value as this one.</div>
 </td>
 </tr>
-<tr class="altColor" id="i10">
+<tr class="rowColor" id="i11">
 <td class="colFirst"><code>void</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#ifEq(java.lang.Object,org.cojen.maker.Label)">ifEq</a></span>&#8203;(<a href="https://docs.oracle.com/en/java/javase/14/docs/api/java.base/java/lang/Object.html?is-external=true" title="class or interface in java.lang" class="externalLink">Object</a>&nbsp;value,
 <a href="Label.html" title="interface in org.cojen.maker">Label</a>&nbsp;label)</code></th>
@@ -202,14 +210,14 @@ loadScripts(document, 'script');</script>
 <div class="block">Conditional goto if this variable is equal to another variable or constant.</div>
 </td>
 </tr>
-<tr class="rowColor" id="i11">
+<tr class="altColor" id="i12">
 <td class="colFirst"><code>void</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#ifFalse(org.cojen.maker.Label)">ifFalse</a></span>&#8203;(<a href="Label.html" title="interface in org.cojen.maker">Label</a>&nbsp;label)</code></th>
 <td class="colLast">
 <div class="block">Conditional goto if this variable is false.</div>
 </td>
 </tr>
-<tr class="altColor" id="i12">
+<tr class="rowColor" id="i13">
 <td class="colFirst"><code>void</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#ifGe(java.lang.Object,org.cojen.maker.Label)">ifGe</a></span>&#8203;(<a href="https://docs.oracle.com/en/java/javase/14/docs/api/java.base/java/lang/Object.html?is-external=true" title="class or interface in java.lang" class="externalLink">Object</a>&nbsp;value,
 <a href="Label.html" title="interface in org.cojen.maker">Label</a>&nbsp;label)</code></th>
@@ -218,7 +226,7 @@ loadScripts(document, 'script');</script>
  constant.</div>
 </td>
 </tr>
-<tr class="rowColor" id="i13">
+<tr class="altColor" id="i14">
 <td class="colFirst"><code>void</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#ifGt(java.lang.Object,org.cojen.maker.Label)">ifGt</a></span>&#8203;(<a href="https://docs.oracle.com/en/java/javase/14/docs/api/java.base/java/lang/Object.html?is-external=true" title="class or interface in java.lang" class="externalLink">Object</a>&nbsp;value,
 <a href="Label.html" title="interface in org.cojen.maker">Label</a>&nbsp;label)</code></th>
@@ -226,7 +234,7 @@ loadScripts(document, 'script');</script>
 <div class="block">Conditional goto if this variable is greater than another variable or constant.</div>
 </td>
 </tr>
-<tr class="altColor" id="i14">
+<tr class="rowColor" id="i15">
 <td class="colFirst"><code>void</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#ifLe(java.lang.Object,org.cojen.maker.Label)">ifLe</a></span>&#8203;(<a href="https://docs.oracle.com/en/java/javase/14/docs/api/java.base/java/lang/Object.html?is-external=true" title="class or interface in java.lang" class="externalLink">Object</a>&nbsp;value,
 <a href="Label.html" title="interface in org.cojen.maker">Label</a>&nbsp;label)</code></th>
@@ -235,7 +243,7 @@ loadScripts(document, 'script');</script>
  constant.</div>
 </td>
 </tr>
-<tr class="rowColor" id="i15">
+<tr class="altColor" id="i16">
 <td class="colFirst"><code>void</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#ifLt(java.lang.Object,org.cojen.maker.Label)">ifLt</a></span>&#8203;(<a href="https://docs.oracle.com/en/java/javase/14/docs/api/java.base/java/lang/Object.html?is-external=true" title="class or interface in java.lang" class="externalLink">Object</a>&nbsp;value,
 <a href="Label.html" title="interface in org.cojen.maker">Label</a>&nbsp;label)</code></th>
@@ -243,7 +251,7 @@ loadScripts(document, 'script');</script>
 <div class="block">Conditional goto if this variable is less than another variable or constant.</div>
 </td>
 </tr>
-<tr class="altColor" id="i16">
+<tr class="rowColor" id="i17">
 <td class="colFirst"><code>void</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#ifNe(java.lang.Object,org.cojen.maker.Label)">ifNe</a></span>&#8203;(<a href="https://docs.oracle.com/en/java/javase/14/docs/api/java.base/java/lang/Object.html?is-external=true" title="class or interface in java.lang" class="externalLink">Object</a>&nbsp;value,
 <a href="Label.html" title="interface in org.cojen.maker">Label</a>&nbsp;label)</code></th>
@@ -251,14 +259,14 @@ loadScripts(document, 'script');</script>
 <div class="block">Conditional goto if this variable is not equal to another variable or constant.</div>
 </td>
 </tr>
-<tr class="rowColor" id="i17">
+<tr class="altColor" id="i18">
 <td class="colFirst"><code>void</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#ifTrue(org.cojen.maker.Label)">ifTrue</a></span>&#8203;(<a href="Label.html" title="interface in org.cojen.maker">Label</a>&nbsp;label)</code></th>
 <td class="colLast">
 <div class="block">Conditional goto if this variable is true.</div>
 </td>
 </tr>
-<tr class="altColor" id="i18">
+<tr class="rowColor" id="i19">
 <td class="colFirst"><code>void</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#inc(java.lang.Object)">inc</a></span>&#8203;(<a href="https://docs.oracle.com/en/java/javase/14/docs/api/java.base/java/lang/Object.html?is-external=true" title="class or interface in java.lang" class="externalLink">Object</a>&nbsp;value)</code></th>
 <td class="colLast">
@@ -266,7 +274,7 @@ loadScripts(document, 'script');</script>
  this variable.</div>
 </td>
 </tr>
-<tr class="rowColor" id="i19">
+<tr class="altColor" id="i20">
 <td class="colFirst"><code><a href="Variable.html" title="interface in org.cojen.maker">Variable</a></code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#instanceOf(java.lang.Object)">instanceOf</a></span>&#8203;(<a href="https://docs.oracle.com/en/java/javase/14/docs/api/java.base/java/lang/Object.html?is-external=true" title="class or interface in java.lang" class="externalLink">Object</a>&nbsp;clazz)</code></th>
 <td class="colLast">
@@ -274,7 +282,7 @@ loadScripts(document, 'script');</script>
  the result to a new boolean variable.</div>
 </td>
 </tr>
-<tr class="altColor" id="i20">
+<tr class="rowColor" id="i21">
 <td class="colFirst"><code><a href="Variable.html" title="interface in org.cojen.maker">Variable</a></code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#invoke(java.lang.Object,java.lang.String,java.lang.Object%5B%5D,java.lang.Object...)">invoke</a></span>&#8203;(<a href="https://docs.oracle.com/en/java/javase/14/docs/api/java.base/java/lang/Object.html?is-external=true" title="class or interface in java.lang" class="externalLink">Object</a>&nbsp;returnType,
 <a href="https://docs.oracle.com/en/java/javase/14/docs/api/java.base/java/lang/String.html?is-external=true" title="class or interface in java.lang" class="externalLink">String</a>&nbsp;name,
@@ -284,7 +292,7 @@ loadScripts(document, 'script');</script>
 <div class="block">Invoke a static or instance method on the object referenced by this variable.</div>
 </td>
 </tr>
-<tr class="rowColor" id="i21">
+<tr class="altColor" id="i22">
 <td class="colFirst"><code><a href="Variable.html" title="interface in org.cojen.maker">Variable</a></code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#invoke(java.lang.String,java.lang.Object...)">invoke</a></span>&#8203;(<a href="https://docs.oracle.com/en/java/javase/14/docs/api/java.base/java/lang/String.html?is-external=true" title="class or interface in java.lang" class="externalLink">String</a>&nbsp;name,
 <a href="https://docs.oracle.com/en/java/javase/14/docs/api/java.base/java/lang/Object.html?is-external=true" title="class or interface in java.lang" class="externalLink">Object</a>...&nbsp;values)</code></th>
@@ -292,21 +300,21 @@ loadScripts(document, 'script');</script>
 <div class="block">Invoke a static or instance method on the object referenced by this variable.</div>
 </td>
 </tr>
-<tr class="altColor" id="i22">
+<tr class="rowColor" id="i23">
 <td class="colFirst"><code>void</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#monitorEnter()">monitorEnter</a></span>()</code></th>
 <td class="colLast">
 <div class="block">Enter a synchronized block on this variable.</div>
 </td>
 </tr>
-<tr class="rowColor" id="i23">
+<tr class="altColor" id="i24">
 <td class="colFirst"><code>void</code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#monitorExit()">monitorExit</a></span>()</code></th>
 <td class="colLast">
 <div class="block">Exit a synchronized block on this variable.</div>
 </td>
 </tr>
-<tr class="altColor" id="i24">
+<tr class="rowColor" id="i25">
 <td class="colFirst"><code><a href="Variable.html" title="interface in org.cojen.maker">Variable</a></code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#mul(java.lang.Object)">mul</a></span>&#8203;(<a href="https://docs.oracle.com/en/java/javase/14/docs/api/java.base/java/lang/Object.html?is-external=true" title="class or interface in java.lang" class="externalLink">Object</a>&nbsp;value)</code></th>
 <td class="colLast">
@@ -314,21 +322,21 @@ loadScripts(document, 'script');</script>
  new variable.</div>
 </td>
 </tr>
-<tr class="rowColor" id="i25">
+<tr class="altColor" id="i26">
 <td class="colFirst"><code><a href="Variable.html" title="interface in org.cojen.maker">Variable</a></code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#name(java.lang.String)">name</a></span>&#8203;(<a href="https://docs.oracle.com/en/java/javase/14/docs/api/java.base/java/lang/String.html?is-external=true" title="class or interface in java.lang" class="externalLink">String</a>&nbsp;name)</code></th>
 <td class="colLast">
 <div class="block">Optionally assign a variable name.</div>
 </td>
 </tr>
-<tr class="altColor" id="i26">
+<tr class="rowColor" id="i27">
 <td class="colFirst"><code><a href="Variable.html" title="interface in org.cojen.maker">Variable</a></code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#neg()">neg</a></span>()</code></th>
 <td class="colLast">
 <div class="block">Negate the value of this variable and assign the result to a new variable.</div>
 </td>
 </tr>
-<tr class="rowColor" id="i27">
+<tr class="altColor" id="i28">
 <td class="colFirst"><code><a href="Variable.html" title="interface in org.cojen.maker">Variable</a></code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#not()">not</a></span>()</code></th>
 <td class="colLast">
@@ -336,7 +344,7 @@ loadScripts(document, 'script');</script>
  variable.</div>
 </td>
 </tr>
-<tr class="altColor" id="i28">
+<tr class="rowColor" id="i29">
 <td class="colFirst"><code><a href="Variable.html" title="interface in org.cojen.maker">Variable</a></code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#or(java.lang.Object)">or</a></span>&#8203;(<a href="https://docs.oracle.com/en/java/javase/14/docs/api/java.base/java/lang/Object.html?is-external=true" title="class or interface in java.lang" class="externalLink">Object</a>&nbsp;value)</code></th>
 <td class="colLast">
@@ -344,7 +352,7 @@ loadScripts(document, 'script');</script>
  the result to a new variable.</div>
 </td>
 </tr>
-<tr class="rowColor" id="i29">
+<tr class="altColor" id="i30">
 <td class="colFirst"><code><a href="Variable.html" title="interface in org.cojen.maker">Variable</a></code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#rem(java.lang.Object)">rem</a></span>&#8203;(<a href="https://docs.oracle.com/en/java/javase/14/docs/api/java.base/java/lang/Object.html?is-external=true" title="class or interface in java.lang" class="externalLink">Object</a>&nbsp;value)</code></th>
 <td class="colLast">
@@ -352,28 +360,19 @@ loadScripts(document, 'script');</script>
  and assign the result to a new variable.</div>
 </td>
 </tr>
-<tr class="altColor" id="i30">
+<tr class="rowColor" id="i31">
 <td class="colFirst"><code><a href="Variable.html" title="interface in org.cojen.maker">Variable</a></code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#set(java.lang.Object)">set</a></span>&#8203;(<a href="https://docs.oracle.com/en/java/javase/14/docs/api/java.base/java/lang/Object.html?is-external=true" title="class or interface in java.lang" class="externalLink">Object</a>&nbsp;value)</code></th>
 <td class="colLast">
 <div class="block">Assign a value to this variable, either from another variable or from a constant.</div>
 </td>
 </tr>
-<tr class="rowColor" id="i31">
+<tr class="altColor" id="i32">
 <td class="colFirst"><code><a href="Variable.html" title="interface in org.cojen.maker">Variable</a></code></td>
 <th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#setConstant(java.lang.Object)">setConstant</a></span>&#8203;(<a href="https://docs.oracle.com/en/java/javase/14/docs/api/java.base/java/lang/Object.html?is-external=true" title="class or interface in java.lang" class="externalLink">Object</a>&nbsp;value)</code></th>
 <td class="colLast">
 <div class="block">Assign a complex constant to this variable, supported only when the class is built
  dynamically instead of loaded from a file.</div>
-</td>
-</tr>
-<tr class="altColor" id="i32">
-<td class="colFirst"><code><a href="Variable.html" title="interface in org.cojen.maker">Variable</a></code></td>
-<th class="colSecond" scope="row"><code><span class="memberNameLink"><a href="#setDynamic(java.lang.invoke.MethodHandleInfo,java.lang.Object%5B%5D,java.lang.String)">setDynamic</a></span>&#8203;(<a href="https://docs.oracle.com/en/java/javase/14/docs/api/java.base/java/lang/invoke/MethodHandleInfo.html?is-external=true" title="class or interface in java.lang.invoke" class="externalLink">MethodHandleInfo</a>&nbsp;bootstrap,
-<a href="https://docs.oracle.com/en/java/javase/14/docs/api/java.base/java/lang/Object.html?is-external=true" title="class or interface in java.lang" class="externalLink">Object</a>[]&nbsp;bootstrapArgs,
-<a href="https://docs.oracle.com/en/java/javase/14/docs/api/java.base/java/lang/String.html?is-external=true" title="class or interface in java.lang" class="externalLink">String</a>&nbsp;name)</code></th>
-<td class="colLast">
-<div class="block">Assign a dynamically generated constant to this variable.</div>
 </td>
 </tr>
 <tr class="rowColor" id="i33">
@@ -499,28 +498,6 @@ int[]&nbsp;cases,
 <dt><span class="throwsLabel">Throws:</span></dt>
 <dd><code><a href="https://docs.oracle.com/en/java/javase/14/docs/api/java.base/java/lang/IllegalStateException.html?is-external=true" title="class or interface in java.lang" class="externalLink">IllegalStateException</a></code> - if this variable cannot be modified, or if it's not
  compatible with the variable type</dd>
-</dl>
-</section>
-</li>
-<li class="blockList">
-<section class="detail">
-<h3><a id="setDynamic(java.lang.invoke.MethodHandleInfo,java.lang.Object[],java.lang.String)">setDynamic</a></h3>
-<div class="memberSignature"><span class="returnType"><a href="Variable.html" title="interface in org.cojen.maker">Variable</a></span>&nbsp;<span class="memberName">setDynamic</span>&#8203;(<span class="arguments"><a href="https://docs.oracle.com/en/java/javase/14/docs/api/java.base/java/lang/invoke/MethodHandleInfo.html?is-external=true" title="class or interface in java.lang.invoke" class="externalLink">MethodHandleInfo</a>&nbsp;bootstrap,
-<a href="https://docs.oracle.com/en/java/javase/14/docs/api/java.base/java/lang/Object.html?is-external=true" title="class or interface in java.lang" class="externalLink">Object</a>[]&nbsp;bootstrapArgs,
-<a href="https://docs.oracle.com/en/java/javase/14/docs/api/java.base/java/lang/String.html?is-external=true" title="class or interface in java.lang" class="externalLink">String</a>&nbsp;name)</span></div>
-<div class="block">Assign a dynamically generated constant to this variable. A static bootstrap method must
- be provided, which is called when the constant needs to be generated.</div>
-<dl>
-<dt><span class="paramLabel">Parameters:</span></dt>
-<dd><code>bootstrap</code> - static bootstrap method</dd>
-<dd><code>bootstrapArgs</code> - constants which are passed to the bootstrap method</dd>
-<dd><code>name</code> - dynamic constant name</dd>
-<dt><span class="returnLabel">Returns:</span></dt>
-<dd>this variable</dd>
-<dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code><a href="https://docs.oracle.com/en/java/javase/14/docs/api/java.base/java/lang/IllegalStateException.html?is-external=true" title="class or interface in java.lang" class="externalLink">IllegalStateException</a></code> - if this variable cannot be modified</dd>
-<dt><span class="seeLabel">See Also:</span></dt>
-<dd><a href="https://docs.oracle.com/en/java/javase/14/docs/api/java.base/java/lang/invoke/package-summary.html?is-external=true" class="externalLink"><code>java.lang.invoke</code></a></dd>
 </dl>
 </section>
 </li>
@@ -999,12 +976,31 @@ int[]&nbsp;cases,
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>returnType</code> - method return type</dd>
 <dd><code>name</code> - method name</dd>
-<dd><code>types</code> - method parameter types</dd>
+<dd><code>types</code> - method parameter types (can be null if none)</dd>
 <dd><code>values</code> - variables or constants</dd>
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd>the result of the method, which is null if void</dd>
 <dt><span class="throwsLabel">Throws:</span></dt>
 <dd><code><a href="https://docs.oracle.com/en/java/javase/14/docs/api/java.base/java/lang/IllegalArgumentException.html?is-external=true" title="class or interface in java.lang" class="externalLink">IllegalArgumentException</a></code> - if not given a variable or a constant</dd>
+</dl>
+</section>
+</li>
+<li class="blockList">
+<section class="detail">
+<h3><a id="bootstrap(java.lang.String,java.lang.Object...)">bootstrap</a></h3>
+<div class="memberSignature"><span class="returnType"><a href="Variable.html" title="interface in org.cojen.maker">Variable</a></span>&nbsp;<span class="memberName">bootstrap</span>&#8203;(<span class="arguments"><a href="https://docs.oracle.com/en/java/javase/14/docs/api/java.base/java/lang/String.html?is-external=true" title="class or interface in java.lang" class="externalLink">String</a>&nbsp;name,
+<a href="https://docs.oracle.com/en/java/javase/14/docs/api/java.base/java/lang/Object.html?is-external=true" title="class or interface in java.lang" class="externalLink">Object</a>...&nbsp;args)</span></div>
+<div class="block">Specify a static bootstrap method for dynamically generating methods or constants. The
+ variable returned by this method is used for the actual invocation. For a dynamic
+ constant, no types or values can be passed to the invoke method.</div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>name</code> - bootstrap method name</dd>
+<dd><code>args</code> - constants which are passed to the bootstrap method, not inlcuding the
+ first three standard arguments</dd>
+<dt><span class="seeLabel">See Also:</span></dt>
+<dd><a href="#invoke(java.lang.Object,java.lang.String,java.lang.Object%5B%5D,java.lang.Object...)"><code>invoke(Object,String,Object[],Object...)</code></a>, 
+<a href="https://docs.oracle.com/en/java/javase/14/docs/api/java.base/java/lang/invoke/package-summary.html?is-external=true" class="externalLink"><code>java.lang.invoke</code></a></dd>
 </dl>
 </section>
 </li>

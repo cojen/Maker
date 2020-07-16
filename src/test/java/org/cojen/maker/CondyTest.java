@@ -38,46 +38,22 @@ public class CondyTest {
         ClassMaker cm = ClassMaker.begin().public_();
         MethodMaker mm = cm.addMethod(null, "run").static_().public_();
 
-        MethodHandle bootstrap = MethodHandles.lookup().findStatic
-            (CondyTest.class, "boot", MethodType.methodType
-             (Object.class, MethodHandles.Lookup.class, String.class, Class.class));
-
-        MethodHandleInfo bootInfo = MethodHandles.lookup().revealDirect(bootstrap);
-
+        var bootstrap = mm.var(CondyTest.class).bootstrap("boot");
         var assertVar = mm.var(Assert.class);
 
-        var v1 = mm.var(String.class);
-        v1.setDynamic(bootInfo, null, "hello");
+        var v1 = bootstrap.invoke(String.class, "hello", null);
         assertVar.invoke("assertEquals", "hello-world", v1);
 
-        var v2 = mm.var(int.class);
-        v2.setDynamic(bootInfo, null, "dummy");
+        var v2 = bootstrap.invoke(int.class, "dummy", null);
         assertVar.invoke("assertEquals", 123, v2);
 
-        var v3 = mm.var(long.class);
-        v3.setDynamic(bootInfo, null, "dummy");
+        var v3 = bootstrap.invoke(long.class, "dummy", null);
         assertVar.invoke("assertEquals", Long.MAX_VALUE, v3);
 
-        bootstrap = MethodHandles.lookup().findStatic
-            (CondyTest.class, "boot", MethodType.methodType
-             (String.class, MethodHandles.Lookup.class, String.class, Class.class,
-              Class.class, int.class));
+        bootstrap = mm.var(CondyTest.class).bootstrap("boot", java.util.Map.class, 999);
 
-        bootInfo = MethodHandles.lookup().revealDirect(bootstrap);
-
-        var v4 = mm.var(String.class);
-        v4.setDynamic(bootInfo, new Object[] {java.util.Map.class, 999}, "dummy");
+        var v4 = bootstrap.invoke(String.class, "dummy", null);
         assertVar.invoke("assertEquals", "java.util.Map999", v4);
-
-        bootstrap = MethodHandles.lookup().findStatic
-            (CondyTest.class, "boot", MethodType.methodType
-             (Object.class, MethodHandles.Lookup.class, String.class, Class.class));
-
-        bootInfo = MethodHandles.lookup().revealDirect(bootstrap);
-
-        cm.addField(String.class, "test").private_().static_();
-        mm.field("test").setDynamic(bootInfo, null, "the-field");
-        assertVar.invoke("assertEquals", "the-field-world", mm.field("test"));
 
         cm.finish().getMethod("run").invoke(null);
     }
@@ -106,27 +82,21 @@ public class CondyTest {
         ClassMaker cm = ClassMaker.begin().public_();
         MethodMaker mm = cm.addMethod(null, "run").static_().public_();
 
-        MethodHandle bootstrap = MethodHandles.lookup().findStatic
-            (CondyTest.class, "boot", MethodType.methodType
-             (String.class, MethodHandles.Lookup.class, String.class, Class.class, Class.class));
-
-        MethodHandleInfo bootInfo = MethodHandles.lookup().revealDirect(bootstrap);
-
+        var v0 = mm.var(CondyTest.class);
         var assertVar = mm.var(Assert.class);
 
         Class[] types = {boolean.class, byte.class, char.class, short.class,
                          int.class, float.class, long.class, double.class};
 
         for (Class type : types) {
-            var v1 = mm.var(String.class);
-            v1.setDynamic(bootInfo, new Object[] {type}, "dummy");
+            var v1 = v0.bootstrap("boot", type).invoke(String.class, "dummy", null);
             assertVar.invoke("assertEquals", type.toString(), v1);
         }
 
         cm.finish().getMethod("run").invoke(null);
     }
 
-    public static String boot(MethodHandles.Lookup lookup, String name, Class type, Class arg1)
+    public static Object boot(MethodHandles.Lookup lookup, String name, Class type, Class arg1)
         throws Exception
     {
         return String.valueOf(arg1);
@@ -137,16 +107,9 @@ public class CondyTest {
         ClassMaker cm = ClassMaker.begin().public_();
         MethodMaker mm = cm.addMethod(null, "run").static_().public_();
 
-        MethodHandle bootstrap = MethodHandles.lookup().findStatic
-            (CondyTest.class, "boot", MethodType.methodType
-             (String.class, MethodHandles.Lookup.class, String.class, Class.class, Class.class));
-
-        MethodHandleInfo bootInfo = MethodHandles.lookup().revealDirect(bootstrap);
-
+        var bootstrap = mm.var(CondyTest.class).bootstrap("boot", (Object) null);
+        var v1 = bootstrap.invoke(String.class, "dummy", null);
         var assertVar = mm.var(Assert.class);
-
-        var v1 = mm.var(String.class);
-        v1.setDynamic(bootInfo, new Object[] {null}, "dummy");
         assertVar.invoke("assertEquals", "null", v1);
 
         cm.finish().getMethod("run").invoke(null);
@@ -157,16 +120,9 @@ public class CondyTest {
         ClassMaker cm = ClassMaker.begin().public_();
         MethodMaker mm = cm.addMethod(null, "run").static_().public_();
 
-        MethodHandle bootstrap = MethodHandles.lookup().findStatic
-            (CondyTest.class, "boot", MethodType.methodType
-             (String.class, MethodHandles.Lookup.class, String.class, Class.class, Enum.class));
-
-        MethodHandleInfo bootInfo = MethodHandles.lookup().revealDirect(bootstrap);
-
+        var bootstrap = mm.var(CondyTest.class).bootstrap("boot", Thread.State.BLOCKED);
+        var v1 = bootstrap.invoke(String.class, "dummy", null);
         var assertVar = mm.var(Assert.class);
-
-        var v1 = mm.var(String.class);
-        v1.setDynamic(bootInfo, new Object[] {Thread.State.BLOCKED}, "dummy");
         assertVar.invoke("assertEquals", "BLOCKED", v1);
 
         cm.finish().getMethod("run").invoke(null);

@@ -17,7 +17,6 @@
 package org.cojen.maker;
 
 import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodHandleInfo;
 import java.lang.invoke.MethodType;
 
 /**
@@ -218,21 +217,6 @@ public interface MethodMaker {
      * @throws IllegalArgumentException if not given a variable or a constant
      */
     public void invokeThisConstructor(Object... values);
-
-    /**
-     * Invoke a dynamically generated method. A static bootstrap method must be provided, which
-     * is called when the method needs to be generated.
-     *
-     * @param bootstrap static bootstrap method
-     * @param bootstrapArgs constants which are passed to the bootstrap method
-     * @param name dynamic method name
-     * @param type dynamic method type
-     * @param values variables or constants passed to the dynamic method
-     * @return the result of the dynamic method, which is null if void
-     * @see java.lang.invoke
-     */
-    public Variable invokeDynamic(MethodHandleInfo bootstrap, Object[] bootstrapArgs,
-                                  String name, MethodType type, Object... values);
 
     /**
      * Invoke a method via a {@code MethodHandle}, which only works when the class is built

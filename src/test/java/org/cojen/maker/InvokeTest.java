@@ -109,29 +109,22 @@ public class InvokeTest {
         ClassMaker cm = ClassMaker.begin().public_();
         MethodMaker mm = cm.addMethod(null, "run").public_().static_();
 
-        MethodHandle bootstrap = MethodHandles.lookup().findStatic
-            (InvokeTest.class, "boot", MethodType.methodType
-             (CallSite.class, MethodHandles.Lookup.class, String.class, MethodType.class));
-
-        MethodHandleInfo info = MethodHandles.lookup().revealDirect(bootstrap);
-
+        var bootVar = mm.var(InvokeTest.class).bootstrap("boot");
         var assertVar = mm.var(Assert.class);
 
         {
             var v1 = mm.var(int.class).set(1);
             var v2 = mm.var(int.class).set(2);
-            var v3 = mm.invokeDynamic
-                (info, null, "intAdd",
-                 MethodType.methodType(int.class, int.class, int.class), v1, v2);
+            var v3 = bootVar.invoke
+                (int.class, "intAdd", new Object[] {int.class, int.class}, v1, v2);
             assertVar.invoke("assertEquals", 3, v3);
         }
 
         {
             var v1 = mm.var(double.class).set(1.1);
             var v2 = mm.var(double.class).set(2.1);
-            var v3 = mm.invokeDynamic
-                (info, null, "doubleAdd",
-                 MethodType.methodType(double.class, double.class, double.class), v1, v2);
+            var v3 = bootVar.invoke
+                (double.class, "doubleAdd", new Object[] {double.class, double.class}, v1, v2);
             assertVar.invoke("assertEquals", 3.2, v3, 0.0);
         }
 
@@ -156,23 +149,23 @@ public class InvokeTest {
         ClassMaker cm = ClassMaker.begin().public_();
         MethodMaker mm = cm.addMethod(null, "run").public_().static_();
 
-        MethodHandle bootstrap = MethodHandles.lookup().findStatic
+        // Just a MethodHandle to anything, passed along for code coverage.
+        MethodHandle handle = MethodHandles.lookup().findStatic
             (InvokeTest.class, "boot", MethodType.methodType
              (CallSite.class, MethodHandles.Lookup.class, String.class, MethodType.class,
               MethodHandle.class, MethodType.class));
 
-        MethodHandleInfo info = MethodHandles.lookup().revealDirect(bootstrap);
+        // Just a MethodType for anything, passed along for code coverage.
         MethodType type = MethodType.methodType(void.class, String.class);
 
         Label start = mm.label().here();
-        var v0 = mm.invokeDynamic
-            (info, new Object[] {info, type}, // pass additional constants for code coverage
-             "throwIt", type, "hello");
+        var bootstrap = mm.var(InvokeTest.class).bootstrap("boot", handle, type);
+        var v0 = bootstrap.invoke(void.class, "throwIt", new Object[] {String.class}, "hello");
         assertNull(v0);
         mm.return_();
         Label end = mm.label().here();
 
-        String expect = "hello" + bootstrap + type;
+        String expect = "hello" + handle + type;
 
         var ex = mm.catch_(start, end, Exception.class);
         var msg = ex.invoke("getMessage");
@@ -202,18 +195,10 @@ public class InvokeTest {
         ClassMaker cm = ClassMaker.begin().public_();
         MethodMaker mm = cm.addMethod(null, "run").public_().static_();
 
-        MethodHandle bootstrap = MethodHandles.lookup().findStatic
-            (InvokeTest.class, "bootComplex", MethodType.methodType
-             (CallSite.class, MethodHandles.Lookup.class, String.class, MethodType.class,
-              Object.class, Object.class));
-
-        MethodHandleInfo info = MethodHandles.lookup().revealDirect(bootstrap);
-        MethodType type = MethodType.methodType(String.class);
-
         Object a = "prefix";
         Object b = List.of("hello", "world");
-
-        var v0 = mm.invokeDynamic(info, new Object[] {a, b}, "test", type);
+        var bootstrap = mm.var(InvokeTest.class).bootstrap("bootComplex", a, b);
+        var v0 = bootstrap.invoke(String.class, "test", null);
 
         mm.var(Assert.class).invoke("assertEquals", "prefix[hello, world]", v0);
 
@@ -241,19 +226,11 @@ public class InvokeTest {
         ClassMaker cm = ClassMaker.begin().public_();
         MethodMaker mm = cm.addMethod(null, "run").public_().static_();
 
-        MethodHandle bootstrap = MethodHandles.lookup().findStatic
-            (InvokeTest.class, "bootTiny", MethodType.methodType
-             (CallSite.class, MethodHandles.Lookup.class, String.class, MethodType.class,
-              byte.class, short.class, char.class));
-
-        MethodHandleInfo info = MethodHandles.lookup().revealDirect(bootstrap);
-        MethodType type = MethodType.methodType(String.class);
-
         byte a = 12;
         short b = 3456;
         char c = 'a';
-
-        var v0 = mm.invokeDynamic(info, new Object[] {a, b, c}, "test", type);
+        var bootstrap = mm.var(InvokeTest.class).bootstrap("bootTiny", a, b, c);
+        var v0 = bootstrap.invoke(String.class, "test", null);
 
         mm.var(Assert.class).invoke("assertEquals", "123456a", v0);
 

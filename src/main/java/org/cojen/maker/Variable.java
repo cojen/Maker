@@ -16,8 +16,6 @@
 
 package org.cojen.maker;
 
-import java.lang.invoke.MethodHandleInfo;
-
 /**
  * Represents a variable bound to a body of a {@link MethodMaker method}.
  *
@@ -60,19 +58,6 @@ public interface Variable {
      * compatible with the variable type
      */
     public Variable setConstant(Object value);
-
-    /**
-     * Assign a dynamically generated constant to this variable. A static bootstrap method must
-     * be provided, which is called when the constant needs to be generated.
-     *
-     * @param bootstrap static bootstrap method
-     * @param bootstrapArgs constants which are passed to the bootstrap method
-     * @param name dynamic constant name
-     * @return this variable
-     * @throws IllegalStateException if this variable cannot be modified
-     * @see java.lang.invoke
-     */
-    public Variable setDynamic(MethodHandleInfo bootstrap, Object[] bootstrapArgs, String name);
 
     /**
      * Return a new variable with the same type and value as this one.
@@ -379,6 +364,19 @@ public interface Variable {
      * @throws IllegalArgumentException if not given a variable or a constant
      */
     public Variable invoke(Object returnType, String name, Object[] types, Object... values);
+
+    /**
+     * Specify a static bootstrap method for dynamically generating methods or constants. The
+     * variable returned by this method is used for the actual invocation. For a dynamic
+     * constant, no types or values can be passed to the invoke method.
+     *
+     * @param name bootstrap method name
+     * @param args constants which are passed to the bootstrap method, not inlcuding the
+     * first three standard arguments
+     * @see #invoke(Object,String,Object[],Object...)
+     * @see java.lang.invoke
+     */
+    public Variable bootstrap(String name, Object... args);
 
     /**
      * Throw the exception object referred to by this variable.

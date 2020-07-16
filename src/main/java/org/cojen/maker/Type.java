@@ -520,13 +520,6 @@ abstract class Type {
         throw new IllegalStateException();
     }
 
-    /**
-     * @return null if not found
-     */
-    Method findMethod(String name, Type... paramTypes) {
-        return null;
-    }
-
     @Override
     public String toString() {
         return "Type {name=" + name() + ", descriptor=" + descriptor() +

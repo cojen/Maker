@@ -194,7 +194,6 @@ public class TypeTest {
         }
 
         assertTrue(type.findMethods("x", new Type[0], 0, 0, null, null).isEmpty());
-        assertNull(type.findMethod("x", new Type[0]));
 
         assertTrue(type.isAssignableFrom(type));
         Type object = Type.from(Object.class);

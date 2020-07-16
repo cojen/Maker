@@ -646,6 +646,13 @@ class ConstantPool {
             mNameAndType = nameAndType;
         }
 
+        /**
+         * True if a dynamic constant, or false if a dynamic method.
+         */
+        boolean isCondy() {
+            return mTag == 17;
+        }
+
         @Override
         public int hashCode() {
             return (mNameAndType.hashCode() * 31 + mTag) * 31 + mBootstrapIndex;

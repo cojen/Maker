@@ -185,21 +185,14 @@ public class UsageTest {
 
     @Test
     public void paramCount2() throws Exception {
-        MethodHandle bootstrap = MethodHandles.lookup().findStatic
-            (UsageTest.class, "boot", MethodType.methodType
-             (CallSite.class, MethodHandles.Lookup.class, String.class, MethodType.class));
-
-        MethodHandleInfo info = MethodHandles.lookup().revealDirect(bootstrap);
-
         MethodMaker mm = mClassMaker.addMethod(null, "test");
+        var bootstrap = mm.var(UsageTest.class).bootstrap("boot");
 
         try {
-            var v3 = mm.invokeDynamic
-                (info, null, "test",
-                 MethodType.methodType(void.class, int.class), 1, 2);
+            bootstrap.invoke(void.class, "test", new Object[] {int.class}, 1, 2);
             fail();
         } catch (IllegalArgumentException e) {
-            check(e, "Wrong number");
+            check(e, "Mismatched");
         }
     }
 

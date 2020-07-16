@@ -159,6 +159,10 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Begin defining a class with an explicitly specified name.</div>
 </dd>
+<dt><span class="memberNameLink"><a href="org.cojen.maker/org/cojen/maker/Variable.html#bootstrap(java.lang.String,java.lang.Object...)">bootstrap(String, Object...)</a></span> - Method in interface org.cojen.maker.<a href="org.cojen.maker/org/cojen/maker/Variable.html" title="interface in org.cojen.maker">Variable</a></dt>
+<dd>
+<div class="block">Specify a static bootstrap method for dynamically generating methods or constants.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="org.cojen.maker/org/cojen/maker/MethodMaker.html#bridge()">bridge()</a></span> - Method in interface org.cojen.maker.<a href="org.cojen.maker/org/cojen/maker/MethodMaker.html" title="interface in org.cojen.maker">MethodMaker</a></dt>
 <dd>
 <div class="block">Indicate that this method is a bridge, which implements an inherited method exactly, but
@@ -441,10 +445,6 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Invoke a static or instance method on the object referenced by this variable.</div>
 </dd>
-<dt><span class="memberNameLink"><a href="org.cojen.maker/org/cojen/maker/MethodMaker.html#invokeDynamic(java.lang.invoke.MethodHandleInfo,java.lang.Object%5B%5D,java.lang.String,java.lang.invoke.MethodType,java.lang.Object...)">invokeDynamic(MethodHandleInfo, Object[], String, MethodType, Object...)</a></span> - Method in interface org.cojen.maker.<a href="org.cojen.maker/org/cojen/maker/MethodMaker.html" title="interface in org.cojen.maker">MethodMaker</a></dt>
-<dd>
-<div class="block">Invoke a dynamically generated method.</div>
-</dd>
 <dt><span class="memberNameLink"><a href="org.cojen.maker/org/cojen/maker/MethodMaker.html#invokeSuper(java.lang.String,java.lang.Object...)">invokeSuper(String, Object...)</a></span> - Method in interface org.cojen.maker.<a href="org.cojen.maker/org/cojen/maker/MethodMaker.html" title="interface in org.cojen.maker">MethodMaker</a></dt>
 <dd>
 <div class="block">Invoke a static or instance super class method on the enclosing object of this method.</div>
@@ -634,10 +634,6 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Assign a complex constant to this variable, supported only when the class is built
  dynamically instead of loaded from a file.</div>
-</dd>
-<dt><span class="memberNameLink"><a href="org.cojen.maker/org/cojen/maker/Variable.html#setDynamic(java.lang.invoke.MethodHandleInfo,java.lang.Object%5B%5D,java.lang.String)">setDynamic(MethodHandleInfo, Object[], String)</a></span> - Method in interface org.cojen.maker.<a href="org.cojen.maker/org/cojen/maker/Variable.html" title="interface in org.cojen.maker">Variable</a></dt>
-<dd>
-<div class="block">Assign a dynamically generated constant to this variable.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="org.cojen.maker/org/cojen/maker/Field.html#setOpaque(java.lang.Object)">setOpaque(Object)</a></span> - Method in interface org.cojen.maker.<a href="org.cojen.maker/org/cojen/maker/Field.html" title="interface in org.cojen.maker">Field</a></dt>
 <dd>
