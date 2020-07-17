@@ -109,7 +109,7 @@ public class InvokeTest {
         ClassMaker cm = ClassMaker.begin().public_();
         MethodMaker mm = cm.addMethod(null, "run").public_().static_();
 
-        var bootVar = mm.var(InvokeTest.class).bootstrap("boot");
+        var bootVar = mm.var(InvokeTest.class).indy("boot");
         var assertVar = mm.var(Assert.class);
 
         {
@@ -159,7 +159,7 @@ public class InvokeTest {
         MethodType type = MethodType.methodType(void.class, String.class);
 
         Label start = mm.label().here();
-        var bootstrap = mm.var(InvokeTest.class).bootstrap("boot", handle, type);
+        var bootstrap = mm.var(InvokeTest.class).indy("boot", handle, type);
         var v0 = bootstrap.invoke(void.class, "throwIt", new Object[] {String.class}, "hello");
         assertNull(v0);
         mm.return_();
@@ -197,7 +197,7 @@ public class InvokeTest {
 
         Object a = "prefix";
         Object b = List.of("hello", "world");
-        var bootstrap = mm.var(InvokeTest.class).bootstrap("bootComplex", a, b);
+        var bootstrap = mm.var(InvokeTest.class).indy("bootComplex", a, b);
         var v0 = bootstrap.invoke(String.class, "test", null);
 
         mm.var(Assert.class).invoke("assertEquals", "prefix[hello, world]", v0);
@@ -229,7 +229,7 @@ public class InvokeTest {
         byte a = 12;
         short b = 3456;
         char c = 'a';
-        var bootstrap = mm.var(InvokeTest.class).bootstrap("bootTiny", a, b, c);
+        var bootstrap = mm.var(InvokeTest.class).indy("bootTiny", a, b, c);
         var v0 = bootstrap.invoke(String.class, "test", null);
 
         mm.var(Assert.class).invoke("assertEquals", "123456a", v0);

@@ -159,9 +159,9 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Begin defining a class with an explicitly specified name.</div>
 </dd>
-<dt><span class="memberNameLink"><a href="org.cojen.maker/org/cojen/maker/Variable.html#bootstrap(java.lang.String,java.lang.Object...)">bootstrap(String, Object...)</a></span> - Method in interface org.cojen.maker.<a href="org.cojen.maker/org/cojen/maker/Variable.html" title="interface in org.cojen.maker">Variable</a></dt>
+<dt><a href="org.cojen.maker/org/cojen/maker/Bootstrap.html" title="interface in org.cojen.maker"><span class="typeNameLink">Bootstrap</span></a> - Interface in <a href="org.cojen.maker/org/cojen/maker/package-summary.html">org.cojen.maker</a></dt>
 <dd>
-<div class="block">Specify a static bootstrap method for dynamically generating methods or constants.</div>
+<div class="block">Represents an invoke dynamic bootstrap method which is bound to a <a href="org.cojen.maker/org/cojen/maker/MethodMaker.html" title="interface in org.cojen.maker"><code>method</code></a>.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="org.cojen.maker/org/cojen/maker/MethodMaker.html#bridge()">bridge()</a></span> - Method in interface org.cojen.maker.<a href="org.cojen.maker/org/cojen/maker/MethodMaker.html" title="interface in org.cojen.maker">MethodMaker</a></dt>
 <dd>
@@ -206,6 +206,11 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Concatenate variables and constants together into a new <code>String</code> in the same
  matter as the Java concatenation operator.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="org.cojen.maker/org/cojen/maker/Variable.html#condy(java.lang.String,java.lang.Object...)">condy(String, Object...)</a></span> - Method in interface org.cojen.maker.<a href="org.cojen.maker/org/cojen/maker/Variable.html" title="interface in org.cojen.maker">Variable</a></dt>
+<dd>
+<div class="block">Specify a static bootstrap method for dynamically generating constants, as found in the
+ class type of this variable.</div>
 </dd>
 </dl>
 <a id="I:D">
@@ -399,6 +404,11 @@ loadScripts(document, 'script');</script>
 <div class="block">Add this variable with another variable or a constant, and assign the result back to
  this variable.</div>
 </dd>
+<dt><span class="memberNameLink"><a href="org.cojen.maker/org/cojen/maker/Variable.html#indy(java.lang.String,java.lang.Object...)">indy(String, Object...)</a></span> - Method in interface org.cojen.maker.<a href="org.cojen.maker/org/cojen/maker/Variable.html" title="interface in org.cojen.maker">Variable</a></dt>
+<dd>
+<div class="block">Specify a static bootstrap method for dynamically generating methods, as found in the
+ class type of this variable.</div>
+</dd>
 <dt><span class="memberNameLink"><a href="org.cojen.maker/org/cojen/maker/FieldMaker.html#init(double)">init(double)</a></span> - Method in interface org.cojen.maker.<a href="org.cojen.maker/org/cojen/maker/FieldMaker.html" title="interface in org.cojen.maker">FieldMaker</a></dt>
 <dd>
 <div class="block">Set an initial constant value for this field as a <code>double</code>.</div>
@@ -432,6 +442,15 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Invoke a method via a <code>MethodHandle</code>, which only works when the class is built
  dynamically instead of loaded from a file.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="org.cojen.maker/org/cojen/maker/Bootstrap.html#invoke(java.lang.Object,java.lang.String)">invoke(Object, String)</a></span> - Method in interface org.cojen.maker.<a href="org.cojen.maker/org/cojen/maker/Bootstrap.html" title="interface in org.cojen.maker">Bootstrap</a></dt>
+<dd>
+<div class="block">Invoke a dynamically generated constant, or a dynamically generated method that has no
+ parameters.</div>
+</dd>
+<dt><span class="memberNameLink"><a href="org.cojen.maker/org/cojen/maker/Bootstrap.html#invoke(java.lang.Object,java.lang.String,java.lang.Object%5B%5D,java.lang.Object...)">invoke(Object, String, Object[], Object...)</a></span> - Method in interface org.cojen.maker.<a href="org.cojen.maker/org/cojen/maker/Bootstrap.html" title="interface in org.cojen.maker">Bootstrap</a></dt>
+<dd>
+<div class="block">Invoke a dynamically generated method.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="org.cojen.maker/org/cojen/maker/Variable.html#invoke(java.lang.Object,java.lang.String,java.lang.Object%5B%5D,java.lang.Object...)">invoke(Object, String, Object[], Object...)</a></span> - Method in interface org.cojen.maker.<a href="org.cojen.maker/org/cojen/maker/Variable.html" title="interface in org.cojen.maker">Variable</a></dt>
 <dd>

@@ -366,17 +366,26 @@ public interface Variable {
     public Variable invoke(Object returnType, String name, Object[] types, Object... values);
 
     /**
-     * Specify a static bootstrap method for dynamically generating methods or constants. The
-     * variable returned by this method is used for the actual invocation. For a dynamic
-     * constant, no types or values can be passed to the invoke method.
+     * Specify a static bootstrap method for dynamically generating methods, as found in the
+     * class type of this variable.
      *
      * @param name bootstrap method name
-     * @param args constants which are passed to the bootstrap method, not inlcuding the
+     * @param args constants which are passed to the bootstrap method, not including the
      * first three standard arguments
-     * @see #invoke(Object,String,Object[],Object...)
      * @see java.lang.invoke
      */
-    public Variable bootstrap(String name, Object... args);
+    public Bootstrap indy(String name, Object... args);
+
+    /**
+     * Specify a static bootstrap method for dynamically generating constants, as found in the
+     * class type of this variable.
+     *
+     * @param name bootstrap method name
+     * @param args constants which are passed to the bootstrap method, not including the
+     * first three standard arguments
+     * @see java.lang.invoke
+     */
+    public Bootstrap condy(String name, Object... args);
 
     /**
      * Throw the exception object referred to by this variable.

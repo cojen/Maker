@@ -38,21 +38,21 @@ public class CondyTest {
         ClassMaker cm = ClassMaker.begin().public_();
         MethodMaker mm = cm.addMethod(null, "run").static_().public_();
 
-        var bootstrap = mm.var(CondyTest.class).bootstrap("boot");
+        var bootstrap = mm.var(CondyTest.class).condy("boot");
         var assertVar = mm.var(Assert.class);
 
-        var v1 = bootstrap.invoke(String.class, "hello", null);
+        var v1 = bootstrap.invoke(String.class, "hello");
         assertVar.invoke("assertEquals", "hello-world", v1);
 
-        var v2 = bootstrap.invoke(int.class, "dummy", null);
+        var v2 = bootstrap.invoke(int.class, "dummy");
         assertVar.invoke("assertEquals", 123, v2);
 
-        var v3 = bootstrap.invoke(long.class, "dummy", null);
+        var v3 = bootstrap.invoke(long.class, "dummy");
         assertVar.invoke("assertEquals", Long.MAX_VALUE, v3);
 
-        bootstrap = mm.var(CondyTest.class).bootstrap("boot", java.util.Map.class, 999);
+        bootstrap = mm.var(CondyTest.class).condy("boot", java.util.Map.class, 999);
 
-        var v4 = bootstrap.invoke(String.class, "dummy", null);
+        var v4 = bootstrap.invoke(String.class, "dummy");
         assertVar.invoke("assertEquals", "java.util.Map999", v4);
 
         cm.finish().getMethod("run").invoke(null);
@@ -89,7 +89,7 @@ public class CondyTest {
                          int.class, float.class, long.class, double.class};
 
         for (Class type : types) {
-            var v1 = v0.bootstrap("boot", type).invoke(String.class, "dummy", null);
+            var v1 = v0.condy("boot", type).invoke(String.class, "dummy");
             assertVar.invoke("assertEquals", type.toString(), v1);
         }
 
@@ -107,8 +107,8 @@ public class CondyTest {
         ClassMaker cm = ClassMaker.begin().public_();
         MethodMaker mm = cm.addMethod(null, "run").static_().public_();
 
-        var bootstrap = mm.var(CondyTest.class).bootstrap("boot", (Object) null);
-        var v1 = bootstrap.invoke(String.class, "dummy", null);
+        var bootstrap = mm.var(CondyTest.class).condy("boot", (Object) null);
+        var v1 = bootstrap.invoke(String.class, "dummy");
         var assertVar = mm.var(Assert.class);
         assertVar.invoke("assertEquals", "null", v1);
 
@@ -120,8 +120,8 @@ public class CondyTest {
         ClassMaker cm = ClassMaker.begin().public_();
         MethodMaker mm = cm.addMethod(null, "run").static_().public_();
 
-        var bootstrap = mm.var(CondyTest.class).bootstrap("boot", Thread.State.BLOCKED);
-        var v1 = bootstrap.invoke(String.class, "dummy", null);
+        var bootstrap = mm.var(CondyTest.class).condy("boot", Thread.State.BLOCKED);
+        var v1 = bootstrap.invoke(String.class, "dummy");
         var assertVar = mm.var(Assert.class);
         assertVar.invoke("assertEquals", "BLOCKED", v1);
 

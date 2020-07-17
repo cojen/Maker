@@ -186,7 +186,7 @@ public class UsageTest {
     @Test
     public void paramCount2() throws Exception {
         MethodMaker mm = mClassMaker.addMethod(null, "test");
-        var bootstrap = mm.var(UsageTest.class).bootstrap("boot");
+        var bootstrap = mm.var(UsageTest.class).indy("boot");
 
         try {
             bootstrap.invoke(void.class, "test", new Object[] {int.class}, 1, 2);

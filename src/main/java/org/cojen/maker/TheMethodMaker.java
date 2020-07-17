@@ -3560,12 +3560,21 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
-        public Variable bootstrap(String name, Object... args) {
+        public Bootstrap indy(String name, Object... args) {
+            return bootstrap(false, name, args);
+        }
+
+        @Override
+        public Bootstrap condy(String name, Object... args) {
+            return bootstrap(true, name, args);
+        }
+
+        private Bootstrap bootstrap(boolean condy, String name, Object... args) {
             var types = new Type[3 + args.length];
 
             types[0] = Type.from(MethodHandles.Lookup.class);
             types[1] = Type.from(String.class);
-            types[2] = Type.from(MethodType.class);
+            types[2] = Type.from(condy ? Class.class : MethodType.class);
 
             for (int i=0; i<args.length; i++) {
                 Object arg = args[i];
@@ -3581,23 +3590,14 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
             }
 
             Type thisType = type();
-            Set<Type.Method> indyCandidates = thisType.findMethods(name, types, 0, 1, null, null);
+            Set<Type.Method> candidates = thisType.findMethods(name, types, 0, 1, null, null);
 
-            types[2] = Type.from(Class.class);
-            Set<Type.Method> condyCandidates = thisType.findMethods(name, types, 0, 1, null, null);
-
-            Set<Type.Method> candidates;
-            if (indyCandidates.isEmpty()) {
-                if (condyCandidates.isEmpty()) {
+            if (candidates.size() != 1) {
+                if (candidates.isEmpty()) {
                     throw noCandidates(thisType, name);
+                } else {
+                    throw noBestCandidate(thisType, name, candidates);
                 }
-                candidates = condyCandidates;
-            } else if (condyCandidates.isEmpty()) {
-                candidates = indyCandidates;
-            } else {
-                candidates = new LinkedHashSet<>(indyCandidates);
-                candidates.addAll(condyCandidates);
-                throw noBestCandidate(thisType, name, candidates);
             }
 
             Type.Method bootstrap = candidates.iterator().next();
@@ -3620,7 +3620,7 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
 
             int bi = mClassMaker.addBootstrapMethod(bootHandle, bootArgs);
 
-            return new BootstrapVar(bi, candidates == condyCandidates);
+            return new BootstrapImpl(bi, condy);
         }
 
         @Override
@@ -4148,67 +4148,13 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
         }
     }
 
-    /**
-     * Pseudo variable used in conjunction with the invokedynamic instruction.
-     */
-    class BootstrapVar extends OwnedVar {
+    class BootstrapImpl implements Bootstrap {
         final int mBootstrapIndex;
         final boolean mCondy;
 
-        BootstrapVar(int bi, boolean condy) {
+        BootstrapImpl(int bi, boolean condy) {
             mBootstrapIndex = bi;
             mCondy = condy;
-        }
-
-        @Override
-        public Variable name(String name) {
-            throw new IllegalStateException("Cannot be named");
-        }
-
-        @Override
-        public Variable set(Object value) {
-            throw new IllegalStateException("Unmodifiable variable");
-        }
-
-        @Override
-        public Variable get() {
-            // Cannot be modified, so return the same variable instance.
-            return this;
-        }
-
-        @Override
-        public void inc(Object value) {
-            throw new IllegalStateException("Unmodifiable variable");
-        }
-
-        @Override
-        public Field field(String name) {
-            throw new IllegalStateException("No fields");
-        }
-
-        @Override
-        public void monitorEnter() {
-            throw new IllegalStateException();
-        }
-
-        @Override
-        public void monitorExit() {
-            throw new IllegalStateException();
-        }
-
-        @Override
-        Type type() {
-            throw new IllegalStateException("Unmodifiable variable");
-        }
-
-        @Override
-        void push() {
-            throw new IllegalStateException();
-        }
-
-        @Override
-        public Var invoke(String name, Object... values) {
-            throw new IllegalStateException("Must invoke with a return type specified");
         }
 
         @Override
@@ -4251,16 +4197,6 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
             Var var = new Var(retType);
             addStoreOp(var);
             return var;
-        }
-
-        @Override
-        protected void beginSetConstant() {
-            throw new IllegalStateException("Unmodifiable variable");
-        }
-
-        @Override
-        protected void finishSetConstant() {
-            throw new IllegalStateException("Unmodifiable variable");
         }
     }
 }
