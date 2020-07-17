@@ -218,7 +218,10 @@ public class ObjectMethods {
                 if (any) {
                     toConcat.add(", ");
                 }
-                toConcat.add(target.field(field.getName()));
+                String fieldName = field.getName();
+                toConcat.add(fieldName);
+                toConcat.add('=');
+                toConcat.add(target.field(fieldName));
                 any = true;
             }
         }
