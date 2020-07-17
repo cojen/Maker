@@ -25,6 +25,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Objects;
 
 import org.cojen.maker.Bootstrap;
@@ -68,6 +69,7 @@ public class ObjectMethods {
             ctor.newInstance("bob", 10),
             ctor.newInstance("bob", 11),
             ctor.newInstance("jane", 11),
+            ctor.newInstance(null, 0),
         };
 
         for (Object instance : instances) {
@@ -113,16 +115,6 @@ public class ObjectMethods {
 
         Field[] fields = targetClass.getDeclaredFields();
 
-        boolean immutable = true;
-        for (int i=0; i<fields.length; i++) {
-            int mods = fields[i].getModifiers();
-            if (Modifier.isStatic(mods)) {
-                fields[i] = null;
-            } else if (!Modifier.isFinal(mods)) {
-                immutable = false;
-            }
-        }
-
         switch (methodName) {
         case "hashCode":
             bootHashCode(mm, fields);
@@ -146,13 +138,35 @@ public class ObjectMethods {
         }
     }
 
+    private static boolean isStatic(Field field) {
+        return Modifier.isStatic(field.getModifiers());
+    }
+
     private static void bootHashCode(MethodMaker mm, Field[] fields) {
         var target = mm.param(0);
         Variable result = null;
 
         for (Field field : fields) {
-            if (field != null) {
-                var subHash = target.field(field.getName()).invoke("hashCode");
+            if (!isStatic(field)) {
+                Class<?> fieldType = field.getType();
+                System.out.println(fieldType);
+
+                Class invoker;
+                String method = "hashCode";
+
+                if (fieldType.isPrimitive()) {
+                    invoker = fieldType;
+                } else if (!fieldType.isArray()) {
+                    invoker = Objects.class;
+                } else {
+                    invoker = Arrays.class;
+                    if (fieldType.getComponentType().isArray()) {
+                        method = "deepHashCode";
+                    }
+                }
+
+                var subHash = mm.var(invoker).invoke(method, target.field(field.getName()));
+
                 if (result == null) {
                     result = mm.var(int.class).set(subHash);
                 } else {
@@ -183,7 +197,7 @@ public class ObjectMethods {
         other = other.cast(targetClass);
 
         for (Field field : fields) {
-            if (field != null) {
+            if (!isStatic(field)) {
                 String fieldName = field.getName();
                 Class<?> fieldType = field.getType();
 
@@ -214,7 +228,7 @@ public class ObjectMethods {
 
         boolean any = false;
         for (Field field : fields) {
-            if (field != null) {
+            if (!isStatic(field)) {
                 if (any) {
                     toConcat.add(", ");
                 }
