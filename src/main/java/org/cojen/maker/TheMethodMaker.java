@@ -208,6 +208,14 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
                             break visited;
                         }
                     }
+                } else if (op instanceof PushConstantOp || op instanceof DynamicConstantOp) {
+                    Op next = op.mNext;
+                    StoreVarOp store;
+                    if (next instanceof StoreVarOp && (store = (StoreVarOp) next).unusedVar()) {
+                        // Don't bother storing a constant to an unused variable.
+                        op = next.mNext;
+                        break visited;
+                    }
                 }
 
                 opCount++;
@@ -2148,7 +2156,12 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         if (value instanceof Variable) {
-            // A variable isn't a constant.
+            if (value instanceof ConstantVar) {
+                var constant = (ConstantVar) value;
+                if (constant.owner() == this) {
+                    return constant.mDynamic;
+                }
+            }
             throw unsupportedConstant(value);
         }
 
@@ -2868,12 +2881,16 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
 
         @Override
         void appendTo(TheMethodMaker m) {
-            if (mVar.mPushCount > 0) {
+            if (unusedVar()) {
+                m.stackPop();
+            } else {
                 mVar.mValid = true;
                 m.storeVar(mVar);
-            } else {
-                m.stackPop();
             }
+        }
+
+        boolean unusedVar() {
+            return mVar.mPushCount <= 0;
         }
     }
 
@@ -3582,6 +3599,8 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
                 Type type;
                 if (arg == mClassVar) {
                     type = Type.from(Class.class);
+                } else if (arg instanceof OwnedVar) {
+                    type = ((OwnedVar) arg).type();
                 } else {
                     type = Type.from(arg.getClass());
                 }
@@ -3786,6 +3805,33 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
         @Override
         int smCode() {
             return SM_UNINIT | (mNewOffset << 8);
+        }
+    }
+
+    /**
+     * Unmodifiable variable which refers to a dynamic constant.
+     */
+    class ConstantVar extends Var {
+        final ConstantPool.C_Dynamic mDynamic;
+
+        ConstantVar(Type type, ConstantPool.C_Dynamic dynamic) {
+            super(type);
+            mDynamic = dynamic;
+        }
+
+        @Override
+        public Var set(Object value) {
+            throw new IllegalStateException("Unmodifiable variable");
+        }
+
+        @Override
+        public Variable setConstant(Object value) {
+            throw new IllegalStateException("Unmodifiable variable");
+        }
+
+        @Override
+        public void inc(Object value) {
+            throw new IllegalStateException("Unmodifiable variable");
         }
     }
 
@@ -4162,6 +4208,8 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
             Type retType = mClassMaker.typeFrom(returnType);
             int length = values == null ? 0 : values.length;
 
+            Var var;
+
             if (mCondy) {
                 if ((types != null && types.length != 0) || length != 0) {
                     throw new IllegalStateException("Dynamic constant has no parameters");
@@ -4171,6 +4219,8 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
                     .addDynamicConstant(mBootstrapIndex, name, retType);
 
                 addOp(new DynamicConstantOp(dynamic, retType));
+
+                var = new ConstantVar(retType, dynamic);
             } else {
                 if ((types == null ? 0 : types.length) != length) {
                     throw new IllegalArgumentException("Mismatched parameter types and values");
@@ -4192,9 +4242,10 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
                 if (retType == VOID) {
                     return null;
                 }
+
+                var = new Var(retType);
             }
 
-            Var var = new Var(retType);
             addStoreOp(var);
             return var;
         }

@@ -378,7 +378,9 @@ public interface Variable {
 
     /**
      * Specify a static bootstrap method for dynamically generating constants, as found in the
-     * class type of this variable.
+     * class type of this variable. The variable returned by the bootstrap method cannot be
+     * modified. Since it is a constant, it can be supplied as an argument to another bootstrap
+     * method.
      *
      * @param name bootstrap method name
      * @param args constants which are passed to the bootstrap method, not including the

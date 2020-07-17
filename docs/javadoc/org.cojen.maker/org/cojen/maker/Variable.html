@@ -1018,7 +1018,9 @@ int[]&nbsp;cases,
 <div class="memberSignature"><span class="returnType"><a href="Bootstrap.html" title="interface in org.cojen.maker">Bootstrap</a></span>&nbsp;<span class="memberName">condy</span>&#8203;(<span class="arguments"><a href="https://docs.oracle.com/en/java/javase/14/docs/api/java.base/java/lang/String.html?is-external=true" title="class or interface in java.lang" class="externalLink">String</a>&nbsp;name,
 <a href="https://docs.oracle.com/en/java/javase/14/docs/api/java.base/java/lang/Object.html?is-external=true" title="class or interface in java.lang" class="externalLink">Object</a>...&nbsp;args)</span></div>
 <div class="block">Specify a static bootstrap method for dynamically generating constants, as found in the
- class type of this variable.</div>
+ class type of this variable. The variable returned by the bootstrap method cannot be
+ modified. Since it is a constant, it can be supplied as an argument to another bootstrap
+ method.</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>name</code> - bootstrap method name</dd>

@@ -853,4 +853,39 @@ public class InvokeTest {
 
         cm.finish().getMethod("run").invoke(null);
     }
+
+    @Test
+    public void dynamicConstant() throws Exception {
+        // Test passing a dynamic constant as a bootstrap arg.
+
+        ClassMaker cm = ClassMaker.begin().public_();
+        MethodMaker mm = cm.addMethod(null, "run").public_().static_();
+
+        var bootstrap = mm.var(InvokeTest.class);
+        var map = bootstrap.condy("makeMap", "hello", "world").invoke(Map.class, "xxx");
+        var result = bootstrap.indy("bootWithMap", map, "hello").invoke(String.class, "xxx");
+
+        var assertVar = mm.var(Assert.class);
+        assertVar.invoke("assertEquals", "world", result);
+
+        cm.finish().getMethod("run").invoke(null);
+    }
+
+    public static Map<String, String> makeMap(MethodHandles.Lookup lookup, String name, Class type,
+                                              String key, String value)
+    {
+        return Map.of(key, value);
+    }
+
+    public static CallSite bootWithMap(MethodHandles.Lookup caller, String name, MethodType type,
+                                       Map<String, String> map, String key)
+        throws Exception
+    {
+        ClassMaker cm = ClassMaker.begin().public_().final_();
+        MethodMaker mm = cm.addMethod(name, type).static_().public_();
+        mm.return_(map.get(key));
+        Class<?> clazz = cm.finish();
+        var mh = MethodHandles.lookup().findStatic(clazz, name, type);
+        return new ConstantCallSite(mh);
+    }
 }

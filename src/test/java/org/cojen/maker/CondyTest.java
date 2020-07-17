@@ -228,4 +228,34 @@ public class CondyTest {
             assertTrue(e.getMessage().startsWith("Mismatched"));
         }
     }
+
+    @Test
+    public void unmodifiable() {
+        ClassMaker cm = ClassMaker.begin(null);
+        MethodMaker mm = cm.addMethod(null, "test");
+        var bootstrap = mm.var(CondyTest.class).condy("boot");
+
+        var v1 = bootstrap.invoke(String.class, "hello");
+
+        try {
+            v1.set(null);
+            fail();
+        } catch (IllegalStateException e) {
+            assertTrue(e.getMessage().startsWith("Unmodifiable"));
+        }
+
+        try {
+            v1.setConstant("world");
+            fail();
+        } catch (IllegalStateException e) {
+            assertTrue(e.getMessage().startsWith("Unmodifiable"));
+        }
+
+        try {
+            v1.inc(1);
+            fail();
+        } catch (IllegalStateException e) {
+            assertTrue(e.getMessage().startsWith("Unmodifiable"));
+        }
+    }
 }
