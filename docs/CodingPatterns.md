@@ -175,3 +175,69 @@ i.inc(1);
 mm.goto_(start);
 end.here();
 ```
+
+Exception handling
+==================
+
+```java
+try {
+    <code>
+} catch (Exception e) {
+    <handler code>
+}
+```
+
+When implementing a `catch` block, it's important that the handled code doesn't flow into the handler.
+
+```java
+MethodMaker mm = ...
+Label tryStart = mm.label().here();
+Label cont = mm.label();
+<code>
+mm.goto(cont); // branch past the handler
+Label tryEnd = mm.label().here();
+var e = mm.catch_(tryStart, tryEnd, Exception.class);
+<handler code>
+cont.here();
+```
+
+Try-finally
+-----------
+
+```java
+lock.lock();
+try {
+    <code>
+    if (a < b) return;
+    <more code>
+} finally {
+    lock.unlock();
+}
+```
+
+Implementing a `finally` statement is tricky, because every path which can exit the `try` block must be handled.
+
+```java
+MethodMaker mm = ...
+Variable lock, a, b = ...
+
+lock.invoke("lock");
+Label tryStart = mm.label().here();
+<code>
+Label cont = mm.label();
+a.ifGe(b, cont);
+lock.invoke("unlock"); // unlock at this exit point
+mm.return_();
+cont.here();
+<more code>
+Label cont2 = mm.label();
+mm.goto_(cont2);
+Label tryEnd = mm.label().here();
+var e = mm.catch_(tryStart, tryEnd, null); // catch anything
+lock.invoke("unlock"); // unlock at this exit point
+e.throw_();
+cont2.here();
+lock.invoke("unlock"); // unlock at this exit point
+```
+
+Note that this example is only safe if the `unlock` method is guaranteed to never throw an exception. Otherwise, two catch locations must be defined which can branch to the same handler. A built-in utility which generates the correct try-finally coding patterns would be nice to have. 
