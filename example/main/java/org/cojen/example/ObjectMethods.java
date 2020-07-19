@@ -87,13 +87,13 @@ public class ObjectMethods {
 
     public static void makeHashCode(ClassMaker cm) {
         MethodMaker mm = cm.addMethod(int.class, "hashCode");
-        var bootstrap = mm.var(ObjectMethods.class).indy("bootstrap", mm.class_());
+        var bootstrap = mm.var(ObjectMethods.class).indy("bootstrap");
         mm.return_(bootstrap.invoke(int.class, "hashCode", new Object[]{cm.name()}, mm.this_()));
     }
 
     public static void makeEquals(ClassMaker cm) {
         MethodMaker mm = cm.addMethod(boolean.class, "equals", Object.class);
-        var bootstrap = mm.var(ObjectMethods.class).indy("bootstrap", mm.class_());
+        var bootstrap = mm.var(ObjectMethods.class).indy("bootstrap");
         mm.return_(bootstrap.invoke(boolean.class, "equals",
                                     new Object[]{cm.name(), Object.class},
                                     mm.this_(), mm.param(0)));
@@ -101,15 +101,15 @@ public class ObjectMethods {
 
     public static void makeToString(ClassMaker cm) {
         MethodMaker mm = cm.addMethod(String.class, "toString");
-        var bootstrap = mm.var(ObjectMethods.class).indy("bootstrap", mm.class_());
+        var bootstrap = mm.var(ObjectMethods.class).indy("bootstrap");
         mm.return_(bootstrap.invoke(String.class, "toString", new Object[]{cm.name()}, mm.this_()));
     }
 
     public static CallSite bootstrap(MethodHandles.Lookup lookup,
                                      String methodName,
-                                     MethodType type,
-                                     Class<?> targetClass)
+                                     MethodType type)
     {
+        Class<?> targetClass = lookup.lookupClass();
         ClassMaker cm = ClassMaker.begin(targetClass.getName(), lookup);
         MethodMaker mm = cm.addMethod(methodName, type).static_();
 
