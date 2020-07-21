@@ -107,12 +107,18 @@ public class CondyTest {
         ClassMaker cm = ClassMaker.begin().public_();
         MethodMaker mm = cm.addMethod(null, "run").static_().public_();
 
-        var bootstrap = mm.var(CondyTest.class).condy("boot", (Object) null);
+        var bootstrap = mm.var(CondyTest.class).condy("bootx", (Object) null);
         var v1 = bootstrap.invoke(String.class, "dummy");
         var assertVar = mm.var(Assert.class);
         assertVar.invoke("assertEquals", "null", v1);
 
         cm.finish().getMethod("run").invoke(null);
+    }
+
+    public static Object bootx(MethodHandles.Lookup lookup, String name, Class type, String arg1)
+        throws Exception
+    {
+        return String.valueOf(arg1);
     }
 
     @Test

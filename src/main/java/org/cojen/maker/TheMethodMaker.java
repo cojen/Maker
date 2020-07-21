@@ -3597,12 +3597,12 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
                 Object arg = args[i];
 
                 Type type;
-                if (arg == mClassVar) {
-                    type = Type.from(Class.class);
+                if (arg == null) {
+                    type = Type.NULL;
                 } else if (arg instanceof OwnedVar) {
                     type = ((OwnedVar) arg).type();
                 } else {
-                    type = Type.from(arg.getClass());
+                    type = mClassMaker.typeFrom(arg.getClass());
                 }
 
                 types[3 + i] = type;
