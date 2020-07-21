@@ -415,7 +415,7 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
     @Override
     public Variable class_() {
         if (mClassVar == null) {
-            mClassVar = new ClassVar(mClassMaker.typeFrom(Class.class));
+            mClassVar = new ClassVar(Type.from(Class.class));
         }
         return mClassVar;
     }
@@ -481,15 +481,7 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
     @Override
     public Var var(Object type) {
         requireNonNull(type);
-
-        Type tType;
-        if (type instanceof OwnedVar) {
-            tType = ((OwnedVar) type).type();
-        } else {
-            tType = mClassMaker.typeFrom(type);
-        }
-
-        return new Var(tType);
+        return new Var(mClassMaker.typeFrom(type));
     }
 
     @Override
@@ -808,7 +800,7 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
             throw new IllegalArgumentException("Wrong number of parameters");
         }
 
-        Type returnType = mClassMaker.typeFrom(mtype.returnType());
+        Type returnType = Type.from(mtype.returnType());
 
         Type handleType = Type.from(MethodHandle.class);
         Var handleVar = new Var(handleType);

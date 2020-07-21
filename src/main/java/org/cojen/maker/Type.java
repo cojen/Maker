@@ -109,6 +109,8 @@ abstract class Type {
             return from(loader, (String) type);
         } else if (type == null) {
             return NULL;
+        } else if (type instanceof TheMethodMaker.OwnedVar) {
+            return ((TheMethodMaker.OwnedVar) type).type();
         } else {
             throw new IllegalArgumentException("Unknown type: " + type);
         }
