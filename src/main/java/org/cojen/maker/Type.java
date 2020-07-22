@@ -105,12 +105,12 @@ abstract class Type {
     static Type from(ClassLoader loader, Object type) {
         if (type instanceof Class) {
             return from((Class) type);
+        } else if (type instanceof Typed) {
+            return ((Typed) type).type();
         } else if (type instanceof String) {
             return from(loader, (String) type);
         } else if (type == null) {
             return NULL;
-        } else if (type instanceof TheMethodMaker.OwnedVar) {
-            return ((TheMethodMaker.OwnedVar) type).type();
         } else {
             throw new IllegalArgumentException("Unknown type: " + type);
         }

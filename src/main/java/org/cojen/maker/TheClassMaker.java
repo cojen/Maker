@@ -46,7 +46,7 @@ import static java.util.Objects.*;
  *
  * @author Brian S O'Neill
  */
-final class TheClassMaker extends Attributed implements ClassMaker {
+final class TheClassMaker extends Attributed implements ClassMaker, Typed {
     static final boolean DEBUG = Boolean.getBoolean(ClassMaker.class.getName() + ".DEBUG");
 
     private static volatile Method cDefineHidden;
@@ -607,7 +607,8 @@ final class TheClassMaker extends Attributed implements ClassMaker {
         return "ClassMaker {name=" + name() + '}';
     }
 
-    Type type() {
+    @Override
+    public Type type() {
         return mThisClass.mType;
     }
 

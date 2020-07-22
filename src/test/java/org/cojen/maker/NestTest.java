@@ -54,28 +54,28 @@ public class NestTest {
         {
             MethodMaker mm = parent.addConstructor().public_();
             mm.invokeSuperConstructor();
-            var f1 = mm.var(child1.name()).field("f1");
+            var f1 = mm.var(child1).field("f1");
             mm.var(Assert.class).invoke("assertEquals", 0, f1);
-            var f2 = mm.new_(child2.name()).field("f2");
+            var f2 = mm.new_(child2).field("f2");
             mm.var(Assert.class).invoke("assertEquals", 0, f2);
         }
 
         // Child can access the parent.
         {
             MethodMaker mm = child1.addMethod(null, "test1").public_().static_();
-            var f0 = mm.var(parent.name()).field("f0");
+            var f0 = mm.var(parent).field("f0");
             mm.var(Assert.class).invoke("assertEquals", 0, f0);
         }
 
         // Parent to child to parent.
         {
             MethodMaker mm = child2.addMethod(null, "internal").private_();
-            var f0 = mm.var(parent.name()).field("f0");
+            var f0 = mm.var(parent).field("f0");
             mm.var(Assert.class).invoke("assertEquals", 0, f0);
         }
         {
             MethodMaker mm = parent.addMethod(null, "test2").public_().static_();
-            mm.new_(child2.name()).invoke("internal");
+            mm.new_(child2).invoke("internal");
         }
 
         Class<?> parentClass = parent.finish();

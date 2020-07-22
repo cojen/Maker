@@ -297,7 +297,7 @@ public class InvokeTest {
         }
 
         MethodMaker mm = cm.addMethod(null, "run").public_().static_();
-        var obj = mm.new_(cm.name());
+        var obj = mm.new_(cm);
         var result = obj.invoke("calc", 1, 2);
         mm.var(Assert.class).invoke("assertEquals", 13, result);
 
@@ -638,7 +638,7 @@ public class InvokeTest {
             assertTrue(e.getMessage().startsWith("No best"));
         }
 
-        var result = mm.var(cm.name()).invoke(long.class, "foo", new Object[0]);
+        var result = mm.var(cm).invoke(long.class, "foo", new Object[0]);
         mm.var(Assert.class).invoke("assertEquals", Long.MAX_VALUE, result);
 
         cm.finish().getMethod("run").invoke(null);

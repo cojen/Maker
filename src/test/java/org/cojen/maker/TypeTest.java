@@ -85,7 +85,7 @@ public class TypeTest {
             "void", "V"
         };
         for (int i=0; i<prims.length; i+=2) {
-            Type type = Type.from(loader, prims[i]);
+            Type type = i < 10 ? Type.from(loader, prims[i]) : Type.from(loader, (Object) prims[i]);
             assertEquals(prims[i], type.name());
             assertTrue(type.isPrimitive());
             assertEquals(type, type.unbox());

@@ -3014,12 +3014,10 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
         return codes;
     }
 
-    abstract class OwnedVar implements Variable {
+    abstract class OwnedVar implements Variable, Typed {
         TheMethodMaker owner() {
             return TheMethodMaker.this;
         }
-
-        abstract Type type();
 
         abstract void push();
 
@@ -3686,7 +3684,7 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
-        Type type() {
+        public Type type() {
             return mType;
         }
 
@@ -3839,7 +3837,7 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
-        Type type() {
+        public Type type() {
             return mFieldRef.mField.type();
         }
 
