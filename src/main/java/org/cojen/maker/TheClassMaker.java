@@ -379,8 +379,7 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
         return this;
     }
 
-    @Override
-    public String name() {
+    String name() {
         return type().name();
     }
 

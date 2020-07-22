@@ -226,11 +226,6 @@ public interface ClassMaker {
     public ClassMaker sourceFile(String fileName);
 
     /**
-     * Returns the name of the class being made.
-     */
-    public String name();
-
-    /**
      * Finishes the definition of the new class.
      *
      * @throws IllegalStateException if already finished or if the definition is broken
