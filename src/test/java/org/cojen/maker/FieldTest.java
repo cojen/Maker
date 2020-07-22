@@ -16,6 +16,8 @@
 
 package org.cojen.maker;
 
+import java.lang.reflect.Modifier;
+
 import org.junit.*;
 import static org.junit.Assert.*;
 
@@ -143,4 +145,113 @@ public class FieldTest {
     }
 
     public FieldTest next;
+
+    @Test
+    public void initConversions() throws Exception {
+        ClassMaker cm = ClassMaker.begin().public_();
+        MethodMaker mm = cm.addMethod(null, "run").public_().static_();
+        var assertVar = mm.var(Assert.class);
+
+        cm.addField(int.class, "f1").private_().static_().final_().init(1.0d);
+        assertVar.invoke("assertEquals", 1, mm.field("f1"));
+
+        cm.addField(float.class, "f2").private_().static_().final_().init(2.0d);
+        assertVar.invoke("assertEquals", 2.0f, mm.field("f2"), 0);
+
+        cm.addField(long.class, "f3").private_().static_().final_().init(3);
+        assertVar.invoke("assertEquals", 3L, mm.field("f3"));
+
+        cm.addField(double.class, "f4").private_().static_().final_().init(4);
+        assertVar.invoke("assertEquals", 4.0d, mm.field("f4"), 0);
+
+        cm.addField(long.class, "f5").private_().static_().final_().init(5.0d);
+        assertVar.invoke("assertEquals", 5L, mm.field("f5"));
+
+        cm.addField(double.class, "f6").private_().static_().final_().init((byte) 6);
+        assertVar.invoke("assertEquals", 6.0d, mm.field("f6"), 0);
+
+        cm.addField(String.class, "f7").private_().static_().final_().init(null);
+        assertVar.invoke("assertEquals", null, mm.field("f7"));
+
+        cm.addField(Integer.class, "f8").private_().static_().final_().init(null);
+        assertVar.invoke("assertEquals", null, mm.field("f8"));
+
+        cm.addField(boolean.class, "f9").private_().static_().final_().init(false);
+        assertVar.invoke("assertEquals", false, mm.field("f9"));
+
+        cm.addField(boolean.class, "f10").private_().static_().final_().init(true);
+        assertVar.invoke("assertEquals", true, mm.field("f10"));
+
+        cm.addField(byte.class, "f11").private_().static_().final_().init((byte) 11);
+        assertVar.invoke("assertEquals", 11, mm.field("f11"));
+
+        cm.addField(byte.class, "f12").private_().static_().final_().init(12);
+        assertVar.invoke("assertEquals", 12, mm.field("f12"));
+
+        cm.addField(char.class, "f13").private_().static_().final_().init((char) 13);
+        assertVar.invoke("assertEquals", 13, mm.field("f13"));
+
+        cm.addField(short.class, "f14").private_().static_().final_().init((short) 14);
+        assertVar.invoke("assertEquals", 14, mm.field("f14"));
+
+        cm.addField(short.class, "f15").private_().static_().final_().init(15);
+        assertVar.invoke("assertEquals", 15, mm.field("f15"));
+
+        cm.addField(Number.class, "f16").private_().static_().final_().init(16);
+        assertVar.invoke("assertEquals", 16, mm.field("f16"));
+
+        cm.addField(Class.class, "f17").private_().static_().final_().init(String.class);
+        assertVar.invoke("assertEquals", String.class, mm.field("f17"));
+
+        try {
+            cm.addField(boolean.class, "f18").private_().static_().final_().init(17);
+            fail();
+        } catch (IllegalStateException e) {
+            assertTrue(e.getMessage().contains("conversion"));
+        }
+
+        try {
+            cm.addField(char.class, "f19").private_().static_().final_().init("18");
+            fail();
+        } catch (IllegalStateException e) {
+            assertTrue(e.getMessage().contains("conversion"));
+        }
+
+        try {
+            cm.addField(Integer.class, "f20").private_().static_().final_().init("19");
+            fail();
+        } catch (IllegalStateException e) {
+            assertTrue(e.getMessage().contains("conversion"));
+        }
+
+        cm.finish().getMethod("run").invoke(null);
+    }
+
+    @Test
+    public void extraModifiers() throws Exception {
+        ClassMaker cm = ClassMaker.begin().public_();
+        cm.addField(int.class, "f1").public_().transient_();
+        cm.addField(int.class, "f2").synthetic();
+        cm.addField(int.class, "f3").transient_().volatile_();
+
+        var clazz = cm.finish();
+
+        {
+            int mods = clazz.getField("f1").getModifiers();
+            assertTrue(Modifier.isPublic(mods));
+            assertTrue(Modifier.isTransient(mods));
+            assertFalse(Modifier.isFinal(mods));
+        }
+
+        {
+            int mods = clazz.getDeclaredField("f2").getModifiers();
+            assertEquals(0x1000, mods);
+        }
+
+        {
+            int mods = clazz.getDeclaredField("f3").getModifiers();
+            assertTrue(Modifier.isTransient(mods));
+            assertTrue(Modifier.isVolatile(mods));
+        }
+    }
 }

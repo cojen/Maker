@@ -24,10 +24,12 @@ import java.lang.reflect.Modifier;
  * @author Brian S O'Neill
  */
 final class TheFieldMaker extends ClassMember implements FieldMaker {
-    Type.Field mField;
+    private final TheClassMaker mClassMaker;
+    private final Type.Field mField;
 
-    TheFieldMaker(ConstantPool cp, Type.Field field) {
-        super(cp, cp.addUTF8(field.name()), cp.addUTF8(field.type().descriptor()));
+    TheFieldMaker(TheClassMaker classMaker, Type.Field field) {
+        super(classMaker.mConstants, field.name(), field.type().descriptor());
+        mClassMaker = classMaker;
         mField = field;
     }
 
@@ -81,39 +83,92 @@ final class TheFieldMaker extends ClassMember implements FieldMaker {
     }
 
     @Override
-    public FieldMaker init(int value) {
-        init(mConstants.addInteger(value));
-        return this;
-    }
-
-    @Override
-    public FieldMaker init(float value) {
-        init(mConstants.addFloat(value));
-        return this;
-    }
-
-    @Override
-    public FieldMaker init(long value) {
-        init(mConstants.addLong(value));
-        return this;
-    }
-
-    @Override
-    public FieldMaker init(double value) {
-        init(mConstants.addDouble(value));
-        return this;
-    }
-
-    @Override
-    public FieldMaker init(String value) {
-        init(mConstants.addString(value));
-        return this;
-    }
-
-    private void init(ConstantPool.Constant constant) {
+    public FieldMaker init(Object value) {
         if (!Modifier.isStatic(mModifiers)) {
             throw new IllegalStateException("Not static");
         }
+
+        ConstantPool.Constant constant;
+
+        addConstant: {
+            int ivalue;
+
+            nonInt: {
+                switch (mField.type().typeCode()) {
+                case Type.T_BOOLEAN:
+                    if (value instanceof Boolean) {
+                        ivalue = ((boolean) value) ? 1 : 0;
+                        break nonInt;
+                    }
+                    break;
+                case Type.T_BYTE:
+                    if (value instanceof Byte) {
+                        ivalue = (byte) value;
+                        break nonInt;
+                    }
+                    break;
+                case Type.T_CHAR:
+                    if (value instanceof Character) {
+                        ivalue = (char) value;
+                        break nonInt;
+                    }
+                    break;
+                case Type.T_SHORT:
+                    if (value instanceof Short) {
+                        ivalue = (short) value;
+                        break nonInt;
+                    }
+                    break;
+                case Type.T_INT:
+                    if (value instanceof Integer) {
+                        ivalue = (int) value;
+                        break nonInt;
+                    }
+                    break;
+                case Type.T_FLOAT:
+                    if (value instanceof Float) {
+                        constant = mConstants.addFloat((float) value);
+                        break addConstant;
+                    }
+                    break;
+                case Type.T_LONG:
+                    if (value instanceof Long || value instanceof Integer) {
+                        constant = mConstants.addLong(((Number) value).longValue());
+                        break addConstant;
+                    }
+                    break;
+                case Type.T_DOUBLE:
+                    if (value instanceof Double || value instanceof Integer) {
+                        constant = mConstants.addDouble(((Number) value).doubleValue());
+                        break addConstant;
+                    }
+                    break;
+                default:
+                    if (value == null) {
+                        // Fields are null by default.
+                        return this;
+                    }
+                    if (value instanceof String && mField.type() == Type.from(String.class)) {
+                        constant = mConstants.addString((String) value);
+                        break addConstant;
+                    }
+                    break;
+                }
+
+                // Define a static initialzer and perform a conversion.
+                mClassMaker.addClinit().field(mField.name()).set(value);
+                return this;
+            }
+
+            if (ivalue == 0) {
+                // Fields are zero by default.
+                return this;
+            }
+
+            constant = mConstants.addInteger(ivalue);
+        }
+
         addAttribute(new Attribute.Constant(mConstants, constant));
+        return this;
     }
 }

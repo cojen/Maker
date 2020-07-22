@@ -35,6 +35,10 @@ abstract class ClassMember extends Attributed {
         mDescriptor = desc;
     }
 
+    ClassMember(ConstantPool cp, String name, String desc) {
+        this(cp, cp.addUTF8(name), cp.addUTF8(desc));
+    }
+
     final void writeTo(BytesOut out) throws IOException {
         out.writeShort(mModifiers);
         out.writeShort(mName.mIndex);

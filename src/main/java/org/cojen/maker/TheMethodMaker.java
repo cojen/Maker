@@ -85,10 +85,7 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
     private int mFinished;
 
     TheMethodMaker(TheClassMaker classMaker, Type.Method method) {
-        super(classMaker.mConstants,
-              classMaker.mConstants.addUTF8(method.name()),
-              classMaker.mConstants.addUTF8(method.descriptor()));
-
+        super(classMaker.mConstants, method.name(), method.descriptor());
         mClassMaker = classMaker;
         mMethod = method;
     }

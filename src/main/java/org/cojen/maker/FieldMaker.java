@@ -80,42 +80,10 @@ public interface FieldMaker {
     public FieldMaker synthetic();
 
     /**
-     * Set an initial constant value for this field as an {@code int}.
+     * Set an initial constant value for this field.
      *
      * @return this
-     * @throws IllegalStateException if not a static field
+     * @throws IllegalStateException if not a static field or if constant isn't supported
      */
-    public FieldMaker init(int value);
-
-    /**
-     * Set an initial constant value for this field as a {@code float}.
-     *
-     * @return this
-     * @throws IllegalStateException if not a static field
-     */
-    public FieldMaker init(float value);
-
-    /**
-     * Set an initial constant value for this field as a {@code long}.
-     *
-     * @return this
-     * @throws IllegalStateException if not a static field
-     */
-    public FieldMaker init(long value);
-
-    /**
-     * Set an initial constant value for this field as a {@code double}.
-     *
-     * @return this
-     * @throws IllegalStateException if not a static field
-     */
-    public FieldMaker init(double value);
-
-    /**
-     * Set an initial constant value for this field as a {@code String}.
-     *
-     * @return this
-     * @throws IllegalStateException if not a static field
-     */
-    public FieldMaker init(String value);
+    public FieldMaker init(Object value);
 }

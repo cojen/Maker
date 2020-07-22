@@ -265,7 +265,7 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
 
         Type tType = typeFrom(type);
 
-        var fm = new TheFieldMaker(mConstants, type().defineField(false, tType, name));
+        var fm = new TheFieldMaker(this, type().defineField(false, tType, name));
         mFields.put(name, fm);
 
         return fm;
