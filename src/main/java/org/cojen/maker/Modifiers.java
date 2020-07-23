@@ -80,7 +80,10 @@ class Modifiers {
     }
 
     static int toStrict(int bitmask) {
-        return bitmask | Modifier.STRICT;
+        if ((bitmask & (Modifier.NATIVE | Modifier.ABSTRACT)) == 0) {
+            bitmask |= Modifier.STRICT;
+        }
+        return bitmask;
     }
 
     static int toBridge(int bitmask) {
@@ -90,14 +93,13 @@ class Modifiers {
     }
 
     static int toEnum(int bitmask) {
-        // Enum re-uses the Modifier.NATIVE modifier, which used to only apply to methods.
-        return (bitmask | Modifier.NATIVE) &
+        return (bitmask | 0x4000) &
             (~Modifier.ABSTRACT & ~Modifier.INTERFACE &
              ~Modifier.STRICT & ~Modifier.SYNCHRONIZED);
     }
 
     static int toVarArgs(int bitmask) {
-        // Enum re-uses the Modifier.TRANSIENT modifier, which used to only apply to fields.
+        // Varargs re-uses the Modifier.TRANSIENT modifier, which used to only apply to fields.
         return (bitmask | Modifier.TRANSIENT) & (~Modifier.INTERFACE & ~Modifier.VOLATILE);
     }
 

@@ -117,7 +117,7 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
     }
 
     void finish() {
-        if (mFinished != 0 || Modifier.isAbstract(mModifiers)) {
+        if (mFinished != 0 || (mModifiers & (Modifier.ABSTRACT | Modifier.NATIVE)) != 0) {
             return;
         }
 
