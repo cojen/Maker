@@ -142,6 +142,22 @@ public class ArrayTest {
             assertVar.invoke("assertEquals", v1, v2.aget(2));
         }
 
+        {
+            var v1 = mm.new_(String[].class, 10);
+            var v2 = mm.new_(String[][].class, 10);
+            v2.aset(2, v1);
+            assertVar.invoke("assertEquals", v1, v2.aget(2));
+            assertVar.invoke("assertNull", v2.aget(0));
+        }
+
+        {
+            var v1 = mm.new_(String[][].class, 10);
+            var v2 = mm.new_(String[][][].class, 20, 30);
+            v2.aset(2, v1);
+            assertVar.invoke("assertEquals", v1, v2.aget(2));
+            assertVar.invoke("assertEquals", 20, v2.alength());
+        }
+
         cm.finish().getMethod("run").invoke(null);
     }
 
