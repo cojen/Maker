@@ -169,10 +169,6 @@ class ConstantPool {
         return addConstant(new C_MethodHandle((byte) kind, ref));
     }
 
-    C_Dynamic addInvokeDynamic(int bootstrapIndex, String name, MethodType type) {
-        return addInvokeDynamic(bootstrapIndex, name, type.toMethodDescriptorString());
-    }
-
     C_Dynamic addInvokeDynamic(int bootstrapIndex, String name, String descriptor) {
         C_NameAndType nameAndType = addNameAndType(name, descriptor);
         return addConstant(new C_Dynamic(18, bootstrapIndex, nameAndType));
