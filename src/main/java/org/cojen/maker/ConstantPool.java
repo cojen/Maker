@@ -126,7 +126,7 @@ class ConstantPool {
     }
 
     C_MethodType addMethodType(MethodType type) {
-        return addMethodType(type.descriptorString());
+        return addMethodType(type.toMethodDescriptorString());
     }
 
     C_MethodHandle addMethodHandle(MethodHandleInfo info) {
@@ -170,7 +170,7 @@ class ConstantPool {
     }
 
     C_Dynamic addInvokeDynamic(int bootstrapIndex, String name, MethodType type) {
-        return addInvokeDynamic(bootstrapIndex, name, type.descriptorString());
+        return addInvokeDynamic(bootstrapIndex, name, type.toMethodDescriptorString());
     }
 
     C_Dynamic addInvokeDynamic(int bootstrapIndex, String name, String descriptor) {

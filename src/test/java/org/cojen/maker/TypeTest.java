@@ -121,6 +121,7 @@ public class TypeTest {
             assertNull(type.unbox());
             assertTrue(type.isArray());
             assertFalse(type.isInterface());
+            assertNull(type.clazz());
 
             // Find by descriptor.
             assertEquals(type, Type.from(loader, "[Labc/Foo;"));
@@ -158,6 +159,19 @@ public class TypeTest {
             Type type = Type.from(loader, "LFoo");
             assertEquals("LFoo", type.name());
             assertEquals("LLFoo;", type.descriptor());
+        }
+
+        {
+            Type type = Type.from(loader, "java.util.List");
+            assertEquals(List.class, type.clazz());
+        }
+
+        {
+            Type type = Type.from(loader, "java.lang.String[]");
+            assertEquals(String[].class, type.clazz());
+            for (int i=0; i<2; i++) {
+                assertEquals("java.lang.String[]", type.name());
+            }
         }
     }
 

@@ -216,7 +216,9 @@ abstract class Type {
         }
 
         if (type.isArray()) {
-            return new Array(from(type.componentType()));
+            Array arr = new Array(from(type.getComponentType()));
+            arr.mClass = type;
+            return arr;
         }
 
         if (type.getPackageName().equals("java.lang")) {
@@ -1049,9 +1051,9 @@ abstract class Type {
         Class clazz() {
             Class clazz = mClass;
             if (clazz == null) {
-                Class elementClass = mElementType.clazz();
-                if (elementClass != null) {
-                    mClass = clazz = elementClass.arrayType();
+                Class element = mElementType.clazz();
+                if (element != null) {
+                    mClass = clazz = java.lang.reflect.Array.newInstance(element, 0).getClass();
                 }
             }
             return clazz;
