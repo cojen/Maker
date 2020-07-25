@@ -602,11 +602,6 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
     }
 
     @Override
-    public String toString() {
-        return "ClassMaker {name=" + name() + '}';
-    }
-
-    @Override
     public Type type() {
         return mThisClass.mType;
     }

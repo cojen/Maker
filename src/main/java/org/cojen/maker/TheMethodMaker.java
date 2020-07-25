@@ -1644,11 +1644,6 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
         mCode = Arrays.copyOf(mCode, newLen);
     }
 
-    @Override
-    public String toString() {
-        return mMethod.toString();
-    }
-
     private void addOp(Op op) {
         if (mLastOp == null) {
             mFirstOp = op;

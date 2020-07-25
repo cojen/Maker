@@ -52,6 +52,13 @@ public class CondyTest {
 
         bootstrap = mm.var(CondyTest.class).condy("boot", java.util.Map.class, 999);
 
+        try {
+            bootstrap.invoke(String.class, "dummy", new Object[]{Object.class}, (Object[]) null);
+            fail();
+        } catch (IllegalStateException e) {
+            assertTrue(e.getMessage().contains("no parameters"));
+        }
+
         var v4 = bootstrap.invoke(String.class, "dummy");
         assertVar.invoke("assertEquals", "java.util.Map999", v4);
 
