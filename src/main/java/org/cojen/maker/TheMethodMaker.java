@@ -4041,8 +4041,7 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
 
         private Var vhGet(String name) {
             Type thisType = type();
-            Type vhType = Type.from(VarHandle.class);
-            pushVarHandle(vhType);
+            Type vhType = pushVarHandle();
 
             int stackPop;
             Type.Method method;
@@ -4065,8 +4064,7 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
 
         private void vhSet(String name, Object value) {
             Type thisType = type();
-            Type vhType = Type.from(VarHandle.class);
-            pushVarHandle(vhType);
+            Type vhType = pushVarHandle();
 
             int stackPop;
             Type.Method method;
@@ -4087,8 +4085,7 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
 
         private Variable vhCas(String name, Type retType, Object expectedValue, Object newValue) {
             Type thisType = type();
-            Type vhType = Type.from(VarHandle.class);
-            pushVarHandle(vhType);
+            Type vhType = pushVarHandle();
 
             if (retType == null) {
                 retType = thisType;
@@ -4120,8 +4117,7 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
 
         private Variable vhGas(String name, Object value) {
             Type thisType = type();
-            Type vhType = Type.from(VarHandle.class);
-            pushVarHandle(vhType);
+            Type vhType = pushVarHandle();
 
             int stackPop;
             Type.Method method;
@@ -4144,7 +4140,12 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
             return var;
         }
 
-        private void pushVarHandle(Type vhType) {
+        /**
+         * @return VarHandle type
+         */
+        private Type pushVarHandle() {
+            Type vhType = Type.from(VarHandle.class);
+
             if (mVarHandle == null) {
                 Type classType = Type.from(Class.class);
 
@@ -4173,6 +4174,8 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
             }
 
             addOp(new DynamicConstantOp(mVarHandle, vhType));
+
+            return vhType;
         }
     }
 
