@@ -3362,10 +3362,20 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
 
                 if (primType == null) {
                     if (Type.from(Number.class).isAssignableFrom(fromType)) {
-                        return invoke(toType.name() + "Value");
+                        if (toType != Type.BOOLEAN && toType != Type.CHAR) {
+                            return invoke(toType.name() + "Value");
+                        }
                     }
                     if (fromType.equals(Type.from(Object.class))) {
-                        return cast(Number.class).cast(clazz);
+                        Var casted;
+                        if (toType == Type.BOOLEAN) {
+                            casted = cast(Boolean.class);
+                        } else if (toType == Type.CHAR) {
+                            casted = cast(Character.class);
+                        } else {
+                            casted = cast(Number.class);
+                        }
+                        return casted.cast(clazz);
                     }
                     throw new IllegalStateException("Unsupported conversion");
                 }

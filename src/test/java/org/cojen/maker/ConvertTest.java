@@ -639,7 +639,7 @@ public class ConvertTest {
     }
 
     @Test
-    public void objectCastToPrimitive() throws Exception {
+    public void objectCastToPrimitiveNumber() throws Exception {
         var v1 = mm.var(Object.class).set(1);
         var v2 = mm.var(Number.class).set(2.0d);
         var v3 = mm.var(Float.class).set(3.0f);
@@ -659,6 +659,38 @@ public class ConvertTest {
 
         try {
             mm.var(String.class).set("hello").cast(int.class);
+            fail();
+        } catch (IllegalStateException e) {
+        }
+
+        var clazz = cm.finish();
+        clazz.getMethod("run").invoke(null);
+    }
+
+    @Test
+    public void objectCastToBoolean() throws Exception {
+        var v1 = mm.var(Object.class).set(true);
+        var v2 = v1.cast(boolean.class);
+        verify(true, v2);
+
+        try {
+            mm.var(Number.class).set(10).cast(boolean.class);
+            fail();
+        } catch (IllegalStateException e) {
+        }
+
+        var clazz = cm.finish();
+        clazz.getMethod("run").invoke(null);
+    }
+
+    @Test
+    public void objectCastToChar() throws Exception {
+        var v1 = mm.var(Object.class).set('a');
+        var v2 = v1.cast(char.class);
+        verify('a', v2);
+
+        try {
+            mm.var(Number.class).set(10).cast(char.class);
             fail();
         } catch (IllegalStateException e) {
         }
