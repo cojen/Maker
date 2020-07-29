@@ -120,7 +120,7 @@ public interface MethodMaker {
     /**
      * Returns the variable which accesses the enclosing object of this method.
      *
-     * @throws IllegalStateException if building a static method
+     * @throws IllegalStateException if making a static method
      */
     public Variable this_();
 
