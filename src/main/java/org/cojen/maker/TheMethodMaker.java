@@ -545,16 +545,12 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
         Type type = mClassMaker.type();
         Type.Field field = findField(type, name);
 
-        Var var = mThisVar;
-        if (var == null) {
-            if (field.isStatic()) {
-                var = new Var(type);
-            } else {
-                var = this_();
-            }
+        Var instance = mThisVar;
+        if (instance == null && !field.isStatic()) {
+            instance = this_();
         }
 
-        return new FieldVar(var, mConstants.addField(field));
+        return new FieldVar(instance, mConstants.addField(field));
     }
 
     private FieldVar field(Var var, String name) {
