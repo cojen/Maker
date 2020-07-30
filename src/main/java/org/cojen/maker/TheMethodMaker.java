@@ -2062,8 +2062,8 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
 
         int bi = mClassMaker.addBootstrapMethod(bootHandle, bootArgs);
 
-        // Note that "const" isn't used by the bootstrap method. It's a dummy.
-        return mConstants.addDynamicConstant(bi, "dummy", type);
+        // Note that "_" isn't used by the bootstrap method. It's a dummy name.
+        return mConstants.addDynamicConstant(bi, "_", type);
     }
 
     /**
