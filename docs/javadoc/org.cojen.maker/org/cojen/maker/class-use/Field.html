@@ -83,19 +83,28 @@ loadScripts(document, 'script');</script>
 <tbody>
 <tr class="altColor">
 <td class="colFirst"><code><a href="../Field.html" title="interface in org.cojen.maker">Field</a></code></td>
+<th class="colSecond" scope="row"><span class="typeNameLabel">MethodMaker.</span><code><span class="memberNameLink"><a href="../MethodMaker.html#access(java.lang.invoke.VarHandle,java.lang.Object...)">access</a></span>&#8203;(<a href="https://docs.oracle.com/en/java/javase/14/docs/api/java.base/java/lang/invoke/VarHandle.html?is-external=true" title="class or interface in java.lang.invoke" class="externalLink">VarHandle</a>&nbsp;handle,
+<a href="https://docs.oracle.com/en/java/javase/14/docs/api/java.base/java/lang/Object.html?is-external=true" title="class or interface in java.lang" class="externalLink">Object</a>...&nbsp;values)</code></th>
+<td class="colLast">
+<div class="block">Access a <code>VarHandle</code> via a pseudo field, which only works when the class is built
+ dynamically instead of loaded from a file.</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code><a href="../Field.html" title="interface in org.cojen.maker">Field</a></code></td>
 <th class="colSecond" scope="row"><span class="typeNameLabel">MethodMaker.</span><code><span class="memberNameLink"><a href="../MethodMaker.html#field(java.lang.String)">field</a></span>&#8203;(<a href="https://docs.oracle.com/en/java/javase/14/docs/api/java.base/java/lang/String.html?is-external=true" title="class or interface in java.lang" class="externalLink">String</a>&nbsp;name)</code></th>
 <td class="colLast">
 <div class="block">Access a static or instance field in the enclosing object of this method.</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code><a href="../Field.html" title="interface in org.cojen.maker">Field</a></code></td>
 <th class="colSecond" scope="row"><span class="typeNameLabel">Variable.</span><code><span class="memberNameLink"><a href="../Variable.html#field(java.lang.String)">field</a></span>&#8203;(<a href="https://docs.oracle.com/en/java/javase/14/docs/api/java.base/java/lang/String.html?is-external=true" title="class or interface in java.lang" class="externalLink">String</a>&nbsp;name)</code></th>
 <td class="colLast">
 <div class="block">Access a static or instance field from the object referred to by this variable.</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>default <a href="../Field.html" title="interface in org.cojen.maker">Field</a></code></td>
 <th class="colSecond" scope="row"><span class="typeNameLabel">Field.</span><code><span class="memberNameLink"><a href="../Field.html#name(java.lang.String)">name</a></span>&#8203;(<a href="https://docs.oracle.com/en/java/javase/14/docs/api/java.base/java/lang/String.html?is-external=true" title="class or interface in java.lang" class="externalLink">String</a>&nbsp;name)</code></th>
 <td class="colLast">
@@ -103,7 +112,7 @@ loadScripts(document, 'script');</script>
  IllegalStateException</code>.</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code><a href="../Field.html" title="interface in org.cojen.maker">Field</a></code></td>
 <th class="colSecond" scope="row"><span class="typeNameLabel">Field.</span><code><span class="memberNameLink"><a href="../Field.html#set(java.lang.Object)">set</a></span>&#8203;(<a href="https://docs.oracle.com/en/java/javase/14/docs/api/java.base/java/lang/Object.html?is-external=true" title="class or interface in java.lang" class="externalLink">Object</a>&nbsp;value)</code></th>
 <td class="colLast">

@@ -18,6 +18,7 @@ package org.cojen.maker;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodType;
+import java.lang.invoke.VarHandle;
 
 /**
  * Allows new methods to be defined within a class.
@@ -261,6 +262,26 @@ public interface MethodMaker {
      * @throws IllegalArgumentException if not given a variable or a constant
      */
     public Variable concat(Object... values);
+
+    /**
+     * Access a {@code VarHandle} via a pseudo field, which only works when the class is built
+     * dynamically instead of loaded from a file. All of the coordinate values must be provided
+     * up front, which are then used each time the {@code VarHandle} is accessed. Variable
+     * coordinates are read each time the access field is used &mdash; they aren't fixed to the
+     * initial value. In addition, the array of coordinates values isn't cloned, permitting
+     * changes without needing to obtain a new access field.
+     *
+     * <p>A {@code VarHandle} can also be accessed by calling {@link VarHandle#toMethodHandle
+     * toMethodHandle}, which is then passed to the {@link #invoke(MethodHandle, Object...)
+     * invoke} method.
+     *
+     * @param handle runtime variable handle
+     * @param values variables or constants for each coordinate
+     * @return a pseudo field which accesses the variable
+     * @throws IllegalArgumentException if not given a variable or a constant, or if the number
+     * of values doesn't match the number of coordinates
+     */
+    public Field access(VarHandle handle, Object... values);
 
     /**
      * Append an instruction which does nothing, which can be useful for debugging.

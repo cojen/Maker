@@ -790,7 +790,8 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
         MethodType mtype = handle.type();
 
         if (mtype.parameterCount() != values.length) {
-            throw new IllegalArgumentException("Wrong number of parameters");
+            throw new IllegalArgumentException
+                ("Wrong number of parameters (expecting " + mtype.parameterCount() + ')');
         }
 
         Type returnType = Type.from(mtype.returnType());
@@ -965,7 +966,7 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
         return var;
     }
 
-    private static class Handler implements ExceptionHandler {
+    private static final class Handler implements ExceptionHandler {
         final Lab mStartLab, mEndLab;
         final HandlerLab mHandlerLab;
         final ConstantPool.C_Class mCatchClass;
@@ -1136,6 +1137,31 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
         Var var = new Var(strType);
         addStoreOp(var);
         return var;
+    }
+
+    @Override
+    public Field access(VarHandle handle, Object... values) {
+        List<Class<?>> coordTypes = handle.coordinateTypes();
+
+        if (coordTypes.size() != values.length) {
+            throw new IllegalArgumentException
+                ("Wrong number of coordinates (expecting " + coordTypes.size() + ')');
+        }
+
+        Type[] coordinateTypes;
+        {
+            coordinateTypes = new Type[coordTypes.size()];
+            int i = 0;
+            for (Class<?> clazz : coordTypes) {
+                coordinateTypes[i++] = Type.from(clazz);
+            }
+        }
+
+        Type handleType = Type.from(VarHandle.class);
+        Var handleVar = new Var(handleType);
+        handleVar.setConstant(handle);
+
+        return new HandleVar(handleVar, Type.from(handle.varType()), coordinateTypes, values);
     }
 
     @Override
@@ -1695,7 +1721,7 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
                 addOp(new PushVarOp(var));
                 actualType = var.mType;
             } else {
-                FieldVar field = (FieldVar) owned;
+                var field = (BaseFieldVar) owned;
                 field.push();
                 actualType = field.type();
             }
@@ -2514,7 +2540,7 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
     /**
      * Exception handler catch label.
      */
-    static class HandlerLab extends Lab {
+    static final class HandlerLab extends Lab {
         private final Type mCatchType;
 
         HandlerLab(TheMethodMaker owner, Type catchType) {
@@ -2565,7 +2591,7 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
         }
     }
 
-    static class BranchOp extends BytecodeOp {
+    static final class BranchOp extends BytecodeOp {
         final Lab mTarget;
 
         /**
@@ -2616,7 +2642,7 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
         }
     }
 
-    static class SwitchOp extends BytecodeOp {
+    static final class SwitchOp extends BytecodeOp {
         final Lab mDefault;
         final int[] mCases;
         final Lab[] mLabels;
@@ -2666,7 +2692,7 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
         }
     }
 
-    static class FieldOp extends BytecodeOp {
+    static final class FieldOp extends BytecodeOp {
         final ConstantPool.C_Field mFieldRef;
 
         FieldOp(byte op, int stackPop, ConstantPool.C_Field fieldRef) {
@@ -2685,7 +2711,7 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
         }
     }
 
-    static class InvokeOp extends BytecodeOp {
+    static final class InvokeOp extends BytecodeOp {
         final ConstantPool.C_Method mMethodRef;
 
         InvokeOp(byte op, int stackPop, ConstantPool.C_Method methodRef) {
@@ -2708,7 +2734,7 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
         }
     }
 
-    static class InvokeDynamicOp extends BytecodeOp {
+    static final class InvokeDynamicOp extends BytecodeOp {
         final ConstantPool.C_Dynamic mDynamic;
         final Type mReturnType;
 
@@ -2732,7 +2758,7 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
     /**
      * Push a constant to the stack an optionally performs a conversion.
      */
-    static class PushConstantOp extends Op {
+    static final class PushConstantOp extends Op {
         final Object mValue;
         final Type mType;
 
@@ -2750,7 +2776,7 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
         }
     }
 
-    static class DynamicConstantOp extends Op {
+    static final class DynamicConstantOp extends Op {
         final ConstantPool.C_Dynamic mDynamic;
         final Type mType;
 
@@ -2776,7 +2802,7 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
     /**
      * Converts a value on the stack and pushes it back.
      */
-    static class ConversionOp extends Op {
+    static final class ConversionOp extends Op {
         final Type mFrom, mTo;
         final int mCode;
 
@@ -2837,7 +2863,7 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
     /**
      * Increments an integer variable.
      */
-    static class IncOp extends Op {
+    static final class IncOp extends Op {
         final Var mVar;
         final int mAmount;
 
@@ -2868,7 +2894,7 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
         }
     }
 
-    static class LineNumOp extends Op {
+    static final class LineNumOp extends Op {
         final int mNum;
 
         LineNumOp(int num) {
@@ -2885,7 +2911,7 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
         }
     }
 
-    static class LocalVarOp extends Op {
+    static final class LocalVarOp extends Op {
         final Var mVar;
         final String mName;
 
@@ -2997,18 +3023,12 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
                 throw new IllegalStateException("Mismatched type");
             }
 
-            ConstantPool.C_Dynamic dynamic = addComplexConstant(type, value);
-
-            beginSetConstant();
-            addOp(new DynamicConstantOp(dynamic, type));
-            finishSetConstant();
+            addStoreConstantOp(new DynamicConstantOp(addComplexConstant(type, value), type));
 
             return this;
         }
 
-        abstract void beginSetConstant();
-
-        abstract void finishSetConstant();
+        abstract void addStoreConstantOp(DynamicConstantOp op);
 
         @Override
         public void ifTrue(Label label) {
@@ -3670,11 +3690,8 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
-        void beginSetConstant() {
-        }
-
-        @Override
-        void finishSetConstant() {
+        void addStoreConstantOp(DynamicConstantOp op) {
+            addOp(op);
             addStoreOp(this);
         }
 
@@ -3728,7 +3745,7 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
     /**
      * Special variable which refers to the enclosing class.
      */
-    class ClassVar extends Var {
+    final class ClassVar extends Var {
         ClassVar(Type type) {
             super(type);
         }
@@ -3742,7 +3759,7 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
     /**
      * Stack variable which represents an uninitialized new object.
      */
-    class NewVar extends Var {
+    final class NewVar extends Var {
         private final int mNewOffset;
 
         NewVar(Type type, int newOffset) {
@@ -3759,7 +3776,7 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
     /**
      * Unmodifiable variable which refers to a dynamic constant.
      */
-    class ConstantVar extends Var {
+    final class ConstantVar extends Var {
         final ConstantPool.C_Dynamic mDynamic;
 
         ConstantVar(Type type, ConstantPool.C_Dynamic dynamic) {
@@ -3783,90 +3800,7 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
         }
     }
 
-    class FieldVar extends OwnedVar implements Field {
-        final Var mInstance;
-        final ConstantPool.C_Field mFieldRef;
-
-        private ConstantPool.C_Dynamic mVarHandle;
-
-        FieldVar(Var instance, ConstantPool.C_Field fieldRef) {
-            mInstance = instance;
-            mFieldRef = fieldRef;
-        }
-
-        @Override
-        public Type type() {
-            return mFieldRef.mField.type();
-        }
-
-        @Override
-        void push() {
-            ConstantPool.C_Field fieldRef = mFieldRef;
-            Type.Field field = fieldRef.mField;
-
-            byte op;
-            int stackPop;
-            if (field.isStatic()) {
-                op = GETSTATIC;
-                stackPop = 0;
-            } else {
-                addPushOp(null, mInstance);
-                op = GETFIELD;
-                stackPop = 1;
-            }
-
-            addOp(new FieldOp(op, stackPop, fieldRef));
-        }
-
-        @Override
-        public FieldVar set(Object value) {
-            addBeginStoreFieldOp();
-            addPushOp(type(), value);
-            addFinishStoreFieldOp();
-            return this;
-        }
-
-        @Override
-        void beginSetConstant() {
-            addBeginStoreFieldOp();
-        }
-
-        @Override
-        void finishSetConstant() {
-            addFinishStoreFieldOp();
-        }
-
-        private void addBeginStoreFieldOp() {
-            if (!mFieldRef.mField.isStatic()) {
-                addPushOp(null, mInstance);
-            }
-        }
-
-        private void addFinishStoreFieldOp() {
-            ConstantPool.C_Field fieldRef = mFieldRef;
-            Type.Field field = fieldRef.mField;
-
-            byte op;
-            int stackPop;
-            if (field.isStatic()) {
-                op = PUTSTATIC;
-                stackPop = 1;
-            } else {
-                op = PUTFIELD;
-                stackPop = 2;
-            }
-
-            addOp(new FieldOp(op, stackPop, fieldRef));
-        }
-
-        @Override
-        public Var get() {
-            Var var = new Var(type());
-            push();
-            addStoreOp(var);
-            return var;
-        }
-
+    abstract class BaseFieldVar extends OwnedVar implements Field {
         @Override
         public void inc(Object value) {
             set(add(value));
@@ -4042,13 +3976,107 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
             return vhGas("getAndBitwiseXorRelease", value);
         }
 
-        private Var vhGet(String name) {
+        abstract Var vhGet(String name);
+
+        abstract void vhSet(String name, Object value);
+
+        abstract Var vhCas(String name, Type retType, Object expectedValue, Object newValue);
+
+        abstract Var vhGas(String name, Object value);
+    }
+
+    /**
+     * Normal static or instance field.
+     */
+    final class FieldVar extends BaseFieldVar {
+        final Var mInstance;
+        final ConstantPool.C_Field mFieldRef;
+
+        private ConstantPool.C_Dynamic mVarHandle;
+
+        FieldVar(Var instance, ConstantPool.C_Field fieldRef) {
+            mInstance = instance;
+            mFieldRef = fieldRef;
+        }
+
+        @Override
+        public Type type() {
+            return mFieldRef.mField.type();
+        }
+
+        @Override
+        public Var get() {
+            Var var = new Var(type());
+            push();
+            addStoreOp(var);
+            return var;
+        }
+
+        @Override
+        public BaseFieldVar set(Object value) {
+            addBeginStoreFieldOp();
+            addPushOp(type(), value);
+            addFinishStoreFieldOp();
+            return this;
+        }
+
+        @Override
+        void push() {
+            ConstantPool.C_Field fieldRef = mFieldRef;
+            Type.Field field = fieldRef.mField;
+
+            byte op;
+            int stackPop;
+            if (field.isStatic()) {
+                op = GETSTATIC;
+                stackPop = 0;
+            } else {
+                addPushOp(null, mInstance);
+                op = GETFIELD;
+                stackPop = 1;
+            }
+
+            addOp(new FieldOp(op, stackPop, fieldRef));
+        }
+
+        @Override
+        void addStoreConstantOp(DynamicConstantOp op) {
+            addBeginStoreFieldOp();
+            addOp(op);
+            addFinishStoreFieldOp();
+        }
+
+        private void addBeginStoreFieldOp() {
+            if (!mFieldRef.mField.isStatic()) {
+                addPushOp(null, mInstance);
+            }
+        }
+
+        private void addFinishStoreFieldOp() {
+            ConstantPool.C_Field fieldRef = mFieldRef;
+            Type.Field field = fieldRef.mField;
+
+            byte op;
+            int stackPop;
+            if (field.isStatic()) {
+                op = PUTSTATIC;
+                stackPop = 1;
+            } else {
+                op = PUTFIELD;
+                stackPop = 2;
+            }
+
+            addOp(new FieldOp(op, stackPop, fieldRef));
+        }
+
+        @Override
+        Var vhGet(String name) {
             Type thisType = type();
             Type vhType = pushVarHandle();
 
             int stackPop;
             Type.Method method;
-            if (mFieldRef.mField.isStatic()) {
+            if (mInstance == null) {
                 stackPop = 1;
                 method = vhType.inventMethod(false, thisType, name);
             } else {
@@ -4065,13 +4093,14 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
             return var;
         }
 
-        private void vhSet(String name, Object value) {
+        @Override
+        void vhSet(String name, Object value) {
             Type thisType = type();
             Type vhType = pushVarHandle();
 
             int stackPop;
             Type.Method method;
-            if (mFieldRef.mField.isStatic()) {
+            if (mInstance == null) {
                 stackPop = 2;
                 addPushOp(thisType, value);
                 method = vhType.inventMethod(false, Type.VOID, name, thisType);
@@ -4086,7 +4115,8 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
             addOp(new InvokeOp(INVOKEVIRTUAL, stackPop, ref));
         }
 
-        private Variable vhCas(String name, Type retType, Object expectedValue, Object newValue) {
+        @Override
+        Var vhCas(String name, Type retType, Object expectedValue, Object newValue) {
             Type thisType = type();
             Type vhType = pushVarHandle();
 
@@ -4096,7 +4126,7 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
 
             int stackPop;
             Type.Method method;
-            if (mFieldRef.mField.isStatic()) {
+            if (mInstance == null) {
                 stackPop = 3;
                 addPushOp(thisType, expectedValue);
                 addPushOp(thisType, newValue);
@@ -4118,13 +4148,14 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
             return var;
         }
 
-        private Variable vhGas(String name, Object value) {
+        @Override
+        Var vhGas(String name, Object value) {
             Type thisType = type();
             Type vhType = pushVarHandle();
 
             int stackPop;
             Type.Method method;
-            if (mFieldRef.mField.isStatic()) {
+            if (mInstance == null) {
                 stackPop = 2;
                 addPushOp(thisType, value);
                 method = vhType.inventMethod(false, thisType, name, thisType);
@@ -4143,9 +4174,6 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
             return var;
         }
 
-        /**
-         * @return VarHandle type
-         */
         private Type pushVarHandle() {
             Type vhType = Type.from(VarHandle.class);
 
@@ -4182,7 +4210,156 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
         }
     }
 
-    class BootstrapImpl implements Bootstrap {
+    /**
+     * Pseudo field which accesses a VarHandle.
+     */
+    final class HandleVar extends BaseFieldVar {
+        private final Var mHandleVar;
+        private final Type mType;
+        private final Type[] mCoordinateTypes;
+        private final Object[] mCoordinates;
+
+        /**
+         * @param handleVar must be of type VarHandle
+         * @param type VarHandle.varType
+         * @param coordinates variables and constants
+         */
+        HandleVar(Var handleVar, Type type, Type[] coordinateTypes, Object[] coordinates) {
+            mHandleVar = handleVar;
+            mType = type;
+            mCoordinateTypes = coordinateTypes;
+            mCoordinates = coordinates;
+        }
+
+        @Override
+        public Type type() {
+            return mType;
+        }
+
+        @Override
+        public Var get() {
+            return getPlain();
+        }
+
+        @Override
+        public HandleVar set(Object value) {
+            setPlain(value);
+            return this;
+        }
+
+        @Override
+        void push() {
+            vhPush("get");
+        }
+
+        @Override
+        void addStoreConstantOp(DynamicConstantOp op) {
+            vhSet("set", op);
+        }
+
+        @Override
+        Var vhGet(String name) {
+            vhPush(name);
+            Var var = new Var(mType);
+            addStoreOp(var);
+            return var;
+        }
+
+        void vhPush(String name) {
+            mHandleVar.push();
+
+            for (int i=0; i<mCoordinates.length; i++) {
+                addPushOp(mCoordinateTypes[i], mCoordinates[i]);
+            }
+
+            Type vhType = mHandleVar.type();
+            Type.Method method = vhType.inventMethod(false, mType, name, mCoordinateTypes);
+
+            ConstantPool.C_Method ref = mConstants.addMethod(method);
+            addOp(new InvokeOp(INVOKEVIRTUAL, 1 + mCoordinates.length, ref));
+        }
+
+        @Override
+        void vhSet(String name, Object value) {
+            mHandleVar.push();
+
+            Type[] allTypes = Arrays.copyOf(mCoordinateTypes, mCoordinateTypes.length + 1);
+
+            int i = 0;
+            for (; i<mCoordinates.length; i++) {
+                allTypes[i] = addPushOp(mCoordinateTypes[i], mCoordinates[i]);
+            }
+
+            if (value instanceof DynamicConstantOp) {
+                allTypes[i] = mType;
+                addOp((DynamicConstantOp) value);
+            } else {
+                allTypes[i] = addPushOp(mType, value);
+            }
+
+            Type vhType = mHandleVar.type();
+            Type.Method method = vhType.inventMethod(false, Type.VOID, name, allTypes);
+
+            ConstantPool.C_Method ref = mConstants.addMethod(method);
+            addOp(new InvokeOp(INVOKEVIRTUAL, 2 + mCoordinates.length, ref));
+        }
+
+        @Override
+        Var vhCas(String name, Type retType, Object expectedValue, Object newValue) {
+            mHandleVar.push();
+
+            Type[] allTypes = Arrays.copyOf(mCoordinateTypes, mCoordinateTypes.length + 2);
+
+            int i = 0;
+            for (; i<mCoordinates.length; i++) {
+                allTypes[i] = addPushOp(mCoordinateTypes[i], mCoordinates[i]);
+            }
+
+            allTypes[i++] = addPushOp(mType, expectedValue);
+            allTypes[i] = addPushOp(mType, newValue);
+
+            Type vhType = mHandleVar.type();
+
+            if (retType == null) {
+                retType = mType;
+            }
+
+            Type.Method method = vhType.inventMethod(false, retType, name, allTypes);
+
+            ConstantPool.C_Method ref = mConstants.addMethod(method);
+            addOp(new InvokeOp(INVOKEVIRTUAL, 3 + mCoordinates.length, ref));
+
+            Var var = new Var(retType);
+            addStoreOp(var);
+            return var;
+        }
+
+        @Override
+        Var vhGas(String name, Object value) {
+            mHandleVar.push();
+
+            Type[] allTypes = Arrays.copyOf(mCoordinateTypes, mCoordinateTypes.length + 1);
+
+            int i = 0;
+            for (; i<mCoordinates.length; i++) {
+                allTypes[i] = addPushOp(mCoordinateTypes[i], mCoordinates[i]);
+            }
+
+            allTypes[i] = addPushOp(mType, value);
+
+            Type vhType = mHandleVar.type();
+            Type.Method method = vhType.inventMethod(false, mType, name, allTypes);
+
+            ConstantPool.C_Method ref = mConstants.addMethod(method);
+            addOp(new InvokeOp(INVOKEVIRTUAL, 2 + mCoordinates.length, ref));
+
+            Var var = new Var(mType);
+            addStoreOp(var);
+            return var;
+        }
+    }
+
+    final class BootstrapImpl implements Bootstrap {
         final int mBootstrapIndex;
         final boolean mCondy;
 
