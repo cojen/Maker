@@ -1677,46 +1677,6 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
         addOp(new BytecodeOp(op, stackPop));
     }
 
-    private void addPushFieldOp(FieldVar fieldVar) {
-        Type.Field field = fieldVar.mFieldRef.mField;
-
-        byte op;
-        int stackPop;
-        if (field.isStatic()) {
-            op = GETSTATIC;
-            stackPop = 0;
-        } else {
-            addPushOp(null, fieldVar.mInstance);
-            op = GETFIELD;
-            stackPop = 1;
-        }
-
-        addOp(new FieldOp(op, stackPop, fieldVar.mFieldRef));
-    }
-
-    private void addBeginStoreFieldOp(FieldVar fieldVar) {
-        if (!fieldVar.mFieldRef.mField.isStatic()) {
-            addPushOp(null, fieldVar.mInstance);
-        }
-    }
-
-    private void addFinishStoreFieldOp(FieldVar fieldVar) {
-        ConstantPool.C_Field fieldRef = fieldVar.mFieldRef;
-        Type.Field field = fieldRef.mField;
-
-        byte op;
-        int stackPop;
-        if (field.isStatic()) {
-            op = PUTSTATIC;
-            stackPop = 1;
-        } else {
-            op = PUTFIELD;
-            stackPop = 2;
-        }
-
-        addOp(new FieldOp(op, stackPop, fieldRef));
-    }
-
     /**
      * Add a push constant or push variable operation, and optionally perform a conversion.
      *
@@ -1736,7 +1696,7 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
                 actualType = var.mType;
             } else {
                 FieldVar field = (FieldVar) owned;
-                addPushFieldOp(field);
+                field.push();
                 actualType = field.type();
             }
             return addConversionOp(actualType, type);
@@ -1755,7 +1715,7 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
             constantType = Type.from(Class.class);
             Class clazz = (Class) value;
             if (clazz.isPrimitive()) {
-                addPushFieldOp(new Var(Type.from(clazz).box()).field("TYPE"));
+                new Var(Type.from(clazz).box()).field("TYPE").push();
                 return addConversionOp(constantType, type);
             }
         } else if (value instanceof Number) {
@@ -1984,7 +1944,7 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
             constantType = Type.from(Class.class);
             Type actualType = (Type) value;
             if (actualType.isPrimitive()) {
-                addPushFieldOp(new Var(actualType.box()).field("TYPE"));
+                new Var(actualType.box()).field("TYPE").push();
                 return addConversionOp(constantType, type);
             }
         } else if (value instanceof MethodType) {
@@ -1997,7 +1957,7 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
             }
         } else if (value instanceof Enum) {
             constantType = Type.from(value.getClass());
-            addPushFieldOp(new Var(constantType).field(((Enum) value).name()));
+            new Var(constantType).field(((Enum) value).name()).push();
             return addConversionOp(constantType, type);
         } else {
             throw unsupportedConstant(value);
@@ -3046,9 +3006,9 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
             return this;
         }
 
-        protected abstract void beginSetConstant();
+        abstract void beginSetConstant();
 
-        protected abstract void finishSetConstant();
+        abstract void finishSetConstant();
 
         @Override
         public void ifTrue(Label label) {
@@ -3710,11 +3670,11 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
-        protected void beginSetConstant() {
+        void beginSetConstant() {
         }
 
         @Override
-        protected void finishSetConstant() {
+        void finishSetConstant() {
             addStoreOp(this);
         }
 
@@ -3841,31 +3801,68 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
 
         @Override
         void push() {
-            addPushFieldOp(this);
+            ConstantPool.C_Field fieldRef = mFieldRef;
+            Type.Field field = fieldRef.mField;
+
+            byte op;
+            int stackPop;
+            if (field.isStatic()) {
+                op = GETSTATIC;
+                stackPop = 0;
+            } else {
+                addPushOp(null, mInstance);
+                op = GETFIELD;
+                stackPop = 1;
+            }
+
+            addOp(new FieldOp(op, stackPop, fieldRef));
         }
 
         @Override
         public FieldVar set(Object value) {
-            addBeginStoreFieldOp(this);
+            addBeginStoreFieldOp();
             addPushOp(type(), value);
-            addFinishStoreFieldOp(this);
+            addFinishStoreFieldOp();
             return this;
         }
 
         @Override
-        protected void beginSetConstant() {
-            addBeginStoreFieldOp(this);
+        void beginSetConstant() {
+            addBeginStoreFieldOp();
         }
 
         @Override
-        protected void finishSetConstant() {
-            addFinishStoreFieldOp(this);
+        void finishSetConstant() {
+            addFinishStoreFieldOp();
+        }
+
+        private void addBeginStoreFieldOp() {
+            if (!mFieldRef.mField.isStatic()) {
+                addPushOp(null, mInstance);
+            }
+        }
+
+        private void addFinishStoreFieldOp() {
+            ConstantPool.C_Field fieldRef = mFieldRef;
+            Type.Field field = fieldRef.mField;
+
+            byte op;
+            int stackPop;
+            if (field.isStatic()) {
+                op = PUTSTATIC;
+                stackPop = 1;
+            } else {
+                op = PUTFIELD;
+                stackPop = 2;
+            }
+
+            addOp(new FieldOp(op, stackPop, fieldRef));
         }
 
         @Override
         public Var get() {
             Var var = new Var(type());
-            addPushFieldOp(this);
+            push();
             addStoreOp(var);
             return var;
         }
