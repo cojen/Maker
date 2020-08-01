@@ -211,4 +211,37 @@ public class VarHandleTest {
 
         assertArrayEquals(new int[] {10, 20}, result);
     }
+
+    @Test
+    public void signaturePolymorphic() throws Exception {
+        VarHandle vh = MethodHandles.lookup()
+            .findStaticVarHandle(VarHandleTest.class, "hiddenInt", int.class);
+
+        hiddenInt = 10;
+
+        ClassMaker cm = ClassMaker.begin().public_();
+        MethodMaker mm = cm.addMethod(null, "run").public_().static_();
+        var vhVar = mm.var(VarHandle.class).setConstant(vh);
+        var assertVar = mm.var(Assert.class);
+
+        {
+            var result = vhVar.invoke(int.class, "compareAndExchange",
+                                      new Object[] {int.class, int.class}, 10, 11);
+            assertVar.invoke("assertEquals", 10, result);
+        }
+
+        {
+            var result = vhVar.invoke("compareAndExchange", 11, 12);
+            assertVar.invoke("assertEquals", 11, result);
+        }
+
+        {
+            var result = vhVar.invoke(int.class, "compareAndExchange", null, 12, 13);
+            assertVar.invoke("assertEquals", 12, result);
+        }
+
+        cm.finish().getMethod("run").invoke(null);
+
+        assertEquals(13, hiddenInt);
+    }
 }

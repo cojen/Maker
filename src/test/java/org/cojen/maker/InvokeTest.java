@@ -816,6 +816,22 @@ public class InvokeTest {
     }
 
     @Test
+    public void instanceVarargs() throws Exception {
+        ClassMaker cm = ClassMaker.begin().public_();
+        MethodMaker mm = cm.addMethod(null, "run").public_().static_();
+
+        var instance = mm.var(InvokeTest.class).setConstant(this);
+        var result = instance.invoke("self", 1, 2);
+        mm.var(Assert.class).invoke("assertEquals", self(1, 2), result);
+
+        cm.finish().getMethod("run").invoke(null);
+    }
+
+    public String self(int... stuff) {
+        return getClass().getName() + Arrays.toString(stuff);
+    }
+
+    @Test
     public void methodType() throws Exception {
         // Test MethodType as a constant.
 
@@ -887,5 +903,33 @@ public class InvokeTest {
         Class<?> clazz = cm.finish();
         var mh = MethodHandles.lookup().findStatic(clazz, name, type);
         return new ConstantCallSite(mh);
+    }
+
+    @Test
+    public void signaturePolymorphic() throws Exception {
+        MethodHandle mh = MethodHandles.lookup()
+            .findStatic(InvokeTest.class, "secret", MethodType.methodType(int.class, int.class));
+
+        ClassMaker cm = ClassMaker.begin().public_();
+        MethodMaker mm = cm.addMethod(null, "run").public_().static_();
+        var mhVar = mm.var(MethodHandle.class).setConstant(mh);
+        var assertVar = mm.var(Assert.class);
+
+        {
+            var result = mhVar.invoke(int.class, "invokeExact", new Object[] {int.class}, 10);
+            assertVar.invoke("assertEquals", 100, result);
+        }
+
+        {
+            var result = mhVar.invoke("invoke", 20);
+            assertVar.invoke("assertEquals", 400, result);
+        }
+
+        {
+            var result = mhVar.invoke(int.class, "invokeExact", null, 30);
+            assertVar.invoke("assertEquals", 900, result);
+        }
+
+        cm.finish().getMethod("run").invoke(null);
     }
 }

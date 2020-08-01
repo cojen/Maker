@@ -667,6 +667,19 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
             }
         }
 
+        // Check if a signature polymorphic method.
+        if (!method.isStatic() && method.isVarargs()) {
+            Type enclosingType = method.enclosingType();
+            Class enclosingClass = enclosingType.clazz();
+            if (enclosingClass == MethodHandle.class || enclosingClass == VarHandle.class) {
+                Type returnType = method.returnType();
+                if (specificReturnType != null) {
+                    returnType = specificReturnType;
+                }
+                method = enclosingType.inventMethod(false, returnType, method.name(), paramTypes);
+            }
+        }
+
         if (instance != null && !method.isStatic()) {
             // Need to go back and push the instance before the arguments.
             Op end = mLastOp;
