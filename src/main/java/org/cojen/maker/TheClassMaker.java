@@ -290,10 +290,24 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
     }
 
     private TheMethodMaker doAddMethod(Object retType, String name, Object... paramTypes) {
+        var mm = new TheMethodMaker(this, defineMethod(retType, name, paramTypes));
+        doAddMethod(mm);
+
+        if (!mHasConstructor && name.equals("<init>")) {
+            mHasConstructor = true;
+        }
+
+        return mm;
+    }
+
+    void doAddMethod(TheMethodMaker mm) {
         if (mMethods == null) {
             mMethods = new ArrayList<>();
         }
+        mMethods.add(mm);
+    }
 
+    Type.Method defineMethod(Object retType, String name, Object... paramTypes) {
         Type tRetType = retType == null ? Type.VOID : typeFrom(retType);
 
         Type[] tParamTypes;
@@ -306,16 +320,7 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
             }
         }
 
-        Type.Method method = type().defineMethod(false, tRetType, name, tParamTypes);
-
-        TheMethodMaker mm = new TheMethodMaker(this, method);
-        mMethods.add(mm);
-
-        if (!mHasConstructor && name.equals("<init>")) {
-            mHasConstructor = true;
-        }
-
-        return mm;
+        return type().defineMethod(false, tRetType, name, tParamTypes);
     }
 
     @Override
@@ -509,7 +514,7 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
 
         mBootstrapMethods = null;
 
-        TheMethodMaker.finish(mClinitMethods);
+        TheMethodMaker.doFinish(mClinitMethods);
         mClinitMethods = null;
 
         checkSize(mInterfaces, 65535, "Interface");
@@ -518,7 +523,7 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
 
         if (mMethods != null) {
             for (TheMethodMaker method : mMethods) {
-                method.finish();
+                method.doFinish();
             }
         }
 

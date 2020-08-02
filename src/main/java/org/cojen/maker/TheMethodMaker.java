@@ -46,9 +46,9 @@ import static org.cojen.maker.BytesOut.*;
  *
  * @author Brian S O'Neill
  */
-final class TheMethodMaker extends ClassMember implements MethodMaker {
-    private final TheClassMaker mClassMaker;
-    private final Type.Method mMethod;
+class TheMethodMaker extends ClassMember implements MethodMaker {
+    final TheClassMaker mClassMaker;
+    final Type.Method mMethod;
 
     private Var[] mParams;
 
@@ -116,7 +116,7 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
         }
     }
 
-    void finish() {
+    void doFinish() {
         if (mFinished != 0 || (mModifiers & (Modifier.ABSTRACT | Modifier.NATIVE)) != 0) {
             return;
         }
@@ -310,7 +310,7 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
     /**
      * Stitch methods together and finish as one. List can be null or empty.
      */
-    static void finish(List<TheMethodMaker> list) {
+    static void doFinish(List<TheMethodMaker> list) {
         int size;
         if (list == null || (size = list.size()) == 0) {
             return;
@@ -328,7 +328,7 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
             }
         }
 
-        first.finish();
+        first.doFinish();
     }
 
     @Override
@@ -1180,6 +1180,11 @@ final class TheMethodMaker extends ClassMember implements MethodMaker {
     @Override
     public void nop() {
         addOp(new BytecodeOp(NOP, 0));
+    }
+
+    @Override
+    public MethodHandle finish() {
+        throw new IllegalStateException("Not a standalone method");
     }
 
     /**
