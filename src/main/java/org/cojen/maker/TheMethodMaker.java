@@ -2969,18 +2969,23 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         // them ensures that future frames are defined correctly.
 
         int[] localCodes = frame.mLocalCodes;
-        int i = 0;
+        int v = 0;
         if (localCodes != null) {
-            for (; i<localCodes.length; i++) {
-                if (localCodes[i] == SM_TOP) {
-                    mVars[i].invalidate();
+            for (int c=0; c<localCodes.length; v++) {
+                if (localCodes[c] == SM_TOP) {
+                    Var var = mVars[v];
+                    var.invalidate();
+                    // Two slots are used for invalidated wide variables. See smCodes method.
+                    c += var.slotWidth();
+                } else {
+                    c++;
                 }
             }
         }
 
         // Remaining ones are implicitly "top" but were pruned.
-        for (; i < mVars.length; i++) {
-            mVars[i].invalidate();
+        for (; v < mVars.length; v++) {
+            mVars[v].invalidate();
         }
     }
 
@@ -2990,18 +2995,41 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
      * @return null if empty
      */
     private static int[] smCodes(Var[] vars, int len) {
-        int[] codes = null;
+        if (len == 0) {
+            return null;
+        }
 
-        while (--len >= 0) {
-            int code = vars[len].smCode();
-            if (codes == null) {
-                if ((code & 0xff) == SM_TOP) {
-                    // Prune off the last consecutive "top" vars.
+        // First pass, determine the amount of codes. What makes this complicated is the fact
+        // that invalidated wide variables occupy two slots. A TOP2 code would be nice.
+
+        int amt = 0;
+
+        do {
+            Var var = vars[--len];
+            if ((var.smCode() & 0xff) == SM_TOP) {
+                if (amt == 0) {
+                    // Prune off the last consecutive top vars.
                     continue;
                 }
-                codes = new int[len + 1];
+                // Need two slots for top wide variables.
+                amt += var.slotWidth();
+            } else {
+                // One slot for kinds of non-top variables.
+                amt++;
             }
-            codes[len] = code;
+        } while (len > 0);
+
+        int[] codes = new int[amt];
+
+        for (int c=0,v=0; c<codes.length; v++) {
+            Var var = vars[v];
+            if ((codes[c] = var.smCode()) == SM_TOP) {
+                // Note that there's no need to explicitly fill in the second top slot for wide
+                // variables. SM_TOP is zero, and arrays are initialized with zeros.
+                c += var.slotWidth();
+            } else {
+                c++;
+            }
         }
 
         return codes;
