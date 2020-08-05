@@ -62,7 +62,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
     private Lab mReturnLabel;
 
-    // Remaining fields are only used when finish is called.
+    // Remaining fields are only used when doFinish is called.
 
     private byte[] mCode;
     private int mCodeLen;
@@ -233,7 +233,6 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
         for (Var var : varSet) {
             if (var.mSlot < 0 && var.mPushCount > 0) {
-                var.mValid = false;
                 var.mSlot = varSlot;
                 varSlot += var.slotWidth();
                 varList.add(var);
@@ -274,7 +273,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             }
 
             for (int i=mParams.length; i<mVars.length; i++) {
-                mVars[i].mValid = false;
+                mVars[i].invalidate();
             }
         }
 
@@ -453,7 +452,9 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
         if (!Modifier.isStatic(mModifiers)) {
             mThisVar = new Var(mClassMaker.type());
-            mThisVar.mValid = !"<init>".equals(getName());
+            if (!"<init>".equals(getName())) {
+                mThisVar.validate();
+            }
             mThisVar.mSlot = 0;
             count++;
             slot = 1;
@@ -468,7 +469,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
         for (Type t : mMethod.paramTypes()) {
             Var param = new Var(t);
-            param.mValid = true;
+            param.validate();
             param.mSlot = slot;
             slot += param.slotWidth();
             mParams[i++] = param;
@@ -512,7 +513,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     public void return_(Object value) {
         Type type = mMethod.returnType();
         if (type == VOID) {
-            throw new IllegalStateException("Must return void from this method");
+            throw new IllegalStateException("Cannot return a value from this method");
         }
 
         byte op;
@@ -607,7 +608,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         addOp(new Op() {
             @Override
             void appendTo(TheMethodMaker m) {
-                mThisVar.mValid = true;
+                mThisVar.validate();
             }
         });
     }
@@ -1216,7 +1217,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         top.mSlot = slot;
-        top.mValid = true;
+        top.validate();
 
         if (mStackSize >= mStack.length) {
             mStack = Arrays.copyOf(mStack, mStack.length << 1);
@@ -2868,7 +2869,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             if (unusedVar()) {
                 m.stackPop();
             } else {
-                mVar.mValid = true;
+                mVar.validate();
                 m.storeVar(mVar);
             }
         }
@@ -2972,14 +2973,14 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         if (localCodes != null) {
             for (; i<localCodes.length; i++) {
                 if (localCodes[i] == SM_TOP) {
-                    mVars[i].mValid = false;
+                    mVars[i].invalidate();
                 }
             }
         }
 
         // Remaining ones are implicitly "top" but were pruned.
         for (; i < mVars.length; i++) {
-            mVars[i].mValid = false;
+            mVars[i].invalidate();
         }
     }
 
@@ -3640,13 +3641,11 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
     class Var extends OwnedVar implements Variable {
         final Type mType;
+        int mSmCode = SM_TOP;
         int mSlot = -1;
 
         // Updated as Op list is built.
         int mPushCount;
-
-        // Updated when code is appended. Must be reset to false each time.
-        boolean mValid;
 
         boolean mNamed;
 
@@ -3663,20 +3662,42 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         /**
+         * Called when code is appended.
+         */
+        void validate() {
+            // Can use the high bit because constant pool entries are two bytes. The high byte
+            // returned by smCode is always zero.
+            mSmCode |= 1 << 31;
+        }
+
+        /**
+         * Must be called when appending code a second time around.
+         */
+        void invalidate() {
+            mSmCode = SM_TOP;
+        }
+
+        /**
          * Needed for StackMapTable.
          *
-         * @return SM code at byte 0; additional bytes used if necessary
+         * @return SM code at byte 0; additional bytes are filled in for object types
          */
         int smCode() {
-            if (!mValid) {
-                return SM_TOP;
-            } else {
-                int code = mType.stackMapCode();
-                if (code == SM_OBJECT) {
-                    code |= (mConstants.addClass(mType).mIndex << 8);
+            int code = mSmCode;
+
+            if (code < 0) {
+                // Validated, but exact code isn't known.
+                code &= ~(1 << 31);
+                if (code == SM_TOP) {
+                    code = mType.stackMapCode();
+                    if (code == SM_OBJECT) {
+                        code |= (mConstants.addClass(mType).mIndex << 8);
+                    }
                 }
-                return code;
+                mSmCode = code;
             }
+
+            return code;
         }
 
         @Override

@@ -130,7 +130,7 @@ public class UsageTest {
             mm.return_(3);
             fail();
         } catch (IllegalStateException e) {
-            check(e, "Must return void");
+            check(e, "Cannot return a value");
         }
     }
 
