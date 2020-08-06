@@ -103,14 +103,18 @@ class ClassInjector extends ClassLoader {
             }
             throw e;
         } finally {
-            if (mReservedNames != null) {
-                synchronized (mReservedNames) {
-                    mReservedNames.remove(name);
-                }
-            }
+            unreserve(name);
         }
 
         return clazz;
+    }
+
+    void unreserve(String name) {
+        if (mReservedNames != null) {
+            synchronized (mReservedNames) {
+                mReservedNames.remove(name);
+            }
+        }
     }
 
     /**

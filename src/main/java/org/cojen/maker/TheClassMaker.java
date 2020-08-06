@@ -452,6 +452,7 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
         }
 
         Type.uncache(mTypeCache, originalName);
+        mClassInjector.unreserve(originalName);
 
         if (hasComplexConstants) {
             ConstantsRegistry.finish(this, result.lookupClass());

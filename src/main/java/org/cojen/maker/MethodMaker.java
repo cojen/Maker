@@ -63,7 +63,7 @@ public interface MethodMaker {
         String name = lookupClass.getName();
         name = name.substring(0, name.lastIndexOf('.') + 1) + "_";
         ClassLoader loader = lookupClass.getClassLoader();
-        TheClassMaker cm = TheClassMaker.begin(false, name, loader, null, lookup);
+        TheClassMaker cm = TheClassMaker.begin(true, name, loader, null, lookup);
 
         Type.Method method = cm.defineMethod(retType, "_", paramTypes);
 
