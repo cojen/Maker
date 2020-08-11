@@ -115,7 +115,7 @@ class Opcodes {
         DUP = (byte) 89,
         //DUP_X1 = (byte) 90,
         //DUP_X2 = (byte) 91,
-        DUP2 = (byte) 92,
+        //DUP2 = (byte) 92,
         //DUP2_X1 = (byte) 93,
         //DUP2_X2 = (byte) 94,
         //SWAP = (byte) 95,

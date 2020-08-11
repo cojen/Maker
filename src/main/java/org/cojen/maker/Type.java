@@ -75,11 +75,6 @@ abstract class Type {
         DOUBLE = new Primitive(SM_DOUBLE, T_DOUBLE),
         VOID = new Primitive(SM_TOP, T_VOID);
 
-    static final Type
-        NULL = new Special(SM_NULL),
-        UNINIT_THIS = new Special(SM_UNINIT_THIS),
-        UNINIT = new Special(SM_UNINIT);
-
     /**
      * Called when making a new class.
      */
@@ -110,7 +105,7 @@ abstract class Type {
         } else if (type instanceof String) {
             return from(loader, (String) type);
         } else if (type == null) {
-            return NULL;
+            return Null.THE;
         } else {
             throw new IllegalArgumentException("Unknown type: " + type);
         }
@@ -121,7 +116,7 @@ abstract class Type {
      */
     static Type from(ClassLoader loader, String type) {
         if (type == null) {
-            return NULL;
+            return Null.THE;
         }
         ConcurrentHashMap<Object, Type> cache = cache(loader);
         Type t = cache.get(type);
@@ -141,7 +136,7 @@ abstract class Type {
         case "double":  case "D": return DOUBLE;
         case "long":    case "J": return LONG;
         case "void":    case "V": return VOID;
-        case "null":    case "":  return NULL;
+        case "null":    case "":  return Null.THE;
         }
 
         if (type.endsWith("[]")) {
@@ -185,7 +180,7 @@ abstract class Type {
 
     static Type from(Class type) {
         if (type == null) {
-            return NULL;
+            return Null.THE;
         }
         ConcurrentHashMap<Object, Type> cache = cache(type.getClassLoader());
         Type t = cache.get(type);
@@ -339,7 +334,7 @@ abstract class Type {
      *      5: Primitive to specific boxed instance.
      *   6..9: Primitive to converted boxed instance (wider type, Number, or Object).
      *      0: Specific instance to superclass or implemented interface (no-op cast)
-     * 10..14: Reboxing to wider object type (NPE isn't possible, code 10 isn't really used).
+     * 10..14: Reboxing to wider object type (NPE isn't possible).
      *     15: Unboxing to specific primitive type (NPE is possible).
      * 16..19: Unboxing to wider primitive type (NPE is possible).
      *    max: Disallowed.
@@ -884,12 +879,8 @@ abstract class Type {
         }
     }
 
-    private static final class Special extends Type {
-        private final int mStackMapCode;
-
-        private Special(int stackMapCode) {
-            mStackMapCode = stackMapCode;
-        }
+    static final class Null extends Type {
+        static final Null THE = new Null();
 
         @Override
         boolean isPrimitive() {
@@ -913,7 +904,7 @@ abstract class Type {
 
         @Override
         int stackMapCode() {
-            return mStackMapCode;
+            return SM_NULL;
         }
 
         @Override
@@ -923,11 +914,7 @@ abstract class Type {
 
         @Override
         String name() {
-            switch (mStackMapCode) {
-            default:             return "*null*";
-            case SM_UNINIT_THIS: return "*uninit_this*";
-            case SM_UNINIT:      return "*uninit*";
-            }
+            return "*null*";
         }
 
         @Override
@@ -953,19 +940,6 @@ abstract class Type {
         @Override
         Class clazz() {
             return null;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (obj instanceof Special) {
-                return mStackMapCode == ((Special) obj).mStackMapCode;
-            }
-            return false;
-        }
-
-        @Override
-        public int hashCode() {
-            return mStackMapCode;
         }
     }
 
@@ -1043,7 +1017,7 @@ abstract class Type {
 
         @Override
         boolean isAssignableFrom(Type other) {
-            return other == NULL || this.equals(other) ||
+            return other == Null.THE || this.equals(other) ||
                 (other.isArray() && elementType().isAssignableFrom(other.elementType()));
         }
 
@@ -1173,7 +1147,7 @@ abstract class Type {
         boolean isAssignableFrom(Type other) {
             // TODO: Cache the result?
 
-            if (other == NULL || this.equals(other)) {
+            if (other == Null.THE || this.equals(other)) {
                 return true;
             }
 

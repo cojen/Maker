@@ -126,26 +126,4 @@ public class ExceptionTest {
             assertTrue(e.getMessage().contains("handler"));
         }
     }
-
-    @Test
-    public void mismatch() throws Exception {
-        // Test stack size verification via an exception handler. There's no simple way to test
-        // this because the public API doesn't support direct pushing to the stack.
-
-        ClassMaker cm = ClassMaker.begin().public_().implement(Runnable.class);
-        MethodMaker mm = cm.addMethod(void.class, "run").public_().static_();
-
-        Label L1 = mm.label().here();
-        mm.return_();
-        Label L2 = mm.label().here();
-        var ex = mm.catch_(L1, L2, Exception.class);
-        mm.goto_(L2);
-
-        try {
-            var clazz = cm.finish();
-            fail();
-        } catch (IllegalStateException e) {
-            assertTrue(e.getMessage().contains("stack"));
-        }
-    }
 }

@@ -29,6 +29,7 @@ import java.lang.reflect.Modifier;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.BitSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -146,100 +147,58 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         if (mParams == null) {
+            // Note that "this" is treated as param 0.
             initParams();
         }
 
         List<Var> varList = new ArrayList<>();
+        BitSet varUsage = new BitSet();
 
         for (Var param : mParams) {
             varList.add(param);
+            varUsage.set(param.mSlot);
         }
 
-        int varSlot;
-        if (mParams.length > 0) {
-            Var lastParam = mParams[mParams.length - 1];
-            varSlot = lastParam.mSlot + lastParam.slotWidth();
-        } else {
-            varSlot = mThisVar == null ? 0 : 1;
+        // Perform flow analysis for assigning variable slots and bulding the StackMapTable.
+        int opCount, maxLocals;
+        {
+            Flow flow = new Flow(varList, varUsage);
+            flow.run(mFirstOp);
+            opCount = flow.mOpCount;
+            maxLocals = flow.nextSlot();
         }
 
-        // Tag visited operations for removing dead code. This is necessary for building the
-        // StackMapTable, since frames are only built for visited labels.
-        mFirstOp.flowThrough();
-
-        // Visit the exception handlers too.
+        // Remove unvisited exception handlers.
         if (mExceptionHandlers != null) {
             Iterator<Handler> it = mExceptionHandlers.iterator();
             while (it.hasNext()) {
                 Handler h = it.next();
-                if (!h.isVisited()) {
+                if (!h.mHandlerLab.mVisited) {
                     it.remove();
                 }
             }
         }
 
-        Set<Var> varSet = new LinkedHashSet<>();
-        int opCount = 0;
-        for (Op op = mFirstOp, prev = null; op != null; ) {
-            visited: {
-                if (!op.mVisited) {
-                    op = op.mNext;
-                    break visited;
-                }
+        mVars = varList.toArray(new Var[varList.size()]);
 
-                if (op instanceof PushVarOp) {
-                    varSet.add(((PushVarOp) op).mVar);
-                } else if (op instanceof StoreVarOp) {
-                    var store = (StoreVarOp) op;
-                    varSet.add(store.mVar);
+        // Prepare the StackMapTable.
+        {
+            Arrays.sort(mVars); // sort by slot
 
-                    // Look for store/push pair to the same variable and remove the pair. Just
-                    // use the stack variable and avoid extra steps.
-                    Op next = store.mNext;
-                    if (next instanceof PushVarOp) {
-                        var push = (PushVarOp) next;
-                        Var var = store.mVar;
-                        if (var == push.mVar && var.mPushCount == 1) {
-                            var.mPushCount--;
-                            op = next.mNext;
-                            break visited;
-                        }
-                    }
-                } else if (op instanceof PushConstantOp || op instanceof DynamicConstantOp) {
-                    Op next = op.mNext;
-                    StoreVarOp store;
-                    if (next instanceof StoreVarOp && (store = (StoreVarOp) next).unusedVar()) {
-                        // Don't bother storing a constant to an unused variable.
-                        op = next.mNext;
-                        break visited;
-                    }
-                }
-
-                opCount++;
-                prev = op;
-                op = op.mNext;
-                continue;
-            }
-
-            // Remove dead code.
-            if (prev == null) {
-                mFirstOp = op;
+            int[] initCodes;
+            if (mParams.length == 0) {
+                initCodes = null;
             } else {
-                prev.mNext = op;
+                initCodes = new int[mParams.length];
+                for (int i=0; i<initCodes.length; i++) {
+                    initCodes[i] = mParams[i].smCode();
+                }
             }
+
+            mStackMapTable = new StackMapTable(mConstants, initCodes);
         }
 
         mCode = new byte[Math.min(65536, opCount * 2)];
-
-        for (Var var : varSet) {
-            if (var.mSlot < 0 && var.mPushCount > 0) {
-                var.mSlot = varSlot;
-                varSlot += var.slotWidth();
-                varList.add(var);
-            }
-        }
-
-        mVars = varList.toArray(new Var[varList.size()]);
         mStack = new Var[8];
 
         while (true) {
@@ -248,18 +207,19 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             mStackSize = 0;
             mMaxStackSlot = 0;
             mUnpositionedLabels = 0;
-            mStackMapTable = new StackMapTable(mConstants, smCodes(mParams, mParams.length));
             mLineNumberTable = null;
             mLocalVariableTable = null;
             mFinished = 0;
 
             for (Op op = mFirstOp; op != null; op = op.mNext) {
-                op.appendTo(this);
+                if (op.mVisited) { // only append if visited by flow analysis
+                    op.appendTo(this);
+                }
             }
 
             if (mUnpositionedLabels != 0) {
                 throw new IllegalStateException("Unpositioned labels in method: " + 
-                                                getName() + ", " + mUnpositionedLabels);
+                                                getName() + ": " + mUnpositionedLabels);
             }
 
             if (mFinished >= 0) {
@@ -272,8 +232,11 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                 op.reset();
             }
 
-            for (int i=mParams.length; i<mVars.length; i++) {
-                mVars[i].invalidate();
+            mStackMapTable.reset();
+
+            if (mFinished < -1) {
+                // Need to perform flow analysis again too to account for new labels.
+                new Flow(varList, varUsage).run(mFirstOp);
             }
         }
 
@@ -285,12 +248,13 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         mStack = null;
 
         var codeAttr = new Attribute.Code
-            (mConstants, mMaxStackSlot, varSlot, mCode, mCodeLen, mExceptionHandlers);
+            (mConstants, mMaxStackSlot, maxLocals, mCode, mCodeLen, mExceptionHandlers);
 
         mExceptionHandlers = null;
 
         if (mStackMapTable.finish()) {
             codeAttr.addAttribute(mStackMapTable);
+            mStackMapTable = null;
         }
 
         if (mLineNumberTable != null && mLineNumberTable.finish(mCodeLen)) {
@@ -451,10 +415,8 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         int slot = 0;
 
         if (!Modifier.isStatic(mModifiers)) {
-            mThisVar = new Var(mClassMaker.type());
-            if (!"<init>".equals(getName())) {
-                mThisVar.validate();
-            }
+            Type type = mClassMaker.type();
+            mThisVar = "<init>".equals(getName()) ? new InitThisVar(type) : new Var(type);
             mThisVar.mSlot = 0;
             count++;
             slot = 1;
@@ -469,7 +431,6 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
         for (Type t : mMethod.paramTypes()) {
             Var param = new Var(t);
-            param.validate();
             param.mSlot = slot;
             slot += param.slotWidth();
             mParams[i++] = param;
@@ -608,7 +569,9 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         addOp(new Op() {
             @Override
             void appendTo(TheMethodMaker m) {
-                mThisVar.validate();
+                // Flow analysis doesn't support variable types changing, so change it when the
+                // code is built. This trick doesn't work when making spaghetti code.
+                ((InitThisVar) this_()).ready();
             }
         });
     }
@@ -947,14 +910,25 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             catchClass = null;
         }
 
-        var handlerLab = new HandlerLab(this, catchType);
+        var handlerLab = new HandlerLab(this, catchType, smCatchCode);
 
         // Insert an operation at the start of the handled block, to capture the set of defined
-        // local variables.
+        // local variables during flow analysis.
         Op startOp = new Op() {
             @Override
-            void appendTo(TheMethodMaker m) {
-                handlerLab.tryCatchStart(m, smCatchCode);
+            void appendTo(TheMethodMaker m) { }
+
+            @Override
+            Op flow(Flow flow, Op prev) {
+                // The end label isn't reached normally, but it cannot be dropped. An address
+                // must be captured to build the exception table.
+                endLab.mVisited = true;
+
+                // Flow into the handler itself.
+                flow.run(handlerLab);
+
+                // Return the first operation in the handled block.
+                return mNext;
             }
         };
 
@@ -1010,26 +984,6 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         @Override
         public ConstantPool.C_Class catchClass() {
             return mCatchClass;
-        }
-
-        boolean isVisited() {
-            // Check if anything is visited in between the start and end labels.
-            check: {
-                for (Op op = mStartLab.mNext; op != null && op != mEndLab; op = op.mNext) {
-                    if (op.mVisited) {
-                        break check;
-                    }
-                }
-                return false;
-            }
-
-            // Makes sure the labels aren't dropped. They're needed to build the exception table.
-            mStartLab.mVisited = true;
-            mEndLab.mVisited = true;
-
-            mHandlerLab.flowThrough();
-
-            return true;
         }
     }
 
@@ -1217,7 +1171,6 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         top.mSlot = slot;
-        top.validate();
 
         if (mStackSize >= mStack.length) {
             mStack = Arrays.copyOf(mStack, mStack.length << 1);
@@ -1229,22 +1182,6 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         if (max > mMaxStackSlot) {
             mMaxStackSlot = max;
         }
-    }
-
-    /**
-     * Duplicate the top stack entry.
-     */
-    private void stackDup() {
-        Type type = stackTop().mType;
-
-        byte op;
-        switch (type.typeCode()) {
-        default: op = DUP; break;
-        case T_LONG: case T_DOUBLE: op = DUP2; break;
-        }
-
-        appendOp(op, 0);
-        stackPush(type);
     }
 
     /**
@@ -1272,7 +1209,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     private void pushConstant(Object value, Type type) {
         if (value == null) {
             appendOp(ACONST_NULL, 0);
-            stackPush(NULL);
+            stackPush(Null.THE);
         } else if (value instanceof String) {
             pushConstant(mConstants.addString((String) value), type);
         } else if (value instanceof Class) {
@@ -1487,23 +1424,8 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         if (code < 15) {
-            // Rebox without throwing NPE.
-            stackDup();
-            Lab nonNull = new Lab(this);
-            new BranchOp(IFNONNULL, 1, nonNull).appendTo(this);
-            // Pop/push of null is required to make verifier happy.
-            stackPop();
-            appendOp(ACONST_NULL, 0);
-            stackPush(to);
-            Lab end = new Lab(this);
-            new BranchOp(GOTO, 0, end).appendTo(this);
-            nonNull.appendTo(this);
-            unbox(from);
-            Type toPrim = to.unbox();
-            convertPrimitive(toPrim, code - 10);
-            box(toPrim);
-            end.appendTo(this);
-            return to;
+            // See doAddConversionOp.
+            throw new AssertionError();
         }
 
         if (code < 20) {
@@ -1695,6 +1617,17 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     }
 
     /**
+     * Assigns next op for the previous op.
+     */
+    private void removeOps(Op prev, Op next) {
+        if (prev == null) {
+            mFirstOp = next;
+        } else {
+            prev.mNext = next;
+        }
+    }
+
+    /**
      * @param savepoint was mLastOp
      * @return start of chain which was clipped off
      */
@@ -1753,7 +1686,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             if (type != null && type.isPrimitive()) {
                 throw new IllegalArgumentException("Cannot store null into primitive variable");
             }
-            constantType = NULL;
+            constantType = Null.THE;
         } else if (value instanceof String) {
             constantType = Type.from(String.class);
         } else if (value instanceof Class) {
@@ -2008,7 +1941,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             throw unsupportedConstant(value);
         }
 
-        addOp(new PushConstantOp(value, constantType));
+        addOp(new BasicConstantOp(value, constantType));
 
         return addConversionOp(constantType, type);
     }
@@ -2032,7 +1965,42 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             throw new IllegalStateException
                 ("Automatic conversion disallowed: " + from.name() + " to " + to.name());
         }
-        addOp(new ConversionOp(from, to, code));
+
+        if (code < 10 || code >= 15) {
+            addOp(new Op() {
+                @Override
+                void appendTo(TheMethodMaker m) {
+                    m.convert(from, to, code);
+                }
+            });
+            return;
+        }
+
+        // Rebox without throwing NPE. Code is in the range 10..14.
+
+        Var fromVar;
+        if (mLastOp instanceof PushVarOp) {
+            fromVar = ((PushVarOp) mLastOp).mVar;
+        } else {
+            fromVar = new Var(from);
+            addOp(new StoreVarOp(fromVar));
+            fromVar.push();
+        }
+
+        Lab nonNull = new Lab(this);
+        addBranchOp(IFNONNULL, 1, nonNull);
+        Var toVar = new Var(to);
+        toVar.set(null);
+        Lab cont = new Lab(this);
+        goto_(cont);
+        nonNull.here();
+        addOp(new PushVarOp(fromVar));
+        Type fromPrim = from.unbox();
+        addConversionOp(from, fromPrim);
+        addConversionOp(fromPrim, to);
+        addOp(new StoreVarOp(toVar));
+        cont.here();
+        addOp(new PushVarOp(toVar));
     }
 
     /**
@@ -2325,6 +2293,120 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         addOp(new SwitchOp(op, defaultLabel, cases, labels));
     }
 
+    /**
+     * State tracked for flow analysis, which is used to build the StackMapTable.
+     */
+    final class Flow {
+        // List of variables that have been visited and have a slot assigned.
+        final List<Var> mVarList;
+        final int mMinVars;
+
+        // Bits are set for variables known to be available at the current flow position.
+        BitSet mVarUsage;
+
+        int mOpCount;
+
+        private Op mRemoved;
+
+        private int mDepth;
+        private Overflow mOverflow;
+
+        Flow(List<Var> varList, BitSet varUsage) {
+            mVarList = varList;
+            mMinVars = varList.size();
+            mVarUsage = varUsage;
+        }
+
+        /**
+         * Entry point for flow analysis.
+         *
+         * @param op always expected to be a Lab except for the very first op
+         */
+        void run(Op op) {
+            final BitSet original = (BitSet) mVarUsage.clone();
+
+            if (mDepth >= 100) {
+                // Prevent stack overflow.
+                mOverflow = new Overflow(mOverflow, op, original);
+                return;
+            }
+
+            while (true) {
+                mDepth++;
+
+                // Track the previous op for supporting removal, but cannot remove Lab ops.
+                Op prev = null;
+
+                while (true) {
+                    Op next;
+                    if (!op.mVisited) {
+                        op.mVisited = true;
+                        mOpCount++;
+                        next = op.flow(this, prev);
+                    } else {
+                        next = op.revisit(this, prev);
+                    }
+                    if (next == null) {
+                        break;
+                    }
+                    if (next instanceof HandlerLab) {
+                        throw new IllegalStateException("Code flows into an exception handler");
+                    }
+
+                    if (mRemoved == op) {
+                        // Keep existing prev node in order for subsequent removes to be correct.
+                        mRemoved = null;
+                    } else {
+                        prev = op;
+                    }
+
+                    op = next;
+                }
+
+                if (--mDepth > 0 || mOverflow == null) {
+                    mVarUsage = original;
+                    break;
+                }
+
+                // Pop the overflow stack.
+                op = mOverflow.mOp;
+                mVarUsage = mOverflow.mVarUsage;
+                mOverflow = mOverflow.mPrev;
+            }
+        }
+
+        /**
+         * @param op the op being removed
+         * @param next the next op to keep
+         */
+        void removeOps(Op prev, Op op, Op next, int amt) {
+            mRemoved = op;
+            TheMethodMaker.this.removeOps(prev, next);
+            mOpCount -= amt;
+        }
+
+        int nextSlot() {
+            List<Var> vars = mVarList;
+            if (vars.isEmpty()) {
+                return 0;
+            }
+            Var last = vars.get(vars.size() - 1);
+            return last.mSlot + last.slotWidth();
+        }
+    }
+
+    private static class Overflow {
+        final Overflow mPrev;
+        final Op mOp;
+        final BitSet mVarUsage;
+
+        Overflow(Overflow prev, Op op, BitSet varUsage) {
+            mPrev = prev;
+            mOp = op;
+            mVarUsage = varUsage;
+        }
+    }
+
     abstract static class Op {
         Op mNext;
         boolean mVisited;
@@ -2335,31 +2417,22 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
          * Should be called before running another pass over the code.
          */
         void reset() {
+            mVisited = false;
         }
 
         /**
          * Recursively flows through unvisited operations and returns the next operation.
+         * Subclasses should override this method if they have special flow patterns.
          */
-        Op flow() {
+        Op flow(Flow flow, Op prev) {
             return mNext;
         }
 
-        final void flowThrough() {
-            Op op = this;
-            while (true) {
-                if (op.mVisited) {
-                    break;
-                }
-                op.mVisited = true;
-                Op next = op.flow();
-                if (next == null) {
-                    break;
-                }
-                if (next instanceof HandlerLab) {
-                    throw new IllegalStateException("Code flows into an exception handler");
-                }
-                op = next;
-            }
+        /**
+         * Called if already visited. Return the next op if flow should continue.
+         */
+        Op revisit(Flow flow, Op prev) {
+            return flow(flow, prev);
         }
     }
 
@@ -2372,7 +2445,8 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         private BranchOp[] mTrackBranches;
         private int mTrackCount;
 
-        StackMapTable.Frame mFrame;
+        // Bits are set for variables known to be available at this label.
+        private BitSet mVarUsage;
 
         Lab(TheMethodMaker owner) {
             mOwner = owner;
@@ -2380,9 +2454,11 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
         @Override
         void reset() {
+            super.reset();
             mAddress = -1;
+            mTrackBranches = null;
             mTrackCount = 0;
-            mFrame = null;
+            mVarUsage = null;
         }
 
         @Override
@@ -2396,23 +2472,71 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
         @Override
         void appendTo(TheMethodMaker m) {
-            // Pseudo-op (nothing to append).
+            // Pseudo-op (no code to append).
 
             mAddress = m.mCodeLen;
-            reached(m);
+
+            if (isTarget()) {
+                Var[] vars = m.mVars;
+                BitSet usage = mVarUsage;
+
+                // First figure out the number of local codes to fill in. Assume that caller
+                // has already sorted the variables by slot.
+
+                int numCodes = 0;
+                for (int i=vars.length; --i>=0; ) {
+                    Var var = vars[i];
+                    int slot = var.mSlot;
+                    if (usage.get(slot)) {
+                        if (numCodes <= 0) {
+                            numCodes = slot + 1;
+                        } else {
+                            // Wide sm codes consume two slots.
+                            numCodes -= var.slotWidth() - 1;
+                        }
+                    }
+                }
+
+                int[] localCodes;
+                if (numCodes <= 0) {
+                    localCodes = null;
+                } else {
+                    // Note that SM_TOP is zero, so all codes are SM_TOP by default.
+                    localCodes = new int[numCodes];
+
+                    int adjust = 0;
+                    for (int i=0; i<vars.length; i++) {
+                        Var var = vars[i];
+                        int slot = var.mSlot;
+                        int codeSlot = slot + adjust;
+                        if (codeSlot >= localCodes.length) {
+                            break;
+                        }
+                        if (usage.get(slot)) {
+                            localCodes[codeSlot] = var.smCode();
+                            // Wide sm codes consume two slots.
+                            adjust -= var.slotWidth() - 1;
+                        }
+                    }
+                }
+
+                int[] stackCodes = stackCodes();
+
+                m.mStackMapTable.add(mAddress, localCodes, stackCodes);
+            }
 
             if (mTrackOffsets != null && mTrackCount != 0) {
                 byte[] code = m.mCode;
                 for (int i=0; i<mTrackCount; i++) {
                     int offset = mTrackOffsets[i];
                     if (offset >= 0) {
-                        int branchAmount = mAddress - (short) cShortArrayHandle.get(code, offset);
+                        int srcAddr = ((short) cShortArrayHandle.get(code, offset)) & 0xffff;
+                        int branchAmount = mAddress - srcAddr;
                         if (branchAmount <= 32767) {
                             cShortArrayHandle.set(code, offset, (short) branchAmount);
                         } else {
                             // Convert to wide branch and perform another code pass.
-                            mTrackBranches[i].makeWide();
-                            m.mFinished = -1;
+                            mTrackBranches[i].makeWide(m);
                         }
                     } else {
                         // Wide encoding.
@@ -2424,23 +2548,31 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                 m.mUnpositionedLabels--;
                 mTrackCount = 0;
             }
+        }
 
-            if (mFrame != null) {
-                int stackSize = mFrame.setAddress(m.mStackMapTable, mAddress);
-                int growth = stackSize - m.mStackSize;
-                if (growth > 0) {
-                    if (mTrackOffsets != null || growth > 1) {
-                        throw new IllegalStateException("False stack growth");
-                    }
-                    // This label is being used for an exception handler catch location. Don't
-                    // adjust the stack because the next operation should do that. See the
-                    // operation appended by the catch_ method after calling handlerLab.here().
-                } else if (growth < 0) {
-                    m.mStackSize = stackSize;
+        @Override
+        Op flow(Flow flow, Op prev) {
+            mVarUsage = (BitSet) flow.mVarUsage.clone();
+            return mNext;
+        }
+
+        @Override
+        Op revisit(Flow flow, Op prev) {
+            if (mVarUsage != null) {
+                if (mVarUsage.equals(flow.mVarUsage)) {
+                    // Nothing changed.
+                    return null;
                 }
-
-                m.invalidateVariables(mFrame);
+                flow.mVarUsage.and(mVarUsage);
+                if (mVarUsage.equals(flow.mVarUsage)) {
+                    // Still nothing changed.
+                    return null;
+                }
             }
+            // Variable of usage at this label changed, so the code that follows will need to
+            // be revisited.
+            mVarUsage = (BitSet) flow.mVarUsage.clone();
+            return mNext;
         }
 
         /**
@@ -2454,12 +2586,17 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         /**
+         * By default, only returns true if label was reached by a branch.
+         */
+        boolean isTarget() {
+            return mTrackOffsets != null;
+        }
+
+        /**
          * Must be called after a branch operation to this label has been appended. The used
          * method must have already been called when the operation was initially created.
          */
         void comesFrom(BranchOp branch, TheMethodMaker m) {
-            reached(m);
-
             int srcAddr = m.mCodeLen - 1; // opcode address
 
             if (mAddress >= 0) {
@@ -2467,30 +2604,19 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
                 if (distance >= -32768) {
                     m.appendShort(distance);
-                    return;
+                } else {
+                    // Wide back branch.
+                    byte op = m.mCode[srcAddr];
+                    if (op == GOTO) {
+                        m.mCode[srcAddr] = GOTO_W;
+                        m.appendInt(distance);
+                    } else {
+                        // Convert to wide branch and perform another code pass.
+                        branch.makeWide(m);
+                    }
                 }
 
-                // Wide back branch.
-
-                byte op = m.mCode[srcAddr];
-                if (op == GOTO) {
-                    m.mCode[srcAddr] = GOTO_W;
-                    m.appendInt(distance);
-                    return;
-                }
-
-                if (IFEQ <= op && op <= IF_ACMPNE || IFNULL <= op && op <= IFNONNULL) {
-                    m.mCode[srcAddr] = flipIf(op);
-                    m.appendShort(3 + 5); // branch past the modified op and the wide goto
-                    srcAddr = m.mCodeLen;
-                    m.appendByte(GOTO_W);
-                    m.appendInt(mAddress - srcAddr);
-                    m.addStackMapFrame(m.mCodeLen); // need a frame for modified op target
-                    return;
-                }
-
-                // Unknown branch op.
-                throw new AssertionError();
+                return;
             }
 
             // Track the offset and update the code when the label is positioned. Encode the
@@ -2522,8 +2648,6 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         void comesFromWide(TheMethodMaker m, int srcAddr) {
-            reached(m);
-
             if (mAddress >= 0) {
                 m.appendInt(mAddress - srcAddr);
                 return;
@@ -2539,20 +2663,10 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         /**
-         * Must be called at the start of a try-catch block, when this label is used as an
-         * exception handler.
+         * Return the StackMapTable codes at this label.
          */
-        void tryCatchStart(TheMethodMaker m, int smCatchCode) {
-            if (mFrame == null) {
-                mFrame = m.addStackMapFrameForCatch(mAddress, smCatchCode);
-            }
-        }
-
-        void reached(TheMethodMaker m) {
-            if (mTrackOffsets != null && mFrame == null) {
-                // First time used as a target, so capture the stack map state.
-                mFrame = m.addStackMapFrame(mAddress);
-            }
+        int[] stackCodes() {
+            return null;
         }
     }
 
@@ -2561,16 +2675,29 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
      */
     static final class HandlerLab extends Lab {
         private final Type mCatchType;
+        private final int mSmCatchCode;
 
-        HandlerLab(TheMethodMaker owner, Type catchType) {
+        HandlerLab(TheMethodMaker owner, Type catchType, int smCatchCode) {
             super(owner);
             mCatchType = catchType;
+            mSmCatchCode = smCatchCode;
         }
 
         @Override
         void appendTo(TheMethodMaker m) {
             super.appendTo(m);
             m.stackPush(mCatchType);
+        }
+
+        @Override
+        boolean isTarget() {
+            // Won't be reached by a branch, but instead will only be reached by tryCatchFlow.
+            return mVisited;
+        }
+
+        @Override
+        int[] stackCodes() {
+            return new int[] {mSmCatchCode};
         }
     }
 
@@ -2601,7 +2728,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
-        Op flow() {
+        Op flow(Flow flow, Op prev) {
             int op = op();
             if ((IRETURN <= op && op <= RETURN) || op == ATHROW) {
                 return null;
@@ -2611,7 +2738,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     }
 
     static final class BranchOp extends BytecodeOp {
-        final Lab mTarget;
+        Lab mTarget;
 
         /**
          * @param stackPop amount of stack elements popped by this operation
@@ -2625,39 +2752,49 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         @Override
         void appendTo(TheMethodMaker m) {
             byte op = op();
-
-            // Branch opcodes are always negative, so ensure that the high bit is set.
-            m.appendOp((byte) (op | 0x80), stackPop());
-
-            if (op < 0) {
-                mTarget.comesFrom(this, m);
-                return;
-            } else {
-                // When op bit is zero, perform a wide branch.
-                m.appendShort(3 + 5); // branch past the modified op and the wide goto
+            if (op == GOTO_W) {
                 int srcAddr = m.mCodeLen;
                 m.appendByte(GOTO_W);
                 mTarget.comesFromWide(m, srcAddr);
-                m.addStackMapFrame(m.mCodeLen); // need a frame for modified op target
-            }
-        }
-
-        void makeWide() {
-            byte op = op();
-            if (op < 0) {
-                // Zero the high opcode bit to indicate a wide branch.
-                mCode = (stackPop() << 8) | (flipIf(op) & 0x7f);
+            } else {
+                m.appendOp(op, stackPop());
+                mTarget.comesFrom(this, m);
             }
         }
 
         @Override
-        Op flow() {
+        Op flow(Flow flow, Op prev) {
+            Lab target = mTarget;
+            Op next = mNext;
             int op = op();
             if (op == GOTO || op == GOTO_W) {
-                return mTarget;
+                if (target == next) {
+                    // Remove silly goto.
+                    flow.removeOps(prev, this, next, 1);
+                }
+                return target;
             }
-            mTarget.flowThrough();
-            return mNext;
+            flow.run(target);
+            return next;
+        }
+
+        void makeWide(TheMethodMaker m) {
+            byte op = op();
+            if (op == GOTO) {
+                mCode = GOTO_W;
+                // Need to rebuild the code to obtain new addresses.
+                m.mFinished = -1;
+            } else {
+                mCode = (stackPop() << 8) | (flipIf(op) & 0xff);
+                Op cont = mNext;
+                mNext = new BranchOp(GOTO_W, 0, mTarget);
+                mTarget = new Lab(m);
+                mTarget.used();
+                mNext.mNext = mTarget;
+                mTarget.mNext = cont;
+                // Need to perform flow analysis again because a new label was added.
+                m.mFinished = -2;
+            }
         }
     }
 
@@ -2703,9 +2840,9 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
-        Op flow() {
+        Op flow(Flow flow, Op prev) {
             for (Lab lab : mLabels) {
-                lab.flowThrough();
+                flow.run(lab);
             }
             return mDefault;
         }
@@ -2777,14 +2914,34 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     /**
      * Push a constant to the stack an optionally performs a conversion.
      */
-    static final class PushConstantOp extends Op {
+    abstract static class ConstantOp extends Op {
+        @Override
+        Op flow(Flow flow, Op prev) {
+            // Check if storing a constant to an unused variable and remove the pair.
+
+            Op next = mNext;
+            if (next instanceof StoreVarOp) {
+                var store = (StoreVarOp) next;
+                if (store.unusedVar()) {
+                    next = next.mNext;
+                    // Removing 2 ops, but specify 1 because the store op won't be visited.
+                    flow.removeOps(prev, this, next, 1);
+                    return next;
+                }
+            }
+
+            return next;
+        }
+    }
+
+    static final class BasicConstantOp extends ConstantOp {
         final Object mValue;
         final Type mType;
 
         /**
          * @param type non-null
          */
-        PushConstantOp(Object value, Type type) {
+        BasicConstantOp(Object value, Type type) {
             mValue = value;
             mType = type;
         }
@@ -2795,7 +2952,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
     }
 
-    static final class DynamicConstantOp extends Op {
+    static final class DynamicConstantOp extends ConstantOp {
         final ConstantPool.C_Dynamic mDynamic;
         final Type mType;
 
@@ -2819,32 +2976,39 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     }
 
     /**
-     * Converts a value on the stack and pushes it back.
+     * Accesses a variable.
      */
-    static final class ConversionOp extends Op {
-        final Type mFrom, mTo;
-        final int mCode;
+    abstract static class VarOp extends Op {
+        final Var mVar;
 
-        ConversionOp(Type from, Type to, int code) {
-            mFrom = from;
-            mTo = to;
-            mCode = code;
+        VarOp(Var var) {
+            mVar = var;
         }
 
         @Override
-        void appendTo(TheMethodMaker m) {
-            m.convert(mFrom, mTo, mCode);
+        Op flow(Flow flow, Op prev) {
+            Var var = mVar;
+            int slot = var.mSlot;
+
+            if (slot < 0) {
+                List<Var> varList = flow.mVarList;
+                slot = flow.nextSlot();
+                var.mSlot = slot;
+                varList.add(var);
+            }
+
+            flow.mVarUsage.set(slot);
+
+            return mNext;
         }
     }
 
     /**
      * Push a variable to the stack.
      */
-    static final class PushVarOp extends Op {
-        final Var mVar;
-
+    static final class PushVarOp extends VarOp {
         PushVarOp(Var var) {
-            mVar = var;
+            super(var);
             var.mPushCount++;
         }
 
@@ -2857,11 +3021,9 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     /**
      * Stores to a variable from the stack.
      */
-    static final class StoreVarOp extends Op {
-        final Var mVar;
-
+    static final class StoreVarOp extends VarOp {
         StoreVarOp(Var var) {
-            mVar = var;
+            super(var);
         }
 
         @Override
@@ -2869,13 +3031,38 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             if (unusedVar()) {
                 m.stackPop();
             } else {
-                mVar.validate();
                 m.storeVar(mVar);
             }
         }
 
+        @Override
+        Op flow(Flow flow, Op prev) {
+            // Look for store/push pair to the same variable and remove the pair. Just use the
+            // stack variable and avoid extra steps.
+
+            Op next = mNext;
+            if (next instanceof PushVarOp) {
+                var push = (PushVarOp) next;
+                Var var = mVar;
+                if (var == push.mVar && var.mPushCount == 1) {
+                    var.mPushCount = 0;
+                    next = next.mNext;
+                    // Removing 2 ops, but specify 1 because the push op won't be visited.
+                    flow.removeOps(prev, this, next, 1);
+                    return next;
+                }
+            }
+
+            if (unusedVar()) {
+                // Won't actually store, but will pop. See appendTo method above.
+                return next;
+            }
+
+            return super.flow(flow, prev);
+        }
+
         boolean unusedVar() {
-            return mVar.mPushCount <= 0;
+            return mVar.mPushCount == 0;
         }
     }
 
@@ -2952,87 +3139,6 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                       constants.addUTF8(mVar.mType.descriptor()),
                       mVar.mSlot);
         }
-    }
-
-    private StackMapTable.Frame addStackMapFrame(int address) {
-        return mStackMapTable.add
-            (address, smCodes(mVars, mVars.length), smCodes(mStack, mStackSize));
-    }
-
-    private StackMapTable.Frame addStackMapFrameForCatch(int address, int smCatchCode) {
-        return mStackMapTable.add(address, smCodes(mVars, mVars.length), new int[] {smCatchCode});
-    }
-
-    private void invalidateVariables(StackMapTable.Frame frame) {
-        // Any variables which aren't known by the current frame must be invalidated. These
-        // variables aren't guaranteed to have been assigned for all code paths. Invalidating
-        // them ensures that future frames are defined correctly.
-
-        int[] localCodes = frame.mLocalCodes;
-        int v = 0;
-        if (localCodes != null) {
-            for (int c=0; c<localCodes.length; v++) {
-                if (localCodes[c] == SM_TOP) {
-                    Var var = mVars[v];
-                    var.invalidate();
-                    // Two slots are used for invalidated wide variables. See smCodes method.
-                    c += var.slotWidth();
-                } else {
-                    c++;
-                }
-            }
-        }
-
-        // Remaining ones are implicitly "top" but were pruned.
-        for (; v < mVars.length; v++) {
-            mVars[v].invalidate();
-        }
-    }
-
-    /**
-     * Needed for StackMapTable.
-     *
-     * @return null if empty
-     */
-    private static int[] smCodes(Var[] vars, int len) {
-        if (len == 0) {
-            return null;
-        }
-
-        // First pass, determine the amount of codes. What makes this complicated is the fact
-        // that invalidated wide variables occupy two slots. A TOP2 code would be nice.
-
-        int amt = 0;
-
-        do {
-            Var var = vars[--len];
-            if ((var.smCode() & 0xff) == SM_TOP) {
-                if (amt == 0) {
-                    // Prune off the last consecutive top vars.
-                    continue;
-                }
-                // Need two slots for top wide variables.
-                amt += var.slotWidth();
-            } else {
-                // One slot for kinds of non-top variables.
-                amt++;
-            }
-        } while (len > 0);
-
-        int[] codes = new int[amt];
-
-        for (int c=0,v=0; c<codes.length; v++) {
-            Var var = vars[v];
-            if ((codes[c] = var.smCode()) == SM_TOP) {
-                // Note that there's no need to explicitly fill in the second top slot for wide
-                // variables. SM_TOP is zero, and arrays are initialized with zeros.
-                c += var.slotWidth();
-            } else {
-                c++;
-            }
-        }
-
-        return codes;
     }
 
     abstract class OwnedVar implements Variable, Typed {
@@ -3353,7 +3459,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                 // Widening conversion, boxing, unboxing, or equal types.
                 push();
                 if (code != 0) {
-                    addOp(new ConversionOp(fromType, toType, code));
+                    doAddConversionOp(fromType, toType, code);
                 }
             } else if (toType.isObject()) {
                 if (!fromType.isObject()) {
@@ -3613,7 +3719,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
                 Type type;
                 if (arg == null) {
-                    type = Type.NULL;
+                    type = Null.THE;
                 } else if (arg instanceof Typed) {
                     type = ((Typed) arg).type();
                 } else {
@@ -3667,9 +3773,9 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
     }
 
-    class Var extends OwnedVar implements Variable {
+    class Var extends OwnedVar implements Variable, Comparable<Var> {
         final Type mType;
-        int mSmCode = SM_TOP;
+
         int mSlot = -1;
 
         // Updated as Op list is built.
@@ -3682,6 +3788,11 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             mType = type;
         }
 
+        @Override
+        public int compareTo(Var other) {
+            return Integer.compare(mSlot, other.mSlot);
+        }
+
         int slotWidth() {
             switch (mType.typeCode()) {
             default: return 1;
@@ -3690,41 +3801,15 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         /**
-         * Called when code is appended.
-         */
-        void validate() {
-            // Can use the high bit because constant pool entries are two bytes. The high byte
-            // returned by smCode is always zero.
-            mSmCode |= 1 << 31;
-        }
-
-        /**
-         * Must be called when appending code a second time around.
-         */
-        void invalidate() {
-            mSmCode = SM_TOP;
-        }
-
-        /**
          * Needed for StackMapTable.
          *
          * @return SM code at byte 0; additional bytes are filled in for object types
          */
         int smCode() {
-            int code = mSmCode;
-
-            if (code < 0) {
-                // Validated, but exact code isn't known.
-                code &= ~(1 << 31);
-                if (code == SM_TOP) {
-                    code = mType.stackMapCode();
-                    if (code == SM_OBJECT) {
-                        code |= (mConstants.addClass(mType).mIndex << 8);
-                    }
-                }
-                mSmCode = code;
+            int code = mType.stackMapCode();
+            if (code == SM_OBJECT) {
+                code |= (mConstants.addClass(mType).mIndex << 8);
             }
-
             return code;
         }
 
@@ -3837,6 +3922,27 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         @Override
         int smCode() {
             return SM_UNINIT | (mNewOffset << 8);
+        }
+    }
+
+    /**
+     * Special variable which represents "this" inside a constructor.
+     */
+    final class InitThisVar extends Var {
+        private int mSmCode;
+
+        InitThisVar(Type type) {
+            super(type);
+            mSmCode = SM_UNINIT_THIS;
+        }
+
+        @Override
+        int smCode() {
+            return mSmCode;
+        }
+
+        void ready() {
+            mSmCode = super.smCode();
         }
     }
 

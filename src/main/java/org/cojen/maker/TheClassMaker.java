@@ -394,17 +394,19 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
         String name = name();
 
         Class clazz;
-        if (mLookup == null) {
-            clazz = mClassInjector.define(name, finishBytes(false));
-        } else {
-            try {
-                clazz = mLookup.defineClass(finishBytes(false));
-            } catch (IllegalAccessException e) {
-                throw new IllegalStateException(e);
+        try {
+            if (mLookup == null) {
+                clazz = mClassInjector.define(name, finishBytes(false));
+            } else {
+                try {
+                    clazz = mLookup.defineClass(finishBytes(false));
+                } catch (IllegalAccessException e) {
+                    throw new IllegalStateException(e);
+                }
             }
+        } finally {
+            Type.uncache(mTypeCache, name);
         }
-
-        Type.uncache(mTypeCache, name);
 
         if (hasComplexConstants) {
             ConstantsRegistry.finish(this, clazz);
@@ -449,10 +451,10 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
             throw new IllegalStateException(e);
         } catch (IllegalAccessException e) {
             throw new IllegalStateException(e);
+        } finally {
+            Type.uncache(mTypeCache, originalName);
+            mClassInjector.unreserve(originalName);
         }
-
-        Type.uncache(mTypeCache, originalName);
-        mClassInjector.unreserve(originalName);
 
         if (hasComplexConstants) {
             ConstantsRegistry.finish(this, result.lookupClass());

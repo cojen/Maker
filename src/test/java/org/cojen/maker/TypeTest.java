@@ -213,7 +213,7 @@ public class TypeTest {
         Type object = Type.from(Object.class);
         assertFalse(type.isAssignableFrom(object));
         
-        assertEquals(type == Type.NULL, object.isAssignableFrom(type));
+        assertEquals(type == Type.Null.THE, object.isAssignableFrom(type));
     }
 
     @Test
@@ -245,9 +245,9 @@ public class TypeTest {
     @Test
     public void nonTypes() throws Exception {
         ClassLoader loader = getClass().getClassLoader();
-        assertEquals(Type.NULL, Type.from(loader, (String) null));
-        assertEquals(Type.NULL, Type.from(loader, (Object) null));
-        assertEquals(Type.NULL, Type.from((Class) null));
+        assertEquals(Type.Null.THE, Type.from(loader, (String) null));
+        assertEquals(Type.Null.THE, Type.from(loader, (Object) null));
+        assertEquals(Type.Null.THE, Type.from((Class) null));
 
         try {
             Type.from(loader, this);

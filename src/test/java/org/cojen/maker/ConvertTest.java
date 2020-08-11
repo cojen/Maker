@@ -404,7 +404,6 @@ public class ConvertTest {
                 var v10 = mm.var(Double.class).set(v9);
                 verify(v9, v10.cast(double.class).cast(Byte.class));
             }
-
         }
 
         // From boxed char...
@@ -862,5 +861,21 @@ public class ConvertTest {
             fail();
         } catch (IllegalStateException e) {
         }
+    }
+
+    @Test
+    public void reboxField() throws Exception {
+        // With the current implementation, a temporary variable will be created to hold the
+        // field value during conversion.
+
+        cm.addField(Integer.class, "value").static_();
+        var f1 = mm.field("value");
+        f1.set(100);
+        var v1 = mm.var(Long.class).set(100);
+        var v2 = mm.var(Long.class).set(f1);
+        verify(v1, v2);
+
+        var clazz = cm.finish();
+        clazz.getMethod("run").invoke(null);
     }
 }

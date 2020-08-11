@@ -19,7 +19,6 @@ package org.cojen.maker;
 import java.io.IOException;
 
 import java.util.Arrays;
-import java.util.TreeMap;
 
 /**
  * The wonderful StackMapTable attribute!
@@ -28,7 +27,8 @@ import java.util.TreeMap;
  */
 class StackMapTable extends Attribute {
     private final Frame mInitFrame;
-    private TreeMap<Integer, Frame> mFrames;
+    private Frame mFirstFrame, mLastFrame;
+    private int mNumFrames;
     private BytesOut mFinished;
 
     /**
@@ -42,51 +42,60 @@ class StackMapTable extends Attribute {
     /**
      * Add a frame entry to the table.
      *
-     * @param address code address the new frame refers to; pass -1 if not known yet
+     * @param address code address the new frame refers to; must not be lower any other frame
      * @param localCodes can be null
      * @param stackCodes can be null
      */
-    Frame add(int address, int[] localCodes, int[] stackCodes) {
-        if (mFrames == null) {
-            mFrames = new TreeMap<>();
-        }
-
-        Integer key = address;
-
-        if (address >= 0 && mFrames != null) {
-            Frame frame = mFrames.get(key);
-            if (frame != null) {
-                frame.merge(localCodes, stackCodes);
-                return frame;
-            }
-        }
-
+    void add(int address, int[] localCodes, int[] stackCodes) {
         Frame frame = new Frame(address, localCodes, stackCodes);
-
-        if (address >= 0) {
-            mFrames.put(key, frame);
+        Frame last = mLastFrame;
+        if (last == null) {
+            mFirstFrame = frame;
+        } else {
+            if (address <= last.mAddress) {
+                if (address < last.mAddress) {
+                    throw new IllegalStateException("Reverse address ordering");
+                } else if (Frame.diff(last.mStackCodes, stackCodes) != 0) {
+                    throw new IllegalStateException("Mismatched stack at branch target");
+                } else {
+                    // There's no way to encode two frames at the same address, so assume that
+                    // the new frame supercedes the existing one.
+                    last.mLocalCodes = localCodes;
+                    return;
+                }
+            }
+            last.mNext = frame;
         }
+        mLastFrame = frame;
+        mNumFrames++;
+    }
 
-        return frame;
+    void reset() {
+        mFirstFrame = null;
+        mLastFrame = null;
+        mNumFrames = 0;
+        mFinished = null;
     }
 
     /**
      * @return false if table is empty and should not be written
      */
     boolean finish() {
-        if (mFrames == null || mFrames.isEmpty()) {
+        if (mFirstFrame == null) {
             return false;
         }
 
-        var out = new BytesOut(null, mFrames.size() * 4);
+        var out = new BytesOut(null, mNumFrames * 4);
 
         try {
-            out.writeShort(mFrames.size());
+            out.writeShort(mNumFrames);
             Frame prev = mInitFrame;
-            for (Frame frame : mFrames.values()) {
+            Frame frame = mFirstFrame;
+            do {
                 frame.writeTo(prev, out);
                 prev = frame;
-            }
+                frame = frame.mNext;
+            } while (frame != null);
             mFinished = out;
         } catch (IOException e) {
             // Not expected.
@@ -106,92 +115,16 @@ class StackMapTable extends Attribute {
         out.write(mFinished);
     }
 
-    private void add(Frame frame) {
-        Integer key = frame.mAddress;
-        Frame existing = mFrames.get(key);
-        if (existing != null) {
-            existing.merge(frame);
-        } else {
-            mFrames.put(key, frame);
-        }
-    }
-
-    static class Frame {
-        int mAddress;
+    private static class Frame {
+        final int mAddress;
         int[] mLocalCodes;
         final int[] mStackCodes;
+        Frame mNext;
 
         Frame(int address, int[] localCodes, int[] stackCodes) {
             mAddress = address;
             mLocalCodes = localCodes;
             mStackCodes = stackCodes;
-        }
-
-        /**
-         * @return stack size
-         */
-        public int setAddress(StackMapTable table, int address) {
-            if (mAddress < 0) {
-                mAddress = address;
-                table.add(this);
-            } else if (address != mAddress) {
-                throw new IllegalStateException("Frame address changed");
-            }
-            return mStackCodes == null ? 0 : mStackCodes.length;
-        }
-
-        private void merge(Frame other) {
-            merge(other.mLocalCodes, other.mStackCodes);
-        }
-
-        private void merge(int[] localCodes, int[] stackCodes) {
-            merge(localCodes, localCodes == null ? 0 : localCodes.length,
-                   stackCodes, stackCodes == null ? 0 : stackCodes.length);
-        }
-
-        private void merge(int[] localCodes, int localLen, int[] stackCodes, int stackLen) {
-            // Stacks must be identical.
-            verify("stack", mStackCodes, stackCodes, stackLen);
-
-            // Apply the intersection of the local variable sets.
-
-            int[] thisCodes = mLocalCodes;
-            int thisLen = thisCodes == null ? 0 : thisCodes.length;
-
-            if (thisLen <= localLen) {
-                localLen = thisLen;
-            } else {
-                // Swap and keep the smaller set.
-                thisCodes = localCodes;
-                localCodes = mLocalCodes;
-                mLocalCodes = thisCodes;
-            }
-
-            // If any mismatches, use the "top" type instead.
-            for (int i=0; i<localLen; i++) {
-                if (thisCodes[i] != localCodes[i]) {
-                    thisCodes[i] = Type.SM_TOP;
-                }
-            }
-        }
-
-        private void verify(String which, int[] expect, int[] actual, int actualLen) {
-            if (actual == null || actualLen == 0) {
-                if (expect == null || expect.length == 0) {
-                    return;
-                }
-            } else if (expect != null && expect.length == actualLen) {
-                check: {
-                    for (int i=0; i<actualLen; i++) {
-                        if (actual[i] != expect[i]) {
-                            break check;
-                        }
-                    }
-                    return;
-                }
-            }
-
-            throw new IllegalStateException("Mismatched " + which + " at branch target");
         }
 
         private void writeTo(Frame prev, BytesOut out) throws IOException {

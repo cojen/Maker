@@ -404,6 +404,28 @@ public class BranchTest {
     }
 
     @Test
+    public void sillyConditional() throws Exception {
+        // Test that unneceessary conditional statements aren't "optimized" improperly.
+
+        ClassMaker cm = ClassMaker.begin().public_();
+        MethodMaker mm = cm.addMethod(null, "run", int.class).static_().public_();
+
+        Label end = mm.label();
+        mm.param(0).ifEq(0, end);
+
+        var v1 = mm.param(0).add(1);
+        var v2 = v1.add(1);
+
+        v1.ifEq(0, end);
+        v2.ifEq(0, end); // unneceessary
+
+        end.here();
+
+        var clazz = cm.finish();
+        clazz.getMethod("run", int.class).invoke(null, 10);
+    }
+
+    @Test
     public void mergeLocals() throws Exception {
         // Test that local variable conflicts at branch targets are resolved.
 
@@ -416,15 +438,10 @@ public class BranchTest {
         var v1 = mm.param(0).add(1);
         var v2 = v1.add(1);
 
-        if (true) {
-            Label l2 = mm.label();
-            v1.ifEq(0, l2);
-            v2.ifEq(0, end);
-            l2.here();
-        } else {
-            v1.ifEq(0, end);
-            v2.ifEq(0, end);
-        }
+        Label l2 = mm.label();
+        v1.ifEq(0, l2);
+        v2.ifEq(0, end);
+        l2.here();
 
         end.here();
 
@@ -490,5 +507,54 @@ public class BranchTest {
         var clazz = cm.finish();
         var method =  clazz.getMethod("run");
         assertEquals(1, method.invoke(null));
+    }
+
+    @Test
+    public void overflow() throws Exception {
+        // Test the code that prevents stack overflow by limiting recursion.
+
+        ClassMaker cm = ClassMaker.begin().public_();
+        MethodMaker mm = cm.addMethod(null, "run").static_().public_();
+
+        var v1 = mm.var(int.class).set(0);
+
+        for (int i=0; i<5000; i++) {
+            Label lab = mm.label();
+            v1.ifEq(0, lab);
+            mm.nop();
+            lab.here();
+        }
+
+        var clazz = cm.finish();
+        clazz.getMethod("run").invoke(null);
+    }
+
+    @Test
+    public void altBranch() throws Exception {
+        // Test that flow analysis for StackMapTable can cope with branches that return.
+
+        ClassMaker cm = ClassMaker.begin().public_();
+        MethodMaker mm = cm.addMethod(long.class, "run").static_().public_();
+
+        var v1 = mm.var(int.class);
+        v1.set(1);
+
+        Label L1 = mm.label();
+        v1.ifEq(0, L1);
+
+        var v2 = mm.var(long.class).set(v1.add(v1));
+        Label L2 = mm.label();
+        v1.ifEq(0, L2);
+        mm.nop();
+        L2.here();
+        mm.return_(v2.add(v2));
+
+        L1.here();
+        var v3 = mm.var(long.class).set(v1.sub(v1));
+        mm.return_(v3.sub(v3));
+
+        var clazz = cm.finish();
+        Object result = clazz.getMethod("run").invoke(null);
+        assertEquals(4L, result);
     }
 }
