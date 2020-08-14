@@ -557,4 +557,39 @@ public class BranchTest {
         Object result = clazz.getMethod("run").invoke(null);
         assertEquals(4L, result);
     }
+
+    @Test
+    public void booleanResult() throws Exception {
+        // Test the convenience methods which store 'if' results to boolean variables.
+
+        ClassMaker cm = ClassMaker.begin().public_();
+        MethodMaker mm = cm.addMethod(void.class, "run").static_().public_();
+        var assertVar = mm.var(Assert.class);
+
+        var v1 = mm.var(int.class).set(10);
+
+        mm.var(Assert.class).invoke("assertEquals", true, v1.eq(10));
+        mm.var(Assert.class).invoke("assertEquals", false, v1.eq(11));
+        mm.var(Assert.class).invoke("assertEquals", true, v1.ne(11));
+        mm.var(Assert.class).invoke("assertEquals", false, v1.ne(10));
+        mm.var(Assert.class).invoke("assertEquals", true, v1.lt(11));
+        mm.var(Assert.class).invoke("assertEquals", false, v1.lt(10));
+        mm.var(Assert.class).invoke("assertEquals", false, v1.ge(11));
+        mm.var(Assert.class).invoke("assertEquals", true, v1.ge(10));
+        mm.var(Assert.class).invoke("assertEquals", false, v1.gt(11));
+        mm.var(Assert.class).invoke("assertEquals", false, v1.gt(10));
+        mm.var(Assert.class).invoke("assertEquals", true, v1.le(11));
+        mm.var(Assert.class).invoke("assertEquals", true, v1.le(10));
+
+        var v2 = mm.var(String.class).set(null);
+        var v3 = mm.var(String.class).set("hello");
+
+        mm.var(Assert.class).invoke("assertEquals", true, v2.eq(null));
+        mm.var(Assert.class).invoke("assertEquals", false, v2.ne(null));
+        mm.var(Assert.class).invoke("assertEquals", false, v3.eq(null));
+        mm.var(Assert.class).invoke("assertEquals", true, v3.ne(null));
+
+        var clazz = cm.finish();
+        clazz.getMethod("run").invoke(null);
+    }
 }

@@ -2671,16 +2671,31 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     }
 
     /**
+     * Label which has one item on the stack.
+     */
+    static class StackLab extends Lab {
+        private final int mSmCode;
+
+        StackLab(TheMethodMaker owner, int smCode) {
+            super(owner);
+            mSmCode = smCode;
+        }
+
+        @Override
+        int[] stackCodes() {
+            return new int[] {mSmCode};
+        }
+    }
+
+    /**
      * Exception handler catch label.
      */
-    static final class HandlerLab extends Lab {
+    static class HandlerLab extends StackLab {
         private final Type mCatchType;
-        private final int mSmCatchCode;
 
         HandlerLab(TheMethodMaker owner, Type catchType, int smCatchCode) {
-            super(owner);
+            super(owner, smCatchCode);
             mCatchType = catchType;
-            mSmCatchCode = smCatchCode;
         }
 
         @Override
@@ -2693,11 +2708,6 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         boolean isTarget() {
             // Won't be reached by a branch, but instead will only be reached by tryCatchFlow.
             return mVisited;
-        }
-
-        @Override
-        int[] stackCodes() {
-            return new int[] {mSmCatchCode};
         }
     }
 
@@ -3418,6 +3428,81 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         @Override
         public Var rem(Object value) {
             return addMathOp("remainder", IREM, this, value);
+        }
+
+        @Override
+        public Var eq(Object value) {
+            if (value == null) {
+                return isNull(IFNULL);
+            } else {
+                return relational(value, true, IF_ICMPEQ, IFEQ);
+            }
+        }
+
+        @Override
+        public Var ne(Object value) {
+            if (value == null) {
+                return isNull(IFNONNULL);
+            } else {
+                return relational(value, true, IF_ICMPNE, IFNE);
+            }
+        }
+
+        /**
+         * @param op IFNULL or IFNONNULL
+         */
+        private Var isNull(byte op) {
+            Var var = new Var(BOOLEAN);
+            Label match = label();
+            pushForNull();
+            addBranchOp(op, 1, match);
+            addOp(new BasicConstantOp(false, BOOLEAN));
+            Label cont = new StackLab(TheMethodMaker.this, SM_INT);
+            goto_(cont);
+            match.here();
+            addOp(new BasicConstantOp(true, BOOLEAN));
+            cont.here();
+            addStoreOp(var);
+            return var;
+        }
+
+        @Override
+        public Var lt(Object value) {
+            return relational(value, false, IF_ICMPLT, IFLT);
+        }
+
+        @Override
+        public Var ge(Object value) {
+            return relational(value, false, IF_ICMPGE, IFGE);
+        }
+
+        @Override
+        public Var gt(Object value) {
+            return relational(value, false, IF_ICMPGT, IFGT);
+        }
+
+        @Override
+        public Var le(Object value) {
+            return relational(value, false, IF_ICMPLE, IFLE);
+        }
+
+        /**
+         * @param eq true if performing an equality check
+         * @param op normal op to use for ints
+         * @param zeroOp op to use when comparing against a constant zero int
+         */
+        private Var relational(Object value, boolean eq, byte op, byte zeroOp) {
+            Var var = new Var(BOOLEAN);
+            Label match = label();
+            ifRelational(value, match, eq, op, zeroOp);
+            addOp(new BasicConstantOp(false, BOOLEAN));
+            Label cont = new StackLab(TheMethodMaker.this, SM_INT);
+            goto_(cont);
+            match.here();
+            addOp(new BasicConstantOp(true, BOOLEAN));
+            cont.here();
+            addStoreOp(var);
+            return var;
         }
 
         @Override

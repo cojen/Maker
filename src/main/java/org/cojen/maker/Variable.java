@@ -201,6 +201,66 @@ public interface Variable {
     public Variable rem(Object value);
 
     /**
+     * Determine if this variable is equal to another variable or constant, and assign
+     * the result to a new boolean variable.
+     *
+     * @param value other variable or a constant
+     * @return the result in a new boolean variable
+     * @see ifEq
+     */
+    public Variable eq(Object value);
+
+    /**
+     * Determine if this variable is not equal to another variable or constant, and assign the
+     * result to a new boolean variable.
+     *
+     * @param value other variable or a constant
+     * @return the result in a new boolean variable
+     * @see ifNe
+     */
+    public Variable ne(Object value);
+
+    /**
+     * Determine if this variable is less than to another variable or constant, and assign the
+     * result to a new boolean variable.
+     *
+     * @param value other variable or a constant
+     * @return the result in a new boolean variable
+     * @see ifLt
+     */
+    public Variable lt(Object value);
+
+    /**
+     * Determine if this variable is greater than or equal to another variable or constant, and
+     * assign the result to a new boolean variable.
+     *
+     * @param value other variable or a constant
+     * @return the result in a new boolean variable
+     * @see ifGe
+     */
+    public Variable ge(Object value);
+
+    /**
+     * Determine if this variable is greater than to another variable or constant, and assign
+     * the result to a new boolean variable.
+     *
+     * @param value other variable or a constant
+     * @return the result in a new boolean variable
+     * @see ifGt
+     */
+    public Variable gt(Object value);
+
+    /**
+     * Determine if this variable is less than or equal to another variable or constant, and
+     * assign the result to a new boolean variable.
+     *
+     * @param value other variable or a constant
+     * @return the result in a new boolean variable
+     * @see ifLe
+     */
+    public Variable le(Object value);
+
+    /**
      * Determine if this variable is an instance of the given class or interface, and assign
      * the result to a new boolean variable.
      *
