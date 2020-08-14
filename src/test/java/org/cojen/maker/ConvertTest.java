@@ -580,6 +580,7 @@ public class ConvertTest {
             verify(-1, v1.cast(int.class));
             verify((float) Long.MAX_VALUE, v1.cast(float.class));
             verify((double) Long.MAX_VALUE, v1.cast(double.class));
+            verify(true, v1.cast(boolean.class));
         }
 
         {
@@ -588,18 +589,21 @@ public class ConvertTest {
             verify('\uffff', v1.cast(char.class));
             verify((short) -1, v1.cast(short.class));
             verify((float) Integer.MAX_VALUE, v1.cast(float.class));
+            verify(true, v1.cast(boolean.class));
         }
 
         {
             var v1 = mm.var(short.class).set(Short.MAX_VALUE);
             verify((byte) -1, v1.cast(byte.class));
             verify('\u7fff', v1.cast(char.class));
+            verify(true, v1.cast(boolean.class));
         }
 
         {
-            var v1 = mm.var(char.class).set('\uffff');
-            verify((byte) -1, v1.cast(byte.class));
-            verify((short) -1, v1.cast(short.class));
+            var v1 = mm.var(char.class).set('\ufffe');
+            verify((byte) -2, v1.cast(byte.class));
+            verify((short) -2, v1.cast(short.class));
+            verify(false, v1.cast(boolean.class));
         }
 
         {
@@ -610,6 +614,7 @@ public class ConvertTest {
             verify(Integer.MAX_VALUE, v1.cast(int.class));
             verify((float) Integer.MAX_VALUE, v1.cast(float.class));
             verify((long) Integer.MAX_VALUE, v1.cast(long.class));
+            verify(true, v1.cast(boolean.class));
         }
 
         {
@@ -619,7 +624,25 @@ public class ConvertTest {
             verify((short) 65, v1.cast(short.class));
             verify(65, v1.cast(int.class));
             verify(65L, v1.cast(long.class));
+            verify(true, v1.cast(boolean.class));
         }
+
+        var clazz = cm.finish();
+        clazz.getMethod("run").invoke(null);
+    }
+
+    @Test
+    public void booleanToNum() throws Exception {
+        var v1 = mm.var(boolean.class).set(true);
+        var v2 = mm.var(boolean.class).set(false);
+
+        verify((byte) 1, v1.cast(byte.class));
+        verify('\u0000', v2.cast(char.class));
+        verify((short) 1, v1.cast(short.class));
+        verify(0, v2.cast(int.class));
+        verify(1L, v1.cast(long.class));
+        verify(1.0f, v1.cast(float.class));
+        verify(0.0d, v2.cast(double.class));
 
         var clazz = cm.finish();
         clazz.getMethod("run").invoke(null);

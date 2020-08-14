@@ -3484,8 +3484,8 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                         m.appendShort(constant.mIndex);
                     }
                 });
-            } else {
-                // Narrowing conversion.
+            } else narrowing: {
+                // Narrowing conversion, or converting boolean to a number.
 
                 Type primType = fromType.unbox();
 
@@ -3515,6 +3515,14 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                 switch (primType.stackMapCode()) {
                 case SM_INT:
                     switch (toTypeCode) {
+                    case T_INT: {
+                        push();
+                        break narrowing;
+                    }
+                    case T_BOOLEAN: {
+                        (primType == INT ? this : cast(int.class)).and(1).push();
+                        break narrowing;
+                    }
                     case T_BYTE:  op = I2B; break;
                     case T_CHAR:  op = I2C; break;
                     case T_SHORT: op = I2S; break;
@@ -3545,10 +3553,18 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
                 if (op == 0) {
                     switch (toTypeCode) {
-                    case T_BYTE: case T_CHAR: case T_SHORT:
-                        return cast(int.class).cast(clazz);
+                    case T_BOOLEAN: case T_BYTE: case T_CHAR: case T_SHORT:
+                        break;
+                    case T_LONG: case T_FLOAT: case T_DOUBLE:
+                        if (primType == BOOLEAN) {
+                            break;
+                        }
+                        // fallthrough
+                    default:
+                        throw new IllegalStateException("Unsupported conversion");
                     }
-                    throw new IllegalStateException("Unsupported conversion");
+
+                    return cast(int.class).cast(clazz);
                 }
 
                 push(primType);
