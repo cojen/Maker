@@ -2800,6 +2800,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                     if (target == next) {
                         // Remove silly goto.
                         flow.removeOps(prev, this, next, 1);
+                        target.lessUsed();
                     }
                     return target;
                 }
