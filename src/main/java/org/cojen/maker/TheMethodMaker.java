@@ -2376,7 +2376,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         /**
-         * @param op the op being removed
+         * @param op the op being removed; pass null if not the current operation
          * @param next the next op to keep
          */
         void removeOps(Op prev, Op op, Op next, int amt) {
@@ -2441,6 +2441,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
         int mAddress = -1;
 
+        private int mUsedCount;
         private int[] mTrackOffsets;
         private BranchOp[] mTrackBranches;
         private int mTrackCount;
@@ -2580,16 +2581,28 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
          * exception handler.
          */
         void used() {
+            mUsedCount++;
             if (mTrackOffsets == null) {
                 mTrackOffsets = new int[4];
             }
         }
 
         /**
+         * @return true if totally unused
+         */
+        boolean lessUsed() {
+            if (--mUsedCount <= 0) {
+                mTrackOffsets = null;
+                return true;
+            }
+            return false;
+        }
+
+        /**
          * By default, only returns true if label was reached by a branch.
          */
         boolean isTarget() {
-            return mTrackOffsets != null;
+            return mUsedCount > 0;
         }
 
         /**
@@ -2774,16 +2787,46 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
         @Override
         Op flow(Flow flow, Op prev) {
-            Lab target = mTarget;
-            Op next = mNext;
-            int op = op();
-            if (op == GOTO || op == GOTO_W) {
-                if (target == next) {
-                    // Remove silly goto.
-                    flow.removeOps(prev, this, next, 1);
+            Lab target;
+            Op next;
+
+            while (true) {
+                target = mTarget;
+                next = mNext;
+
+                byte op = op();
+
+                if (op == GOTO || op == GOTO_W) {
+                    if (target == next) {
+                        // Remove silly goto.
+                        flow.removeOps(prev, this, next, 1);
+                    }
+                    return target;
                 }
-                return target;
+
+                // If the next op is a goto, then flip the condition and remove the goto.
+
+                if (!(next instanceof BranchOp)) {
+                    break;
+                }
+
+                BranchOp nextBranch = (BranchOp) next;
+
+                if (nextBranch.op() != GOTO || next.mNext != target) {
+                    break;
+                }
+
+                Op newNext = target;
+                int amtRemoved = 1;
+                if (target.lessUsed()) {
+                    newNext = target.mNext;
+                    amtRemoved++;
+                }
+                flip(op);
+                mTarget = nextBranch.mTarget;
+                flow.removeOps(this, null, newNext, amtRemoved);
             }
+
             flow.run(target);
             return next;
         }
@@ -2795,7 +2838,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                 // Need to rebuild the code to obtain new addresses.
                 m.mFinished = -1;
             } else {
-                mCode = (stackPop() << 8) | (flipIf(op) & 0xff);
+                flip(op);
                 Op cont = mNext;
                 mNext = new BranchOp(GOTO_W, 0, mTarget);
                 mTarget = new Lab(m);
@@ -2805,6 +2848,10 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                 // Need to perform flow analysis again because a new label was added.
                 m.mFinished = -2;
             }
+        }
+
+        private void flip(byte op) {
+            mCode = (stackPop() << 8) | (flipIf(op) & 0xff);
         }
     }
 
