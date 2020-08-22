@@ -56,17 +56,6 @@ public interface ClassMaker {
      *
      * @param className fully qualified class name; pass null to use default
      * @param parentLoader parent class loader; pass null to use default
-     */
-    public static ClassMaker begin(String className, ClassLoader parentLoader) {
-        return begin(className, parentLoader, null);
-    }
-
-    /**
-     * Begin defining a class with the given name. The actual name will have a suffix applied
-     * to ensure uniqueness.
-     *
-     * @param className fully qualified class name; pass null to use default
-     * @param parentLoader parent class loader; pass null to use default
      * @param domain to define class in; pass null to use default
      */
     public static ClassMaker begin(String className,
