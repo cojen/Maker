@@ -405,7 +405,7 @@ public class BranchTest {
 
     @Test
     public void sillyConditional() throws Exception {
-        // Test that unneceessary conditional statements aren't "optimized" improperly.
+        // Test that unnecessary conditional statements aren't "optimized" improperly.
 
         ClassMaker cm = ClassMaker.begin().public_();
         MethodMaker mm = cm.addMethod(null, "run", int.class).static_().public_();
@@ -417,7 +417,7 @@ public class BranchTest {
         var v2 = v1.add(1);
 
         v1.ifEq(0, end);
-        v2.ifEq(0, end); // unneceessary
+        v2.ifEq(0, end); // unnecessary
 
         end.here();
 
