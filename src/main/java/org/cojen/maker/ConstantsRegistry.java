@@ -81,6 +81,10 @@ public class ConstantsRegistry {
      * @param type unused
      */
     public static Object remove(MethodHandles.Lookup lookup, String name, Class<?> type, int slot) {
+        if ((lookup.lookupModes() & MethodHandles.Lookup.PRIVATE) == 0) {
+            throw new IllegalStateException();
+        }
+
         Class<?> clazz = lookup.lookupClass();
 
         Object value;
