@@ -47,6 +47,7 @@ public interface Bootstrap {
      * @param values variables or constants
      * @return the result of the method, which is null if void
      * @throws IllegalArgumentException if not given a variable or a constant
+     * @throws IllegalStateException if this is a condy bootstrap
      */
     public Variable invoke(Object returnType, String name, Object[] types, Object... values);
 }
