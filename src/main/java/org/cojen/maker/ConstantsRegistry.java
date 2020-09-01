@@ -77,13 +77,12 @@ public class ConstantsRegistry {
     /**
      * Removes the constant assigned to the given slot. This is a dynamic bootstrap method.
      *
-     * @param lookup unused
      * @param name unused
      * @param type unused
      */
-    public static Object remove(MethodHandles.Lookup lookup, String name, Class<?> type,
-                                Class<?> clazz, int slot)
-    {
+    public static Object remove(MethodHandles.Lookup lookup, String name, Class<?> type, int slot) {
+        Class<?> clazz = lookup.lookupClass();
+
         Object value;
         synchronized (ConstantsRegistry.class) {
             value = cEntries.get(clazz);

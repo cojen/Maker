@@ -2007,12 +2007,10 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
      * Adds a constant using the ConstantsRegistry.
      */
     private ConstantPool.C_Dynamic addComplexConstant(Type type, Object value) {
-        Type classType = Type.from(Class.class);
-
         Set<Type.Method> bootstraps = Type.from(ConstantsRegistry.class).findMethods
             ("remove",
              new Type[] {Type.from(MethodHandles.Lookup.class), Type.from(String.class),
-                         classType, classType, Type.INT},
+                         Type.from(Class.class), Type.INT},
              0, 1, null, null);
 
         if (bootstraps.size() != 1) {
@@ -2026,7 +2024,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         int slot = mClassMaker.addComplexConstant(value);
 
         ConstantPool.Constant[] bootArgs = {
-            addLoadableConstant(classType, class_()), addLoadableConstant(Type.INT, slot)
+            addLoadableConstant(Type.INT, slot)
         };
 
         int bi = mClassMaker.addBootstrapMethod(bootHandle, bootArgs);
