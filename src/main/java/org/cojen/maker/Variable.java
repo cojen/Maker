@@ -431,7 +431,7 @@ public interface Variable {
      *
      * @param name bootstrap method name
      * @param args constants which are passed to the bootstrap method, not including the
-     * first three standard arguments
+     * first three standard arguments: {@code (Lookup caller, String name, MethodType type)}
      * @see java.lang.invoke
      */
     public Bootstrap indy(String name, Object... args);
@@ -444,7 +444,7 @@ public interface Variable {
      *
      * @param name bootstrap method name
      * @param args constants which are passed to the bootstrap method, not including the
-     * first three standard arguments
+     * first three standard arguments: {@code (Lookup caller, String name, Class type)}
      * @see java.lang.invoke
      */
     public Bootstrap condy(String name, Object... args);
