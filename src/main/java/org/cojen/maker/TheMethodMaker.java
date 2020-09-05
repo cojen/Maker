@@ -166,6 +166,9 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             flow.run(mFirstOp);
             opCount = flow.mOpCount;
             maxLocals = flow.nextSlot();
+            if (maxLocals >= 65536) {
+                throw new IllegalStateException("Too many local variables");
+            }
         }
 
         // Remove unvisited exception handlers.
@@ -3125,12 +3128,11 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     /**
      * Increments an integer variable.
      */
-    static final class IncOp extends Op {
-        final Var mVar;
+    static final class IncOp extends VarOp {
         final int mAmount;
 
         IncOp(Var var, int amount) {
-            mVar = var;
+            super(var);
             mAmount = amount;
             var.mPushCount++;
         }
@@ -3142,16 +3144,11 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                 m.appendOp(IINC, 0);
                 m.appendByte(slot);
                 m.appendByte(mAmount);
-            } else if (slot < 65536) {
+            } else {
                 m.appendOp(WIDE, 0);
                 m.appendByte(IINC);
                 m.appendShort(slot);
                 m.appendShort(mAmount);
-            } else {
-                m.pushVar(mVar);
-                m.pushConstant(mAmount, INT);
-                m.appendOp(IADD, 1);
-                m.storeVar(mVar);
             }
         }
     }

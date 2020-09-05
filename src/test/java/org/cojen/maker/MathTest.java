@@ -416,4 +416,20 @@ public class MathTest {
         mm.nop();
         cm.finish().getMethod("run").invoke(null);
     }
+
+    @Test
+    public void tooManyVariables() throws Exception {
+        ClassMaker cm = ClassMaker.begin().public_();
+        MethodMaker mm = cm.addMethod(null, "run").static_().public_();
+
+        try {
+            for (int i=0; i<70_000; i++) {
+                mm.var(int.class).inc(1);
+            }
+            cm.finish();
+            fail();
+        } catch (IllegalStateException e) {
+            assertTrue(e.getMessage().startsWith("Too many"));
+        }
+    }
 }
