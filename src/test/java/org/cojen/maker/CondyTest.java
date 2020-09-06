@@ -271,4 +271,57 @@ public class CondyTest {
             assertTrue(e.getMessage().startsWith("Unmodifiable"));
         }
     }
+
+    @Test
+    public void sneaky() throws Exception {
+        // Try to steal a complex constant, to verify some of the security features. When given
+        // enough access, the constant can be stolen. This isn't a feature, but just an
+        // artifact of the current implementation.
+
+        ClassMaker cm = ClassMaker.begin(null, MethodHandles.lookup());
+        cm.addField(byte[].class, "test").public_().static_().final_();
+
+        MethodMaker mm = cm.addClinit();
+        var const0 = new byte[] {1,2,3};
+        mm.field("test").setConstant(const0);
+
+        var lookup = cm.finishHidden();
+        var clazz = lookup.lookupClass();
+
+        // Class hasn't been initialized yet. Try to steal via the backdoor.
+
+        try {
+            ConstantsRegistry.remove(MethodHandles.lookup(), "_", null, 0);
+            fail();
+        } catch (IllegalStateException e) {
+            // Wrong lookup, so not found.
+        }
+
+        try {
+            ConstantsRegistry.remove(MethodHandles.lookup().in(clazz), "_", null, 0);
+            fail();
+        } catch (IllegalStateException e) {
+            // Doesn't have private access.
+        }
+
+        try {
+            ConstantsRegistry.remove
+                (lookup.dropLookupMode(MethodHandles.Lookup.PRIVATE), "_", null, 0);
+            fail();
+        } catch (IllegalStateException e) {
+            // Doesn't have private access.
+        }
+
+        // Works when given full permission.
+        Object const1 = ConstantsRegistry.remove(lookup, "_", null, 0);
+        assertEquals(const0, const1);
+
+        try {
+            clazz.getField("test").get(null);
+            fail();
+        } catch (BootstrapMethodError e) {
+            // Stolen!
+            assertTrue(e.getCause() instanceof IllegalStateException);
+        }
+    }
 }

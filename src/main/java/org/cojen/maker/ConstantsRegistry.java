@@ -89,7 +89,7 @@ public class ConstantsRegistry {
 
         Object value;
         synchronized (ConstantsRegistry.class) {
-            value = cEntries.get(clazz);
+            value = cEntries == null ? null : cEntries.get(clazz);
         }
 
         if (value == null) {
