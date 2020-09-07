@@ -2976,17 +2976,14 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     abstract static class ConstantOp extends Op {
         @Override
         Op flow(Flow flow, Op prev) {
-            // Check if storing a constant to an unused variable and remove the pair.
+            // Check if storing to an unused variable and remove the pair.
 
             Op next = mNext;
-            if (next instanceof StoreVarOp) {
-                var store = (StoreVarOp) next;
-                if (store.unusedVar()) {
-                    next = next.mNext;
-                    // Removing 2 ops, but specify 1 because the store op won't be visited.
-                    flow.removeOps(prev, this, next, 1);
-                    return next;
-                }
+            if (next instanceof StoreVarOp && ((StoreVarOp) next).unusedVar()) {
+                next = next.mNext;
+                // Removing 2 ops, but specify 1 because the store op won't be visited.
+                flow.removeOps(prev, this, next, 1);
+                return next;
             }
 
             return next;
@@ -3074,6 +3071,22 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         @Override
         void appendTo(TheMethodMaker m) {
             m.pushVar(mVar);
+        }
+
+        @Override
+        Op flow(Flow flow, Op prev) {
+            // Check if storing to an unused variable and remove the pair.
+
+            Op next = mNext;
+            if (next instanceof StoreVarOp && ((StoreVarOp) next).unusedVar()) {
+                mVar.mPushCount--;
+                next = next.mNext;
+                // Removing 2 ops, but specify 1 because the store op won't be visited.
+                flow.removeOps(prev, this, next, 1);
+                return next;
+            }
+
+            return super.flow(flow, prev);
         }
     }
 
