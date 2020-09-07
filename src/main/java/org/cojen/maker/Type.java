@@ -425,6 +425,13 @@ abstract class Type {
     abstract Class clazz();
 
     /**
+     * Returns null if class already exists.
+     */
+    ClassMaker maker() {
+        return null;
+    }
+
+    /**
      * Returns null if not applicable or unknown.
      */
     Type superType() {
@@ -1707,7 +1714,7 @@ abstract class Type {
     }
 
     private static class NewClazz extends Clazz {
-        final TheClassMaker mMaker;
+        private final TheClassMaker mMaker;
 
         NewClazz(ClassLoader loader, TheClassMaker maker, String name) {
             super(loader, name, null, false);
@@ -1719,6 +1726,11 @@ abstract class Type {
             // It doesn't exist yet, so don't try loading it. Doing so causes the ClassLoader
             // to allocate a lock object, and it might never be reclaimed.
             return null;
+        }
+
+        @Override
+        ClassMaker maker() {
+            return mMaker;
         }
 
         @Override

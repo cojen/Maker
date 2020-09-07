@@ -298,6 +298,8 @@ public class InvokeTest {
 
         MethodMaker mm = cm.addMethod(null, "run").public_().static_();
         var obj = mm.new_(cm);
+        assertNull(obj.classType());
+        assertEquals(cm, obj.makerType());
         var result = obj.invoke("calc", 1, 2);
         mm.var(Assert.class).invoke("assertEquals", 13, result);
 

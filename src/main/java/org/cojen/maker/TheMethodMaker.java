@@ -3212,6 +3212,16 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             return TheMethodMaker.this;
         }
 
+        @Override
+        public Class classType() {
+            return type().clazz();
+        }
+
+        @Override
+        public ClassMaker makerType() {
+            return type().maker();
+        }
+
         abstract void push();
 
         /**

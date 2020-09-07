@@ -60,6 +60,12 @@ public class FieldTest {
         var num1Var = mm.field("num1");
         var num2Var = mm.field("num2");
 
+        assertEquals(String.class, strVar.classType());
+        assertNull(strVar.makerType());
+        assertEquals(int.class, num1Var.classType());
+        assertNull(num1Var.makerType());
+        assertEquals(double.class, num2Var.classType());
+
         var assertVar = mm.var(Assert.class);
         assertVar.invoke("assertEquals", "hello", strVar);
         assertVar.invoke("assertEquals", 0L, num1Var);
