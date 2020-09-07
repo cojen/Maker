@@ -42,6 +42,7 @@ public class ConcatTest {
 
         {
             var v1 = mm.var(String.class).set("hello").name("v1");
+            assertEquals("v1", v1.name());
             mm.var(Assert.class).invoke("assertEquals", "hello", mm.concat(v1));
         }
 

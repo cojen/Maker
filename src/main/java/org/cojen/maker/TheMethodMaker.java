@@ -3948,7 +3948,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         // Updated as Op list is built.
         int mPushCount;
 
-        boolean mNamed;
+        private String mName;
 
         Var(Type type) {
             requireNonNull(type);
@@ -3991,13 +3991,18 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
+        public String name() {
+            return mName;
+        }
+
+        @Override
         public Var name(String name) {
             Objects.requireNonNull(name);
-            if (mNamed) {
+            if (mName != null) {
                 throw new IllegalStateException("Already named");
             }
             addOp(new LocalVarOp(this, name));
-            mNamed = true;
+            mName = name;
             return this;
         }
 
@@ -4345,6 +4350,11 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
+        public String name() {
+            return mFieldRef.mField.name();
+        }
+
+        @Override
         public Var get() {
             Var var = new Var(type());
             push();
@@ -4574,6 +4584,11 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         @Override
         public Type type() {
             return mType;
+        }
+
+        @Override
+        public String name() {
+            return null;
         }
 
         @Override

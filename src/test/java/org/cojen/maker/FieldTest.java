@@ -65,6 +65,7 @@ public class FieldTest {
         assertEquals(int.class, num1Var.classType());
         assertNull(num1Var.makerType());
         assertEquals(double.class, num2Var.classType());
+        assertEquals("num2", num2Var.name());
 
         var assertVar = mm.var(Assert.class);
         assertVar.invoke("assertEquals", "hello", strVar);

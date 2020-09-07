@@ -79,6 +79,7 @@ public class VarHandleTest {
         ClassMaker cm = ClassMaker.begin().public_();
         MethodMaker mm = cm.addMethod(null, "run").public_().static_();
         Field field = mm.access(vh);
+        assertNull(field.name());
 
         var assertVar = mm.var(Assert.class);
         assertVar.invoke("assertFalse", (field.compareAndSet(1, 11)));

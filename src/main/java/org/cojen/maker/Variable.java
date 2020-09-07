@@ -36,6 +36,11 @@ public interface Variable {
     public ClassMaker makerType();
 
     /**
+     * Returns the name of this variable, which is null if unnamed.
+     */
+    public String name();
+
+    /**
      * Optionally assign a variable name.
      *
      * @return this variable
