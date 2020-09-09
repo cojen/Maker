@@ -433,7 +433,7 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
         try {
             if (options == null) {
                 var clazz = (Class<?>) m.invoke(cUnsafe, mLookup.lookupClass(), bytes, null);
-                result = MethodHandles.lookup().in(clazz);
+                result = mLookup.in(clazz);
             } else {
                 result = ((MethodHandles.Lookup) m.invoke(mLookup, bytes, false, options));
             }
