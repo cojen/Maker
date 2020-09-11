@@ -187,7 +187,7 @@ public interface MethodMaker {
      * Indicate that this method supports a variable number of arguments.
      *
      * @return this
-     * @throws IllegalStateException if last parameter type isn't an object array
+     * @throws IllegalStateException if last parameter type isn't an array
      */
     public MethodMaker varargs();
 
