@@ -67,6 +67,43 @@ public class ClinitTest {
     }
 
     @Test
+    public void varSharing() throws Exception {
+        // Verifies that local variables cannot be shared between class initializers.
+
+        ClassMaker cm = ClassMaker.begin().public_();
+
+        cm.addField(int.class, "test1").static_().public_();
+        cm.addField(int.class, "test2").static_().public_();
+
+        Variable v1;
+        {
+            MethodMaker mm = cm.addClinit();
+            v1 = mm.var(int.class).set(1);
+            mm.field("test1").set(v1);
+            v1.inc(1);
+            mm.field("test1").set(v1);
+        }
+
+        {
+            MethodMaker mm = cm.addClinit();
+            try {
+                mm.field("test2").set(v1);
+                fail();
+            } catch (IllegalArgumentException e) {                
+            }
+            v1 = mm.var(int.class).set(10);
+            mm.field("test2").set(v1);
+            v1.inc(1);
+            mm.field("test2").set(v1);
+        }
+
+        var clazz = cm.finish();
+
+        assertEquals(2, clazz.getField("test1").get(null));
+        assertEquals(11, clazz.getField("test2").get(null));
+    }
+
+    @Test
     public void hidden() throws Exception {
         ClassMaker cm = ClassMaker.begin(null, MethodHandles.lookup()).public_();
 
