@@ -30,9 +30,11 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
+import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
@@ -126,9 +128,13 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
         boolean isEndReached = true;
         if (mLastOp instanceof BytecodeOp) {
-            byte op = ((BytecodeOp) mLastOp).op();
-            if ((op >= IRETURN && op <= RETURN) || op == GOTO || op == GOTO_W || op == ATHROW) {
+            if (mLastOp instanceof ReturnOp) {
                 isEndReached = false;
+            } else {
+                byte op = ((BytecodeOp) mLastOp).op();
+                if (op == GOTO || op == GOTO_W || op == ATHROW) {
+                    isEndReached = false;
+                }
             }
         }
 
@@ -467,7 +473,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             throw new IllegalStateException("Must return a value from this method");
         }
         if (mReturnLabel == null) {
-            addBytecodeOp(RETURN, 0);
+            addOp(new ReturnOp(RETURN, 0));
         } else {
             addOp(new BranchOp(GOTO, 0, mReturnLabel));
         }
@@ -502,7 +508,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         addPushOp(type, value);
-        addBytecodeOp(op, 1);
+        addOp(new ReturnOp(op, 1));
     }
 
     @Override
@@ -988,6 +994,148 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         public ConstantPool.C_Class catchClass() {
             return mCatchClass;
         }
+    }
+
+    @Override
+    public void finally_(Label start, Runnable handler) {
+        Lab startLab = target(start);
+        Lab endLab = new Lab(this);
+        addOp(endLab);
+
+        // Scan between the labels and gather all the labels which are in between. Any branch
+        // to one of these labels is considered to be inside the range, and so no finally
+        // handler needs to be generated for these. All other branches are considered to exit
+        // the range, and so they need a finally handler.
+
+        HashSet<Lab> inside = null;
+
+        for (Op op = startLab;;) {
+            op = op.mNext;
+            if (op == null) {
+                throw new IllegalStateException("Start is unpositioned");
+            }
+            if (op == endLab) {
+                break;
+            }
+            if (op instanceof Lab) {
+                if (inside == null) {
+                    inside = new HashSet<>();
+                }
+                inside.add((Lab) op);
+            }
+        }
+
+        // Scan between the labels and gather/modify all the exits.
+
+        // Maps final targets to handler labels.
+        Map<Lab, Lab> exits = new LinkedHashMap<>();
+
+        // Is set when a return exit is found.
+        Lab retHandler = null;
+        Var retVar = null;
+
+        boolean lastTransformed = false;
+        Lab veryEnd = null;
+
+        for (Op prev = startLab;;) {
+            Op op = prev.mNext;
+
+            if (op == endLab) {
+                break;
+            }
+
+            lastTransformed = true;
+
+            if (op instanceof BranchOp) {
+                var branchOp = (BranchOp) op;
+                branchOp.mTarget = finallyExit(inside, exits, branchOp.mTarget);
+            } else if (op instanceof SwitchOp) {
+                ((SwitchOp) op).finallyExits(this, inside, exits);
+            } else if (op instanceof ReturnOp) {
+                var retOp = (ReturnOp) op;
+
+                if (retHandler == null) {
+                    retHandler = new Lab(this);
+                    if (retOp.op() != RETURN) {
+                        retVar = new Var(mMethod.returnType());
+                    }
+                }
+
+                if (retVar != null) {
+                    // Store the result into a variable before the return, which will be
+                    // replaced below.
+                    var storeOp = new StoreVarOp(retVar);
+                    prev.mNext = storeOp;
+                    prev = storeOp;
+                }
+
+                // Replace the return with a goto.
+                var gotoOp = new BranchOp(GOTO, 0, retHandler);
+                prev.mNext = gotoOp;
+                gotoOp.mNext = op.mNext;
+                op = gotoOp;
+            } else {
+                lastTransformed = false;
+            }
+
+            prev = op;
+        }
+
+        if (!lastTransformed) {
+            // Add a finally handler here, and then go past everything else.
+            handler.run();
+            veryEnd = new Lab(this);
+            goto_(veryEnd);
+        }
+
+        // Add the "catch all" exception handler.
+        {
+            var exVar = catch_(startLab, endLab, null);
+            handler.run();
+            exVar.throw_();
+        }
+
+        // Add finally handlers for each branch-based exit.
+        for (Map.Entry<Lab, Lab> e : exits.entrySet()) {
+            e.getValue().here();
+            handler.run();
+            goto_(e.getKey());
+        }
+
+        // Add a finally handler for any return exits.
+        if (retHandler != null) {
+            retHandler.here();
+            handler.run();
+            if (retVar == null) {
+                return_();
+            } else {
+                return_(retVar);
+            }
+        }
+
+        if (veryEnd != null) {
+            veryEnd.here();
+        }
+    }
+
+    /**
+     * Gather/modify a branch target outide a finally range.
+     *
+     * @param inside labels inside the finally range; can be null if empty
+     * @param exits maps final targets to handler labels
+     * @return new or existing target label
+     */
+    private Lab finallyExit(HashSet<Lab> inside, Map<Lab, Lab> exits, Lab target) {
+        if (inside == null || !inside.contains(target)) {
+            Lab handlerLab = exits.get(target);
+            if (handlerLab == null) {
+                handlerLab = new Lab(this);
+                exits.put(target, handlerLab);
+            }
+            target = handlerLab;
+            target.used();
+        }
+        return target;
     }
 
     @Override
@@ -2753,11 +2901,22 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
         @Override
         Op flow(Flow flow, Op prev) {
-            int op = op();
-            if ((IRETURN <= op && op <= RETURN) || op == ATHROW) {
+            byte op = op();
+            if (op == ATHROW) {
                 return null;
             }
             return mNext;
+        }
+    }
+
+    static class ReturnOp extends BytecodeOp {
+        ReturnOp(byte op, int stackPop) {
+            super(op, stackPop);
+        }
+
+        @Override
+        Op flow(Flow flow, Op prev) {
+            return null;
         }
     }
 
@@ -2858,7 +3017,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     }
 
     static final class SwitchOp extends BytecodeOp {
-        final Lab mDefault;
+        Lab mDefault;
         final int[] mCases;
         final Lab[] mLabels;
 
@@ -2904,6 +3063,20 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                 flow.run(lab);
             }
             return mDefault;
+        }
+
+        /**
+         * Gather/modify all targets from this switch which branch outside a finally range.
+         *
+         * @param inside labels inside the finally range; can be null if empty
+         * @param exits maps final targets to handler labels
+         */
+        void finallyExits(TheMethodMaker m, HashSet<Lab> inside, Map<Lab, Lab> exits) {
+            mDefault = m.finallyExit(inside, exits, mDefault);
+
+            for (int i=0; i<mLabels.length; i++) {
+                mLabels[i] = m.finallyExit(inside, exits, mLabels[i]);
+            }
         }
     }
 

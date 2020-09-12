@@ -331,6 +331,14 @@ public interface MethodMaker {
     public Variable catch_(Label start, Label end, Object type);
 
     /**
+     * Define a finally handler which is generated for every possible exit path between the
+     * start label and here.
+     *
+     * @param handler called for each exit path to generate handler code
+     */
+    public void finally_(Label start, Runnable handler);
+
+    /**
      * Concatenate variables and constants together into a new {@code String} in the same
      * matter as the Java concatenation operator. If no values are given, the returned variable
      * will refer to the empty string.

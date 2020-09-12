@@ -120,13 +120,22 @@ loadScripts(document, 'script');</script>
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code>void</code></td>
+<th class="colSecond" scope="row"><span class="typeNameLabel">MethodMaker.</span><code><span class="memberNameLink"><a href="../MethodMaker.html#finally_(org.cojen.maker.Label,java.lang.Runnable)">finally_</a></span>&#8203;(<a href="../Label.html" title="interface in org.cojen.maker">Label</a>&nbsp;start,
+<a href="https://docs.oracle.com/en/java/javase/14/docs/api/java.base/java/lang/Runnable.html?is-external=true" title="class or interface in java.lang" class="externalLink">Runnable</a>&nbsp;handler)</code></th>
+<td class="colLast">
+<div class="block">Define a finally handler which is generated for every possible exit path between the
+ start label and here.</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
 <th class="colSecond" scope="row"><span class="typeNameLabel">MethodMaker.</span><code><span class="memberNameLink"><a href="../MethodMaker.html#goto_(org.cojen.maker.Label)">goto_</a></span>&#8203;(<a href="../Label.html" title="interface in org.cojen.maker">Label</a>&nbsp;label)</code></th>
 <td class="colLast">
 <div class="block">Generates an unconditional goto statement to the given label, which doesn't need to be
  positioned yet.</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <th class="colSecond" scope="row"><span class="typeNameLabel">Variable.</span><code><span class="memberNameLink"><a href="../Variable.html#ifEq(java.lang.Object,org.cojen.maker.Label)">ifEq</a></span>&#8203;(<a href="https://docs.oracle.com/en/java/javase/14/docs/api/java.base/java/lang/Object.html?is-external=true" title="class or interface in java.lang" class="externalLink">Object</a>&nbsp;value,
 <a href="../Label.html" title="interface in org.cojen.maker">Label</a>&nbsp;label)</code></th>
@@ -134,14 +143,14 @@ loadScripts(document, 'script');</script>
 <div class="block">Conditional goto if this variable is equal to another variable or constant.</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>void</code></td>
 <th class="colSecond" scope="row"><span class="typeNameLabel">Variable.</span><code><span class="memberNameLink"><a href="../Variable.html#ifFalse(org.cojen.maker.Label)">ifFalse</a></span>&#8203;(<a href="../Label.html" title="interface in org.cojen.maker">Label</a>&nbsp;label)</code></th>
 <td class="colLast">
 <div class="block">Conditional goto if this variable is false.</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <th class="colSecond" scope="row"><span class="typeNameLabel">Variable.</span><code><span class="memberNameLink"><a href="../Variable.html#ifGe(java.lang.Object,org.cojen.maker.Label)">ifGe</a></span>&#8203;(<a href="https://docs.oracle.com/en/java/javase/14/docs/api/java.base/java/lang/Object.html?is-external=true" title="class or interface in java.lang" class="externalLink">Object</a>&nbsp;value,
 <a href="../Label.html" title="interface in org.cojen.maker">Label</a>&nbsp;label)</code></th>
@@ -150,7 +159,7 @@ loadScripts(document, 'script');</script>
  constant.</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>void</code></td>
 <th class="colSecond" scope="row"><span class="typeNameLabel">Variable.</span><code><span class="memberNameLink"><a href="../Variable.html#ifGt(java.lang.Object,org.cojen.maker.Label)">ifGt</a></span>&#8203;(<a href="https://docs.oracle.com/en/java/javase/14/docs/api/java.base/java/lang/Object.html?is-external=true" title="class or interface in java.lang" class="externalLink">Object</a>&nbsp;value,
 <a href="../Label.html" title="interface in org.cojen.maker">Label</a>&nbsp;label)</code></th>
@@ -158,7 +167,7 @@ loadScripts(document, 'script');</script>
 <div class="block">Conditional goto if this variable is greater than another variable or constant.</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <th class="colSecond" scope="row"><span class="typeNameLabel">Variable.</span><code><span class="memberNameLink"><a href="../Variable.html#ifLe(java.lang.Object,org.cojen.maker.Label)">ifLe</a></span>&#8203;(<a href="https://docs.oracle.com/en/java/javase/14/docs/api/java.base/java/lang/Object.html?is-external=true" title="class or interface in java.lang" class="externalLink">Object</a>&nbsp;value,
 <a href="../Label.html" title="interface in org.cojen.maker">Label</a>&nbsp;label)</code></th>
@@ -167,7 +176,7 @@ loadScripts(document, 'script');</script>
  constant.</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>void</code></td>
 <th class="colSecond" scope="row"><span class="typeNameLabel">Variable.</span><code><span class="memberNameLink"><a href="../Variable.html#ifLt(java.lang.Object,org.cojen.maker.Label)">ifLt</a></span>&#8203;(<a href="https://docs.oracle.com/en/java/javase/14/docs/api/java.base/java/lang/Object.html?is-external=true" title="class or interface in java.lang" class="externalLink">Object</a>&nbsp;value,
 <a href="../Label.html" title="interface in org.cojen.maker">Label</a>&nbsp;label)</code></th>
@@ -175,7 +184,7 @@ loadScripts(document, 'script');</script>
 <div class="block">Conditional goto if this variable is less than another variable or constant.</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <th class="colSecond" scope="row"><span class="typeNameLabel">Variable.</span><code><span class="memberNameLink"><a href="../Variable.html#ifNe(java.lang.Object,org.cojen.maker.Label)">ifNe</a></span>&#8203;(<a href="https://docs.oracle.com/en/java/javase/14/docs/api/java.base/java/lang/Object.html?is-external=true" title="class or interface in java.lang" class="externalLink">Object</a>&nbsp;value,
 <a href="../Label.html" title="interface in org.cojen.maker">Label</a>&nbsp;label)</code></th>
@@ -183,14 +192,14 @@ loadScripts(document, 'script');</script>
 <div class="block">Conditional goto if this variable is not equal to another variable or constant.</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>void</code></td>
 <th class="colSecond" scope="row"><span class="typeNameLabel">Variable.</span><code><span class="memberNameLink"><a href="../Variable.html#ifTrue(org.cojen.maker.Label)">ifTrue</a></span>&#8203;(<a href="../Label.html" title="interface in org.cojen.maker">Label</a>&nbsp;label)</code></th>
 <td class="colLast">
 <div class="block">Conditional goto if this variable is true.</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <th class="colSecond" scope="row"><span class="typeNameLabel">Variable.</span><code><span class="memberNameLink"><a href="../Variable.html#switch_(org.cojen.maker.Label,int%5B%5D,org.cojen.maker.Label...)">switch_</a></span>&#8203;(<a href="../Label.html" title="interface in org.cojen.maker">Label</a>&nbsp;defaultLabel,
 int[]&nbsp;cases,

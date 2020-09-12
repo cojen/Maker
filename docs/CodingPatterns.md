@@ -215,7 +215,8 @@ try {
 }
 ```
 
-Implementing a `finally` statement is tricky, because every path which can exit the `try` block must be handled.
+With `finally` statements, every path which can exit the `try` block must be handled. The
+built-in `finally_` method makes this pattern automatically.
 
 ```java
 MethodMaker mm = ...
@@ -226,18 +227,8 @@ Label tryStart = mm.label().here();
 <code>
 Label cont = mm.label();
 a.ifGe(b, cont);
-lock.invoke("unlock"); // unlock at this exit point
 mm.return_();
 cont.here();
 <more code>
-Label cont2 = mm.label();
-mm.goto_(cont2);
-Label tryEnd = mm.label().here();
-var e = mm.catch_(tryStart, tryEnd, null); // catch anything
-lock.invoke("unlock"); // unlock at this exit point
-e.throw_();
-cont2.here();
-lock.invoke("unlock"); // unlock at this exit point
+mm.finally_(tryStart, () -> lock.invoke("unlock"));
 ```
-
-Note that this example is only safe if the `unlock` method is guaranteed to never throw an exception. Otherwise, two catch locations must be defined which can branch to the same handler. A built-in utility which generates the correct try-finally coding patterns would be nice to have. 
