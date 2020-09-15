@@ -1,1 +1,1 @@
-packageSearchIndex = [{"l":"All Packages","url":"allpackages-index.html"},{"m":"org.cojen.maker","l":"org.cojen.maker"}]
+packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"m":"org.cojen.maker","l":"org.cojen.maker"}];updateSearchResults();

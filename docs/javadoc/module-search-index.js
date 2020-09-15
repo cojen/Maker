@@ -1,1 +1,1 @@
-moduleSearchIndex = [{"l":"org.cojen.maker"}]
+moduleSearchIndex = [{"l":"org.cojen.maker"}];updateSearchResults();
