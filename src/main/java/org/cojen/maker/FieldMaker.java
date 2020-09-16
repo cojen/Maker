@@ -24,6 +24,11 @@ package org.cojen.maker;
  */
 public interface FieldMaker {
     /**
+     * Returns the enclosing {@code ClassMaker} for this field.
+     */
+    public ClassMaker classMaker();
+
+    /**
      * Switch this field to be public. Fields are package-private by default.
      *
      * @return this

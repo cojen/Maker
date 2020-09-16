@@ -41,6 +41,7 @@ public class FieldTest {
         cm.addField(double.class, "num2").volatile_();
 
         FieldMaker fm = cm.addField(float.class, "num3");
+        assertEquals(cm, fm.classMaker());
 
         try {
             fm.init(10.0f);
@@ -55,6 +56,7 @@ public class FieldTest {
         cm.addField(long.class, "num6").static_().init(Long.MAX_VALUE);
 
         MethodMaker mm = cm.addMethod(null, "run").public_().final_();
+        assertEquals(cm, mm.classMaker());
 
         var strVar = mm.field("str");
         var num1Var = mm.field("num1");

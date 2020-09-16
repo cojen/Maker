@@ -15,7 +15,7 @@
 <script type="text/javascript" src="../../../../script-dir/jquery-ui.min.js"></script>
 </head>
 <body class="class-declaration-page">
-<script type="text/javascript">var data = {"i0":6,"i1":6,"i2":6,"i3":6,"i4":6,"i5":6,"i6":6,"i7":6,"i8":6};
+<script type="text/javascript">var data = {"i0":6,"i1":6,"i2":6,"i3":6,"i4":6,"i5":6,"i6":6,"i7":6,"i8":6,"i9":6};
 var tabs = {65535:["t0","All Methods"],2:["t2","Instance Methods"],4:["t3","Abstract Methods"]};
 var altColor = "alt-color";
 var rowColor = "row-color";
@@ -104,62 +104,69 @@ loadScripts(document, 'script');</script>
 </thead>
 <tbody>
 <tr class="alt-color" id="i0">
+<td class="col-first"><code><a href="ClassMaker.html" title="interface in org.cojen.maker">ClassMaker</a></code></td>
+<th class="col-second" scope="row"><code><span class="member-name-link"><a href="#classMaker()">classMaker</a></span>()</code></th>
+<td class="col-last">
+<div class="block">Returns the enclosing <code>ClassMaker</code> for this field.</div>
+</td>
+</tr>
+<tr class="row-color" id="i1">
 <td class="col-first"><code><a href="FieldMaker.html" title="interface in org.cojen.maker">FieldMaker</a></code></td>
 <th class="col-second" scope="row"><code><span class="member-name-link"><a href="#final_()">final_</a></span>()</code></th>
 <td class="col-last">
 <div class="block">Switch this field to be final.</div>
 </td>
 </tr>
-<tr class="row-color" id="i1">
+<tr class="alt-color" id="i2">
 <td class="col-first"><code><a href="FieldMaker.html" title="interface in org.cojen.maker">FieldMaker</a></code></td>
 <th class="col-second" scope="row"><code><span class="member-name-link"><a href="#init(java.lang.Object)">init</a></span>&#8203;(<a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>&nbsp;value)</code></th>
 <td class="col-last">
 <div class="block">Set an initial constant value for this field.</div>
 </td>
 </tr>
-<tr class="alt-color" id="i2">
+<tr class="row-color" id="i3">
 <td class="col-first"><code><a href="FieldMaker.html" title="interface in org.cojen.maker">FieldMaker</a></code></td>
 <th class="col-second" scope="row"><code><span class="member-name-link"><a href="#private_()">private_</a></span>()</code></th>
 <td class="col-last">
 <div class="block">Switch this field to be private.</div>
 </td>
 </tr>
-<tr class="row-color" id="i3">
+<tr class="alt-color" id="i4">
 <td class="col-first"><code><a href="FieldMaker.html" title="interface in org.cojen.maker">FieldMaker</a></code></td>
 <th class="col-second" scope="row"><code><span class="member-name-link"><a href="#protected_()">protected_</a></span>()</code></th>
 <td class="col-last">
 <div class="block">Switch this field to be protected.</div>
 </td>
 </tr>
-<tr class="alt-color" id="i4">
+<tr class="row-color" id="i5">
 <td class="col-first"><code><a href="FieldMaker.html" title="interface in org.cojen.maker">FieldMaker</a></code></td>
 <th class="col-second" scope="row"><code><span class="member-name-link"><a href="#public_()">public_</a></span>()</code></th>
 <td class="col-last">
 <div class="block">Switch this field to be public.</div>
 </td>
 </tr>
-<tr class="row-color" id="i5">
+<tr class="alt-color" id="i6">
 <td class="col-first"><code><a href="FieldMaker.html" title="interface in org.cojen.maker">FieldMaker</a></code></td>
 <th class="col-second" scope="row"><code><span class="member-name-link"><a href="#static_()">static_</a></span>()</code></th>
 <td class="col-last">
 <div class="block">Switch this field to be static.</div>
 </td>
 </tr>
-<tr class="alt-color" id="i6">
+<tr class="row-color" id="i7">
 <td class="col-first"><code><a href="FieldMaker.html" title="interface in org.cojen.maker">FieldMaker</a></code></td>
 <th class="col-second" scope="row"><code><span class="member-name-link"><a href="#synthetic()">synthetic</a></span>()</code></th>
 <td class="col-last">
 <div class="block">Indicate that this field is synthetic.</div>
 </td>
 </tr>
-<tr class="row-color" id="i7">
+<tr class="alt-color" id="i8">
 <td class="col-first"><code><a href="FieldMaker.html" title="interface in org.cojen.maker">FieldMaker</a></code></td>
 <th class="col-second" scope="row"><code><span class="member-name-link"><a href="#transient_()">transient_</a></span>()</code></th>
 <td class="col-last">
 <div class="block">Switch this field to be transient.</div>
 </td>
 </tr>
-<tr class="alt-color" id="i8">
+<tr class="row-color" id="i9">
 <td class="col-first"><code><a href="FieldMaker.html" title="interface in org.cojen.maker">FieldMaker</a></code></td>
 <th class="col-second" scope="row"><code><span class="member-name-link"><a href="#volatile_()">volatile_</a></span>()</code></th>
 <td class="col-last">
@@ -181,6 +188,13 @@ loadScripts(document, 'script');</script>
 <section class="method-details" id="method.detail">
 <h2>Method Details</h2>
 <ul class="member-list">
+<li>
+<section class="detail" id="classMaker()">
+<h3>classMaker</h3>
+<div class="member-signature"><span class="return-type"><a href="ClassMaker.html" title="interface in org.cojen.maker">ClassMaker</a></span>&nbsp;<span class="member-name">classMaker</span>()</div>
+<div class="block">Returns the enclosing <code>ClassMaker</code> for this field.</div>
+</section>
+</li>
 <li>
 <section class="detail" id="public_()">
 <h3>public_</h3>

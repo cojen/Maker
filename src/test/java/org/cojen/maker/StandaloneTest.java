@@ -41,6 +41,13 @@ public class StandaloneTest {
     @Test
     public void simple() throws Throwable {
         MethodMaker mm = MethodMaker.begin(MethodHandles.lookup(), int.class, int.class, int.class);
+
+        try {
+            mm.classMaker();
+            fail();
+        } catch (IllegalStateException e) {
+        }
+
         mm.return_(mm.param(0).add(mm.param(1)));
         MethodHandle mh = mm.finish();
         assertEquals(3, (int) mh.invoke(1, 2));

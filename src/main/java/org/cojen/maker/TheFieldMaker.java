@@ -34,6 +34,11 @@ final class TheFieldMaker extends ClassMember implements FieldMaker {
     }
 
     @Override
+    public ClassMaker classMaker() {
+        return mClassMaker;
+    }
+
+    @Override
     public FieldMaker public_() {
         mModifiers = Modifiers.toPublic(mModifiers);
         return this;

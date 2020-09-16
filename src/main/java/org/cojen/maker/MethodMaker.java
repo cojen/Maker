@@ -81,6 +81,11 @@ public interface MethodMaker {
 
         var mm = new TheMethodMaker(cm, method) {
             @Override
+            public ClassMaker classMaker() {
+                throw new IllegalStateException("Standalone method");
+            }
+
+            @Override
             public MethodHandle finish() {
                 MethodHandles.Lookup lookup = mClassMaker.finishHidden();
                 try {
@@ -104,6 +109,13 @@ public interface MethodMaker {
         }
         return clazz;
     }
+
+    /**
+     * Returns the enclosing {@code ClassMaker} for this method.
+     *
+     * @throws IllegalStateException if this is a standalone method
+     */
+    public ClassMaker classMaker();
 
     /**
      * Switch this method to be public. Methods are package-private by default.

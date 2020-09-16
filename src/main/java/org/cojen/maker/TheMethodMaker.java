@@ -304,6 +304,11 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     }
 
     @Override
+    public ClassMaker classMaker() {
+        return mClassMaker;
+    }
+
+    @Override
     public MethodMaker public_() {
         mModifiers = Modifiers.toPublic(mModifiers);
         return this;

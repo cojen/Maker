@@ -15,7 +15,7 @@
 <script type="text/javascript" src="../../../../script-dir/jquery-ui.min.js"></script>
 </head>
 <body class="class-declaration-page">
-<script type="text/javascript">var data = {"i0":6,"i1":6,"i2":1,"i3":1,"i4":6,"i5":6,"i6":6,"i7":6,"i8":6,"i9":6,"i10":6,"i11":6,"i12":6,"i13":6,"i14":6,"i15":6,"i16":6,"i17":6,"i18":6,"i19":6,"i20":6,"i21":6,"i22":6,"i23":6,"i24":6,"i25":6,"i26":6,"i27":6,"i28":6,"i29":6,"i30":6,"i31":6,"i32":6,"i33":6,"i34":6,"i35":6};
+<script type="text/javascript">var data = {"i0":6,"i1":6,"i2":1,"i3":1,"i4":6,"i5":6,"i6":6,"i7":6,"i8":6,"i9":6,"i10":6,"i11":6,"i12":6,"i13":6,"i14":6,"i15":6,"i16":6,"i17":6,"i18":6,"i19":6,"i20":6,"i21":6,"i22":6,"i23":6,"i24":6,"i25":6,"i26":6,"i27":6,"i28":6,"i29":6,"i30":6,"i31":6,"i32":6,"i33":6,"i34":6,"i35":6,"i36":6};
 var tabs = {65535:["t0","All Methods"],1:["t1","Static Methods"],2:["t2","Instance Methods"],4:["t3","Abstract Methods"]};
 var altColor = "alt-color";
 var rowColor = "row-color";
@@ -161,6 +161,13 @@ loadScripts(document, 'script');</script>
 </td>
 </tr>
 <tr class="row-color" id="i7">
+<td class="col-first"><code><a href="ClassMaker.html" title="interface in org.cojen.maker">ClassMaker</a></code></td>
+<th class="col-second" scope="row"><code><span class="member-name-link"><a href="#classMaker()">classMaker</a></span>()</code></th>
+<td class="col-last">
+<div class="block">Returns the enclosing <code>ClassMaker</code> for this method.</div>
+</td>
+</tr>
+<tr class="alt-color" id="i8">
 <td class="col-first"><code><a href="Variable.html" title="interface in org.cojen.maker">Variable</a></code></td>
 <th class="col-second" scope="row"><code><span class="member-name-link"><a href="#concat(java.lang.Object...)">concat</a></span>&#8203;(<a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>...&nbsp;values)</code></th>
 <td class="col-last">
@@ -168,21 +175,21 @@ loadScripts(document, 'script');</script>
  matter as the Java concatenation operator.</div>
 </td>
 </tr>
-<tr class="alt-color" id="i8">
+<tr class="row-color" id="i9">
 <td class="col-first"><code><a href="Field.html" title="interface in org.cojen.maker">Field</a></code></td>
 <th class="col-second" scope="row"><code><span class="member-name-link"><a href="#field(java.lang.String)">field</a></span>&#8203;(<a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;name)</code></th>
 <td class="col-last">
 <div class="block">Access a static or instance field in the enclosing object of this method.</div>
 </td>
 </tr>
-<tr class="row-color" id="i9">
+<tr class="alt-color" id="i10">
 <td class="col-first"><code><a href="MethodMaker.html" title="interface in org.cojen.maker">MethodMaker</a></code></td>
 <th class="col-second" scope="row"><code><span class="member-name-link"><a href="#final_()">final_</a></span>()</code></th>
 <td class="col-last">
 <div class="block">Switch this method to be final.</div>
 </td>
 </tr>
-<tr class="alt-color" id="i10">
+<tr class="row-color" id="i11">
 <td class="col-first"><code>void</code></td>
 <th class="col-second" scope="row"><code><span class="member-name-link"><a href="#finally_(org.cojen.maker.Label,java.lang.Runnable)">finally_</a></span>&#8203;(<a href="Label.html" title="interface in org.cojen.maker">Label</a>&nbsp;start,
 <a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/lang/Runnable.html" title="class or interface in java.lang" class="external-link">Runnable</a>&nbsp;handler)</code></th>
@@ -191,14 +198,14 @@ loadScripts(document, 'script');</script>
  start label and here.</div>
 </td>
 </tr>
-<tr class="row-color" id="i11">
+<tr class="alt-color" id="i12">
 <td class="col-first"><code><a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/lang/invoke/MethodHandle.html" title="class or interface in java.lang.invoke" class="external-link">MethodHandle</a></code></td>
 <th class="col-second" scope="row"><code><span class="member-name-link"><a href="#finish()">finish</a></span>()</code></th>
 <td class="col-last">
 <div class="block">Finishes the definition of a standalone method.</div>
 </td>
 </tr>
-<tr class="alt-color" id="i12">
+<tr class="row-color" id="i13">
 <td class="col-first"><code>void</code></td>
 <th class="col-second" scope="row"><code><span class="member-name-link"><a href="#goto_(org.cojen.maker.Label)">goto_</a></span>&#8203;(<a href="Label.html" title="interface in org.cojen.maker">Label</a>&nbsp;label)</code></th>
 <td class="col-last">
@@ -206,7 +213,7 @@ loadScripts(document, 'script');</script>
  positioned yet.</div>
 </td>
 </tr>
-<tr class="row-color" id="i13">
+<tr class="alt-color" id="i14">
 <td class="col-first"><code><a href="Variable.html" title="interface in org.cojen.maker">Variable</a></code></td>
 <th class="col-second" scope="row"><code><span class="member-name-link"><a href="#invoke(java.lang.invoke.MethodHandle,java.lang.Object...)">invoke</a></span>&#8203;(<a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/lang/invoke/MethodHandle.html" title="class or interface in java.lang.invoke" class="external-link">MethodHandle</a>&nbsp;handle,
 <a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>...&nbsp;values)</code></th>
@@ -215,7 +222,7 @@ loadScripts(document, 'script');</script>
  dynamically instead of loaded from a file.</div>
 </td>
 </tr>
-<tr class="alt-color" id="i14">
+<tr class="row-color" id="i15">
 <td class="col-first"><code><a href="Variable.html" title="interface in org.cojen.maker">Variable</a></code></td>
 <th class="col-second" scope="row"><code><span class="member-name-link"><a href="#invoke(java.lang.String,java.lang.Object...)">invoke</a></span>&#8203;(<a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;name,
 <a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>...&nbsp;values)</code></th>
@@ -223,7 +230,7 @@ loadScripts(document, 'script');</script>
 <div class="block">Invoke a static or instance method on the enclosing object of this method.</div>
 </td>
 </tr>
-<tr class="row-color" id="i15">
+<tr class="alt-color" id="i16">
 <td class="col-first"><code><a href="Variable.html" title="interface in org.cojen.maker">Variable</a></code></td>
 <th class="col-second" scope="row"><code><span class="member-name-link"><a href="#invokeSuper(java.lang.String,java.lang.Object...)">invokeSuper</a></span>&#8203;(<a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;name,
 <a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>...&nbsp;values)</code></th>
@@ -231,7 +238,7 @@ loadScripts(document, 'script');</script>
 <div class="block">Invoke a static or instance super class method on the enclosing object of this method.</div>
 </td>
 </tr>
-<tr class="alt-color" id="i16">
+<tr class="row-color" id="i17">
 <td class="col-first"><code>void</code></td>
 <th class="col-second" scope="row"><code><span class="member-name-link"><a href="#invokeSuperConstructor(java.lang.Object...)">invokeSuperConstructor</a></span>&#8203;(<a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>...&nbsp;values)</code></th>
 <td class="col-last">
@@ -239,7 +246,7 @@ loadScripts(document, 'script');</script>
  within a constructor.</div>
 </td>
 </tr>
-<tr class="row-color" id="i17">
+<tr class="alt-color" id="i18">
 <td class="col-first"><code>void</code></td>
 <th class="col-second" scope="row"><code><span class="member-name-link"><a href="#invokeThisConstructor(java.lang.Object...)">invokeThisConstructor</a></span>&#8203;(<a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>...&nbsp;values)</code></th>
 <td class="col-last">
@@ -247,28 +254,28 @@ loadScripts(document, 'script');</script>
  constructor.</div>
 </td>
 </tr>
-<tr class="alt-color" id="i18">
+<tr class="row-color" id="i19">
 <td class="col-first"><code><a href="Label.html" title="interface in org.cojen.maker">Label</a></code></td>
 <th class="col-second" scope="row"><code><span class="member-name-link"><a href="#label()">label</a></span>()</code></th>
 <td class="col-last">
 <div class="block">Returns a new label, initially unpositioned.</div>
 </td>
 </tr>
-<tr class="row-color" id="i19">
+<tr class="alt-color" id="i20">
 <td class="col-first"><code>void</code></td>
 <th class="col-second" scope="row"><code><span class="member-name-link"><a href="#lineNum(int)">lineNum</a></span>&#8203;(int&nbsp;num)</code></th>
 <td class="col-last">
 <div class="block">Define a line number to represent the location of the next code instruction.</div>
 </td>
 </tr>
-<tr class="alt-color" id="i20">
+<tr class="row-color" id="i21">
 <td class="col-first"><code><a href="MethodMaker.html" title="interface in org.cojen.maker">MethodMaker</a></code></td>
 <th class="col-second" scope="row"><code><span class="member-name-link"><a href="#native_()">native_</a></span>()</code></th>
 <td class="col-last">
 <div class="block">Switch this method to be native.</div>
 </td>
 </tr>
-<tr class="row-color" id="i21">
+<tr class="alt-color" id="i22">
 <td class="col-first"><code><a href="Variable.html" title="interface in org.cojen.maker">Variable</a></code></td>
 <th class="col-second" scope="row"><code><span class="member-name-link"><a href="#new_(java.lang.Object,java.lang.Object...)">new_</a></span>&#8203;(<a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>&nbsp;type,
 <a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>...&nbsp;values)</code></th>
@@ -276,98 +283,98 @@ loadScripts(document, 'script');</script>
 <div class="block">Allocate a new object.</div>
 </td>
 </tr>
-<tr class="alt-color" id="i22">
+<tr class="row-color" id="i23">
 <td class="col-first"><code>void</code></td>
 <th class="col-second" scope="row"><code><span class="member-name-link"><a href="#nop()">nop</a></span>()</code></th>
 <td class="col-last">
 <div class="block">Append an instruction which does nothing, which can be useful for debugging.</div>
 </td>
 </tr>
-<tr class="row-color" id="i23">
+<tr class="alt-color" id="i24">
 <td class="col-first"><code><a href="Variable.html" title="interface in org.cojen.maker">Variable</a></code></td>
 <th class="col-second" scope="row"><code><span class="member-name-link"><a href="#param(int)">param</a></span>&#8203;(int&nbsp;index)</code></th>
 <td class="col-last">
 <div class="block">Returns a variable which accesses a parameter of the method being built.</div>
 </td>
 </tr>
-<tr class="alt-color" id="i24">
+<tr class="row-color" id="i25">
 <td class="col-first"><code><a href="MethodMaker.html" title="interface in org.cojen.maker">MethodMaker</a></code></td>
 <th class="col-second" scope="row"><code><span class="member-name-link"><a href="#private_()">private_</a></span>()</code></th>
 <td class="col-last">
 <div class="block">Switch this method to be private.</div>
 </td>
 </tr>
-<tr class="row-color" id="i25">
+<tr class="alt-color" id="i26">
 <td class="col-first"><code><a href="MethodMaker.html" title="interface in org.cojen.maker">MethodMaker</a></code></td>
 <th class="col-second" scope="row"><code><span class="member-name-link"><a href="#protected_()">protected_</a></span>()</code></th>
 <td class="col-last">
 <div class="block">Switch this method to be protected.</div>
 </td>
 </tr>
-<tr class="alt-color" id="i26">
+<tr class="row-color" id="i27">
 <td class="col-first"><code><a href="MethodMaker.html" title="interface in org.cojen.maker">MethodMaker</a></code></td>
 <th class="col-second" scope="row"><code><span class="member-name-link"><a href="#public_()">public_</a></span>()</code></th>
 <td class="col-last">
 <div class="block">Switch this method to be public.</div>
 </td>
 </tr>
-<tr class="row-color" id="i27">
+<tr class="alt-color" id="i28">
 <td class="col-first"><code>void</code></td>
 <th class="col-second" scope="row"><code><span class="member-name-link"><a href="#return_()">return_</a></span>()</code></th>
 <td class="col-last">
 <div class="block">Generates a return void statement.</div>
 </td>
 </tr>
-<tr class="alt-color" id="i28">
+<tr class="row-color" id="i29">
 <td class="col-first"><code>void</code></td>
 <th class="col-second" scope="row"><code><span class="member-name-link"><a href="#return_(java.lang.Object)">return_</a></span>&#8203;(<a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>&nbsp;value)</code></th>
 <td class="col-last">
 <div class="block">Generates a statement which returns a variable or a constant.</div>
 </td>
 </tr>
-<tr class="row-color" id="i29">
+<tr class="alt-color" id="i30">
 <td class="col-first"><code><a href="MethodMaker.html" title="interface in org.cojen.maker">MethodMaker</a></code></td>
 <th class="col-second" scope="row"><code><span class="member-name-link"><a href="#static_()">static_</a></span>()</code></th>
 <td class="col-last">
 <div class="block">Switch this method to be static.</div>
 </td>
 </tr>
-<tr class="alt-color" id="i30">
+<tr class="row-color" id="i31">
 <td class="col-first"><code><a href="MethodMaker.html" title="interface in org.cojen.maker">MethodMaker</a></code></td>
 <th class="col-second" scope="row"><code><span class="member-name-link"><a href="#strictfp_()">strictfp_</a></span>()</code></th>
 <td class="col-last">
 <div class="block">Switch this method to strictfp mode.</div>
 </td>
 </tr>
-<tr class="row-color" id="i31">
+<tr class="alt-color" id="i32">
 <td class="col-first"><code><a href="MethodMaker.html" title="interface in org.cojen.maker">MethodMaker</a></code></td>
 <th class="col-second" scope="row"><code><span class="member-name-link"><a href="#synchronized_()">synchronized_</a></span>()</code></th>
 <td class="col-last">
 <div class="block">Switch this method to be synchronized.</div>
 </td>
 </tr>
-<tr class="alt-color" id="i32">
+<tr class="row-color" id="i33">
 <td class="col-first"><code><a href="MethodMaker.html" title="interface in org.cojen.maker">MethodMaker</a></code></td>
 <th class="col-second" scope="row"><code><span class="member-name-link"><a href="#synthetic()">synthetic</a></span>()</code></th>
 <td class="col-last">
 <div class="block">Indicate that this method is synthetic.</div>
 </td>
 </tr>
-<tr class="row-color" id="i33">
+<tr class="alt-color" id="i34">
 <td class="col-first"><code><a href="Variable.html" title="interface in org.cojen.maker">Variable</a></code></td>
 <th class="col-second" scope="row"><code><span class="member-name-link"><a href="#this_()">this_</a></span>()</code></th>
 <td class="col-last">
 <div class="block">Returns the variable which accesses the enclosing object of this method.</div>
 </td>
 </tr>
-<tr class="alt-color" id="i34">
+<tr class="row-color" id="i35">
 <td class="col-first"><code><a href="Variable.html" title="interface in org.cojen.maker">Variable</a></code></td>
 <th class="col-second" scope="row"><code><span class="member-name-link"><a href="#var(java.lang.Object)">var</a></span>&#8203;(<a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>&nbsp;type)</code></th>
 <td class="col-last">
 <div class="block">Returns a new unitialized variable with the given type.</div>
 </td>
 </tr>
-<tr class="row-color" id="i35">
+<tr class="alt-color" id="i36">
 <td class="col-first"><code><a href="MethodMaker.html" title="interface in org.cojen.maker">MethodMaker</a></code></td>
 <th class="col-second" scope="row"><code><span class="member-name-link"><a href="#varargs()">varargs</a></span>()</code></th>
 <td class="col-last">
@@ -418,6 +425,17 @@ loadScripts(document, 'script');</script>
 <dd><code>type</code> - defines the return type and parameter types</dd>
 <dt>See Also:</dt>
 <dd><a href="#finish()"><code>finish()</code></a></dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="classMaker()">
+<h3>classMaker</h3>
+<div class="member-signature"><span class="return-type"><a href="ClassMaker.html" title="interface in org.cojen.maker">ClassMaker</a></span>&nbsp;<span class="member-name">classMaker</span>()</div>
+<div class="block">Returns the enclosing <code>ClassMaker</code> for this method.</div>
+<dl class="notes">
+<dt>Throws:</dt>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/lang/IllegalStateException.html" title="class or interface in java.lang" class="external-link">IllegalStateException</a></code> - if this is a standalone method</dd>
 </dl>
 </section>
 </li>
