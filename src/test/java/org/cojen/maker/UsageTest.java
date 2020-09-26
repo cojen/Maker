@@ -468,18 +468,6 @@ public class UsageTest {
         } catch (IllegalStateException e) {
             check(e, "Not an object");
         }
-        mClassMaker.addField(String.class, "foo");
-        var field = mm.field("foo");
-        try {
-            field.monitorEnter();
-            fail();
-        } catch (IllegalStateException e) {
-        }
-        try {
-            field.monitorExit();
-            fail();
-        } catch (IllegalStateException e) {
-        }
     }
 
     @Test

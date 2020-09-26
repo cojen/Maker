@@ -4116,6 +4116,25 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             push();
             addBytecodeOp(ATHROW, 1);
         }
+
+
+        @Override
+        public void monitorEnter() {
+            monitor(MONITORENTER);
+        }
+
+        @Override
+        public void monitorExit() {
+            monitor(MONITOREXIT);
+        }
+
+        private void monitor(byte op) {
+            if (!type().isObject()) {
+                throw new IllegalStateException("Not an object type");
+            }
+            push();
+            addBytecodeOp(op, 1);
+        }
     }
 
     class Var extends OwnedVar implements Variable, Comparable<Var> {
@@ -4224,24 +4243,6 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         public FieldVar field(String name) {
             return TheMethodMaker.this.field(this, name);
         }
-
-        @Override
-        public void monitorEnter() {
-            monitor(MONITORENTER);
-        }
-
-        @Override
-        public void monitorExit() {
-            monitor(MONITOREXIT);
-        }
-
-        private void monitor(byte op) {
-            if (!mType.isObject()) {
-                throw new IllegalStateException("Not an object type");
-            }
-            push();
-            addBytecodeOp(op, 1);
-        }
     }
 
     /**
@@ -4332,16 +4333,6 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         @Override
         public Field field(String name) {
             return get().field(name);
-        }
-
-        @Override
-        public void monitorEnter() {
-            throw new IllegalStateException();
-        }
-
-        @Override
-        public void monitorExit() {
-            throw new IllegalStateException();
         }
 
         @Override

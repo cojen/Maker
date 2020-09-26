@@ -476,16 +476,14 @@ public interface Variable {
     /**
      * Enter a synchronized block on this variable.
      *
-     * @throws IllegalStateException if this variable isn't an object type, or if this variable
-     * is a field
+     * @throws IllegalStateException if this variable isn't an object type
      */
     public void monitorEnter();
 
     /**
      * Exit a synchronized block on this variable.
      *
-     * @throws IllegalStateException if this variable isn't an object type, or if this variable
-     * is a field
+     * @throws IllegalStateException if this variable isn't an object type
      */
     public void monitorExit();
 }
