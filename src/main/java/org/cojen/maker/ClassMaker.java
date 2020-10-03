@@ -44,7 +44,7 @@ public interface ClassMaker {
      * Begin defining a class with the given name. The actual name will have a suffix applied
      * to ensure uniqueness.
      *
-     * @param className fully qualified class name; pass null to use default
+     * @param className fully qualified class name; pass null to automatically assign a name
      */
     public static ClassMaker begin(String className) {
         return begin(className, null, null);
@@ -54,7 +54,7 @@ public interface ClassMaker {
      * Begin defining a class with the given name. The actual name will have a suffix applied
      * to ensure uniqueness.
      *
-     * @param className fully qualified class name; pass null to use default
+     * @param className fully qualified class name; pass null to automatically assign a name
      * @param parentLoader parent class loader; pass null to use default
      * @param domain to define class in; pass null to use default
      */
@@ -68,7 +68,7 @@ public interface ClassMaker {
      * Begin defining a class with the given name. The actual name will have a suffix applied
      * to ensure uniqueness.
      *
-     * @param className fully qualified class name; pass null to use default
+     * @param className fully qualified class name; pass null to automatically assign a name
      * @param lookup finish loading the class using this lookup object
      */
     public static ClassMaker begin(String className, MethodHandles.Lookup lookup) {
@@ -92,7 +92,8 @@ public interface ClassMaker {
      * actual class name will have a suffix applied to ensure uniqueness, unless this maker was
      * created with an explicit name.
      *
-     * @param className fully qualified class name; pass null to use default (unless explicit)
+     * @param className fully qualified class name; pass null to automatically assign a name
+     * (unless explicit)
      * @see addClass
      */
     public ClassMaker another(String className);

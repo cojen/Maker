@@ -34,6 +34,6 @@
  * thread-safe. Only one thread at a time should be interacting with a {@code ClassMaker}
  * instance and any of the objects produced by it.
  *
- * @see ClassMaker
+ * @see ClassMaker#begin()
  */
 package org.cojen.maker;
