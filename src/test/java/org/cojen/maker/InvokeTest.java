@@ -908,6 +908,28 @@ public class InvokeTest {
     }
 
     @Test
+    public void indyVarargs() throws Exception {
+        ClassMaker cm = ClassMaker.begin().public_();
+        MethodMaker mm = cm.addMethod(null, "run").public_().static_();
+
+        var bootstrap = mm.var(InvokeTest.class);
+        var result = bootstrap.indy("bootVarargs", 10, "hello", "world").invoke(String.class, "x");
+
+        var assertVar = mm.var(Assert.class);
+        assertVar.invoke("assertEquals", "10[hello, world]", result);
+
+        cm.finish().getMethod("run").invoke(null);
+    }
+
+    public static CallSite bootVarargs(MethodHandles.Lookup caller, String name, MethodType type,
+                                       int num, String... strs)
+    {
+        MethodMaker mm = MethodMaker.begin(MethodHandles.lookup(), String.class);
+        mm.return_(num + Arrays.toString(strs));
+        return new ConstantCallSite(mm.finish());
+    }
+
+    @Test
     public void signaturePolymorphic() throws Exception {
         MethodHandle mh = MethodHandles.lookup()
             .findStatic(InvokeTest.class, "secret", MethodType.methodType(int.class, int.class));
