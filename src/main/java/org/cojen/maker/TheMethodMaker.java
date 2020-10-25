@@ -4764,6 +4764,8 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         private final Type[] mCoordinateTypes;
         private final Object[] mCoordinates;
 
+        private Variable mHandleGet, mHandleSet;
+
         /**
          * @param handleVar must be of type VarHandle
          * @param type VarHandle.varType
@@ -4798,13 +4800,19 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
-        public Variable mhSet() {
-            throw new UnsupportedOperationException();
+        public Variable mhGet() {
+            if (mHandleGet == null) {
+                mHandleGet = mHandleVar.invoke("toMethodHandle", VarHandle.AccessMode.GET);
+            }
+            return mHandleGet;
         }
 
         @Override
-        public Variable mhGet() {
-            throw new UnsupportedOperationException();
+        public Variable mhSet() {
+            if (mHandleSet == null) {
+                mHandleSet = mHandleVar.invoke("toMethodHandle", VarHandle.AccessMode.SET);
+            }
+            return mHandleSet;
         }
 
         @Override

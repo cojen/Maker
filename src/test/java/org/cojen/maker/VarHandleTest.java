@@ -245,4 +245,26 @@ public class VarHandleTest {
 
         assertEquals(13, hiddenInt);
     }
+
+    @Test
+    public void toMethodHandle() throws Exception {
+        VarHandle vh = MethodHandles.lookup()
+            .findStaticVarHandle(VarHandleTest.class, "hiddenStr", String.class);
+
+        hiddenStr = "hello";
+
+        ClassMaker cm = ClassMaker.begin().public_();
+        MethodMaker mm = cm.addMethod(null, "run").public_().static_();
+
+        var mh1 = mm.access(vh).mhGet();
+        var mh2 = mm.access(vh).mhSet();
+
+        var value = mh1.invoke(String.class, "invokeExact", null);
+        var concat = mm.concat(value, "world");
+        mh2.invoke(void.class, "invokeExact", new Object[] {String.class}, concat);
+
+        cm.finish().getMethod("run").invoke(null);
+
+        assertEquals("helloworld", hiddenStr);
+    }
 }
