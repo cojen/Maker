@@ -238,4 +238,16 @@ public interface Field extends Variable {
      * @see VarHandle#getAndBitwiseXorRelease
      */
     public Variable getAndBitwiseXorRelease(Object value);
+
+    /**
+     * Returns a {@code MethodHandle} variable for setting the field value. The variable itself
+     * is actually a constant, and so it can be supplied as an argument to a bootstrap method.
+     */
+    public Variable mhSet();
+
+    /**
+     * Returns a {@code MethodHandle} variable for getting the field value. The variable itself
+     * is actually a constant, and so it can be supplied as an argument to a bootstrap method.
+     */
+    public Variable mhGet();
 }

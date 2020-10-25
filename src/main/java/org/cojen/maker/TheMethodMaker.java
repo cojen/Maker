@@ -1823,17 +1823,8 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             if (owned.owner() != this) {
                 throw new IllegalArgumentException("Unknown variable");
             }
-            Type actualType;
-            if (owned instanceof Var) {
-                Var var = (Var) owned;
-                addOp(new PushVarOp(var));
-                actualType = var.mType;
-            } else {
-                var field = (BaseFieldVar) owned;
-                field.push();
-                actualType = field.type();
-            }
-            return addConversionOp(actualType, type);
+            owned.push();
+            return addConversionOp(owned.type(), type);
         }
 
         Type constantType;
@@ -2266,7 +2257,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             if (value instanceof ConstantVar) {
                 var constant = (ConstantVar) value;
                 if (constant.owner() == this) {
-                    return constant.mDynamic;
+                    return constant.mConstant;
                 }
             }
             throw unsupportedConstant(value);
@@ -3186,12 +3177,12 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
     }
 
-    static final class DynamicConstantOp extends ConstantOp {
-        final ConstantPool.C_Dynamic mDynamic;
+    static final class ExplicitConstantOp extends ConstantOp {
+        final ConstantPool.Constant mConstant;
         final Type mType;
 
-        DynamicConstantOp(ConstantPool.C_Dynamic dynamic, Type type) {
-            mDynamic = dynamic;
+        ExplicitConstantOp(ConstantPool.Constant constant, Type type) {
+            mConstant = constant;
             mType = type;
         }
 
@@ -3199,12 +3190,12 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         void appendTo(TheMethodMaker m) {
             int typeCode = mType.typeCode();
             if (typeCode == T_DOUBLE || typeCode == T_LONG) {
-                int index = mDynamic.mIndex;
+                int index = mConstant.mIndex;
                 m.appendOp(LDC2_W, 0);
                 m.appendShort(index);
                 m.stackPush(mType);
             } else {
-                m.pushConstant(mDynamic, mType);
+                m.pushConstant(mConstant, mType);
             }
         }
     }
@@ -3430,12 +3421,12 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                 throw new IllegalStateException("Mismatched type");
             }
 
-            addStoreConstantOp(new DynamicConstantOp(addComplexConstant(type, value), type));
+            addStoreConstantOp(new ExplicitConstantOp(addComplexConstant(type, value), type));
 
             return this;
         }
 
-        abstract void addStoreConstantOp(DynamicConstantOp op);
+        abstract void addStoreConstantOp(ExplicitConstantOp op);
 
         @Override
         public void ifTrue(Label label) {
@@ -4225,7 +4216,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
-        void addStoreConstantOp(DynamicConstantOp op) {
+        void addStoreConstantOp(ExplicitConstantOp op) {
             addOp(op);
             addStoreOp(this);
         }
@@ -4312,14 +4303,19 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     }
 
     /**
-     * Unmodifiable variable which refers to a dynamic constant.
+     * Unmodifiable variable which refers to a constant.
      */
     final class ConstantVar extends Var {
-        final ConstantPool.C_Dynamic mDynamic;
+        final ConstantPool.Constant mConstant;
 
-        ConstantVar(Type type, ConstantPool.C_Dynamic dynamic) {
+        ConstantVar(Type type, ConstantPool.Constant constant) {
             super(type);
-            mDynamic = dynamic;
+            mConstant = constant;
+        }
+
+        @Override
+        void push() {
+            addOp(new ExplicitConstantOp(mConstant, mType));
         }
 
         @Override
@@ -4554,6 +4550,22 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
+        public ConstantVar mhSet() {
+            int kind = mFieldRef.mField.isStatic() ?
+                MethodHandleInfo.REF_putStatic : MethodHandleInfo.REF_putField;
+            return new ConstantVar(Type.from(MethodHandle.class),
+                                   mConstants.addMethodHandle(kind, mFieldRef));
+        }
+
+        @Override
+        public ConstantVar mhGet() {
+            int kind = mFieldRef.mField.isStatic() ?
+                MethodHandleInfo.REF_getStatic : MethodHandleInfo.REF_getField;
+            return new ConstantVar(Type.from(MethodHandle.class),
+                                   mConstants.addMethodHandle(kind, mFieldRef));
+        }
+
+        @Override
         void push() {
             ConstantPool.C_Field fieldRef = mFieldRef;
             Type.Field field = fieldRef.mField;
@@ -4573,7 +4585,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
-        void addStoreConstantOp(DynamicConstantOp op) {
+        void addStoreConstantOp(ExplicitConstantOp op) {
             addBeginStoreFieldOp();
             addOp(op);
             addFinishStoreFieldOp();
@@ -4737,7 +4749,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                      mFieldRef.mNameAndType.mName, vhType);
             }
 
-            addOp(new DynamicConstantOp(mVarHandle, vhType));
+            addOp(new ExplicitConstantOp(mVarHandle, vhType));
 
             return vhType;
         }
@@ -4786,12 +4798,22 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
+        public Variable mhSet() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public Variable mhGet() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
         void push() {
             vhPush("get");
         }
 
         @Override
-        void addStoreConstantOp(DynamicConstantOp op) {
+        void addStoreConstantOp(ExplicitConstantOp op) {
             vhSet("set", op);
         }
 
@@ -4828,9 +4850,9 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                 allTypes[i] = addPushOp(mCoordinateTypes[i], mCoordinates[i]);
             }
 
-            if (value instanceof DynamicConstantOp) {
+            if (value instanceof ExplicitConstantOp) {
                 allTypes[i] = mType;
-                addOp((DynamicConstantOp) value);
+                addOp((ExplicitConstantOp) value);
             } else {
                 allTypes[i] = addPushOp(mType, value);
             }
@@ -4921,7 +4943,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                 ConstantPool.C_Dynamic dynamic = mConstants
                     .addDynamicConstant(mBootstrapIndex, name, retType);
 
-                addOp(new DynamicConstantOp(dynamic, retType));
+                addOp(new ExplicitConstantOp(dynamic, retType));
 
                 var = new ConstantVar(retType, dynamic);
             } else {
