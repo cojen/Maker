@@ -4082,29 +4082,24 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             ConstantPool.C_MethodHandle bootHandle =
                 mConstants.addMethodHandle(MethodHandleInfo.REF_invokeStatic, ref);
 
-            ConstantPool.Constant[] bootArgs;
-            if (args == null) {
-                bootArgs = new ConstantPool.Constant[0];
-            } else {
-                Type[] bootTypes = bootstrap.paramTypes();
-                bootArgs = new ConstantPool.Constant[args.length];
-                if (!bootstrap.isVarargs()) {
-                    for (int i=0; i<args.length; i++) {
-                        // +3 to skip these: Lookup caller, String name, and MethodType type
-                        bootArgs[i] = addLoadableConstant(bootTypes[i + 3], args[i]);
-                    }
-                } else {
+            Type[] bootTypes = bootstrap.paramTypes();
+            var bootArgs = new ConstantPool.Constant[args.length];
+            if (!bootstrap.isVarargs()) {
+                for (int i=0; i<args.length; i++) {
                     // +3 to skip these: Lookup caller, String name, and MethodType type
-                    int i = 3;
-                    for (; i < bootTypes.length - 1; i++) {
-                        bootArgs[i - 3] = addLoadableConstant(bootTypes[i], args[i - 3]);
-                    }
-                    // Remaining args are passed as varargs.
-                    Type varargType = bootTypes[i].elementType();
-                    i -= 3;
-                    for (; i < args.length; i++) {
-                        bootArgs[i] = addLoadableConstant(varargType, args[i]);
-                    }
+                    bootArgs[i] = addLoadableConstant(bootTypes[i + 3], args[i]);
+                }
+            } else {
+                // +3 to skip these: Lookup caller, String name, and MethodType type
+                int i = 3;
+                for (; i < bootTypes.length - 1; i++) {
+                    bootArgs[i - 3] = addLoadableConstant(bootTypes[i], args[i - 3]);
+                }
+                // Remaining args are passed as varargs.
+                Type varargType = bootTypes[i].elementType();
+                i -= 3;
+                for (; i < args.length; i++) {
+                    bootArgs[i] = addLoadableConstant(varargType, args[i]);
                 }
             }
 
