@@ -165,7 +165,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             varUsage.set(param.mSlot);
         }
 
-        // Perform flow analysis for assigning variable slots and bulding the StackMapTable.
+        // Perform flow analysis for assigning variable slots and building the StackMapTable.
         int opCount, maxLocals;
         {
             Flow flow = new Flow(varList, varUsage);
@@ -1124,7 +1124,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     }
 
     /**
-     * Gather/modify a branch target outide a finally range.
+     * Gather/modify a branch target outside a finally range.
      *
      * @param inside labels inside the finally range; can be null if empty
      * @param exits maps final targets to handler labels
@@ -1180,7 +1180,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
             if (!(value instanceof Variable)) {
                 if (value instanceof Character) {
-                    char c = ((Character) value).charValue();
+                    char c = (Character) value;
                     if (c > '\u0002' || c == '\u0000') {
                         if (recipe == null) {
                             recipe = new char[values.length];
@@ -1491,7 +1491,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
      * Push a variable to the stack.
      */
     private void pushVar(Var var) {
-        if (var != null && var == mClassVar) {
+        if (var == mClassVar) {
             pushConstant(mClassMaker.mThisClass, var.mType);
             return;
         }
@@ -1847,7 +1847,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             if (value instanceof Integer) {
                 constantType = INT;
                 if (type != null) {
-                    int v = ((Integer) value).intValue();
+                    int v = (Integer) value;
                     switch (type.unboxTypeCode()) {
                     case T_BYTE:
                         if (((byte) v) == v) {
@@ -1881,7 +1881,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             } else if (value instanceof Long) {
                 constantType = LONG;
                 if (type != null) {
-                    long v = ((Long) value).longValue();
+                    long v = (Long) value;
                     switch (type.unboxTypeCode()) {
                     case T_BYTE:
                         byte bv = (byte) v;
@@ -1923,7 +1923,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             } else if (value instanceof Float) {
                 constantType = FLOAT;
                 if (type != null) {
-                    float v = ((Float) value).floatValue();
+                    float v = (Float) value;
                     switch (type.unboxTypeCode()) {
                     case T_BYTE:
                         byte bv = (byte) v;
@@ -1962,7 +1962,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             } else if (value instanceof Double) {
                 constantType = DOUBLE;
                 if (type != null) {
-                    double v = ((Double) value).doubleValue();
+                    double v = (Double) value;
                     switch (type.unboxTypeCode()) {
                     case T_BYTE:
                         byte bv = (byte) v;
@@ -2004,7 +2004,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             } else if (value instanceof Byte) {
                 constantType = BYTE;
                 if (type != null) {
-                    byte v = ((Byte) value).byteValue();
+                    byte v = (Byte) value;
                     switch (type.unboxTypeCode()) {
                     case T_SHORT:
                         value = (short) v;
@@ -2031,7 +2031,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             } else if (value instanceof Short) {
                 constantType = SHORT;
                 if (type != null) {
-                    short v = ((Short) value).shortValue();
+                    short v = (Short) value;
                     switch (type.unboxTypeCode()) {
                     case T_BYTE:
                         byte bv = (byte) v;

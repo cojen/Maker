@@ -224,7 +224,7 @@ public interface MethodMaker {
     public Variable param(int index);
 
     /**
-     * Returns a new unitialized variable with the given type. Call {@link Variable#set set} to
+     * Returns a new uninitialized variable with the given type. Call {@link Variable#set set} to
      * initialize it immediately.
      *
      * @param type a class, class name, or a variable

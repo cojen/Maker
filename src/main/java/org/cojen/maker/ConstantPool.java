@@ -148,7 +148,7 @@ class ConstantPool {
 
         case REF_putField: case REF_putStatic:
             ref = addField(decl.inventField
-                           (kind == REF_getStatic, Type.from(mtype.lastParameterType()), name));
+                           (kind == REF_putStatic, Type.from(mtype.lastParameterType()), name));
             break;
 
         case REF_invokeVirtual: case REF_newInvokeSpecial:

@@ -1107,7 +1107,7 @@ abstract class Type {
             Boolean is = mIsInterface;
             if (is == null) {
                 Class clazz = clazz();
-                mIsInterface = is = clazz == null ? false : clazz.isInterface();
+                mIsInterface = is = clazz != null && clazz.isInterface();
             }
             return is;
         }
@@ -1749,9 +1749,7 @@ abstract class Type {
                 synchronized (this) {
                     interfaces = mInterfaces;
                     if (interfaces == null) {
-                        Set<Type> all = mMaker.allInterfaces(null);
-                        interfaces = all == null ? Collections.emptySet() : all;
-                        mInterfaces = interfaces;
+                        mInterfaces = interfaces = mMaker.allInterfaces();
                     }
                 }
             }

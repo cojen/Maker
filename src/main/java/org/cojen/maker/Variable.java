@@ -223,7 +223,7 @@ public interface Variable {
      *
      * @param value other variable or a constant
      * @return the result in a new boolean variable
-     * @see ifEq
+     * @see #ifEq
      */
     public Variable eq(Object value);
 
@@ -233,7 +233,7 @@ public interface Variable {
      *
      * @param value other variable or a constant
      * @return the result in a new boolean variable
-     * @see ifNe
+     * @see #ifNe
      */
     public Variable ne(Object value);
 
@@ -243,7 +243,7 @@ public interface Variable {
      *
      * @param value other variable or a constant
      * @return the result in a new boolean variable
-     * @see ifLt
+     * @see #ifLt
      */
     public Variable lt(Object value);
 
@@ -253,7 +253,7 @@ public interface Variable {
      *
      * @param value other variable or a constant
      * @return the result in a new boolean variable
-     * @see ifGe
+     * @see #ifGe
      */
     public Variable ge(Object value);
 
@@ -263,7 +263,7 @@ public interface Variable {
      *
      * @param value other variable or a constant
      * @return the result in a new boolean variable
-     * @see ifGt
+     * @see #ifGt
      */
     public Variable gt(Object value);
 
@@ -273,7 +273,7 @@ public interface Variable {
      *
      * @param value other variable or a constant
      * @return the result in a new boolean variable
-     * @see ifLe
+     * @see #ifLe
      */
     public Variable le(Object value);
 

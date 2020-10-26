@@ -189,7 +189,7 @@ class Opcodes {
         IF_ICMPGT = (byte) 163,
         IF_ICMPLE = (byte) 164,
         IF_ACMPEQ = (byte) 165,
-        IF_ACMPNE = (byte) 166,
+        //IF_ACMPNE = (byte) 166,
         GOTO = (byte) 167,
         TABLESWITCH = (byte) 170,
         LOOKUPSWITCH = (byte) 171,

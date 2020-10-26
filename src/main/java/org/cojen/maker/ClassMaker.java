@@ -94,7 +94,7 @@ public interface ClassMaker {
      *
      * @param className fully qualified class name; pass null to automatically assign a name
      * (unless explicit)
-     * @see addClass
+     * @see #addClass
      */
     public ClassMaker another(String className);
 
@@ -204,7 +204,7 @@ public interface ClassMaker {
      *
      * @param className simple class name; pass null to use default
      * @throws IllegalArgumentException if not given a simple class name
-     * @see another
+     * @see #another
      */
     public ClassMaker addClass(String className);
 

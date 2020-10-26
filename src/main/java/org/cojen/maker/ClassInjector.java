@@ -196,7 +196,7 @@ class ClassInjector extends ClassLoader {
             if (permList.size() == 1) {
                 permsKey = permList.get(0);
             } else if (permList.size() > 1) {
-                permsKey = new HashSet<Permission>(permList);
+                permsKey = new HashSet<>(permList);
             }
         }
 

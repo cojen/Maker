@@ -263,7 +263,7 @@ abstract class Attribute extends Attributed {
     }
 
     static class BootstrapMethods extends Attribute {
-        private LinkedHashMap<Entry, Entry> mEntries;
+        private final LinkedHashMap<Entry, Entry> mEntries;
         private int mLength;
 
         BootstrapMethods(ConstantPool cp) {

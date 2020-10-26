@@ -59,7 +59,7 @@ class StackMapTable extends Attribute {
                     throw new IllegalStateException("Mismatched stack at branch target");
                 } else {
                     // There's no way to encode two frames at the same address, so assume that
-                    // the new frame supercedes the existing one.
+                    // the new frame supersedes the existing one.
                     last.mLocalCodes = localCodes;
                     return;
                 }
@@ -215,7 +215,7 @@ class StackMapTable extends Attribute {
                 return to == null ? 0 : to.length;
             }
             if (to == null || to.length == 0) {
-                return from == null ? 0 : -from.length;
+                return -from.length;
             }
             int mismatch = Arrays.mismatch(from, to);
             if (mismatch < 0) {

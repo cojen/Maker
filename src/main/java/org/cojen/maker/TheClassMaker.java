@@ -32,6 +32,7 @@ import java.security.ProtectionDomain;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -232,19 +233,19 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
     }
 
     /**
-     * @param can be null initially
-     * @return new or original set
+     * @return empty set if no interfaces
      */
-    Set<Type> allInterfaces(Set<Type> all) {
-        if (mInterfaces != null) {
-            if (all == null) {
-                all = new LinkedHashSet<>(mInterfaces.size());
-            }
-            for (ConstantPool.C_Class clazz : mInterfaces) {
-                Type type = clazz.mType;
-                all.add(type);
-                all.addAll(type.interfaces());
-            }
+    Set<Type> allInterfaces() {
+        if (mInterfaces == null) {
+            return Collections.emptySet();
+        }
+
+        Set<Type> all = new LinkedHashSet<>(mInterfaces.size());
+
+        for (ConstantPool.C_Class clazz : mInterfaces) {
+            Type type = clazz.mType;
+            all.add(type);
+            all.addAll(type.interfaces());
         }
 
         return all;
@@ -448,7 +449,7 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
             if (cause == null) {
                 cause = e;
             }
-            throw new IllegalStateException(e);
+            throw new IllegalStateException(cause);
         } catch (IllegalAccessException e) {
             throw new IllegalStateException(e);
         } finally {

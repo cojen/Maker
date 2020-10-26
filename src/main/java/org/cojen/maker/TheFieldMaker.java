@@ -160,7 +160,7 @@ final class TheFieldMaker extends ClassMember implements FieldMaker {
                     break;
                 }
 
-                // Define a static initialzer and perform a conversion.
+                // Define a static initializer and perform a conversion.
                 mClassMaker.addClinit().field(mField.name()).set(value);
                 return this;
             }

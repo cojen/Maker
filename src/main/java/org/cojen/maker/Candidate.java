@@ -27,7 +27,7 @@ final class Candidate {
      * possible candidates to bind to. For a method to be strictly "better" than another, all
      * parameter types must be better or equal based on conversion cost.
      *
-     * @param params actual types supplied to the onvoke method
+     * @param params actual types supplied to the invoke method
      * @return -1 if if method a is better, 1 if b is better, or 0 if neither is strictly better
      */
     public static int compare(Type[] params, Type.Method a, Type.Method b) {
@@ -87,7 +87,7 @@ final class Candidate {
         int aSpec = specialization(aParam);
         int bSpec = specialization(bParam);
 
-        return aSpec == bSpec ? 0 : (aSpec < bSpec ? 1 : -1);
+        return Integer.compare(bSpec, aSpec);
     }
 
     private static Type root(Type type) {
