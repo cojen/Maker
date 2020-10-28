@@ -285,6 +285,12 @@ public class FieldTest {
         mh2.invoke(void.class, "invokeExact", new Object[] {String.class}, "hello"); 
         assertVar.invoke("assertEquals", "hello", mm.field("f2").get());
 
+        try {
+            mh2.set(null);
+        } catch (IllegalStateException e) {
+            assertTrue(e.getMessage().contains("Unmodifiable"));
+        }
+
         cm.finish().getMethod("run").invoke(null);
     }
     
@@ -312,6 +318,61 @@ public class FieldTest {
     {
         MethodMaker mm = MethodMaker.begin(MethodHandles.lookup(), void.class);
         mm.invoke(fieldHandle, Integer.parseInt(name));
+        return new ConstantCallSite(mm.finish());
+    }
+
+    @Test
+    public void varHandles() throws Exception {
+        ClassMaker cm = ClassMaker.begin().public_();
+
+        cm.addField(int.class, "f1").static_();
+        cm.addField(String.class, "f2").static_().private_();
+
+        MethodMaker mm = cm.addMethod(null, "run").public_().static_();
+        var assertVar = mm.var(Assert.class);
+
+        mm.field("f1").set(10);
+        var vh1 = mm.field("f1").varHandle();
+        var result = vh1.invoke(int.class, "getOpaque", null);
+        assertVar.invoke("assertEquals", 10, result);
+
+        var vh2 = mm.field("f2").varHandle();
+        vh2.invoke(void.class, "setRelease", new Object[] {String.class}, "hello"); 
+        assertVar.invoke("assertEquals", "hello", mm.field("f2").get());
+
+        try {
+            vh2.set(null);
+        } catch (IllegalStateException e) {
+            assertTrue(e.getMessage().contains("Unmodifiable"));
+        }
+
+        cm.finish().getMethod("run").invoke(null);
+    }
+
+    @Test
+    public void varHandlesBootstrap() throws Exception {
+        // Test passing the field VarHandle to an indy bootstrap method.
+
+        ClassMaker cm = ClassMaker.begin().public_();
+
+        cm.addField(int.class, "f1").static_().private_();
+
+        MethodMaker mm = cm.addMethod(null, "run").public_().static_();
+        var assertVar = mm.var(Assert.class);
+
+        var bootstrap = mm.var(FieldTest.class).indy("bootTest", mm.field("f1").varHandle());
+        bootstrap.invoke(void.class, "123");
+
+        assertVar.invoke("assertEquals", -123, mm.field("f1").get());
+
+        cm.finish().getMethod("run").invoke(null);
+    }
+
+    public static CallSite bootTest(MethodHandles.Lookup caller, String name, MethodType type,
+                                    VarHandle fieldHandle)
+    {
+        MethodMaker mm = MethodMaker.begin(MethodHandles.lookup(), void.class);
+        mm.access(fieldHandle).setVolatile(-Integer.parseInt(name));
         return new ConstantCallSite(mm.finish());
     }
 }

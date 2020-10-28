@@ -240,6 +240,13 @@ public interface Field extends Variable {
     public Variable getAndBitwiseXorRelease(Object value);
 
     /**
+     * Returns a {@code VarHandle} variable which accesses the field. If this is an ordinary
+     * field, the variable is actually a constant, and so it can be supplied as an argument to
+     * a bootstrap method.
+     */
+    public Variable varHandle();
+
+    /**
      * Returns a {@code MethodHandle} variable for setting the field value. If this is an
      * ordinary field, the variable is actually a constant, and so it can be supplied as
      * an argument to a bootstrap method.

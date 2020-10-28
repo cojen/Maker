@@ -4545,6 +4545,12 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
+        public ConstantVar varHandle() {
+            Type vhType = Type.from(VarHandle.class);
+            return new ConstantVar(vhType, vh(vhType));
+        }
+
+        @Override
         public ConstantVar methodHandleSet() {
             int kind = mFieldRef.mField.isStatic() ?
                 MethodHandleInfo.REF_putStatic : MethodHandleInfo.REF_putField;
@@ -4716,7 +4722,11 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
         private Type pushVarHandle() {
             Type vhType = Type.from(VarHandle.class);
+            addOp(new ExplicitConstantOp(vh(vhType), vhType));
+            return vhType;
+        }
 
+        private ConstantPool.C_Dynamic vh(Type vhType) {
             if (mVarHandle == null) {
                 Type classType = Type.from(Class.class);
 
@@ -4744,9 +4754,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                      mFieldRef.mNameAndType.mName, vhType);
             }
 
-            addOp(new ExplicitConstantOp(mVarHandle, vhType));
-
-            return vhType;
+            return mVarHandle;
         }
     }
 
@@ -4792,6 +4800,12 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         public HandleVar set(Object value) {
             setPlain(value);
             return this;
+        }
+
+        @Override
+        public Variable varHandle() {
+            // Return a copy.
+            return mHandleVar.get();
         }
 
         @Override
