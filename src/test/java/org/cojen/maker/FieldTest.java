@@ -277,11 +277,11 @@ public class FieldTest {
         var assertVar = mm.var(Assert.class);
 
         mm.field("f1").set(10);
-        var mh1 = mm.field("f1").mhGet();
+        var mh1 = mm.field("f1").methodHandleGet();
         var result = mh1.invoke(int.class, "invokeExact", null);
         assertVar.invoke("assertEquals", 10, result);
 
-        var mh2 = mm.field("f2").mhSet();
+        var mh2 = mm.field("f2").methodHandleSet();
         mh2.invoke(void.class, "invokeExact", new Object[] {String.class}, "hello"); 
         assertVar.invoke("assertEquals", "hello", mm.field("f2").get());
 
@@ -299,7 +299,7 @@ public class FieldTest {
         MethodMaker mm = cm.addMethod(null, "run").public_().static_();
         var assertVar = mm.var(Assert.class);
 
-        var bootstrap = mm.var(FieldTest.class).indy("bootTest", mm.field("f1").mhSet());
+        var bootstrap = mm.var(FieldTest.class).indy("bootTest", mm.field("f1").methodHandleSet());
         bootstrap.invoke(void.class, "123");
 
         assertVar.invoke("assertEquals", 123, mm.field("f1").get());

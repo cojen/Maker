@@ -244,12 +244,12 @@ public interface Field extends Variable {
      * ordinary field, the variable is actually a constant, and so it can be supplied as
      * an argument to a bootstrap method.
      */
-    public Variable mhSet();
+    public Variable methodHandleSet();
 
     /**
      * Returns a {@code MethodHandle} variable for getting the field value. If this is an
      * ordinary field, the variable is actually a constant, and so it can be supplied as
      * an argument to a bootstrap method.
      */
-    public Variable mhGet();
+    public Variable methodHandleGet();
 }

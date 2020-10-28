@@ -4545,7 +4545,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
-        public ConstantVar mhSet() {
+        public ConstantVar methodHandleSet() {
             int kind = mFieldRef.mField.isStatic() ?
                 MethodHandleInfo.REF_putStatic : MethodHandleInfo.REF_putField;
             return new ConstantVar(Type.from(MethodHandle.class),
@@ -4553,7 +4553,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
-        public ConstantVar mhGet() {
+        public ConstantVar methodHandleGet() {
             int kind = mFieldRef.mField.isStatic() ?
                 MethodHandleInfo.REF_getStatic : MethodHandleInfo.REF_getField;
             return new ConstantVar(Type.from(MethodHandle.class),
@@ -4795,7 +4795,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
-        public Variable mhGet() {
+        public Variable methodHandleGet() {
             if (mHandleGet == null) {
                 mHandleGet = mHandleVar.invoke("toMethodHandle", VarHandle.AccessMode.GET);
             }
@@ -4803,7 +4803,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
-        public Variable mhSet() {
+        public Variable methodHandleSet() {
             if (mHandleSet == null) {
                 mHandleSet = mHandleVar.invoke("toMethodHandle", VarHandle.AccessMode.SET);
             }

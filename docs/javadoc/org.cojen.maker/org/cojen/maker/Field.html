@@ -238,14 +238,14 @@ extends <a href="Variable.html" title="interface in org.cojen.maker">Variable</a
 </tr>
 <tr class="row-color" id="i23">
 <td class="col-first"><code><a href="Variable.html" title="interface in org.cojen.maker">Variable</a></code></td>
-<th class="col-second" scope="row"><code><span class="member-name-link"><a href="#mhGet()">mhGet</a></span>()</code></th>
+<th class="col-second" scope="row"><code><span class="member-name-link"><a href="#methodHandleGet()">methodHandleGet</a></span>()</code></th>
 <td class="col-last">
 <div class="block">Returns a <code>MethodHandle</code> variable for getting the field value.</div>
 </td>
 </tr>
 <tr class="alt-color" id="i24">
 <td class="col-first"><code><a href="Variable.html" title="interface in org.cojen.maker">Variable</a></code></td>
-<th class="col-second" scope="row"><code><span class="member-name-link"><a href="#mhSet()">mhSet</a></span>()</code></th>
+<th class="col-second" scope="row"><code><span class="member-name-link"><a href="#methodHandleSet()">methodHandleSet</a></span>()</code></th>
 <td class="col-last">
 <div class="block">Returns a <code>MethodHandle</code> variable for setting the field value.</div>
 </td>
@@ -749,18 +749,18 @@ extends <a href="Variable.html" title="interface in org.cojen.maker">Variable</a
 </section>
 </li>
 <li>
-<section class="detail" id="mhSet()">
-<h3>mhSet</h3>
-<div class="member-signature"><span class="return-type"><a href="Variable.html" title="interface in org.cojen.maker">Variable</a></span>&nbsp;<span class="member-name">mhSet</span>()</div>
+<section class="detail" id="methodHandleSet()">
+<h3>methodHandleSet</h3>
+<div class="member-signature"><span class="return-type"><a href="Variable.html" title="interface in org.cojen.maker">Variable</a></span>&nbsp;<span class="member-name">methodHandleSet</span>()</div>
 <div class="block">Returns a <code>MethodHandle</code> variable for setting the field value. If this is an
  ordinary field, the variable is actually a constant, and so it can be supplied as
  an argument to a bootstrap method.</div>
 </section>
 </li>
 <li>
-<section class="detail" id="mhGet()">
-<h3>mhGet</h3>
-<div class="member-signature"><span class="return-type"><a href="Variable.html" title="interface in org.cojen.maker">Variable</a></span>&nbsp;<span class="member-name">mhGet</span>()</div>
+<section class="detail" id="methodHandleGet()">
+<h3>methodHandleGet</h3>
+<div class="member-signature"><span class="return-type"><a href="Variable.html" title="interface in org.cojen.maker">Variable</a></span>&nbsp;<span class="member-name">methodHandleGet</span>()</div>
 <div class="block">Returns a <code>MethodHandle</code> variable for getting the field value. If this is an
  ordinary field, the variable is actually a constant, and so it can be supplied as
  an argument to a bootstrap method.</div>

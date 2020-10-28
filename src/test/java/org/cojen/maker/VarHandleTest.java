@@ -256,8 +256,8 @@ public class VarHandleTest {
         ClassMaker cm = ClassMaker.begin().public_();
         MethodMaker mm = cm.addMethod(null, "run").public_().static_();
 
-        var mh1 = mm.access(vh).mhGet();
-        var mh2 = mm.access(vh).mhSet();
+        var mh1 = mm.access(vh).methodHandleGet();
+        var mh2 = mm.access(vh).methodHandleSet();
 
         var value = mh1.invoke(String.class, "invokeExact", null);
         var concat = mm.concat(value, "world");
