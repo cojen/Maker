@@ -165,6 +165,13 @@ class ConstantPool {
         return addMethodHandle(kind, ref);
     }
 
+    C_MethodHandle addMethodHandle(Type.Method method) {
+        int kind = method.isStatic() ? REF_invokeStatic
+            : (method.enclosingType().isInterface() ? REF_invokeInterface : REF_invokeVirtual);
+
+        return addMethodHandle(kind, addMethod(method));
+    }
+
     C_MethodHandle addMethodHandle(int kind, Constant ref) {
         return addConstant(new C_MethodHandle((byte) kind, ref));
     }

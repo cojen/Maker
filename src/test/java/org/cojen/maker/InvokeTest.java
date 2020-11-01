@@ -956,4 +956,39 @@ public class InvokeTest {
 
         cm.finish().getMethod("run").invoke(null);
     }
+
+    @Test
+    public void methodHandleBootstrap() throws Exception {
+        // Test passing a MethodHandle constant to an indy bootstrap method.
+
+        ClassMaker cm = ClassMaker.begin().public_();
+
+        {
+            MethodMaker mm = cm.addMethod(String.class, "foo", int.class).static_();
+            mm.return_(mm.var(String.class).invoke("valueOf", mm.param(0).add(10)));
+        }
+
+        MethodMaker mm = cm.addMethod(null, "run").public_().static_();
+        var assertVar = mm.var(Assert.class);
+
+        var mhVar = mm.var(cm).methodHandle(String.class, "foo", int.class);
+        var bootstrap = mm.var(InvokeTest.class).indy("bootTest", mhVar);
+
+        var result = bootstrap.invoke(String.class, "xxx", new Object[] {int.class}, 123);
+
+        assertVar.invoke("assertEquals", "133", result);
+
+        cm.finish().getMethod("run").invoke(null);
+    }
+
+    public static CallSite bootTest(MethodHandles.Lookup caller, String name, MethodType type,
+                                    MethodHandle mh)
+    {
+        MethodMaker mm = MethodMaker.begin(caller, String.class, int.class);
+        var result = mm.var(MethodHandle.class).set(caller.revealDirect(mh))
+            .invoke(String.class, "invokeExact", new Object[] {int.class}, mm.param(0));
+        mm.return_(result);
+
+        return new ConstantCallSite(mm.finish());
+    }
 }

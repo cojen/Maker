@@ -443,6 +443,18 @@ public interface Variable {
     public Variable invoke(Object returnType, String name, Object[] types, Object... values);
 
     /**
+     * Returns a {@code MethodHandle} variable which can invoke a static or instance method on
+     * the object referenced by this variable. The returned variable is actually a constant,
+     * and so it can be supplied as an argument to a bootstrap method.
+     *
+     * @param returnType method return type
+     * @param name method name
+     * @param types method parameter types (can be null if none)
+     * @throws IllegalArgumentException if not given a supported type object
+     */
+    public Variable methodHandle(Object returnType, String name, Object... types);
+
+    /**
      * Specify a static bootstrap method for dynamically generating methods, as found in the
      * class type of this variable.
      *

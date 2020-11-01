@@ -610,15 +610,15 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             type = type.box();
         }
 
-        int staticMatch;
+        int staticAllowed;
 
         if (instance != null) {
-            staticMatch = 0; // maybe static
+            staticAllowed = 0; // maybe static
         } else if ("<init>".equals(methodName)) {
             // Calling a constructor for new object allocation.
-            staticMatch = -1; // not static
+            staticAllowed = -1; // not static
         } else {
-            staticMatch = 1; // only static
+            staticAllowed = 1; // only static
         }
 
         Op savepoint = mLastOp;
@@ -630,13 +630,10 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         Set<Type.Method> candidates =
-            type.findMethods(methodName, paramTypes, inherit, staticMatch,
+            type.findMethods(methodName, paramTypes, inherit, staticAllowed,
                              specificReturnType, specificParamTypes);
 
-        Type.Method method;
-        if (candidates.size() == 1) {
-            method = candidates.iterator().next();
-        } else {
+        if (candidates.size() != 1) {
             rollback(savepoint);
             if (candidates.isEmpty()) {
                 throw noCandidates(type, methodName);
@@ -644,6 +641,8 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                 throw noBestCandidate(type, methodName, candidates);
             }
         }
+
+        Type.Method method = candidates.iterator().next();
 
         // Check if a signature polymorphic method.
         if (!method.isStatic() && method.isVarargs()) {
@@ -747,6 +746,35 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         Var var = new Var(returnType);
         addStoreOp(var);
         return var;
+    }
+
+    /**
+     * Returns a Variable of type MethodHandle.
+     */
+    private ConstantVar doMethodHandle(Type type,
+                                       OwnedVar instance,
+                                       String methodName,
+                                       Type returnType,
+                                       Type[] paramTypes)
+    {
+        if (type.isPrimitive()) {
+            type = type.box();
+        }
+
+        Set<Type.Method> candidates =
+            type.findMethods(methodName, paramTypes, 0, 0, returnType, paramTypes);
+
+        if (candidates.size() != 1) {
+            if (candidates.isEmpty()) {
+                throw noCandidates(type, methodName);
+            } else {
+                throw noBestCandidate(type, methodName, candidates);
+            }
+        }
+
+        Type.Method method = candidates.iterator().next();
+
+        return new ConstantVar(Type.from(MethodHandle.class), mConstants.addMethodHandle(method));
     }
 
     private static IllegalStateException noCandidates(Type type, String name) {
@@ -4031,6 +4059,23 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             }
 
             return doInvoke(type(), this, name, 0, values, specificReturnType, specificParamTypes);
+        }
+
+        @Override
+        public Variable methodHandle(Object retType, String name, Object... types) {
+            Type returnType = retType == null ? Type.VOID : mClassMaker.typeFrom(retType);
+
+            Type[] paramTypes;
+            if (types == null) {
+                paramTypes = new Type[0];
+            } else {
+                paramTypes = new Type[types.length];
+                for (int i=0; i<types.length; i++) {
+                    paramTypes[i] = mClassMaker.typeFrom(types[i]);
+                }
+            }
+
+            return doMethodHandle(type(), this, name, returnType, paramTypes);
         }
 
         @Override
