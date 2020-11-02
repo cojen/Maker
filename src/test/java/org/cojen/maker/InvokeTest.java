@@ -993,6 +993,36 @@ public class InvokeTest {
     }
 
     @Test
+    public void methodHandleBootstrap2() throws Exception {
+        // Test passing a MethodHandle newInvokeSpecial constant to an indy bootstrap method.
+
+        ClassMaker cm = ClassMaker.begin().public_();
+
+        MethodMaker mm = cm.addMethod(null, "run").public_().static_();
+        var assertVar = mm.var(Assert.class);
+
+        var mhVar = mm.var(ArrayList.class).methodHandle(null, "new", int.class);
+        var bootstrap = mm.var(InvokeTest.class).indy("bootTest2", mhVar);
+
+        var result = bootstrap.invoke(List.class, "xxx", new Object[] {int.class}, 10);
+
+        assertVar.invoke("assertTrue", result.instanceOf(ArrayList.class));
+
+        cm.finish().getMethod("run").invoke(null);
+    }
+
+    public static CallSite bootTest2(MethodHandles.Lookup caller, String name, MethodType type,
+                                     MethodHandle mh)
+    {
+        MethodMaker mm = MethodMaker.begin(caller, List.class, int.class);
+        var result = mm.var(MethodHandle.class).set(caller.revealDirect(mh))
+            .invoke(ArrayList.class, "invokeExact", new Object[] {int.class}, mm.param(0));
+        mm.return_(result);
+
+        return new ConstantCallSite(mm.finish());
+    }
+
+    @Test
     public void invokeNew() throws Exception {
         // Test that "new" can be used as a method name in place of calling the new_ method.
 

@@ -748,30 +748,6 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         return var;
     }
 
-    /**
-     * Returns a Variable of type MethodHandle.
-     */
-    private ConstantVar doMethodHandle(Type type,
-                                       OwnedVar instance,
-                                       String methodName,
-                                       Type returnType,
-                                       Type[] paramTypes)
-    {
-        if (type.isPrimitive()) {
-            type = type.box();
-        }
-
-        Type.Method method = type.findMethod(methodName, paramTypes, 0, 0, returnType, paramTypes);
-
-        int kind = method.isStatic() ? REF_invokeStatic
-            : (method.enclosingType().isInterface() ? REF_invokeInterface : REF_invokeVirtual);
-
-        ConstantPool.C_MemberRef ref = mConstants.addMethod(method);
-
-        return new ConstantVar(Type.from(MethodHandle.class),
-                               mConstants.addMethodHandle(kind, ref));
-    }
-
     @Override
     public Variable invoke(MethodHandle handle, Object... values) {
         MethodType mtype = handle.type();
@@ -4050,7 +4026,31 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                 }
             }
 
-            return doMethodHandle(type(), this, name, returnType, paramTypes);
+            Type type = type();
+            Type.Method method;
+            int kind;
+
+            if (name.equals("new") && (retType == null || returnType == type)) {
+                method = type.findMethod("<init>", paramTypes, -1, -1, null, paramTypes);
+                kind = REF_newInvokeSpecial;
+            } else {
+                if (type.isPrimitive()) {
+                    type = type.box();
+                }
+
+                method = type.findMethod(name, paramTypes, 0, 0, returnType, paramTypes);
+
+                if (method.isStatic()) {
+                    kind = REF_invokeStatic;
+                } else if (method.enclosingType().isInterface()) {
+                    kind = REF_invokeInterface;
+                } else {
+                    kind = REF_invokeVirtual;
+                }
+            }
+
+            return new ConstantVar(Type.from(MethodHandle.class),
+                                   mConstants.addMethodHandle(kind, mConstants.addMethod(method)));
         }
 
         @Override
