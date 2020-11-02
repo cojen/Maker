@@ -991,4 +991,36 @@ public class InvokeTest {
 
         return new ConstantCallSite(mm.finish());
     }
+
+    @Test
+    public void invokeNew() throws Exception {
+        // Test that "new" can be used as a method name in place of calling the new_ method.
+
+        ClassMaker cm = ClassMaker.begin().public_();
+        MethodMaker mm = cm.addMethod(null, "run").public_().static_();
+
+        var v1 = mm.var(ArrayList.class).invoke("new", 10);
+        var v2 = mm.var(String[].class).invoke("new", 10);
+
+        var v3 = mm.var(ArrayList.class)
+            .invoke(ArrayList.class, "new", new Object[] {int.class}, 10);
+        var v4 = mm.var(ArrayList.class)
+            .invoke((Object) null, "new", new Object[] {int.class}, 10);
+
+        var v5 = mm.var(String[].class).invoke(String[].class, "new", null, 10);
+
+        try {
+            mm.var(int.class).invoke("new", 10);
+        } catch (IllegalArgumentException e) {
+        }
+
+        var assertVar = mm.var(Assert.class);
+        assertVar.invoke("assertTrue", v1.instanceOf(ArrayList.class));
+        assertVar.invoke("assertTrue", v2.instanceOf(String[].class));
+        assertVar.invoke("assertTrue", v3.instanceOf(ArrayList.class));
+        assertVar.invoke("assertTrue", v4.instanceOf(ArrayList.class));
+        assertVar.invoke("assertTrue", v5.instanceOf(String[].class));
+
+        cm.finish().getMethod("run").invoke(null);
+    }
 }

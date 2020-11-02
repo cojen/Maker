@@ -545,7 +545,11 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
     @Override
     public Variable invoke(String name, Object... values) {
-        return doInvoke(name, 0, values);
+        if (name.equals("new")) {
+            return doNew(mClassMaker.type(), values, null);
+        } else {
+            return doInvoke(name, 0, values);
+        }
     }
 
     @Override
@@ -708,7 +712,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                     addPushOp(actualTypes[i], args[i]);
                 }
 
-                var vararg = new_(actualTypes[firstLen], args.length - i);
+                var vararg = doNew(actualTypes[firstLen], new Object[] {args.length - i}, null);
 
                 for (; i<args.length; i++) {
                     vararg.aset(i - firstLen, args[i]);
@@ -842,10 +846,10 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
     @Override
     public Variable new_(Object objType, Object... values) {
-        return new_(mClassMaker.typeFrom(objType), values);
+        return doNew(mClassMaker.typeFrom(objType), values, null);
     }
 
-    private Variable new_(Type type, Object... values) {
+    private Var doNew(Type type, Object[] values, Type[] specificParamTypes) {
         if (type.isArray()) {
             if (values == null || values.length == 0) {
                 throw new IllegalArgumentException("At least one dimension required");
@@ -4039,26 +4043,34 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
         @Override
         public Var invoke(String name, Object... values) {
-            return doInvoke(type(), this, name, 0, values, null, null);
+            if (name.equals("new")) {
+                return doNew(type(), values, null);
+            } else {
+                return doInvoke(type(), this, name, 0, values, null, null);
+            }
         }
 
         @Override
-        public Var invoke(Object returnType, String name, Object[] types, Object... values) {
-            Type specificReturnType = null;
-            Type[] specificParamTypes = null;
+        public Var invoke(Object retType, String name, Object[] types, Object... values) {
+            Type returnType = null;
+            Type[] paramTypes = null;
 
-            if (returnType != null) {
-                specificReturnType = mClassMaker.typeFrom(returnType);
+            if (retType != null) {
+                returnType = mClassMaker.typeFrom(retType);
             }
 
             if (types != null) {
-                specificParamTypes = new Type[types.length];
+                paramTypes = new Type[types.length];
                 for (int i=0; i<types.length; i++) {
-                    specificParamTypes[i] = mClassMaker.typeFrom(types[i]);
+                    paramTypes[i] = mClassMaker.typeFrom(types[i]);
                 }
             }
 
-            return doInvoke(type(), this, name, 0, values, specificReturnType, specificParamTypes);
+            if (name.equals("new") && (returnType == null || returnType == type())) {
+                return doNew(type(), values, paramTypes);
+            } else {
+                return doInvoke(type(), this, name, 0, values, returnType, paramTypes);
+            }
         }
 
         @Override
