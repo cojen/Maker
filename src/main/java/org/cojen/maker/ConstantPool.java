@@ -135,7 +135,7 @@ class ConstantPool {
         final MethodType mtype = info.getMethodType();
         final String name = info.getName();
 
-        final Constant ref;
+        final C_MemberRef ref;
 
         switch (kind) {
         default:
@@ -165,14 +165,7 @@ class ConstantPool {
         return addMethodHandle(kind, ref);
     }
 
-    C_MethodHandle addMethodHandle(Type.Method method) {
-        int kind = method.isStatic() ? REF_invokeStatic
-            : (method.enclosingType().isInterface() ? REF_invokeInterface : REF_invokeVirtual);
-
-        return addMethodHandle(kind, addMethod(method));
-    }
-
-    C_MethodHandle addMethodHandle(int kind, Constant ref) {
+    C_MethodHandle addMethodHandle(int kind, C_MemberRef ref) {
         return addConstant(new C_MethodHandle((byte) kind, ref));
     }
 
@@ -249,7 +242,7 @@ class ConstantPool {
         return constant;
     }
 
-    abstract static class Constant {
+    static abstract class Constant {
         final int mTag;
         int mIndex;
 
@@ -508,7 +501,7 @@ class ConstantPool {
         }
     }
 
-    static class C_MemberRef extends Constant {
+    static abstract class C_MemberRef extends Constant {
         final C_Class mClass;
         final C_NameAndType mNameAndType;
 

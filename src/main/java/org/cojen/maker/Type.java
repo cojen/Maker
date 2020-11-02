@@ -516,6 +516,45 @@ abstract class Type {
     }
 
     /**
+     * See comments for findMethods above.
+     *
+     * @throws IllegalStateException if not exactly one matching method is found
+     */
+    final Method findMethod(String methodName, Type[] params, int inherit, int staticAllowed,
+                            Type specificReturnType, Type[] specificParamTypes)
+    {
+        Set<Method> candidates = findMethods
+            (methodName, params, inherit, staticAllowed, specificReturnType, specificParamTypes);
+
+        if (candidates.size() == 1) {
+            return candidates.iterator().next();
+        }
+
+        if (candidates.isEmpty()) {
+            throw new IllegalStateException
+                ("No matching methods found for: " + name() + '.' + methodName);
+        }
+
+        var b = new StringBuilder()
+            .append("No best matching method found for: ")
+            .append(name()).append('.').append(methodName);
+
+        if (!candidates.isEmpty()) {
+            b.append(". Remaining candidates: ");
+            int amt = 0;
+            for (Type.Method m : candidates) {
+                if (amt > 0) {
+                    b.append(", ");
+                }
+                b.append(m);
+                amt++;
+            }
+        }
+
+        throw new IllegalStateException(b.toString());
+    }
+
+    /**
      * @throws IllegalStateException if type cannot have methods or if a conflict exists
      */
     Method defineMethod(boolean isStatic, Type returnType, String name, Type... paramTypes) {

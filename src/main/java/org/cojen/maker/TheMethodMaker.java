@@ -38,6 +38,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
+import static java.lang.invoke.MethodHandleInfo.*;
+
 import static java.util.Objects.*;
 
 import static org.cojen.maker.Opcodes.*;
@@ -633,20 +635,14 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             paramTypes[i] = addPushOp(null, args[i]);
         }
 
-        Set<Type.Method> candidates =
-            type.findMethods(methodName, paramTypes, inherit, staticAllowed,
-                             specificReturnType, specificParamTypes);
-
-        if (candidates.size() != 1) {
+        Type.Method method;
+        try {
+            method = type.findMethod(methodName, paramTypes, inherit, staticAllowed,
+                                     specificReturnType, specificParamTypes);
+        } catch (Throwable e) {
             rollback(savepoint);
-            if (candidates.isEmpty()) {
-                throw noCandidates(type, methodName);
-            } else {
-                throw noBestCandidate(type, methodName, candidates);
-            }
+            throw e;
         }
-
-        Type.Method method = candidates.iterator().next();
 
         // Check if a signature polymorphic method.
         if (!method.isStatic() && method.isVarargs()) {
@@ -765,47 +761,15 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             type = type.box();
         }
 
-        Set<Type.Method> candidates =
-            type.findMethods(methodName, paramTypes, 0, 0, returnType, paramTypes);
+        Type.Method method = type.findMethod(methodName, paramTypes, 0, 0, returnType, paramTypes);
 
-        if (candidates.size() != 1) {
-            if (candidates.isEmpty()) {
-                throw noCandidates(type, methodName);
-            } else {
-                throw noBestCandidate(type, methodName, candidates);
-            }
-        }
+        int kind = method.isStatic() ? REF_invokeStatic
+            : (method.enclosingType().isInterface() ? REF_invokeInterface : REF_invokeVirtual);
 
-        Type.Method method = candidates.iterator().next();
+        ConstantPool.C_MemberRef ref = mConstants.addMethod(method);
 
-        return new ConstantVar(Type.from(MethodHandle.class), mConstants.addMethodHandle(method));
-    }
-
-    private static IllegalStateException noCandidates(Type type, String name) {
-        return new IllegalStateException
-            ("No matching methods found for: " + type.name() + '.' + name);
-    }
-
-    private static IllegalStateException noBestCandidate(Type type, String name,
-                                                         Set<Type.Method> candidates)
-    {
-        var b = new StringBuilder()
-            .append("No best matching method found for: ")
-            .append(type.name()).append('.').append(name);
-
-        if (!candidates.isEmpty()) {
-            b.append(". Remaining candidates: ");
-            int amt = 0;
-            for (Type.Method m : candidates) {
-                if (amt > 0) {
-                    b.append(", ");
-                }
-                b.append(m);
-                amt++;
-            }
-        }
-
-        return new IllegalStateException(b.toString());
+        return new ConstantVar(Type.from(MethodHandle.class),
+                               mConstants.addMethodHandle(kind, ref));
     }
 
     @Override
@@ -1282,7 +1246,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
              (true, Type.from(CallSite.class), bootName, bootParams));
 
         ConstantPool.C_MethodHandle bootstrapHandle =
-            mConstants.addMethodHandle(MethodHandleInfo.REF_invokeStatic, ref);
+            mConstants.addMethodHandle(REF_invokeStatic, ref);
 
         int bi = mClassMaker.addBootstrapMethod(bootstrapHandle, bootArgs);
         String desc = Type.makeDescriptor(strType, valueTypes);
@@ -2197,8 +2161,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         ConstantPool.C_Method ref = mConstants.addMethod(bootstraps.iterator().next());
-        ConstantPool.C_MethodHandle bootHandle =
-            mConstants.addMethodHandle(MethodHandleInfo.REF_invokeStatic, ref);
+        ConstantPool.C_MethodHandle bootHandle = mConstants.addMethodHandle(REF_invokeStatic, ref);
 
         int slot = mClassMaker.addComplexConstant(value);
 
@@ -2278,7 +2241,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                  (true, retType, method, bootParams));
 
             ConstantPool.C_MethodHandle bootHandle =
-                mConstants.addMethodHandle(MethodHandleInfo.REF_invokeStatic, ref);
+                mConstants.addMethodHandle(REF_invokeStatic, ref);
 
             return mConstants.addDynamicConstant
                 (mClassMaker.addBootstrapMethod(bootHandle, new ConstantPool.Constant[0]),
@@ -4122,22 +4085,11 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                 types[3 + i] = type;
             }
 
-            Type thisType = type();
-            Set<Type.Method> candidates = thisType.findMethods(name, types, 0, 1, null, null);
-
-            if (candidates.size() != 1) {
-                if (candidates.isEmpty()) {
-                    throw noCandidates(thisType, name);
-                } else {
-                    throw noBestCandidate(thisType, name, candidates);
-                }
-            }
-
-            Type.Method bootstrap = candidates.iterator().next();
+            Type.Method bootstrap = type().findMethod(name, types, 0, 1, null, null);
 
             ConstantPool.C_Method ref = mConstants.addMethod(bootstrap);
             ConstantPool.C_MethodHandle bootHandle =
-                mConstants.addMethodHandle(MethodHandleInfo.REF_invokeStatic, ref);
+                mConstants.addMethodHandle(REF_invokeStatic, ref);
 
             Type[] bootTypes = bootstrap.paramTypes();
             var bootArgs = new ConstantPool.Constant[args.length];
@@ -4609,16 +4561,14 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
         @Override
         public ConstantVar methodHandleSet() {
-            int kind = mFieldRef.mField.isStatic() ?
-                MethodHandleInfo.REF_putStatic : MethodHandleInfo.REF_putField;
+            int kind = mFieldRef.mField.isStatic() ? REF_putStatic : REF_putField;
             return new ConstantVar(Type.from(MethodHandle.class),
                                    mConstants.addMethodHandle(kind, mFieldRef));
         }
 
         @Override
         public ConstantVar methodHandleGet() {
-            int kind = mFieldRef.mField.isStatic() ?
-                MethodHandleInfo.REF_getStatic : MethodHandleInfo.REF_getField;
+            int kind = mFieldRef.mField.isStatic() ? REF_getStatic : REF_getField;
             return new ConstantVar(Type.from(MethodHandle.class),
                                    mConstants.addMethodHandle(kind, mFieldRef));
         }
@@ -4800,7 +4750,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                      (true, vhType, bootName, bootParams));
 
                 ConstantPool.C_MethodHandle bootHandle =
-                    mConstants.addMethodHandle(MethodHandleInfo.REF_invokeStatic, ref);
+                    mConstants.addMethodHandle(REF_invokeStatic, ref);
 
                 ConstantPool.Constant[] bootArgs = {
                     mFieldRef.mClass, addLoadableConstant(null, mFieldRef.mField.type())
