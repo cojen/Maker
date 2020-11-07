@@ -111,7 +111,8 @@ public interface MethodMaker {
     }
 
     /**
-     * Returns the enclosing {@code ClassMaker} for this method.
+     * Returns the enclosing {@code ClassMaker} for this method, which can also be used as a
+     * type specification.
      *
      * @throws IllegalStateException if this is a standalone method
      */
@@ -204,7 +205,10 @@ public interface MethodMaker {
     public MethodMaker varargs();
 
     /**
-     * Returns a variable which represents the enclosing class of this method.
+     * Returns a variable which represents the enclosing class of this method. The type of the
+     * variable is always {@code java.lang.Class}.
+     *
+     * @see #classMaker()
      */
     public Variable class_();
 

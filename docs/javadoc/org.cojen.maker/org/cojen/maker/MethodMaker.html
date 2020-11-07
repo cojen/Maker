@@ -164,7 +164,8 @@ loadScripts(document, 'script');</script>
 <td class="col-first"><code><a href="ClassMaker.html" title="interface in org.cojen.maker">ClassMaker</a></code></td>
 <th class="col-second" scope="row"><code><span class="member-name-link"><a href="#classMaker()">classMaker</a></span>()</code></th>
 <td class="col-last">
-<div class="block">Returns the enclosing <code>ClassMaker</code> for this method.</div>
+<div class="block">Returns the enclosing <code>ClassMaker</code> for this method, which can also be used as a
+ type specification.</div>
 </td>
 </tr>
 <tr class="alt-color" id="i8">
@@ -432,7 +433,8 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="classMaker()">
 <h3>classMaker</h3>
 <div class="member-signature"><span class="return-type"><a href="ClassMaker.html" title="interface in org.cojen.maker">ClassMaker</a></span>&nbsp;<span class="member-name">classMaker</span>()</div>
-<div class="block">Returns the enclosing <code>ClassMaker</code> for this method.</div>
+<div class="block">Returns the enclosing <code>ClassMaker</code> for this method, which can also be used as a
+ type specification.</div>
 <dl class="notes">
 <dt>Throws:</dt>
 <dd><code><a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/lang/IllegalStateException.html" title="class or interface in java.lang" class="external-link">IllegalStateException</a></code> - if this is a standalone method</dd>
@@ -578,7 +580,12 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="class_()">
 <h3>class_</h3>
 <div class="member-signature"><span class="return-type"><a href="Variable.html" title="interface in org.cojen.maker">Variable</a></span>&nbsp;<span class="member-name">class_</span>()</div>
-<div class="block">Returns a variable which represents the enclosing class of this method.</div>
+<div class="block">Returns a variable which represents the enclosing class of this method. The type of the
+ variable is always <code>java.lang.Class</code>.</div>
+<dl class="notes">
+<dt>See Also:</dt>
+<dd><a href="#classMaker()"><code>classMaker()</code></a></dd>
+</dl>
 </section>
 </li>
 <li>
