@@ -129,27 +129,6 @@
           </configuration>
       </plugin>
 
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <version>2.22.2</version>
-        <dependencies>
-          <dependency>
-            <groupId>org.ow2.asm</groupId>
-            <artifactId>asm</artifactId>
-            <version>7.3.1</version>
-          </dependency>
-        </dependencies>
-        <configuration>
-          <!-- Why in the world does Surefire trim traces by default? -->
-          <trimStackTrace>false</trimStackTrace>
-          <useFile>false</useFile>
-          <parallel>classes</parallel>
-          <perCoreThreadCount>false</perCoreThreadCount>
-          <threadCount>6</threadCount>
-        </configuration>
-      </plugin>
-
     </plugins>
   </build>
 </project>
