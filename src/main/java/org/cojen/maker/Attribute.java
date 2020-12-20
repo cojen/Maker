@@ -75,11 +75,11 @@ abstract class Attribute extends Attributed {
     }
 
     static class SourceFile extends Attribute {
-        private final ConstantPool.C_UTF8 mSourcefile;
+        private final ConstantPool.C_UTF8 mSourceFile;
 
         SourceFile(ConstantPool cp, String fileName) {
             super(cp, "SourceFile");
-            mSourcefile = cp.addUTF8(fileName);
+            mSourceFile = cp.addUTF8(fileName);
         }
 
         @Override
@@ -89,7 +89,7 @@ abstract class Attribute extends Attributed {
 
         @Override
         void writeDataTo(BytesOut out) throws IOException {
-            out.writeShort(mSourcefile.mIndex);
+            out.writeShort(mSourceFile.mIndex);
         }
     }
 
@@ -299,8 +299,8 @@ abstract class Attribute extends Attributed {
                 out.writeShort(entry.mMethod.mIndex);
                 ConstantPool.Constant[] args = entry.mArgs;
                 out.writeShort(args.length);
-                for (int i=0; i<args.length; i++) {
-                    out.writeShort(args[i].mIndex);
+                for (ConstantPool.Constant arg : args) {
+                    out.writeShort(arg.mIndex);
                 }
             }
         }

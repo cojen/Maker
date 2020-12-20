@@ -132,7 +132,7 @@ public class ConstantsRegistry {
             int slot = mSize;
             if (slot >= mValues.length) {
                 mValues = Arrays.copyOf
-                    (mValues, (int) Math.min((long) Integer.MAX_VALUE, slot << 1));
+                    (mValues, (int) Math.min(Integer.MAX_VALUE, ((long) slot) << 1));
             }
             mValues[slot] = value;
             mSize = slot + 1;

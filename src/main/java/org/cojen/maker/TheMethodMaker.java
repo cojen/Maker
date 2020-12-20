@@ -31,7 +31,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -181,13 +180,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
         // Remove unvisited exception handlers.
         if (mExceptionHandlers != null) {
-            Iterator<Handler> it = mExceptionHandlers.iterator();
-            while (it.hasNext()) {
-                Handler h = it.next();
-                if (!h.mHandlerLab.mVisited) {
-                    it.remove();
-                }
-            }
+            mExceptionHandlers.removeIf(h -> !h.mHandlerLab.mVisited);
         }
 
         mVars = varList.toArray(new Var[varList.size()]);
@@ -867,7 +860,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                 }
             });
 
-            doInvoke(type, null, "<init>", -1, values, null, null);
+            doInvoke(type, null, "<init>", -1, values, null, specificParamTypes);
         }
 
         Var var = new Var(type);
@@ -1532,13 +1525,14 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     /**
      * Converts the item on the top of the stack. Must call canConvert first and pass in the code.
      */
-    private Type convert(Type from, Type to, int code) {
+    private void convert(Type from, Type to, int code) {
         if (code <= 0) {
-            return to;
+            return;
         }
 
         if (code < 5) {
-            return convertPrimitive(to, code);
+            convertPrimitive(to, code);
+            return;
         }
 
         if (code < 10) {
@@ -1548,7 +1542,8 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                 // Assume converting to Object/Number. Need something specific.
                 primTo = convertPrimitive(from.box(), code);
             }
-            return box(primTo);
+            box(primTo);
+            return;
         }
 
         if (code < 15) {
@@ -1558,7 +1553,8 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
         if (code < 20) {
             unbox(from);
-            return convertPrimitive(to, code - 15);
+            convertPrimitive(to, code - 15);
+            return;
         }
 
         throw new AssertionError();
@@ -1592,31 +1588,25 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
     /**
      * Box a primitive type on the stack, resulting in an object on the stack.
-     *
-     * @return object type
      */
-    private Type box(Type primType) {
+    private void box(Type primType) {
         Type objType = primType.box();
         Type.Method method = objType.defineMethod(true, objType, "valueOf", primType);
         appendOp(INVOKESTATIC, 1);
         appendShort(mConstants.addMethod(method).mIndex);
         stackPush(objType);
-        return objType;
     }
 
     /**
      * Unbox a boxed primitive type on the stack, resulting in a primitive type on the stack.
      * Can throw a NullPointerException at runtime.
-     *
-     * @return primitive type
      */
-    private Type unbox(Type objType) {
+    private void unbox(Type objType) {
         Type primType = objType.unbox();
         Type.Method method = objType.defineMethod(false, primType, primType.name() + "Value");
         appendOp(INVOKEVIRTUAL, 1);
         appendShort(mConstants.addMethod(method).mIndex);
         stackPush(primType);
-        return primType;
     }
 
     /**
@@ -2404,7 +2394,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     private void addSwitchOp(Lab defaultLabel, int[] cases, Lab[] labels) {
         // Determine which kind of switch to use based on encoding size.
         long tSize = 12 + 4 * (((long) cases[cases.length - 1]) - cases[0] + 1);
-        long lSize = 8 + 8 * cases.length;
+        long lSize = 8 + 8L * cases.length;
         byte op = (tSize <= lSize) ? TABLESWITCH : LOOKUPSWITCH;
         addOp(new SwitchOp(op, defaultLabel, cases, labels));
     }
@@ -2622,8 +2612,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                     localCodes = new int[numCodes];
 
                     int adjust = 0;
-                    for (int i=0; i<vars.length; i++) {
-                        Var var = vars[i];
+                    for (Var var : vars) {
                         int slot = var.mSlot;
                         int codeSlot = slot + adjust;
                         if (codeSlot >= localCodes.length) {
@@ -3364,12 +3353,9 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
         abstract void push();
 
-        /**
-         * @return actual type
-         */
-        Type push(Type type) {
+        void push(Type type) {
             push();
-            return addConversionOp(type(), type);
+            addConversionOp(type(), type);
         }
 
         void pushObject() {
