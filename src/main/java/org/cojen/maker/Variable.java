@@ -378,7 +378,7 @@ public interface Variable {
     public Variable neg();
 
     /**
-     * Compute the two's complement of this variable and assign the result to a new variable.
+     * Compute the bitwise complement of this variable and assign the result to a new variable.
      *
      * @return the result in a new variable, with the same type as this one
      * @throws IllegalStateException if this variable doesn't support the operation
