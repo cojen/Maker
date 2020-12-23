@@ -85,10 +85,14 @@ public interface FieldMaker {
     public FieldMaker synthetic();
 
     /**
-     * Set an initial constant value for this field.
+     * Set an initial constant value for this field. The allowed constants are the same as
+     * those allowed by the {@link Variable#set Variable.set} method. Complex constants can be
+     * assigned using a {@link ClassMaker#addClinit static initializer}.
      *
      * @return this
-     * @throws IllegalStateException if not a static field or if constant isn't supported
+     * @throws IllegalStateException if not a static field
+     * @throws IllegalArgumentException if the value type is unsupported, or if it's not
+     * compatible with the field type
      */
     public FieldMaker init(Object value);
 }

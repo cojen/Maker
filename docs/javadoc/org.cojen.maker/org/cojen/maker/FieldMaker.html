@@ -287,12 +287,16 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="init(java.lang.Object)">
 <h3>init</h3>
 <div class="member-signature"><span class="return-type"><a href="FieldMaker.html" title="interface in org.cojen.maker">FieldMaker</a></span>&nbsp;<span class="member-name">init</span>&#8203;(<span class="parameters"><a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>&nbsp;value)</span></div>
-<div class="block">Set an initial constant value for this field.</div>
+<div class="block">Set an initial constant value for this field. The allowed constants are the same as
+ those allowed by the <a href="Variable.html#set(java.lang.Object)"><code>Variable.set</code></a> method. Complex constants can be
+ assigned using a <a href="ClassMaker.html#addClinit()"><code>static initializer</code></a>.</div>
 <dl class="notes">
 <dt>Returns:</dt>
 <dd>this</dd>
 <dt>Throws:</dt>
-<dd><code><a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/lang/IllegalStateException.html" title="class or interface in java.lang" class="external-link">IllegalStateException</a></code> - if not a static field or if constant isn't supported</dd>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/lang/IllegalStateException.html" title="class or interface in java.lang" class="external-link">IllegalStateException</a></code> - if not a static field</dd>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if the value type is unsupported, or if it's not
+ compatible with the field type</dd>
 </dl>
 </section>
 </li>
