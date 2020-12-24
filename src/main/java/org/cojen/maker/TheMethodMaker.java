@@ -4853,7 +4853,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         void vhSet(String name, Object value) {
             mHandleVar.push();
 
-            Type[] allTypes = Arrays.copyOf(mCoordinateTypes, mCoordinateTypes.length + 1);
+            Type[] allTypes = new Type[mCoordinateTypes.length + 1];
 
             int i = 0;
             for (; i<mCoordinates.length; i++) {
@@ -4878,7 +4878,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         Var vhCas(String name, Type retType, Object expectedValue, Object newValue) {
             mHandleVar.push();
 
-            Type[] allTypes = Arrays.copyOf(mCoordinateTypes, mCoordinateTypes.length + 2);
+            Type[] allTypes = new Type[mCoordinateTypes.length + 2];
 
             int i = 0;
             for (; i<mCoordinates.length; i++) {
@@ -4908,7 +4908,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         Var vhGas(String name, Object value) {
             mHandleVar.push();
 
-            Type[] allTypes = Arrays.copyOf(mCoordinateTypes, mCoordinateTypes.length + 1);
+            Type[] allTypes = new Type[mCoordinateTypes.length + 1];
 
             int i = 0;
             for (; i<mCoordinates.length; i++) {
