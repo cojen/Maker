@@ -107,8 +107,12 @@ abstract class Type {
         } else if (type == null) {
             return Null.THE;
         } else {
-            throw new IllegalArgumentException("Unknown type: " + type);
+            String desc = ConstableSupport.THE.descriptorString(type);
+            if (desc != null) {
+                return from(loader, desc);
+            }
         }
+        throw new IllegalArgumentException("Unknown type: " + type);
     }
 
     /**

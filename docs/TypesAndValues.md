@@ -10,6 +10,7 @@ The following kinds of types are supported:
 - ClassMaker &mdash; Specifies the class being made.
 - Variable or Field &mdash; Specifies the type used by the given `Variable` or `Field`.
 - null &mdash; Specifies the `null` type or a context specific default such as `void.class`.
+- ClassDesc &mdash; Specifies a type descriptor. See `java.lang.constant.ClassDesc`.
 
 When making a factory method that constructs the class being made, pass the current `ClassMaker`. Unless explicitly specified, the actual name of the class being made isn't known until it's finished.
 
