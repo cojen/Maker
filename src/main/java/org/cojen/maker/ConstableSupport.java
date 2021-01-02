@@ -16,7 +16,9 @@
 
 package org.cojen.maker;
 
-import java.lang.constant.ClassDesc;
+import java.lang.constant.DynamicConstantDesc;
+
+import java.lang.invoke.TypeDescriptor;
 
 /**
  * Supports the java.lang.constant package, added in Java 12.
@@ -29,7 +31,7 @@ class ConstableSupport {
     static {
         ConstableSupport instance = null;
         try {
-            if (ClassDesc.class != null) {
+            if (TypeDescriptor.class != null) {
                 instance = new ConstableSupport();
             }
         } catch (LinkageError e) {
@@ -43,18 +45,23 @@ class ConstableSupport {
     }
 
     /**
-     * Returns a descriptor if given an instanceof ClassDesc, otherwise returns null.
+     * Returns null if not supported.
      */
-    String descriptorString(Object desc) {
-        if (desc instanceof ClassDesc) {
-            return ((ClassDesc) desc).descriptorString();
+    Type typeFrom(ClassLoader loader, Object type) {
+        TypeDescriptor.OfField desc;
+        if (type instanceof TypeDescriptor.OfField) {
+            desc = (TypeDescriptor.OfField) type;
+        } else if (type instanceof DynamicConstantDesc) {
+            desc = ((DynamicConstantDesc) type).constantType();
+        } else {
+            return null;
         }
-        return null;
+        return Type.from(loader, desc.descriptorString());
     }
 
     private static class Unsupported extends ConstableSupport {
         @Override
-        String descriptorString(Object desc) {
+        Type typeFrom(ClassLoader loader, Object type) {
             return null;
         }
     }
