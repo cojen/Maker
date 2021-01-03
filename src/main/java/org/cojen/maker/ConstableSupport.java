@@ -97,8 +97,6 @@ abstract class ConstableSupport {
             if (type instanceof TypeDescriptor.OfField) {
                 // This also handles ClassDesc, which extends TypeDescriptor.OfField.
                 desc = (TypeDescriptor.OfField) type;
-            } else if (type instanceof DynamicConstantDesc) {
-                desc = ((DynamicConstantDesc) type).constantType();
             } else {
                 return null;
             }
@@ -111,7 +109,7 @@ abstract class ConstableSupport {
                 return null;
             }
             var opt = ((Constable) value).describeConstable();
-            if (!opt.isPresent()) {
+            if (opt.isEmpty()) {
                 return null;
             }
             ConstantDesc desc = opt.get();
