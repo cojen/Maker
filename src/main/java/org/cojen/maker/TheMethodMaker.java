@@ -2047,6 +2047,11 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             new Var(constantType).field(((Enum) value).name()).push();
             return addConversionOp(constantType, type);
         } else {
+            ConstantVar c = ConstableSupport.THE.tryAddDynamicConstantVar(this, value);
+            if (c != null) {
+                c.push(type);
+                return type;
+            }
             throw unsupportedConstant(value);
         }
 
@@ -2222,6 +2227,11 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                 }
             }
             throw unsupportedConstant(value);
+        }
+
+        c = ConstableSupport.THE.tryAddDynamicConstant(this, type, value);
+        if (c != null) {
+            return c;
         }
 
         // Use ConstantsRegistry. In doing so, the generated class cannot be loaded from a file.

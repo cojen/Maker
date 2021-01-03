@@ -45,6 +45,7 @@ A value can be a `Variable`, a `Field` or a constant:
 - Enum
 - MethodType
 - MethodHandleInfo
+- Constable which is described by a DynamicConstantDesc
 
 Constants of type `MethodHandleInfo` are treated specially when assigning them to variable or parameters of type `MethodHandle`. A lookup is performed at runtime which resolves the `MethodHandle` instance.
 

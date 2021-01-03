@@ -16,6 +16,9 @@
 
 package org.cojen.maker;
 
+import java.lang.constant.Constable;
+import java.lang.constant.ConstantDesc;
+import java.lang.constant.DirectMethodHandleDesc;
 import java.lang.constant.DynamicConstantDesc;
 
 import java.lang.invoke.TypeDescriptor;
@@ -25,16 +28,16 @@ import java.lang.invoke.TypeDescriptor;
  *
  * @author Brian S O'Neill
  */
-class ConstableSupport {
+abstract class ConstableSupport {
     static final ConstableSupport THE;
 
     static {
         ConstableSupport instance = null;
         try {
-            if (TypeDescriptor.class != null) {
-                instance = new ConstableSupport();
+            if (Constable.class != null) {
+                instance = new Supported();
             }
-        } catch (LinkageError e) {
+        } catch (NoClassDefFoundError e) {
         }
 
         if (instance == null) {
@@ -47,21 +50,86 @@ class ConstableSupport {
     /**
      * Returns null if not supported.
      */
-    Type typeFrom(ClassLoader loader, Object type) {
-        TypeDescriptor.OfField desc;
-        if (type instanceof TypeDescriptor.OfField) {
-            desc = (TypeDescriptor.OfField) type;
-        } else if (type instanceof DynamicConstantDesc) {
-            desc = ((DynamicConstantDesc) type).constantType();
-        } else {
+    abstract Type typeFrom(ClassLoader loader, Object type);
+
+    /**
+     * Returns null if not supported.
+     */
+    abstract DynamicConstantDesc descFrom(Object value);
+
+    /**
+     * Returns null if not supported.
+     *
+     * @param type optional type of value to expect
+     */
+    final ConstantPool.Constant tryAddDynamicConstant(TheMethodMaker mm, Type type, Object value) {
+        TheMethodMaker.ConstantVar cvar = tryAddDynamicConstantVar(mm, value);
+        if (cvar == null) {
             return null;
         }
-        return Type.from(loader, desc.descriptorString());
+        if (type != null && !type.isAssignableFrom(cvar.type())) {
+            throw new IllegalStateException
+                ("Automatic conversion disallowed: " + cvar.type().name() + " to " + type.name());
+        }
+        return cvar.mConstant;
+    }
+
+    /**
+     * Returns null if not supported.
+     */
+    final TheMethodMaker.ConstantVar tryAddDynamicConstantVar(TheMethodMaker mm, Object value) {
+        DynamicConstantDesc desc = descFrom(value);
+        if (desc == null) {
+            return null;
+        }
+        Type type = mm.mClassMaker.typeFrom(desc.constantType().descriptorString());
+        DirectMethodHandleDesc mdesc = desc.bootstrapMethod();
+        Variable constant = mm.var(mdesc.owner())
+            .condy(mdesc.methodName(), (Object[]) desc.bootstrapArgs())
+            .invoke(type, desc.constantName());
+        return (TheMethodMaker.ConstantVar) constant;
+    }
+
+    private static class Supported extends ConstableSupport {
+        @Override
+        Type typeFrom(ClassLoader loader, Object type) {
+            TypeDescriptor.OfField desc;
+            if (type instanceof TypeDescriptor.OfField) {
+                // This also handles ClassDesc, which extends TypeDescriptor.OfField.
+                desc = (TypeDescriptor.OfField) type;
+            } else if (type instanceof DynamicConstantDesc) {
+                desc = ((DynamicConstantDesc) type).constantType();
+            } else {
+                return null;
+            }
+            return Type.from(loader, desc.descriptorString());
+        }
+
+        @Override
+        DynamicConstantDesc descFrom(Object value) {
+            if (!(value instanceof Constable)) {
+                return null;
+            }
+            var opt = ((Constable) value).describeConstable();
+            if (!opt.isPresent()) {
+                return null;
+            }
+            ConstantDesc desc = opt.get();
+            if (!(desc instanceof DynamicConstantDesc)) {
+                return null;
+            }
+            return (DynamicConstantDesc) desc;
+        }
     }
 
     private static class Unsupported extends ConstableSupport {
         @Override
         Type typeFrom(ClassLoader loader, Object type) {
+            return null;
+        }
+
+        @Override
+        DynamicConstantDesc descFrom(Object value) {
             return null;
         }
     }

@@ -38,7 +38,7 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * @author Brian S O'Neill
  */
-abstract class Type {
+abstract class Type implements Typed {
     // Note: These codes match those used by the stack map table attribute.
     static final int
         SM_TOP = 0,
@@ -242,6 +242,11 @@ abstract class Type {
             b.append(type.descriptor());
         }
         return b.append(')').append(returnType.descriptor()).toString();
+    }
+
+    @Override
+    public Type type() {
+        return this;
     }
 
     /**
