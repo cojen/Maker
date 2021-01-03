@@ -62,33 +62,13 @@ abstract class ConstableSupport {
      *
      * @param type optional type of value to expect
      */
-    final ConstantPool.Constant tryAddDynamicConstant(TheMethodMaker mm, Type type, Object value) {
-        TheMethodMaker.ConstantVar cvar = tryAddDynamicConstantVar(mm, value);
-        if (cvar == null) {
-            return null;
-        }
-        if (type != null && !type.isAssignableFrom(cvar.type())) {
-            throw new IllegalStateException
-                ("Automatic conversion disallowed: " + cvar.type().name() + " to " + type.name());
-        }
-        return cvar.mConstant;
-    }
+    abstract ConstantPool.Constant tryAddDynamicConstant(TheMethodMaker mm,
+                                                         Type type, Object value);
 
     /**
      * Returns null if not supported.
      */
-    final TheMethodMaker.ConstantVar tryAddDynamicConstantVar(TheMethodMaker mm, Object value) {
-        DynamicConstantDesc desc = descFrom(value);
-        if (desc == null) {
-            return null;
-        }
-        Type type = mm.mClassMaker.typeFrom(desc.constantType().descriptorString());
-        DirectMethodHandleDesc mdesc = desc.bootstrapMethod();
-        Variable constant = mm.var(mdesc.owner())
-            .condy(mdesc.methodName(), (Object[]) desc.bootstrapArgs())
-            .invoke(type, desc.constantName());
-        return (TheMethodMaker.ConstantVar) constant;
-    }
+    abstract TheMethodMaker.ConstantVar tryAddDynamicConstantVar(TheMethodMaker mm, Object value);
 
     private static class Supported extends ConstableSupport {
         @Override
@@ -118,6 +98,34 @@ abstract class ConstableSupport {
             }
             return (DynamicConstantDesc) desc;
         }
+
+        @Override
+        ConstantPool.Constant tryAddDynamicConstant(TheMethodMaker mm, Type type, Object value) {
+            TheMethodMaker.ConstantVar cvar = tryAddDynamicConstantVar(mm, value);
+            if (cvar == null) {
+                return null;
+            }
+            if (type != null && !type.isAssignableFrom(cvar.type())) {
+                throw new IllegalStateException
+                    ("Automatic conversion disallowed: " +
+                     cvar.type().name() + " to " + type.name());
+            }
+            return cvar.mConstant;
+        }
+
+        @Override
+        TheMethodMaker.ConstantVar tryAddDynamicConstantVar(TheMethodMaker mm, Object value) {
+            DynamicConstantDesc desc = descFrom(value);
+            if (desc == null) {
+                return null;
+            }
+            Type type = mm.mClassMaker.typeFrom(desc.constantType().descriptorString());
+            DirectMethodHandleDesc mdesc = desc.bootstrapMethod();
+            Variable constant = mm.var(mdesc.owner())
+                .condy(mdesc.methodName(), (Object[]) desc.bootstrapArgs())
+                .invoke(type, desc.constantName());
+            return (TheMethodMaker.ConstantVar) constant;
+        }
     }
 
     private static class Unsupported extends ConstableSupport {
@@ -128,6 +136,16 @@ abstract class ConstableSupport {
 
         @Override
         DynamicConstantDesc descFrom(Object value) {
+            return null;
+        }
+
+        @Override
+        ConstantPool.Constant tryAddDynamicConstant(TheMethodMaker mm, Type type, Object value) {
+            return null;
+        }
+
+        @Override
+        TheMethodMaker.ConstantVar tryAddDynamicConstantVar(TheMethodMaker mm, Object value) {
             return null;
         }
     }
