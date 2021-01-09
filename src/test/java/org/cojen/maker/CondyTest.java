@@ -17,6 +17,8 @@
 package org.cojen.maker;
 
 import java.lang.constant.ClassDesc;
+import java.lang.constant.Constable;
+import java.lang.constant.ConstantDesc;
 import java.lang.constant.DirectMethodHandleDesc;
 import java.lang.constant.DynamicConstantDesc;
 import java.lang.constant.MethodHandleDesc;
@@ -25,6 +27,7 @@ import java.lang.constant.MethodTypeDesc;
 import java.lang.invoke.*;
 
 import java.util.ArrayList;
+import java.util.Optional;
 import java.util.Vector;
 
 import org.junit.*;
@@ -114,6 +117,30 @@ public class CondyTest {
         throws Exception
     {
         return String.valueOf(arg1);
+    }
+
+    @Test
+    public void bootstrapWithPrimitiveValue() throws Exception {
+        // Test passing a special constant (a short) to a bootstrap method. As of Java 12, it
+        // will use Constable and DynamicConstantDesc. For Java 11, the ConstantsRegistry is
+        // used instead.
+
+        ClassMaker cm = ClassMaker.begin().public_();
+        MethodMaker mm = cm.addMethod(null, "run").static_().public_();
+
+        var v0 = mm.var(CondyTest.class);
+        var assertVar = mm.var(Assert.class);
+
+        var v1 = v0.condy("boot_s", (short) 12345).invoke(String.class, "dummy");
+        assertVar.invoke("assertEquals", "12345", v1);
+
+        cm.finish().getMethod("run").invoke(null);
+    }
+
+    public static Object boot_s(MethodHandles.Lookup lookup, String name, Class type, short arg)
+        throws Exception
+    {
+        return String.valueOf(arg);
     }
 
     @Test
@@ -340,6 +367,9 @@ public class CondyTest {
 
     @Test
     public void classDesc() throws Exception {
+        // ClassDesc added in Java 12.
+        Assume.assumeTrue(Runtime.getRuntime().version().feature() >= 12);
+
         ClassDesc cd0 = ClassDesc.of("java.lang.String").arrayType();
         ClassDesc cd1 = ClassDesc.ofDescriptor("I");
         ClassDesc cd2 = ClassDesc.ofDescriptor("I").arrayType();
@@ -367,6 +397,9 @@ public class CondyTest {
 
     @Test
     public void methodTypeDesc() throws Exception {
+        // MethodTypeDesc added in Java 12.
+        Assume.assumeTrue(Runtime.getRuntime().version().feature() >= 12);
+
         MethodTypeDesc mtd0 = MethodTypeDesc.ofDescriptor("(Ljava/lang/String;)I");
 
         ClassMaker cm = ClassMaker.begin().public_();
@@ -388,6 +421,9 @@ public class CondyTest {
     @Test
     @SuppressWarnings("unchecked")
     public void methodHandleDesc() throws Throwable {
+        // MethodHandleDesc added in Java 12.
+        Assume.assumeTrue(Runtime.getRuntime().version().feature() >= 12);
+
         ClassDesc cd0 = ClassDesc.of(Vector.class.getName());
         ClassDesc cd1 = ClassDesc.ofDescriptor("I");
         ClassDesc cd2 = ClassDesc.of(Object.class.getName());
@@ -461,6 +497,9 @@ public class CondyTest {
 
     @Test
     public void dynamicConstantDesc() throws Exception {
+        // DynamicConstantDesc added in Java 12.
+        Assume.assumeTrue(Runtime.getRuntime().version().feature() >= 12);
+
         ClassDesc cd0 = ClassDesc.of(CondyTest.class.getName());
         ClassDesc cd1 = ClassDesc.of(MethodHandles.Lookup.class.getName());
         ClassDesc cd2 = ClassDesc.of(String.class.getName());
@@ -491,5 +530,86 @@ public class CondyTest {
 
     public static String dynBoot(MethodHandles.Lookup lookup, String name, Class type, int arg) {
         return "hello-" + arg;
+    }
+
+    @Test
+    public void dynamicConstantAssign() throws Exception {
+        // DynamicConstantDesc added in Java 12.
+        Assume.assumeTrue(Runtime.getRuntime().version().feature() >= 12);
+
+        ClassMaker cm = ClassMaker.begin().public_();
+        MethodMaker mm = cm.addMethod(Object.class, "run").static_().public_();
+
+        var v = mm.var(Object.class);
+        v.set(new MagicConstant(100));
+        mm.return_(v);
+
+        Object result = cm.finish().getMethod("run").invoke(null);
+
+        assertTrue(result instanceof MagicConstant);
+        assertEquals(100, ((MagicConstant) result).value);
+    }
+
+    public static class MagicBooter {
+        // Hide inside another class to prevent linkage errors when running pre Java 12.
+        public static MagicConstant boot_magic(MethodHandles.Lookup lookup, String name, Class type,
+                                               int value)
+            throws Exception
+        {
+            return new MagicConstant(value);
+        }
+    }
+
+    public static class MagicConstant implements Constable {
+        final int value;
+
+        MagicConstant(int value) {
+            this.value = value;
+        }
+
+        @Override
+        public Optional<? extends ConstantDesc> describeConstable() {
+            DynamicConstantDesc desc = DynamicConstantDesc
+                .of(MethodHandleDesc.of
+                    (DirectMethodHandleDesc.Kind.STATIC,
+                     MagicBooter.class.describeConstable().get(),
+                     "boot_magic",
+                     "(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;" +
+                     "Ljava/lang/Class;I)Lorg/cojen/maker/CondyTest$MagicConstant;"),
+                    value);
+
+            return Optional.of(desc);
+        }
+
+        @Override
+        public String toString() {
+            return "magic-" + value;
+        }
+    }
+
+    @Test
+    public void dynamicConstantAssignForBootstrap() throws Exception {
+        // DynamicConstantDesc added in Java 12.
+        Assume.assumeTrue(Runtime.getRuntime().version().feature() >= 12);
+
+        // Pass a dynamic constant to a bootstrap method.
+
+        ClassMaker cm = ClassMaker.begin().public_();
+        MethodMaker mm = cm.addMethod(Object.class, "run").static_().public_();
+
+        var c = new MagicConstant(123);
+        var bootstrap = mm.var(CondyTest.class).condy("boot_magic2", c);
+        var v = bootstrap.invoke(String.class, "hello ");
+        mm.return_(v);
+        
+        Object result = cm.finish().getMethod("run").invoke(null);
+        assertEquals("hello magic-123", result);
+    }
+
+    public static String boot_magic2(MethodHandles.Lookup lookup, String name, Class type,
+                                     Object magic)
+        throws Exception
+    {
+        return name + magic.toString();
     }
 }

@@ -17,6 +17,7 @@
 package org.cojen.maker;
 
 import java.lang.constant.ClassDesc;
+import java.lang.constant.Constable;
 import java.lang.constant.ConstantDesc;
 import java.lang.constant.DirectMethodHandleDesc;
 import java.lang.constant.DynamicConstantDesc;
@@ -61,7 +62,7 @@ abstract class ConstableSupport {
     /**
      * Returns null if not supported.
      *
-     * @param value expected to be a ConstantDesc, but not ClassDesc
+     * @param value expected to be a custom Constable or ConstantDesc
      */
     abstract TheMethodMaker.ConstantVar toConstantVar(TheMethodMaker mm, Object value);
 
@@ -104,6 +105,16 @@ abstract class ConstableSupport {
                 constant = cp.addDynamicConstant
                     (mm.mClassMaker.addBootstrapMethod(bootHandle, bootConstants),
                      dcd.constantName(), type);
+            } else if (value instanceof ClassDesc) {
+                type = Type.from(Class.class);
+                constant = mm.addLoadableConstant
+                    (type, mm.mClassMaker.typeFrom(((ClassDesc) value).descriptorString()));
+            } else if (value instanceof Constable) {
+                var opt = ((Constable) value).describeConstable();
+                if (opt.isEmpty()) {
+                    return null;
+                }
+                return toConstantVar(mm, opt.get());
             } else {
                 return null;
             }
