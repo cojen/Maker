@@ -2161,7 +2161,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
      *
      * @param type expected constant type; can pass null to derive from the arg itself
      */
-    private ConstantPool.Constant addLoadableConstant(Type type, Object value) {
+    ConstantPool.Constant addLoadableConstant(Type type, Object value) {
         ConstantPool.Constant c = mConstants.tryAddLoadableConstant(value);
         if (c != null) {
             return c;
@@ -2237,6 +2237,11 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                 }
             }
             throw unsupportedConstant(value);
+        }
+
+        ConstantVar cv = ConstableSupport.THE.toConstantVar(this, value);
+        if (cv != null) {
+            return cv.mConstant;
         }
 
         // Use ConstantsRegistry. In doing so, the generated class cannot be loaded from a file.

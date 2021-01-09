@@ -17,7 +17,9 @@
 package org.cojen.maker;
 
 import java.lang.constant.ClassDesc;
+import java.lang.constant.ConstantDesc;
 import java.lang.constant.DirectMethodHandleDesc;
+import java.lang.constant.DynamicConstantDesc;
 import java.lang.constant.MethodTypeDesc;
 
 import java.lang.invoke.MethodHandle;
@@ -83,6 +85,25 @@ abstract class ConstableSupport {
             } else if (value instanceof DirectMethodHandleDesc) {
                 type = Type.from(MethodHandle.class);
                 constant = addMethodHandle(mm, (DirectMethodHandleDesc) value);
+            } else if (value instanceof DynamicConstantDesc) {
+                var dcd = (DynamicConstantDesc) value;
+                type = mm.mClassMaker.typeFrom(dcd.constantType().descriptorString());
+
+                DirectMethodHandleDesc bootDesc = dcd.bootstrapMethod();
+                ConstantPool.C_MethodHandle bootHandle = addMethodHandle(mm, bootDesc);
+
+                ConstantDesc[] bootArgs = dcd.bootstrapArgs();
+                var bootConstants = new ConstantPool.Constant[bootArgs.length];
+
+                ConstantPool cp = mm.mConstants;
+
+                for (int i=0; i<bootArgs.length; i++) {
+                    bootConstants[i] = mm.addLoadableConstant(null, bootArgs[i]);
+                }
+
+                constant = cp.addDynamicConstant
+                    (mm.mClassMaker.addBootstrapMethod(bootHandle, bootConstants),
+                     dcd.constantName(), type);
             } else {
                 return null;
             }

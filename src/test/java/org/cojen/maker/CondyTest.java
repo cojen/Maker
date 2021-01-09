@@ -18,6 +18,7 @@ package org.cojen.maker;
 
 import java.lang.constant.ClassDesc;
 import java.lang.constant.DirectMethodHandleDesc;
+import java.lang.constant.DynamicConstantDesc;
 import java.lang.constant.MethodHandleDesc;
 import java.lang.constant.MethodTypeDesc;
 
@@ -456,5 +457,39 @@ public class CondyTest {
 
     public static class SomeClass {
         public int some_field;
+    }
+
+    @Test
+    public void dynamicConstantDesc() throws Exception {
+        ClassDesc cd0 = ClassDesc.of(CondyTest.class.getName());
+        ClassDesc cd1 = ClassDesc.of(MethodHandles.Lookup.class.getName());
+        ClassDesc cd2 = ClassDesc.of(String.class.getName());
+        ClassDesc cd3 = ClassDesc.of(Class.class.getName());
+        ClassDesc cd4 = ClassDesc.ofDescriptor("I");
+
+        MethodTypeDesc mtd0 = MethodTypeDesc.of(cd2, cd1, cd2, cd3, cd4);
+
+        DirectMethodHandleDesc boot = MethodHandleDesc.ofMethod
+            (DirectMethodHandleDesc.Kind.STATIC, cd0, "dynBoot", mtd0);
+
+        DynamicConstantDesc dcd0 = DynamicConstantDesc.of(boot, 10);
+
+        ClassMaker cm = ClassMaker.begin().public_();
+        MethodMaker mm = cm.addMethod(Object[].class, "test").public_().static_();
+
+        var c0 = mm.var(String.class).set(dcd0);
+
+        var result = mm.new_(Object[].class, 1);
+        result.aset(0, c0);
+
+        mm.return_(result);
+
+        Object[] actual = (Object[]) cm.finish().getMethod("test").invoke(null);
+
+        assertEquals("hello-10", actual[0]);
+    }
+
+    public static String dynBoot(MethodHandles.Lookup lookup, String name, Class type, int arg) {
+        return "hello-" + arg;
     }
 }
