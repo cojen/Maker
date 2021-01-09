@@ -38,7 +38,7 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * @author Brian S O'Neill
  */
-abstract class Type implements Typed {
+abstract class Type {
     // Note: These codes match those used by the stack map table attribute.
     static final int
         SM_TOP = 0,
@@ -107,12 +107,8 @@ abstract class Type implements Typed {
         } else if (type == null) {
             return Null.THE;
         } else {
-            Type tt = ConstableSupport.THE.typeFrom(loader, type);
-            if (tt != null) {
-                return tt;
-            }
+            throw new IllegalArgumentException("Unknown type: " + type);
         }
-        throw new IllegalArgumentException("Unknown type: " + type);
     }
 
     /**
@@ -242,11 +238,6 @@ abstract class Type implements Typed {
             b.append(type.descriptor());
         }
         return b.append(')').append(returnType.descriptor()).toString();
-    }
-
-    @Override
-    public Type type() {
-        return this;
     }
 
     /**
