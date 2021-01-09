@@ -2047,7 +2047,22 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             new Var(constantType).field(((Enum) value).name()).push();
             return addConversionOp(constantType, type);
         } else {
-            throw unsupportedConstant(value);
+            Type actualType = ConstableSupport.THE.toConstantType(this, value);
+            if (actualType != null) {
+                constantType = Type.from(Class.class);
+                if (actualType.isPrimitive()) {
+                    new Var(actualType.box()).field("TYPE").push();
+                    return addConversionOp(constantType, type);
+                }
+                value = actualType;
+            } else {
+                ConstantVar cv = ConstableSupport.THE.toConstantVar(this, value);
+                if (cv != null) {
+                    cv.push(type);
+                    return type;
+                }
+                throw unsupportedConstant(value);
+            }
         }
 
         addOp(new BasicConstantOp(value, constantType));

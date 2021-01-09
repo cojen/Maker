@@ -16,9 +16,15 @@
 
 package org.cojen.maker;
 
+import java.lang.constant.ClassDesc;
+import java.lang.constant.DirectMethodHandleDesc;
+import java.lang.constant.MethodHandleDesc;
+import java.lang.constant.MethodTypeDesc;
+
 import java.lang.invoke.*;
 
 import java.util.ArrayList;
+import java.util.Vector;
 
 import org.junit.*;
 import static org.junit.Assert.*;
@@ -328,5 +334,127 @@ public class CondyTest {
             // Stolen!
             assertTrue(e.getCause() instanceof IllegalStateException);
         }
+    }
+
+
+    @Test
+    public void classDesc() throws Exception {
+        ClassDesc cd0 = ClassDesc.of("java.lang.String").arrayType();
+        ClassDesc cd1 = ClassDesc.ofDescriptor("I");
+        ClassDesc cd2 = ClassDesc.ofDescriptor("I").arrayType();
+
+        ClassMaker cm = ClassMaker.begin().public_();
+        MethodMaker mm = cm.addMethod(Class[].class, "test").public_().static_();
+
+        var c0 = mm.var(Class.class).set(cd0);
+        var c1 = mm.var(Class.class).set(cd1);
+        var c2 = mm.var(Class.class).set(cd2);
+
+        var result = mm.new_(Class[].class, 3);
+        result.aset(0, c0);
+        result.aset(1, c1);
+        result.aset(2, c2);
+
+        mm.return_(result);
+
+        Class[] actual = (Class[]) cm.finish().getMethod("test").invoke(null);
+
+        assertEquals(String[].class, actual[0]);
+        assertEquals(int.class, actual[1]);
+        assertEquals(int[].class, actual[2]);
+    }
+
+    @Test
+    public void methodTypeDesc() throws Exception {
+        MethodTypeDesc mtd0 = MethodTypeDesc.ofDescriptor("(Ljava/lang/String;)I");
+
+        ClassMaker cm = ClassMaker.begin().public_();
+        MethodMaker mm = cm.addMethod(MethodType[].class, "test").public_().static_();
+
+        var c0 = mm.var(MethodType.class).set(mtd0);
+
+        var result = mm.new_(MethodType[].class, 1);
+        result.aset(0, c0);
+
+        mm.return_(result);
+
+        MethodType[] actual = (MethodType[]) cm.finish().getMethod("test").invoke(null);
+
+        MethodType mt = MethodType.methodType(int.class, String.class);
+        assertEquals(mt, actual[0]);
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void methodHandleDesc() throws Throwable {
+        ClassDesc cd0 = ClassDesc.of(Vector.class.getName());
+        ClassDesc cd1 = ClassDesc.ofDescriptor("I");
+        ClassDesc cd2 = ClassDesc.of(Object.class.getName());
+        ClassDesc cd3 = ClassDesc.of(CondyTest.class.getName());
+        ClassDesc cd4 = ClassDesc.of(SomeClass.class.getName());
+
+        MethodTypeDesc mtd0 = MethodTypeDesc.ofDescriptor("(I)Ljava/lang/Object;");
+
+        DirectMethodHandleDesc mhd0 = MethodHandleDesc.ofConstructor(cd0, cd1);
+        DirectMethodHandleDesc mhd1 = MethodHandleDesc.ofMethod
+            (DirectMethodHandleDesc.Kind.VIRTUAL, cd0, "get", mtd0);
+
+        DirectMethodHandleDesc mhd2 = MethodHandleDesc.ofField
+            (DirectMethodHandleDesc.Kind.STATIC_GETTER, cd3, "test_field", cd1);
+        DirectMethodHandleDesc mhd3 = MethodHandleDesc.ofField
+            (DirectMethodHandleDesc.Kind.STATIC_SETTER, cd3, "test_field", cd1);
+
+        DirectMethodHandleDesc mhd4 = MethodHandleDesc.ofField
+            (DirectMethodHandleDesc.Kind.GETTER, cd4, "some_field", cd1);
+        DirectMethodHandleDesc mhd5 = MethodHandleDesc.ofField
+            (DirectMethodHandleDesc.Kind.SETTER, cd4, "some_field", cd1);
+
+        ClassMaker cm = ClassMaker.begin().public_();
+        MethodMaker mm = cm.addMethod(MethodHandle[].class, "test").public_().static_();
+
+        var c0 = mm.var(MethodHandle.class).set(mhd0);
+        var c1 = mm.var(MethodHandle.class).set(mhd1);
+        var c2 = mm.var(MethodHandle.class).set(mhd2);
+        var c3 = mm.var(MethodHandle.class).set(mhd3);
+        var c4 = mm.var(MethodHandle.class).set(mhd4);
+        var c5 = mm.var(MethodHandle.class).set(mhd5);
+
+        var result = mm.new_(MethodHandle[].class, 6);
+        result.aset(0, c0);
+        result.aset(1, c1);
+        result.aset(2, c2);
+        result.aset(3, c3);
+        result.aset(4, c4);
+        result.aset(5, c5);
+
+        mm.return_(result);
+
+        MethodHandle[] handles = (MethodHandle[]) cm.finish().getMethod("test").invoke(null);
+
+        Vector obj0 = (Vector) handles[0].invoke(10);
+        assertEquals(10, obj0.capacity());
+        obj0.add("hello");
+
+        assertEquals("hello", handles[1].invoke(obj0, 0));
+
+        test_field = 123;
+        assertEquals(123, (int) handles[2].invoke());
+
+        handles[3].invoke(999);
+        assertEquals(999, test_field);
+
+        var sc = new SomeClass();
+        sc.some_field = 10;
+
+        assertEquals(10, (int) handles[4].invoke(sc));
+
+        handles[5].invoke(sc, 321);
+        assertEquals(321, sc.some_field);
+    }
+
+    public static int test_field;
+
+    public static class SomeClass {
+        public int some_field;
     }
 }

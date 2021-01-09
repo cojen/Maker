@@ -217,7 +217,7 @@ class ConstantPool {
         return null;
     }
 
-    private C_MethodType addMethodType(String typeDesc) {
+    C_MethodType addMethodType(String typeDesc) {
         return addConstant(new C_MethodType(addUTF8(typeDesc)));
     }
 
