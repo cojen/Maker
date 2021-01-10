@@ -10,6 +10,7 @@ The following kinds of types are supported:
 - ClassMaker &mdash; Specifies the class being made.
 - Variable or Field &mdash; Specifies the type used by the given `Variable` or `Field`.
 - null &mdash; Specifies the `null` type or a context specific default such as `void.class`.
+- ClassDesc &mdash; Specifies a type descriptor.
 
 When making a factory method that constructs the class being made, pass the current `ClassMaker`. Unless explicitly specified, the actual name of the class being made isn't known until it's finished.
 
@@ -44,8 +45,10 @@ A value can be a `Variable`, a `Field` or a constant:
 - Enum
 - MethodType
 - MethodHandleInfo
+- ConstantDesc
+- Constable
 
-Constants of type `MethodHandleInfo` are treated specially when assigning them to variable or parameters of type `MethodHandle`. A lookup is performed at runtime which resolves the `MethodHandle` instance.
+Constants of type `MethodHandleInfo` are treated specially when assigning them to variable or parameters of type `MethodHandle`. A lookup is performed at runtime which resolves the `MethodHandle` instance. Handling of `ConstantDesc` and `Constable` is also treated specially. The actual type is determined by the resolved constant.
 
 Constants that aren't in the above set can be specified via `Variable.setConstant` or `Variable.condy`. The `setConstant` method supports any kind of object, but this feature only works for classes which are directly made. If the class is written to a file and then loaded from it, the constant won't be found, resulting in a linkage error.
 
