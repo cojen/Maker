@@ -506,12 +506,12 @@ public class CondyTest {
         ClassDesc cd3 = ClassDesc.of(Class.class.getName());
         ClassDesc cd4 = ClassDesc.ofDescriptor("I");
 
-        MethodTypeDesc mtd0 = MethodTypeDesc.of(cd2, cd1, cd2, cd3, cd4);
+        MethodTypeDesc mtd0 = MethodTypeDesc.of(cd2, cd1, cd2, cd3, cd4, cd3);
 
         DirectMethodHandleDesc boot = MethodHandleDesc.ofMethod
             (DirectMethodHandleDesc.Kind.STATIC, cd0, "dynBoot", mtd0);
 
-        DynamicConstantDesc dcd0 = DynamicConstantDesc.of(boot, 10);
+        DynamicConstantDesc dcd0 = DynamicConstantDesc.of(boot, 10, cd2);
 
         ClassMaker cm = ClassMaker.begin().public_();
         MethodMaker mm = cm.addMethod(Object[].class, "test").public_().static_();
@@ -525,11 +525,13 @@ public class CondyTest {
 
         Object[] actual = (Object[]) cm.finish().getMethod("test").invoke(null);
 
-        assertEquals("hello-10", actual[0]);
+        assertEquals("hello-10:String", actual[0]);
     }
 
-    public static String dynBoot(MethodHandles.Lookup lookup, String name, Class type, int arg) {
-        return "hello-" + arg;
+    public static String dynBoot(MethodHandles.Lookup lookup, String name, Class type,
+                                 int arg, Class someClass)
+    {
+        return "hello-" + arg + ":" + someClass.getSimpleName();
     }
 
     @Test
