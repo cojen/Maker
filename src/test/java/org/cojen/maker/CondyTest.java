@@ -543,7 +543,16 @@ public class CondyTest {
         MethodMaker mm = cm.addMethod(Object.class, "run").static_().public_();
 
         var v = mm.var(Object.class);
+
+        try {
+            v.set(new MagicConstant(-1));
+            fail();
+        } catch (IllegalArgumentException e) {
+            // Unsupported magic constant.
+        }
+
         v.set(new MagicConstant(100));
+
         mm.return_(v);
 
         Object result = cm.finish().getMethod("run").invoke(null);
@@ -571,6 +580,10 @@ public class CondyTest {
 
         @Override
         public Optional<? extends ConstantDesc> describeConstable() {
+            if (value < 0) {
+                return Optional.empty();
+            }
+
             DynamicConstantDesc desc = DynamicConstantDesc
                 .of(MethodHandleDesc.of
                     (DirectMethodHandleDesc.Kind.STATIC,
