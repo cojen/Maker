@@ -627,4 +627,26 @@ public class CondyTest {
     {
         return name + magic.toString();
     }
+
+    @Test
+    public void constantVarHandle() throws Exception {
+        // DynamicConstantDesc added in Java 12.
+        Assume.assumeTrue(Runtime.getRuntime().version().feature() >= 12);
+
+        // Set a VarHandle variable with a constant, which uses a DynamicConstantDesc.
+
+        VarHandle vh = MethodHandles.arrayElementVarHandle(int[].class);
+
+        ClassMaker cm = ClassMaker.begin().public_();
+        MethodMaker mm = cm.addMethod(int.class, "get", int[].class, int.class).public_().static_();
+
+        var vhVar = mm.var(VarHandle.class).set(vh);
+        mm.return_(vhVar.invoke(int.class, "getVolatile",
+                                new Object[] {int[].class, int.class}, mm.param(0), mm.param(1)));
+
+        Object result = cm.finish()
+            .getMethod("get", int[].class, int.class).invoke(null, new int[] {1, 2, 3}, 1);
+
+        assertEquals(2, result);
+    }
 }
