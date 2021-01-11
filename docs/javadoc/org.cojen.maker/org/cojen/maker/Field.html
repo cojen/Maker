@@ -362,9 +362,13 @@ extends <a href="Variable.html" title="interface in org.cojen.maker">Variable</a
 <div class="member-signature"><span class="return-type"><a href="Field.html" title="interface in org.cojen.maker">Field</a></span>&nbsp;<span class="member-name">set</span>&#8203;(<span class="parameters"><a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>&nbsp;value)</span></div>
 <div class="block">Assign a value to this variable, either from another variable or from a constant. A
  constant value can be a primitive type (boxed or unboxed), null, a <code>String</code>, a
- <code>Class</code>, an <code>Enum</code>, a <code>MethodType</code>, or a <code>
- MethodHandleInfo</code>. Note that a <code>MethodHandle</code> can be set with a <code>
- MethodHandleInfo</code>, which is converted automatically at link time.</div>
+ <code>Class</code>, an <code>Enum</code>, a <code>MethodType</code>, a <code>MethodHandleInfo</code>, a
+ <code>ConstantDesc</code>, or a <code>Constable</code>.
+
+ <p>Note that a <code>MethodHandle</code> can be set with a <code>MethodHandleInfo</code>, which is
+ converted automatically at link time. Handling of <code>ConstantDesc</code> and <code>
+ Constable</code> is also treated specially. The actual type is determined by the resolved
+ constant.</div>
 <dl class="notes">
 <dt>Specified by:</dt>
 <dd><code><a href="Variable.html#set(java.lang.Object)">set</a></code>&nbsp;in interface&nbsp;<code><a href="Variable.html" title="interface in org.cojen.maker">Variable</a></code></dd>
@@ -825,7 +829,7 @@ extends <a href="Variable.html" title="interface in org.cojen.maker">Variable</a
 <span class="skip-nav" id="skip.navbar.bottom">
 <!--   -->
 </span></nav>
-<p class="legal-copy"><small>Copyright &#169; 2019&#x2013;2020 <a href="https://github.com/cojen">Cojen</a>. All rights reserved.</small></p>
+<p class="legal-copy"><small>Copyright &#169; 2019&#x2013;2021 <a href="https://github.com/cojen">Cojen</a>. All rights reserved.</small></p>
 </footer>
 </div>
 </div>
