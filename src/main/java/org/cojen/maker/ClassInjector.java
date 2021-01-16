@@ -71,7 +71,7 @@ class ClassInjector extends ClassLoader {
 
         ClassInjector injector = cInjectors.get(injectorKey);
         if (injector == null) {
-            injector = new ClassInjector(explicit, parentLoader, domain);
+            injector = new ClassInjector(false, parentLoader, domain);
             ClassInjector existing = cInjectors.putIfAbsent(injectorKey, injector);
             if (existing != null) {
                 injector = existing;

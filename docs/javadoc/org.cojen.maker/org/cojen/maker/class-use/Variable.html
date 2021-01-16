@@ -355,8 +355,7 @@ loadScripts(document, 'script');</script>
 <th class="col-second" scope="row"><span class="type-name-label">MethodMaker.</span><code><span class="member-name-link"><a href="../MethodMaker.html#invoke(java.lang.invoke.MethodHandle,java.lang.Object...)">invoke</a></span>&#8203;(<a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/lang/invoke/MethodHandle.html" title="class or interface in java.lang.invoke" class="external-link">MethodHandle</a>&nbsp;handle,
 <a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>...&nbsp;values)</code></th>
 <td class="col-last">
-<div class="block">Invoke a method via a <code>MethodHandle</code>, which only works when the class is built
- dynamically instead of loaded from a file.</div>
+<div class="block">Invoke a method via a <code>MethodHandle</code>.</div>
 </td>
 </tr>
 <tr class="row-color">
@@ -511,9 +510,9 @@ loadScripts(document, 'script');</script>
 </tr>
 <tr class="alt-color">
 <td class="col-first"><code><a href="../Variable.html" title="interface in org.cojen.maker">Variable</a></code></td>
-<th class="col-second" scope="row"><span class="type-name-label">Variable.</span><code><span class="member-name-link"><a href="../Variable.html#setConstant(java.lang.Object)">setConstant</a></span>&#8203;(<a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>&nbsp;value)</code></th>
+<th class="col-second" scope="row"><span class="type-name-label">Variable.</span><code><span class="member-name-link"><a href="../Variable.html#setExact(java.lang.Object)">setExact</a></span>&#8203;(<a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>&nbsp;value)</code></th>
 <td class="col-last">
-<div class="block">Assign a complex constant to this variable, supported only when the class is built
+<div class="block">Assign an exact object instance this variable, supported only when the class is built
  dynamically instead of loaded from a file.</div>
 </td>
 </tr>

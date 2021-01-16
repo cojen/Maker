@@ -530,6 +530,26 @@ public class InvokeTest {
     }
 
     @Test
+    public void invokeHandleExternal() throws Exception {
+        // DynamicConstantDesc added in Java 12.
+        Assume.assumeTrue(Runtime.getRuntime().version().feature() >= 12);
+
+        ClassMaker cm = ClassMaker.beginExternal(getClass().getName() + "Fake").public_();
+        MethodMaker mm = cm.addMethod(int.class, "add").public_().static_();
+
+        MethodHandle handle = MethodHandles.lookup()
+            .findStatic(InvokeTest.class, "notSecret", MethodType.methodType(int.class, int.class));
+
+        mm.return_(mm.invoke(handle, 10));
+
+        assertEquals(20, cm.finish().getMethod("add").invoke(null));
+    }
+
+    public static int notSecret(int a) {
+        return a + a;
+    }
+
+    @Test
     public void invokeHandleKind() throws Exception {
         // Test a few different kinds of method handles.
 
@@ -759,7 +779,7 @@ public class InvokeTest {
         } catch (IllegalStateException e) {
         }
 
-        var numbers = mm.var(long[].class).setConstant(new long[] {1, 2});
+        var numbers = mm.var(long[].class).setExact(new long[] {1, 2});
         var result = mm.var(InvokeTest.class).invoke("sum", numbers);
         mm.var(Assert.class).invoke("assertEquals", 3, result);
 
@@ -822,7 +842,7 @@ public class InvokeTest {
         ClassMaker cm = ClassMaker.begin().public_();
         MethodMaker mm = cm.addMethod(null, "run").public_().static_();
 
-        var instance = mm.var(InvokeTest.class).setConstant(this);
+        var instance = mm.var(InvokeTest.class).setExact(this);
         var result = instance.invoke("self", 1, 2);
         mm.var(Assert.class).invoke("assertEquals", self(1, 2), result);
 
@@ -936,7 +956,7 @@ public class InvokeTest {
 
         ClassMaker cm = ClassMaker.begin().public_();
         MethodMaker mm = cm.addMethod(null, "run").public_().static_();
-        var mhVar = mm.var(MethodHandle.class).setConstant(mh);
+        var mhVar = mm.var(MethodHandle.class).setExact(mh);
         var assertVar = mm.var(Assert.class);
 
         {

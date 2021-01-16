@@ -87,6 +87,7 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
         throw new UnsupportedOperationException("Cannot define hidden classes");
     }
 
+    private final boolean mExternal;
     private final MethodHandles.Lookup mLookup;
     private final ClassInjector mClassInjector;
 
@@ -114,7 +115,7 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
     // -1: finished, 0: not finished, 1: has complex constants
     private int mFinished;
 
-    static TheClassMaker begin(boolean explicit, String className,
+    static TheClassMaker begin(boolean external, String className, boolean explicit,
                                ClassLoader parentLoader, ProtectionDomain domain,
                                MethodHandles.Lookup lookup)
     {
@@ -127,12 +128,15 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
 
         ClassInjector injector = ClassInjector.lookup(explicit, parentLoader, domain);
 
-        return new TheClassMaker(className, lookup, injector);
+        return new TheClassMaker(external, className, lookup, injector);
     }
 
-    private TheClassMaker(String className, MethodHandles.Lookup lookup, ClassInjector injector) {
+    private TheClassMaker(boolean external,
+                          String className, MethodHandles.Lookup lookup, ClassInjector injector)
+    {
         super(new ConstantPool());
 
+        mExternal = external;
         mLookup = lookup;
         mClassInjector = injector;
 
@@ -148,7 +152,7 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
     }
 
     private TheClassMaker(TheClassMaker from, String className) {
-        this(className, from.mLookup, from.mClassInjector);
+        this(from.mExternal, className, from.mLookup, from.mClassInjector);
     }
 
     @Override
@@ -630,11 +634,18 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
         return mBootstrapMethods.add(method, args);
     }
 
+    boolean allowComplexConstants() {
+        return !mExternal;
+    }
+
     /**
      * @return slot
      */
     int addComplexConstant(Object value) {
         checkFinished();
+        if (mExternal) {
+            throw new IllegalStateException("Making an external class");
+        }
         mFinished = 1;
         return ConstantsRegistry.add(this, value);
     }

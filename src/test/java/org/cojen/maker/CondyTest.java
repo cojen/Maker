@@ -203,25 +203,25 @@ public class CondyTest {
         MethodMaker mm = cm.addMethod(null, "run").public_();
 
         var const0 = new byte[] {1,2,3};
-        mm.invoke("add", mm.var(byte[].class).setConstant(const0));
+        mm.invoke("add", mm.var(byte[].class).setExact(const0));
 
         var const1 = "hello";
-        mm.invoke("add", mm.var(String.class).setConstant(const1));
+        mm.invoke("add", mm.var(String.class).setExact(const1));
 
         var const2 = Long.valueOf(8675309);
-        mm.invoke("add", mm.var(Long.class).setConstant(const2));
+        mm.invoke("add", mm.var(Long.class).setExact(const2));
 
         var const3 = this;
-        mm.invoke("add", mm.var(CondyTest.class).setConstant(const3));
+        mm.invoke("add", mm.var(CondyTest.class).setExact(const3));
 
         var const4 = System.getProperties();
-        mm.invoke("add", mm.var(Object.class).setConstant(const4));
+        mm.invoke("add", mm.var(Object.class).setExact(const4));
 
         mm.invoke("add", "hello");
-        mm.invoke("set", 5, mm.var(Object.class).setConstant(null));
+        mm.invoke("set", 5, mm.var(Object.class).setExact(null));
 
         cm.addField(byte[].class, "test").private_();
-        mm.field("test").setConstant(const0);
+        mm.field("test").setExact(const0);
         mm.invoke("add", mm.field("test").get());
 
         var clazz = cm.finish();
@@ -257,7 +257,7 @@ public class CondyTest {
 
         MethodMaker mm = cm.addClinit();
         var const0 = new byte[] {1,2,3};
-        mm.field("test").setConstant(const0);
+        mm.field("test").setExact(const0);
 
         Class<?> clazz = hidden ? cm.finishHidden().lookupClass() : cm.finish();
 
@@ -269,7 +269,7 @@ public class CondyTest {
         ClassMaker cm = ClassMaker.begin(null);
         MethodMaker mm = cm.addMethod(null, "test");
         try {
-            mm.var(String.class).setConstant(new ArrayList());
+            mm.var(String.class).setExact(new ArrayList());
             fail();
         } catch (IllegalStateException e) {
             assertTrue(e.getMessage().startsWith("Mismatched"));
@@ -292,7 +292,7 @@ public class CondyTest {
         }
 
         try {
-            v1.setConstant("world");
+            v1.setExact("world");
             fail();
         } catch (IllegalStateException e) {
             assertTrue(e.getMessage().startsWith("Unmodifiable"));
@@ -317,7 +317,7 @@ public class CondyTest {
 
         MethodMaker mm = cm.addClinit();
         var const0 = new byte[] {1,2,3};
-        mm.field("test").setConstant(const0);
+        mm.field("test").setExact(const0);
 
         var lookup = cm.finishHidden();
         var clazz = lookup.lookupClass();

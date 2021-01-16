@@ -445,9 +445,9 @@ loadScripts(document, 'script');</script>
 </tr>
 <tr class="row-color" id="i43">
 <td class="col-first"><code><a href="Variable.html" title="interface in org.cojen.maker">Variable</a></code></td>
-<th class="col-second" scope="row"><code><span class="member-name-link"><a href="#setConstant(java.lang.Object)">setConstant</a></span>&#8203;(<a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>&nbsp;value)</code></th>
+<th class="col-second" scope="row"><code><span class="member-name-link"><a href="#setExact(java.lang.Object)">setExact</a></span>&#8203;(<a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>&nbsp;value)</code></th>
 <td class="col-last">
-<div class="block">Assign a complex constant to this variable, supported only when the class is built
+<div class="block">Assign an exact object instance this variable, supported only when the class is built
  dynamically instead of loaded from a file.</div>
 </td>
 </tr>
@@ -584,16 +584,16 @@ int[]&nbsp;cases,
 </section>
 </li>
 <li>
-<section class="detail" id="setConstant(java.lang.Object)">
-<h3>setConstant</h3>
-<div class="member-signature"><span class="return-type"><a href="Variable.html" title="interface in org.cojen.maker">Variable</a></span>&nbsp;<span class="member-name">setConstant</span>&#8203;(<span class="parameters"><a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>&nbsp;value)</span></div>
-<div class="block">Assign a complex constant to this variable, supported only when the class is built
+<section class="detail" id="setExact(java.lang.Object)">
+<h3>setExact</h3>
+<div class="member-signature"><span class="return-type"><a href="Variable.html" title="interface in org.cojen.maker">Variable</a></span>&nbsp;<span class="member-name">setExact</span>&#8203;(<span class="parameters"><a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>&nbsp;value)</span></div>
+<div class="block">Assign an exact object instance this variable, supported only when the class is built
  dynamically instead of loaded from a file. At runtime, the object instance provided here
  is exactly the same as referenced by the generated class. For simple constants, the
  regular set method is preferred.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
-<dd><code>value</code> - a constant</dd>
+<dd><code>value</code> - exact object instance to assign</dd>
 <dt>Returns:</dt>
 <dd>this variable</dd>
 <dt>Throws:</dt>

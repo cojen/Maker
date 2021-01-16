@@ -40,7 +40,7 @@ public class VarHandleTest {
         ClassMaker cm = ClassMaker.begin().public_();
         MethodMaker mm = cm.addMethod(null, "run").public_().static_();
 
-        var bytes = mm.var(byte[].class).setConstant("hello world".getBytes("UTF-8"));
+        var bytes = mm.var(byte[].class).setExact("hello world".getBytes("UTF-8"));
         var result = mm.access(vh, bytes, 4).get();
 
         int expect = ('o' << 24) | (' ' << 16) | ('w' << 8) | 'o';
@@ -49,6 +49,23 @@ public class VarHandleTest {
         assertVar.invoke("assertEquals", expect, result);
 
         cm.finish().getMethod("run").invoke(null);
+    }
+
+    @Test
+    public void accessExternal() throws Exception {
+        // DynamicConstantDesc added in Java 12.
+        Assume.assumeTrue(Runtime.getRuntime().version().feature() >= 12);
+
+        VarHandle vh = MethodHandles.arrayElementVarHandle(int[].class);
+
+        ClassMaker cm = ClassMaker.beginExternal(getClass().getName() + "Fake").public_();
+        MethodMaker mm = cm.addMethod(int.class, "run", int[].class).public_().static_();
+
+        mm.return_(mm.access(vh, mm.param(0), 1).get());
+
+        Object result = cm.finish().getMethod("run", int[].class).invoke(null, new int[] {5, 6, 7});
+
+        assertEquals(6, result);
     }
 
     @Test
@@ -112,7 +129,7 @@ public class VarHandleTest {
     }
 
     @Test
-    public void setConstant() throws Exception {
+    public void setExact() throws Exception {
         VarHandle vh1 = MethodHandles.lookup()
             .findStaticVarHandle(VarHandleTest.class, "hiddenObj", Object.class);
         VarHandle vh2 = MethodHandles.lookup()
@@ -126,12 +143,12 @@ public class VarHandleTest {
         MethodMaker mm = cm.addMethod(null, "run").public_().static_();
 
         var access1 = mm.access(vh1);
-        access1.setConstant(this);
+        access1.setExact(this);
         var assertVar = mm.var(Assert.class);
         assertVar.invoke("assertEquals", VarHandleTest.class, access1.invoke("getClass"));
         
         var array = mm.access(vh2);
-        mm.access(vh3, array, 1).setConstant(this);
+        mm.access(vh3, array, 1).setExact(this);
 
         cm.finish().getMethod("run").invoke(null);
 
@@ -222,7 +239,7 @@ public class VarHandleTest {
 
         ClassMaker cm = ClassMaker.begin().public_();
         MethodMaker mm = cm.addMethod(null, "run").public_().static_();
-        var vhVar = mm.var(VarHandle.class).setConstant(vh);
+        var vhVar = mm.var(VarHandle.class).setExact(vh);
         var assertVar = mm.var(Assert.class);
 
         {

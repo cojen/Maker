@@ -61,7 +61,7 @@ public interface ClassMaker {
     public static ClassMaker begin(String className,
                                    ClassLoader parentLoader, ProtectionDomain domain)
     {
-        return TheClassMaker.begin(false, className, parentLoader, domain, null);
+        return TheClassMaker.begin(false, className, false, parentLoader, domain, null);
     }
 
     /**
@@ -74,26 +74,27 @@ public interface ClassMaker {
     public static ClassMaker begin(String className, MethodHandles.Lookup lookup) {
         Objects.requireNonNull(lookup);
         ClassLoader loader = lookup.lookupClass().getClassLoader();
-        return TheClassMaker.begin(false, className, loader, null, lookup);
+        return TheClassMaker.begin(false, className, false, loader, null, lookup);
     }
 
     /**
-     * Begin defining a class with an explicitly specified name. All other classes defined from
-     * this maker will also be explicit.
+     * Begin defining a class intended to be loaded from a file. The class name exactly matches
+     * the one given, and {@link Variable#setExact setExact} is unsupported. All classes
+     * defined from this maker will also be external.
      *
      * @param className fully qualified class name
      */
-    public static ClassMaker beginExplicit(String className) {
-        return TheClassMaker.begin(true, className, null, null, null);
+    public static ClassMaker beginExternal(String className) {
+        return TheClassMaker.begin(true, className, true, null, null, null);
     }
 
     /**
      * Begin defining another class with the same loader, domain, and lookup as this one. The
-     * actual class name will have a suffix applied to ensure uniqueness, unless this maker was
-     * created with an explicit name.
+     * actual class name will have a suffix applied to ensure uniqueness, unless this maker
+     * creates external classes.
      *
      * @param className fully qualified class name; pass null to automatically assign a name
-     * (unless explicit)
+     * (unless external)
      * @see #addClass
      */
     public ClassMaker another(String className);

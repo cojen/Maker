@@ -63,7 +63,7 @@ public interface MethodMaker {
         String name = lookupClass.getName();
         name = name.substring(0, name.lastIndexOf('.') + 1) + "_";
         ClassLoader loader = lookupClass.getClassLoader();
-        TheClassMaker cm = TheClassMaker.begin(true, name, loader, null, lookup);
+        TheClassMaker cm = TheClassMaker.begin(false, name, true, loader, null, lookup);
 
         Type.Method method = cm.defineMethod(retType, "_", paramTypes);
 
@@ -314,8 +314,7 @@ public interface MethodMaker {
     public void invokeThisConstructor(Object... values);
 
     /**
-     * Invoke a method via a {@code MethodHandle}, which only works when the class is built
-     * dynamically instead of loaded from a file.
+     * Invoke a method via a {@code MethodHandle}.
      *
      * @param handle runtime method handle
      * @param values variables or constants
@@ -366,12 +365,11 @@ public interface MethodMaker {
     public Variable concat(Object... values);
 
     /**
-     * Access a {@code VarHandle} via a pseudo field, which only works when the class is built
-     * dynamically instead of loaded from a file. All of the coordinate values must be provided
-     * up front, which are then used each time the {@code VarHandle} is accessed. Variable
-     * coordinates are read each time the access field is used &mdash; they aren't fixed to the
-     * initial value. In addition, the array of coordinates values isn't cloned, permitting
-     * changes without needing to obtain a new access field.
+     * Access a {@code VarHandle} via a pseudo field. All of the coordinate values must be
+     * provided up front, which are then used each time the {@code VarHandle} is
+     * accessed. Variable coordinates are read each time the access field is used &mdash; they
+     * aren't fixed to the initial value. In addition, the array of coordinates values isn't
+     * cloned, permitting changes without needing to obtain a new access field.
      *
      * <p>A {@code VarHandle} can also be accessed by calling {@link VarHandle#toMethodHandle
      * toMethodHandle}, which is then passed to the {@link #invoke(MethodHandle, Object...)

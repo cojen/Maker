@@ -68,17 +68,17 @@ public interface Variable {
     public Variable set(Object value);
 
     /**
-     * Assign a complex constant to this variable, supported only when the class is built
+     * Assign an exact object instance this variable, supported only when the class is built
      * dynamically instead of loaded from a file. At runtime, the object instance provided here
      * is exactly the same as referenced by the generated class. For simple constants, the
      * regular set method is preferred.
      *
-     * @param value a constant
+     * @param value exact object instance to assign
      * @return this variable
      * @throws IllegalStateException if this variable cannot be modified, or if it's not
      * compatible with the variable type
      */
-    public Variable setConstant(Object value);
+    public Variable setExact(Object value);
 
     /**
      * Return a new variable with the same type and value as this one.

@@ -28,9 +28,9 @@ import static org.junit.Assert.*;
  *
  * @author Brian S O'Neill
  */
-public class ExplicitTest {
+public class ExternalTest {
     public static void main(String[] args) throws Exception {
-        org.junit.runner.JUnitCore.main(ExplicitTest.class.getName());
+        org.junit.runner.JUnitCore.main(ExternalTest.class.getName());
     }
 
     @Test
@@ -43,7 +43,7 @@ public class ExplicitTest {
         throws Exception
     {
         if (cm == null) {
-            cm = ClassMaker.beginExplicit(name);
+            cm = ClassMaker.beginExternal(name);
         } else {
             cm = cm.another(name);
         }
@@ -51,6 +51,13 @@ public class ExplicitTest {
         cm.public_().addConstructor().public_();
 
         MethodMaker mm = cm.addMethod(String.class, "test").public_();
+
+        try {
+            mm.var(String.class).setExact("hello");
+            fail();
+        } catch (IllegalStateException e) {
+        }
+
         mm.return_("hello");
 
         Class<?> clazz;
@@ -96,7 +103,7 @@ public class ExplicitTest {
 
     @Test
     public void extraModifiers() throws Exception {
-        ClassMaker cm = ClassMaker.beginExplicit("org.cojen.maker.Fake").abstract_().synthetic();
+        ClassMaker cm = ClassMaker.beginExternal("org.cojen.maker.Fake").abstract_().synthetic();
         cm.addMethod(void.class, "m1").strictfp_().abstract_().synthetic();
         cm.addMethod(void.class, "m2").abstract_().synthetic().strictfp_();
         cm.addMethod(void.class, "m3").native_();

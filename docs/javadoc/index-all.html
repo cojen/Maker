@@ -65,8 +65,7 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><span class="member-name-link"><a href="org.cojen.maker/org/cojen/maker/MethodMaker.html#access(java.lang.invoke.VarHandle,java.lang.Object...)">access(VarHandle, Object...)</a></span> - Method in interface org.cojen.maker.<a href="org.cojen.maker/org/cojen/maker/MethodMaker.html" title="interface in org.cojen.maker">MethodMaker</a></dt>
 <dd>
-<div class="block">Access a <code>VarHandle</code> via a pseudo field, which only works when the class is built
- dynamically instead of loaded from a file.</div>
+<div class="block">Access a <code>VarHandle</code> via a pseudo field.</div>
 </dd>
 <dt><span class="member-name-link"><a href="org.cojen.maker/org/cojen/maker/Variable.html#add(java.lang.Object)">add(Object)</a></span> - Method in interface org.cojen.maker.<a href="org.cojen.maker/org/cojen/maker/Variable.html" title="interface in org.cojen.maker">Variable</a></dt>
 <dd>
@@ -149,9 +148,9 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Begin defining a class with the given name.</div>
 </dd>
-<dt><span class="member-name-link"><a href="org.cojen.maker/org/cojen/maker/ClassMaker.html#beginExplicit(java.lang.String)">beginExplicit(String)</a></span> - Static method in interface org.cojen.maker.<a href="org.cojen.maker/org/cojen/maker/ClassMaker.html" title="interface in org.cojen.maker">ClassMaker</a></dt>
+<dt><span class="member-name-link"><a href="org.cojen.maker/org/cojen/maker/ClassMaker.html#beginExternal(java.lang.String)">beginExternal(String)</a></span> - Static method in interface org.cojen.maker.<a href="org.cojen.maker/org/cojen/maker/ClassMaker.html" title="interface in org.cojen.maker">ClassMaker</a></dt>
 <dd>
-<div class="block">Begin defining a class with an explicitly specified name.</div>
+<div class="block">Begin defining a class intended to be loaded from a file.</div>
 </dd>
 <dt><a href="org.cojen.maker/org/cojen/maker/Bootstrap.html" title="interface in org.cojen.maker"><span class="type-name-link">Bootstrap</span></a> - Interface in <a href="org.cojen.maker/org/cojen/maker/package-summary.html">org.cojen.maker</a></dt>
 <dd>
@@ -434,8 +433,7 @@ loadScripts(document, 'script');</script>
 </dd>
 <dt><span class="member-name-link"><a href="org.cojen.maker/org/cojen/maker/MethodMaker.html#invoke(java.lang.invoke.MethodHandle,java.lang.Object...)">invoke(MethodHandle, Object...)</a></span> - Method in interface org.cojen.maker.<a href="org.cojen.maker/org/cojen/maker/MethodMaker.html" title="interface in org.cojen.maker">MethodMaker</a></dt>
 <dd>
-<div class="block">Invoke a method via a <code>MethodHandle</code>, which only works when the class is built
- dynamically instead of loaded from a file.</div>
+<div class="block">Invoke a method via a <code>MethodHandle</code>.</div>
 </dd>
 <dt><span class="member-name-link"><a href="org.cojen.maker/org/cojen/maker/Bootstrap.html#invoke(java.lang.Object,java.lang.String)">invoke(Object, String)</a></span> - Method in interface org.cojen.maker.<a href="org.cojen.maker/org/cojen/maker/Bootstrap.html" title="interface in org.cojen.maker">Bootstrap</a></dt>
 <dd>
@@ -654,9 +652,9 @@ loadScripts(document, 'script');</script>
 <dd>
 <div class="block">Assign a value to this variable, either from another variable or from a constant.</div>
 </dd>
-<dt><span class="member-name-link"><a href="org.cojen.maker/org/cojen/maker/Variable.html#setConstant(java.lang.Object)">setConstant(Object)</a></span> - Method in interface org.cojen.maker.<a href="org.cojen.maker/org/cojen/maker/Variable.html" title="interface in org.cojen.maker">Variable</a></dt>
+<dt><span class="member-name-link"><a href="org.cojen.maker/org/cojen/maker/Variable.html#setExact(java.lang.Object)">setExact(Object)</a></span> - Method in interface org.cojen.maker.<a href="org.cojen.maker/org/cojen/maker/Variable.html" title="interface in org.cojen.maker">Variable</a></dt>
 <dd>
-<div class="block">Assign a complex constant to this variable, supported only when the class is built
+<div class="block">Assign an exact object instance this variable, supported only when the class is built
  dynamically instead of loaded from a file.</div>
 </dd>
 <dt><span class="member-name-link"><a href="org.cojen.maker/org/cojen/maker/Field.html#setOpaque(java.lang.Object)">setOpaque(Object)</a></span> - Method in interface org.cojen.maker.<a href="org.cojen.maker/org/cojen/maker/Field.html" title="interface in org.cojen.maker">Field</a></dt>

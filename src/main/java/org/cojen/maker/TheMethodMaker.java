@@ -754,7 +754,13 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
         Type handleType = Type.from(MethodHandle.class);
         Var handleVar = new Var(handleType);
-        handleVar.setConstant(handle);
+
+        if (mClassMaker.allowComplexConstants()) {
+            handleVar.setExact(handle);
+        } else {
+            handleVar.set(handle);
+        }
+
         addOp(new PushVarOp(handleVar));
 
         // Push all arguments and obtain their actual types.
@@ -1248,7 +1254,12 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
         Type handleType = Type.from(VarHandle.class);
         Var handleVar = new Var(handleType);
-        handleVar.setConstant(handle);
+
+        if (mClassMaker.allowComplexConstants()) {
+            handleVar.setExact(handle);
+        } else {
+            handleVar.set(handle);
+        }
 
         return new HandleVar(handleVar, Type.from(handle.varType()), coordinateTypes, values);
     }
@@ -3387,7 +3398,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
-        public Variable setConstant(Object value) {
+        public Variable setExact(Object value) {
             if (value == null) {
                 return set(null);
             }
@@ -4334,7 +4345,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
-        public Variable setConstant(Object value) {
+        public Variable setExact(Object value) {
             throw new IllegalStateException("Unmodifiable variable");
         }
 

@@ -203,9 +203,9 @@ loadScripts(document, 'script');</script>
 </tr>
 <tr class="row-color" id="i13">
 <td class="col-first"><code>static <a href="ClassMaker.html" title="interface in org.cojen.maker">ClassMaker</a></code></td>
-<th class="col-second" scope="row"><code><span class="member-name-link"><a href="#beginExplicit(java.lang.String)">beginExplicit</a></span>&#8203;(<a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;className)</code></th>
+<th class="col-second" scope="row"><code><span class="member-name-link"><a href="#beginExternal(java.lang.String)">beginExternal</a></span>&#8203;(<a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;className)</code></th>
 <td class="col-last">
-<div class="block">Begin defining a class with an explicitly specified name.</div>
+<div class="block">Begin defining a class intended to be loaded from a file.</div>
 </td>
 </tr>
 <tr class="alt-color" id="i14">
@@ -351,11 +351,12 @@ loadScripts(document, 'script');</script>
 </section>
 </li>
 <li>
-<section class="detail" id="beginExplicit(java.lang.String)">
-<h3>beginExplicit</h3>
-<div class="member-signature"><span class="modifiers">static</span>&nbsp;<span class="return-type"><a href="ClassMaker.html" title="interface in org.cojen.maker">ClassMaker</a></span>&nbsp;<span class="member-name">beginExplicit</span>&#8203;(<span class="parameters"><a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;className)</span></div>
-<div class="block">Begin defining a class with an explicitly specified name. All other classes defined from
- this maker will also be explicit.</div>
+<section class="detail" id="beginExternal(java.lang.String)">
+<h3>beginExternal</h3>
+<div class="member-signature"><span class="modifiers">static</span>&nbsp;<span class="return-type"><a href="ClassMaker.html" title="interface in org.cojen.maker">ClassMaker</a></span>&nbsp;<span class="member-name">beginExternal</span>&#8203;(<span class="parameters"><a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;className)</span></div>
+<div class="block">Begin defining a class intended to be loaded from a file. The class name exactly matches
+ the one given, and <a href="Variable.html#setExact(java.lang.Object)"><code>setExact</code></a> is unsupported. All classes
+ defined from this maker will also be external.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>className</code> - fully qualified class name</dd>
@@ -367,12 +368,12 @@ loadScripts(document, 'script');</script>
 <h3>another</h3>
 <div class="member-signature"><span class="return-type"><a href="ClassMaker.html" title="interface in org.cojen.maker">ClassMaker</a></span>&nbsp;<span class="member-name">another</span>&#8203;(<span class="parameters"><a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;className)</span></div>
 <div class="block">Begin defining another class with the same loader, domain, and lookup as this one. The
- actual class name will have a suffix applied to ensure uniqueness, unless this maker was
- created with an explicit name.</div>
+ actual class name will have a suffix applied to ensure uniqueness, unless this maker
+ creates external classes.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>className</code> - fully qualified class name; pass null to automatically assign a name
- (unless explicit)</dd>
+ (unless external)</dd>
 <dt>See Also:</dt>
 <dd><a href="#addClass(java.lang.String)"><code>addClass(java.lang.String)</code></a></dd>
 </dl>
