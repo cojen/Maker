@@ -314,12 +314,15 @@ public interface MethodMaker {
     public void invokeThisConstructor(Object... values);
 
     /**
-     * Invoke a method via a {@code MethodHandle}.
+     * Invoke a method via a {@code MethodHandle}. If making a class to be loaded {@link
+     * ClassMaker#beginExternal externally}, the handle must be truly {@code Constable}.
      *
      * @param handle runtime method handle
      * @param values variables or constants
      * @return the result of the method, which is null if void
      * @throws IllegalArgumentException if not given a variable or a constant
+     * @throws IllegalStateException if defining an external class and the handle isn't truly
+     * {@code Constable}
      */
     public Variable invoke(MethodHandle handle, Object... values);
 
@@ -365,11 +368,14 @@ public interface MethodMaker {
     public Variable concat(Object... values);
 
     /**
-     * Access a {@code VarHandle} via a pseudo field. All of the coordinate values must be
-     * provided up front, which are then used each time the {@code VarHandle} is
-     * accessed. Variable coordinates are read each time the access field is used &mdash; they
-     * aren't fixed to the initial value. In addition, the array of coordinates values isn't
-     * cloned, permitting changes without needing to obtain a new access field.
+     * Access a {@code VarHandle} via a pseudo field. If making a class to be loaded {@link
+     * ClassMaker#beginExternal externally}, the handle must be truly {@code Constable}.
+     *
+     * <p>All of the coordinate values must be provided up front, which are then used each time
+     * the {@code VarHandle} is accessed. Variable coordinates are read each time the access
+     * field is used &mdash; they aren't fixed to the initial value. In addition, the array of
+     * coordinates values isn't cloned, permitting changes without needing to obtain a new
+     * access field.
      *
      * <p>A {@code VarHandle} can also be accessed by calling {@link VarHandle#toMethodHandle
      * toMethodHandle}, which is then passed to the {@link #invoke(MethodHandle, Object...)
@@ -380,6 +386,8 @@ public interface MethodMaker {
      * @return a pseudo field which accesses the variable
      * @throws IllegalArgumentException if not given a variable or a constant, or if the number
      * of values doesn't match the number of coordinates
+     * @throws IllegalStateException if defining an external class and the handle isn't truly
+     * {@code Constable}
      */
     public Field access(VarHandle handle, Object... values);
 

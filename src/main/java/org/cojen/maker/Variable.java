@@ -50,14 +50,14 @@ public interface Variable {
 
     /**
      * Assign a value to this variable, either from another variable or from a constant. A
-     * constant value can be a primitive type (boxed or unboxed), null, a {@code String}, a
-     * {@code Class}, an {@code Enum}, a {@code MethodType}, a {@code MethodHandleInfo}, a
-     * {@code ConstantDesc}, or a {@code Constable}.
+     * constant value can be a primitive type (boxed or unboxed), {@code null}, a {@code
+     * String}, a {@code Class}, an {@code Enum}, a {@code MethodType}, a {@code
+     * MethodHandleInfo}, a {@code ConstantDesc}, or a {@code Constable}.
      *
      * <p>Note that a {@code MethodHandle} can be set with a {@code MethodHandleInfo}, which is
      * converted automatically at link time. Handling of {@code ConstantDesc} and {@code
-     * Constable} is also treated specially. The actual type is determined by the resolved
-     * constant.
+     * Constable} is also treated specially &mdash; the actual type is determined by the
+     * resolved constant.
      *
      * @param value a Variable or a constant
      * @return this variable

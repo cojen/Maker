@@ -749,7 +749,7 @@ loadScripts(document, 'script');</script>
 <h3>invoke</h3>
 <div class="member-signature"><span class="return-type"><a href="Variable.html" title="interface in org.cojen.maker">Variable</a></span>&nbsp;<span class="member-name">invoke</span>&#8203;(<span class="parameters"><a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/lang/invoke/MethodHandle.html" title="class or interface in java.lang.invoke" class="external-link">MethodHandle</a>&nbsp;handle,
 <a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>...&nbsp;values)</span></div>
-<div class="block">Invoke a method via a <code>MethodHandle</code>.</div>
+<div class="block">Invoke a method via a <code>MethodHandle</code>. If making a class to be loaded <a href="ClassMaker.html#beginExternal(java.lang.String)"><code>externally</code></a>, the handle must be truly <code>Constable</code>.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>handle</code> - runtime method handle</dd>
@@ -758,6 +758,8 @@ loadScripts(document, 'script');</script>
 <dd>the result of the method, which is null if void</dd>
 <dt>Throws:</dt>
 <dd><code><a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if not given a variable or a constant</dd>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/lang/IllegalStateException.html" title="class or interface in java.lang" class="external-link">IllegalStateException</a></code> - if defining an external class and the handle isn't truly
+ <code>Constable</code></dd>
 </dl>
 </section>
 </li>
@@ -832,11 +834,13 @@ loadScripts(document, 'script');</script>
 <h3>access</h3>
 <div class="member-signature"><span class="return-type"><a href="Field.html" title="interface in org.cojen.maker">Field</a></span>&nbsp;<span class="member-name">access</span>&#8203;(<span class="parameters"><a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/lang/invoke/VarHandle.html" title="class or interface in java.lang.invoke" class="external-link">VarHandle</a>&nbsp;handle,
 <a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>...&nbsp;values)</span></div>
-<div class="block">Access a <code>VarHandle</code> via a pseudo field. All of the coordinate values must be
- provided up front, which are then used each time the <code>VarHandle</code> is
- accessed. Variable coordinates are read each time the access field is used &mdash; they
- aren't fixed to the initial value. In addition, the array of coordinates values isn't
- cloned, permitting changes without needing to obtain a new access field.
+<div class="block">Access a <code>VarHandle</code> via a pseudo field. If making a class to be loaded <a href="ClassMaker.html#beginExternal(java.lang.String)"><code>externally</code></a>, the handle must be truly <code>Constable</code>.
+
+ <p>All of the coordinate values must be provided up front, which are then used each time
+ the <code>VarHandle</code> is accessed. Variable coordinates are read each time the access
+ field is used &mdash; they aren't fixed to the initial value. In addition, the array of
+ coordinates values isn't cloned, permitting changes without needing to obtain a new
+ access field.
 
  <p>A <code>VarHandle</code> can also be accessed by calling <a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/lang/invoke/VarHandle.html#toMethodHandle(java.lang.invoke.VarHandle.AccessMode)" title="class or interface in java.lang.invoke" class="external-link"><code>toMethodHandle</code></a>, which is then passed to the <a href="#invoke(java.lang.invoke.MethodHandle,java.lang.Object...)"><code>invoke</code></a> method.</div>
 <dl class="notes">
@@ -848,6 +852,8 @@ loadScripts(document, 'script');</script>
 <dt>Throws:</dt>
 <dd><code><a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if not given a variable or a constant, or if the number
  of values doesn't match the number of coordinates</dd>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/lang/IllegalStateException.html" title="class or interface in java.lang" class="external-link">IllegalStateException</a></code> - if defining an external class and the handle isn't truly
+ <code>Constable</code></dd>
 </dl>
 </section>
 </li>
