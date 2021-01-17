@@ -649,4 +649,25 @@ public class CondyTest {
 
         assertEquals(2, result);
     }
+
+    @Test
+    public void selfBoot() throws Exception {
+        // The class being made defines a private bootstrap method in itself.
+
+        ClassMaker cm = ClassMaker.begin().public_();
+
+        // Note that the bootstrap method can be private.
+        MethodMaker boot = cm.addMethod
+            (String.class, "boot", MethodHandles.Lookup.class, String.class, Class.class, int.class)
+            .static_().private_();
+
+        boot.return_(boot.concat("hello-", boot.param(1), '-', boot.param(3)));
+
+        MethodMaker mm = cm.addMethod(Object.class, "run").static_().public_();
+        var v0 = mm.var(cm).condy("boot", 999).invoke(String.class, "qwerty");
+        mm.return_(v0);
+
+        Object result = cm.finish().getMethod("run").invoke(null);
+        assertEquals("hello-qwerty-999", result);
+    }
 }
