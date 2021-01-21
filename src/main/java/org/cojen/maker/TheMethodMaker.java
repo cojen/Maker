@@ -2069,8 +2069,8 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             } else {
                 ConstantVar cv = ConstableSupport.THE.toConstantVar(this, value);
                 if (cv != null) {
-                    cv.push(type);
-                    return type;
+                    cv.push();
+                    return addConversionOp(cv.type(), type);
                 }
                 throw unsupportedConstant(value);
             }
@@ -2250,12 +2250,21 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             throw unsupportedConstant(value);
         }
 
-        ConstantVar cv = ConstableSupport.THE.toConstantVar(this, value);
-        if (cv != null) {
-            return cv.mConstant;
-        }
+        // If the value is Constable, toConstantVar might still work, but the resulting
+        // ConstantDesc might throw some state away. VarHandle and MethodHandle are Constable,
+        // but the Lookup object is lost. For this reason, always pass the value as a complex
+        // constant if allowed. If for some reason the "lossy" behavior is desired, the
+        // application must provide a ConstantDesc instead of a Constable.
 
-        // Use ConstantsRegistry. In doing so, the generated class cannot be loaded from a file.
+        if (!mClassMaker.allowComplexConstants() || ConstableSupport.THE.isConstantDesc(value)) {
+            ConstantVar cv = ConstableSupport.THE.toConstantVar(this, value);
+            if (cv != null) {
+                return cv.mConstant;
+            }
+            if (!mClassMaker.allowComplexConstants()) {
+                throw unsupportedConstant(value);
+            }
+        }
 
         if (type == null) {
             type = Type.from(value.getClass());
@@ -4095,8 +4104,14 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                     type = Null.THE;
                 } else if (arg instanceof Typed) {
                     type = ((Typed) arg).type();
+                } else if (arg instanceof MethodHandleInfo) {
+                    // Conversion to MethodHandle is automatic.
+                    type = Type.from(MethodHandle.class);
                 } else {
-                    type = mClassMaker.typeFrom(arg.getClass());
+                    type = ConstableSupport.THE.toConstantDescType(owner(), arg);
+                    if (type == null) {
+                        type = mClassMaker.typeFrom(arg.getClass());
+                    }
                 }
 
                 types[3 + i] = type;

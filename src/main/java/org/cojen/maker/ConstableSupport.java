@@ -66,6 +66,15 @@ abstract class ConstableSupport {
      */
     abstract TheMethodMaker.ConstantVar toConstantVar(TheMethodMaker mm, Object value);
 
+    abstract boolean isConstantDesc(Object value);
+
+    /**
+     * Returns the type of the constant if isConstantDesc, or null if not supported.
+     *
+     * @param value expected to be ConstantDesc
+     */
+    abstract Type toConstantDescType(TheMethodMaker mm, Object value);
+
     private static class Supported extends ConstableSupport {
         @Override
         Type toConstantType(TheMethodMaker mm, Object value) {
@@ -171,6 +180,29 @@ abstract class ConstableSupport {
 
             return cp.addMethodHandle(refKind, ref);
         }
+
+        @Override
+        boolean isConstantDesc(Object value) {
+            return value instanceof ConstantDesc;
+        }
+
+        @Override
+        Type toConstantDescType(TheMethodMaker mm, Object value) {
+            if (value instanceof ConstantDesc) {
+                if (value instanceof MethodTypeDesc) {
+                    return Type.from(MethodType.class);
+                } else if (value instanceof DirectMethodHandleDesc) {
+                    return Type.from(MethodHandle.class);
+                } else if (value instanceof DynamicConstantDesc) {
+                    var dcd = (DynamicConstantDesc) value;
+                    return mm.mClassMaker.typeFrom(dcd.constantType().descriptorString());
+                } else if (value instanceof ClassDesc) {
+                    return Type.from(Class.class);
+                }
+            }
+            
+            return null;
+        }
     }
 
     private static class Unsupported extends ConstableSupport {
@@ -181,6 +213,16 @@ abstract class ConstableSupport {
 
         @Override
         TheMethodMaker.ConstantVar toConstantVar(TheMethodMaker mm, Object value) {
+            return null;
+        }
+
+        @Override
+        boolean isConstantDesc(Object value) {
+            return false;
+        }
+
+        @Override
+        Type toConstantDescType(TheMethodMaker mm, Object value) {
             return null;
         }
     }

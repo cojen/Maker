@@ -651,6 +651,97 @@ public class CondyTest {
     }
 
     @Test
+    public void bootWithVarHandle() throws Exception {
+        // A VarHandle lookup isn't lost when building a class dynamically, even though it's
+        // Constable.
+
+        hidden = 1234;
+
+        VarHandle vh = MethodHandles.lookup()
+            .findStaticVarHandle(CondyTest.class, "hidden", int.class);
+
+        ClassMaker cm = ClassMaker.begin().public_();
+        MethodMaker mm = cm.addMethod(String.class, "run").static_().public_();
+
+        var bootstrap = mm.var(CondyTest.class).condy("bootWithVarHandle", vh);
+        var v = bootstrap.invoke(String.class, "hello ");
+        mm.return_(v);
+
+        Object result = cm.finish().getMethod("run").invoke(null);
+        assertEquals("hello 1234", result);
+    }
+
+    private static int hidden;
+
+    public static String bootWithVarHandle(MethodHandles.Lookup lookup, String name, Class type,
+                                           VarHandle vh)
+        throws Exception
+    {
+        return name + (int) vh.get();
+    }
+
+    @Test
+    public void bootWithVarHandleDesc() throws Exception {
+        // Test that a VarHandle can be passed to a bootstrap method as a ConstantDesc.
+
+        notHidden = 9999;
+
+        VarHandle vh = MethodHandles.lookup()
+            .findStaticVarHandle(CondyTest.class, "notHidden", int.class);
+        ConstantDesc desc = vh.describeConstable().get();
+
+        ClassMaker cm = ClassMaker.begin().public_();
+        MethodMaker mm = cm.addMethod(String.class, "run").static_().public_();
+
+        var bootstrap = mm.var(CondyTest.class).condy("bootWithVarHandle", desc);
+        var v = bootstrap.invoke(String.class, "hello ");
+        mm.return_(v);
+
+        Object result = cm.finish().getMethod("run").invoke(null);
+        assertEquals("hello 9999", result);
+    }
+
+    public static int notHidden;
+
+    @Test
+    public void specialBootArgs() throws Exception {
+        // Test various special bootstrap argument types which resolve differently at runtime.
+        // This is an extension to the bootWithVarHandleDesc test.
+
+        var lookup = MethodHandles.lookup();
+
+        var mt = MethodType.methodType(String.class, int.class);
+        var mh = lookup.findStatic(CondyTest.class, "someMethod", mt);
+
+        ClassDesc a = String.class.describeConstable().get();
+        MethodTypeDesc b = mt.describeConstable().get();
+        MethodHandleInfo c = lookup.revealDirect(mh);
+        MethodHandleDesc d = mh.describeConstable().get();
+
+        ClassMaker cm = ClassMaker.begin().public_();
+        MethodMaker mm = cm.addMethod(String.class, "run").static_().public_();
+
+        var bootstrap = mm.var(CondyTest.class).condy("bootSpecials", a, b, c, d);
+        var v = bootstrap.invoke(String.class, "hello");
+        mm.return_(v);
+
+        Object result = cm.finish().getMethod("run").invoke(null);
+        String expect = "hello:String:(int)String:MethodHandle(int)String:MethodHandle(int)String";
+        assertEquals(expect, result);
+    }
+
+    public static String someMethod(int param) {
+        return "" + param;
+    }
+
+    public static String bootSpecials(MethodHandles.Lookup lookup, String name, Class type,
+                                      Class a, TypeDescriptor b, MethodHandle c, Constable d)
+        throws Exception
+    {
+        return name + ":" + a.getSimpleName() + ":" + b + ":" + c + ":" + d;
+    }
+
+    @Test
     public void selfBoot() throws Exception {
         // The class being made defines a private bootstrap method in itself.
 
