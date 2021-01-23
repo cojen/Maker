@@ -43,12 +43,6 @@ public class StandaloneTest {
         MethodMaker mm = MethodMaker.begin
             (MethodHandles.lookup(), int.class, null, int.class, int.class);
 
-        try {
-            mm.classMaker();
-            fail();
-        } catch (IllegalStateException e) {
-        }
-
         mm.return_(mm.param(0).add(mm.param(1)));
         MethodHandle mh = mm.finish();
         assertEquals(3, (int) mh.invoke(1, 2));
@@ -69,5 +63,23 @@ public class StandaloneTest {
         } catch (IllegalStateException e) {
             assertTrue(e.getMessage().startsWith("Unknown"));
         }
+    }
+
+    @Test
+    public void extraMethods() throws Throwable {
+        MethodMaker mm = MethodMaker.begin(MethodHandles.lookup(), int.class, "_");
+
+        ClassMaker cm = mm.classMaker();
+        cm.addField(int.class, "foo").static_();
+        cm.addClinit().field("foo").set(100);
+
+        MethodMaker helper = cm.addMethod(int.class, "helper").static_();
+        helper.return_(helper.field("foo"));
+
+        mm.return_(mm.invoke("helper"));
+
+        MethodHandle mh = mm.finish();
+        int result = (int) mh.invoke();
+        assertEquals(100, result);
     }
 }

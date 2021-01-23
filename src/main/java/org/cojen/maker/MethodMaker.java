@@ -85,11 +85,6 @@ public interface MethodMaker {
 
         var mm = new TheMethodMaker(cm, method) {
             @Override
-            public ClassMaker classMaker() {
-                throw new IllegalStateException("Standalone method");
-            }
-
-            @Override
             public MethodHandle finish() {
                 MethodHandles.Lookup lookup = mClassMaker.finishHidden();
                 try {
