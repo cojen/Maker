@@ -1073,4 +1073,47 @@ public class InvokeTest {
 
         cm.finish().getMethod("run").invoke(null);
     }
+
+    @Test
+    public void objectMethods() throws Exception {
+        // Tests Java 16 toString generator using the ObjectMethods class. This test just
+        // ensures that a complex bootstrap method can be invoked. If the format of the
+        // generated string changes, then this test needs to be revised.
+        Assume.assumeTrue(Runtime.getRuntime().version().feature() >= 16);
+
+        var cm = ClassMaker.begin().public_();
+
+        cm.addField(int.class, "foo");
+        cm.addField(String.class, "bar");
+
+        {
+            var mm = cm.addConstructor().public_();
+            mm.invokeSuperConstructor();
+            mm.field("foo").set(10);
+            mm.field("bar").set("hello");
+        }
+
+        {
+            var mm = cm.addMethod(int.class, "getFoo").private_();
+            mm.return_(mm.field("foo"));
+        }
+
+        {
+            var mm = cm.addMethod(String.class, "toString").public_();
+
+            var bootstrap = mm.var("java.lang.runtime.ObjectMethods")
+                .indy("bootstrap", mm.class_(), "foo;bar",
+                      //mm.field("foo").methodHandleGet(),
+                      mm.var(cm).methodHandle(int.class, "getFoo"),
+                      mm.field("bar").methodHandleGet());
+
+            mm.return_(bootstrap.invoke(String.class, "toString",
+                                        new Object[] {cm}, mm.this_()));
+        }
+
+        Class<?> clazz = cm.finish();
+        var obj = clazz.getConstructor().newInstance();
+
+        assertEquals(clazz.getSimpleName() + "[foo=10, bar=hello]", obj.toString());
+    }
 }
