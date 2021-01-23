@@ -316,7 +316,7 @@ public class FieldTest {
     public static CallSite bootTest(MethodHandles.Lookup caller, String name, MethodType type,
                                     MethodHandle fieldHandle)
     {
-        MethodMaker mm = MethodMaker.begin(MethodHandles.lookup(), void.class);
+        MethodMaker mm = MethodMaker.begin(MethodHandles.lookup(), void.class, "_");
         mm.invoke(fieldHandle, Integer.parseInt(name));
         return new ConstantCallSite(mm.finish());
     }
@@ -371,7 +371,7 @@ public class FieldTest {
     public static CallSite bootTest(MethodHandles.Lookup caller, String name, MethodType type,
                                     VarHandle fieldHandle)
     {
-        MethodMaker mm = MethodMaker.begin(MethodHandles.lookup(), void.class);
+        MethodMaker mm = MethodMaker.begin(MethodHandles.lookup(), void.class, "_");
         mm.access(fieldHandle).setVolatile(-Integer.parseInt(name));
         return new ConstantCallSite(mm.finish());
     }

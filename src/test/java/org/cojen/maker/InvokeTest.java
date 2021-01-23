@@ -944,7 +944,7 @@ public class InvokeTest {
     public static CallSite bootVarargs(MethodHandles.Lookup caller, String name, MethodType type,
                                        int num, String... strs)
     {
-        MethodMaker mm = MethodMaker.begin(MethodHandles.lookup(), String.class);
+        MethodMaker mm = MethodMaker.begin(MethodHandles.lookup(), String.class, "_");
         mm.return_(num + Arrays.toString(strs));
         return new ConstantCallSite(mm.finish());
     }
@@ -1004,7 +1004,7 @@ public class InvokeTest {
     public static CallSite bootTest(MethodHandles.Lookup caller, String name, MethodType type,
                                     MethodHandle mh)
     {
-        MethodMaker mm = MethodMaker.begin(caller, String.class, int.class);
+        MethodMaker mm = MethodMaker.begin(caller, String.class, "_", int.class);
         var result = mm.var(MethodHandle.class).set(caller.revealDirect(mh))
             .invoke(String.class, "invokeExact", new Object[] {int.class}, mm.param(0));
         mm.return_(result);
@@ -1034,7 +1034,7 @@ public class InvokeTest {
     public static CallSite bootTest2(MethodHandles.Lookup caller, String name, MethodType type,
                                      MethodHandle mh)
     {
-        MethodMaker mm = MethodMaker.begin(caller, List.class, int.class);
+        MethodMaker mm = MethodMaker.begin(caller, List.class, name, int.class);
         var result = mm.var(MethodHandle.class).set(caller.revealDirect(mh))
             .invoke(ArrayList.class, "invokeExact", new Object[] {int.class}, mm.param(0));
         mm.return_(result);

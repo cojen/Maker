@@ -33,14 +33,15 @@ public class StandaloneTest {
 
     @Test
     public void nothing() throws Throwable {
-        MethodMaker mm = MethodMaker.begin(MethodHandles.lookup(), null);
+        MethodMaker mm = MethodMaker.begin(MethodHandles.lookup(), null, "_");
         MethodHandle mh = mm.finish();
         mh.invoke();
     }
 
     @Test
     public void simple() throws Throwable {
-        MethodMaker mm = MethodMaker.begin(MethodHandles.lookup(), int.class, int.class, int.class);
+        MethodMaker mm = MethodMaker.begin
+            (MethodHandles.lookup(), int.class, null, int.class, int.class);
 
         try {
             mm.classMaker();
@@ -53,7 +54,7 @@ public class StandaloneTest {
         assertEquals(3, (int) mh.invoke(1, 2));
 
         // Again with a MethodType.
-        mm = MethodMaker.begin(MethodHandles.lookup(),
+        mm = MethodMaker.begin(MethodHandles.lookup(), "_",
                                MethodType.methodType(int.class, int.class, int.class));
         mm.return_(mm.param(0).add(mm.param(1)));
         mh = mm.finish();
@@ -63,7 +64,7 @@ public class StandaloneTest {
     @Test
     public void broken() throws Exception {
         try {
-            MethodMaker.begin(MethodHandles.lookup(), "FAKE");
+            MethodMaker.begin(MethodHandles.lookup(), "FAKE", "_");
             fail();
         } catch (IllegalStateException e) {
             assertTrue(e.getMessage().startsWith("Unknown"));

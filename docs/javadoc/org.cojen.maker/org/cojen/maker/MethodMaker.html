@@ -120,17 +120,19 @@ loadScripts(document, 'script');</script>
 </tr>
 <tr class="alt-color" id="i2">
 <td class="col-first"><code>static <a href="MethodMaker.html" title="interface in org.cojen.maker">MethodMaker</a></code></td>
-<th class="col-second" scope="row"><code><span class="member-name-link"><a href="#begin(java.lang.invoke.MethodHandles.Lookup,java.lang.invoke.MethodType)">begin</a></span>&#8203;(<a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/lang/invoke/MethodHandles.Lookup.html" title="class or interface in java.lang.invoke" class="external-link">MethodHandles.Lookup</a>&nbsp;lookup,
-<a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/lang/invoke/MethodType.html" title="class or interface in java.lang.invoke" class="external-link">MethodType</a>&nbsp;type)</code></th>
+<th class="col-second" scope="row"><code><span class="member-name-link"><a href="#begin(java.lang.invoke.MethodHandles.Lookup,java.lang.Object,java.lang.String,java.lang.Object...)">begin</a></span>&#8203;(<a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/lang/invoke/MethodHandles.Lookup.html" title="class or interface in java.lang.invoke" class="external-link">MethodHandles.Lookup</a>&nbsp;lookup,
+<a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>&nbsp;retType,
+<a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;name,
+<a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>...&nbsp;paramTypes)</code></th>
 <td class="col-last">
 <div class="block">Begin defining a standalone method.</div>
 </td>
 </tr>
 <tr class="row-color" id="i3">
 <td class="col-first"><code>static <a href="MethodMaker.html" title="interface in org.cojen.maker">MethodMaker</a></code></td>
-<th class="col-second" scope="row"><code><span class="member-name-link"><a href="#begin(java.lang.invoke.MethodHandles.Lookup,java.lang.Object,java.lang.Object...)">begin</a></span>&#8203;(<a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/lang/invoke/MethodHandles.Lookup.html" title="class or interface in java.lang.invoke" class="external-link">MethodHandles.Lookup</a>&nbsp;lookup,
-<a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>&nbsp;retType,
-<a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>...&nbsp;paramTypes)</code></th>
+<th class="col-second" scope="row"><code><span class="member-name-link"><a href="#begin(java.lang.invoke.MethodHandles.Lookup,java.lang.String,java.lang.invoke.MethodType)">begin</a></span>&#8203;(<a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/lang/invoke/MethodHandles.Lookup.html" title="class or interface in java.lang.invoke" class="external-link">MethodHandles.Lookup</a>&nbsp;lookup,
+<a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;name,
+<a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/lang/invoke/MethodType.html" title="class or interface in java.lang.invoke" class="external-link">MethodType</a>&nbsp;type)</code></th>
 <td class="col-last">
 <div class="block">Begin defining a standalone method.</div>
 </td>
@@ -396,16 +398,18 @@ loadScripts(document, 'script');</script>
 <h2>Method Details</h2>
 <ul class="member-list">
 <li>
-<section class="detail" id="begin(java.lang.invoke.MethodHandles.Lookup,java.lang.Object,java.lang.Object...)">
+<section class="detail" id="begin(java.lang.invoke.MethodHandles.Lookup,java.lang.Object,java.lang.String,java.lang.Object...)">
 <h3>begin</h3>
 <div class="member-signature"><span class="modifiers">static</span>&nbsp;<span class="return-type"><a href="MethodMaker.html" title="interface in org.cojen.maker">MethodMaker</a></span>&nbsp;<span class="member-name">begin</span>&#8203;(<span class="parameters"><a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/lang/invoke/MethodHandles.Lookup.html" title="class or interface in java.lang.invoke" class="external-link">MethodHandles.Lookup</a>&nbsp;lookup,
 <a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>&nbsp;retType,
+<a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;name,
 <a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>...&nbsp;paramTypes)</span></div>
 <div class="block">Begin defining a standalone method.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>lookup</code> - define the method using this lookup object</dd>
 <dd><code>retType</code> - a class or name; can be null if method returns void</dd>
+<dd><code>name</code> - method name; use null or "_" if unnamed</dd>
 <dd><code>paramTypes</code> - classes or names; can be null if method accepts no parameters</dd>
 <dt>See Also:</dt>
 <dd><a href="#finish()"><code>finish()</code></a></dd>
@@ -413,14 +417,16 @@ loadScripts(document, 'script');</script>
 </section>
 </li>
 <li>
-<section class="detail" id="begin(java.lang.invoke.MethodHandles.Lookup,java.lang.invoke.MethodType)">
+<section class="detail" id="begin(java.lang.invoke.MethodHandles.Lookup,java.lang.String,java.lang.invoke.MethodType)">
 <h3>begin</h3>
 <div class="member-signature"><span class="modifiers">static</span>&nbsp;<span class="return-type"><a href="MethodMaker.html" title="interface in org.cojen.maker">MethodMaker</a></span>&nbsp;<span class="member-name">begin</span>&#8203;(<span class="parameters"><a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/lang/invoke/MethodHandles.Lookup.html" title="class or interface in java.lang.invoke" class="external-link">MethodHandles.Lookup</a>&nbsp;lookup,
+<a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;name,
 <a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/lang/invoke/MethodType.html" title="class or interface in java.lang.invoke" class="external-link">MethodType</a>&nbsp;type)</span></div>
 <div class="block">Begin defining a standalone method.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>lookup</code> - define the method using this lookup object</dd>
+<dd><code>name</code> - method name; use null or "_" if unnamed</dd>
 <dd><code>type</code> - defines the return type and parameter types</dd>
 <dt>See Also:</dt>
 <dd><a href="#finish()"><code>finish()</code></a></dd>

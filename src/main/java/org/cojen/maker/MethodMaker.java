@@ -33,39 +33,43 @@ public interface MethodMaker {
      *
      * @param lookup define the method using this lookup object
      * @param retType a class or name; can be null if method returns void
+     * @param name method name; use null or "_" if unnamed
      * @param paramTypes classes or names; can be null if method accepts no parameters
      * @see #finish
      */
     public static MethodMaker begin(MethodHandles.Lookup lookup,
-                                    Object retType, Object... paramTypes)
+                                    Object retType, String name, Object... paramTypes)
     {
-        return begin(lookup, null, retType, paramTypes);
+        return begin(lookup, null, retType, name, paramTypes);
     }
 
     /**
      * Begin defining a standalone method.
      *
      * @param lookup define the method using this lookup object
+     * @param name method name; use null or "_" if unnamed
      * @param type defines the return type and parameter types
      * @see #finish
      */
-    public static MethodMaker begin(MethodHandles.Lookup lookup, MethodType type) {
+    public static MethodMaker begin(MethodHandles.Lookup lookup, String name, MethodType type) {
         if (type == null) {
             type = MethodType.methodType(void.class);
         }
-        return begin(lookup, type, type.returnType(), (Object[]) type.parameterArray());
+        return begin(lookup, type, type.returnType(), name, (Object[]) type.parameterArray());
     }
 
     private static MethodMaker begin(MethodHandles.Lookup lookup, MethodType type,
-                                     Object retType, Object... paramTypes)
+                                     Object retType, String methodName, Object... paramTypes)
     {
         Class<?> lookupClass = lookup.lookupClass();
-        String name = lookupClass.getName();
-        name = name.substring(0, name.lastIndexOf('.') + 1) + "_";
+        String className = lookupClass.getName();
+        className = className.substring(0, className.lastIndexOf('.') + 1) + "_";
         ClassLoader loader = lookupClass.getClassLoader();
-        TheClassMaker cm = TheClassMaker.begin(false, name, true, loader, null, lookup);
+        TheClassMaker cm = TheClassMaker.begin(false, className, true, loader, null, lookup);
 
-        Type.Method method = cm.defineMethod(retType, "_", paramTypes);
+        final String mname = methodName == null ? "_" : methodName;
+
+        Type.Method method = cm.defineMethod(retType, mname, paramTypes);
 
         final MethodType mtype;
         if (type != null) {
@@ -89,7 +93,7 @@ public interface MethodMaker {
             public MethodHandle finish() {
                 MethodHandles.Lookup lookup = mClassMaker.finishHidden();
                 try {
-                    return lookup.findStatic(lookup.lookupClass(), "_", mtype);
+                    return lookup.findStatic(lookup.lookupClass(), mname, mtype);
                 } catch (NoSuchMethodException | IllegalAccessException e) {
                     throw new IllegalStateException(e);
                 }
