@@ -3415,6 +3415,12 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         abstract void addStoreConstantOp(ExplicitConstantOp op);
 
         @Override
+        public Var get() {
+            push();
+            return storeToNewVar(type());
+        }
+
+        @Override
         public void ifTrue(Label label) {
             push(Type.BOOLEAN);
             addBranchOp(IFNE, 1, label);
@@ -4235,13 +4241,6 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
-        public Var get() {
-            Var var = new Var(mType);
-            var.set(this);
-            return var;
-        }
-
-        @Override
         public void inc(Object value) {
             if (mType == INT
                 && (value instanceof Long || value instanceof Integer
@@ -4555,12 +4554,6 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         @Override
         public String name() {
             return mFieldRef.mField.name();
-        }
-
-        @Override
-        public Var get() {
-            push();
-            return storeToNewVar(type());
         }
 
         @Override
