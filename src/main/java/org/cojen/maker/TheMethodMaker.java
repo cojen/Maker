@@ -54,13 +54,13 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     final TheClassMaker mClassMaker;
     final Type.Method mMethod;
 
-    private Var[] mParams;
+    private LocalVar[] mParams;
 
     private Op mFirstOp;
     private Op mLastOp;
 
-    private Var mThisVar;
-    private Var mClassVar;
+    private LocalVar mThisVar;
+    private ClassVar mClassVar;
 
     private List<Handler> mExceptionHandlers;
 
@@ -71,9 +71,9 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     private byte[] mCode;
     private int mCodeLen;
 
-    private Var[] mVars;
+    private LocalVar[] mVars;
 
-    private Var[] mStack;
+    private LocalVar[] mStack;
     private int mStackSize;
     private int mMaxStackSlot;
 
@@ -158,10 +158,10 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             initParams();
         }
 
-        List<Var> varList = new ArrayList<>();
+        List<LocalVar> varList = new ArrayList<>();
         BitSet varUsage = new BitSet();
 
-        for (Var param : mParams) {
+        for (LocalVar param : mParams) {
             varList.add(param);
             varUsage.set(param.mSlot);
         }
@@ -183,7 +183,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             mExceptionHandlers.removeIf(h -> !h.mHandlerLab.mVisited);
         }
 
-        mVars = varList.toArray(new Var[varList.size()]);
+        mVars = varList.toArray(new LocalVar[varList.size()]);
 
         // Prepare the StackMapTable.
         {
@@ -203,7 +203,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         mCode = new byte[Math.min(65536, opCount * 2)];
-        mStack = new Var[8];
+        mStack = new LocalVar[8];
 
         while (true) {
             mCodeLen = 0;
@@ -382,7 +382,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     }
 
     @Override
-    public Variable class_() {
+    public ClassVar class_() {
         if (mClassVar == null) {
             mClassVar = new ClassVar(Type.from(Class.class));
         }
@@ -390,7 +390,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     }
 
     @Override
-    public Var this_() {
+    public LocalVar this_() {
         while (true) {
             if (mThisVar != null) {
                 return mThisVar;
@@ -404,11 +404,11 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     }
 
     @Override
-    public Variable param(int index) {
+    public LocalVar param(int index) {
         if (index < 0) {
             throw new IndexOutOfBoundsException();
         }
-        Var[] params = mParams;
+        LocalVar[] params = mParams;
         if (params == null) {
             initParams();
             params = mParams;
@@ -425,21 +425,21 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
         if (!Modifier.isStatic(mModifiers)) {
             Type type = mClassMaker.type();
-            mThisVar = "<init>".equals(getName()) ? new InitThisVar(type) : new Var(type);
+            mThisVar = "<init>".equals(getName()) ? new InitThisVar(type) : new LocalVar(type);
             mThisVar.mSlot = 0;
             count++;
             slot = 1;
         }
 
         int i = 0;
-        mParams = new Var[count];
+        mParams = new LocalVar[count];
 
         if (mThisVar != null) {
             mParams[i++] = mThisVar;
         }
 
         for (Type t : mMethod.paramTypes()) {
-            Var param = new Var(t);
+            var param = new LocalVar(t);
             param.mSlot = slot;
             slot += param.slotWidth();
             mParams[i++] = param;
@@ -447,9 +447,9 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     }
 
     @Override
-    public Var var(Object type) {
+    public LocalVar var(Object type) {
         requireNonNull(type);
-        return new Var(mClassMaker.typeFrom(type));
+        return new LocalVar(mClassMaker.typeFrom(type));
     }
 
     @Override
@@ -516,7 +516,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         Type type = mClassMaker.type();
         Type.Field field = findField(type, name);
 
-        Var instance = mThisVar;
+        LocalVar instance = mThisVar;
         if (instance == null && !field.isStatic()) {
             instance = this_();
         }
@@ -524,7 +524,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         return new FieldVar(instance, mConstants.addField(field));
     }
 
-    private FieldVar field(Var var, String name) {
+    private FieldVar field(LocalVar var, String name) {
         Type type = var.mType.box();
         Type.Field field = findField(type, name);
         return new FieldVar(var, mConstants.addField(field));
@@ -552,8 +552,8 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         return doInvoke(name, 1, values);
     }
 
-    private Var doInvoke(String name, int inherit, Object... values) {
-        Var this_ = mThisVar;
+    private LocalVar doInvoke(String name, int inherit, Object... values) {
+        LocalVar this_ = mThisVar;
         if (this_ == null && mParams == null) {
             initParams();
             this_ = mThisVar;
@@ -597,13 +597,13 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
      * @param specificReturnType optional
      * @param specificParamTypes optional
      */
-    Var doInvoke(Type type,
-                 OwnedVar instance,
-                 String methodName,
-                 int inherit,
-                 Object[] args,
-                 Type specificReturnType,
-                 Type[] specificParamTypes)
+    LocalVar doInvoke(Type type,
+                      OwnedVar instance,
+                      String methodName,
+                      int inherit,
+                      Object[] args,
+                      Type specificReturnType,
+                      Type[] specificParamTypes)
     {
         if (type.isPrimitive()) {
             type = type.box();
@@ -751,7 +751,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         Type returnType = Type.from(mtype.returnType());
 
         Type handleType = Type.from(MethodHandle.class);
-        Var handleVar = new Var(handleType);
+        var handleVar = new LocalVar(handleType);
 
         if (mClassMaker.allowComplexConstants()) {
             handleVar.setExact(handle);
@@ -784,7 +784,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         return doNew(mClassMaker.typeFrom(objType), values, null);
     }
 
-    private Var doNew(Type type, Object[] values, Type[] specificParamTypes) {
+    private LocalVar doNew(Type type, Object[] values, Type[] specificParamTypes) {
         if (type.isArray()) {
             if (values == null || values.length == 0) {
                 throw new IllegalArgumentException("At least one dimension required");
@@ -1000,7 +1000,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
         // Is set when a return exit is found.
         Lab retHandler = null;
-        Var retVar = null;
+        LocalVar retVar = null;
 
         boolean lastTransformed = false;
         Lab veryEnd = null;
@@ -1025,7 +1025,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                 if (retHandler == null) {
                     retHandler = new Lab(this);
                     if (retOp.op() != RETURN) {
-                        retVar = new Var(mMethod.returnType());
+                        retVar = new LocalVar(mMethod.returnType());
                     }
                 }
 
@@ -1243,7 +1243,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         Type handleType = Type.from(VarHandle.class);
-        Var handleVar = new Var(handleType);
+        var handleVar = new LocalVar(handleType);
 
         if (mClassMaker.allowComplexConstants()) {
             handleVar.setExact(handle);
@@ -1281,13 +1281,13 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         if (mStackSize == 0) {
             slot = 0;
         } else {
-            Var top = stackTop();
+            LocalVar top = stackTop();
             slot = top.mSlot + top.slotWidth();
         }
 
-        Var top;
+        LocalVar top;
         if (newOffset < 0) {
-            top = new Var(type);
+            top = new LocalVar(type);
         } else {
             top = new NewVar(type, newOffset);
         }
@@ -1319,7 +1319,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         appendOp(op, 1);
     }
 
-    private Var stackTop() {
+    private LocalVar stackTop() {
         return mStack[mStackSize - 1];
     }
 
@@ -1456,7 +1456,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     /**
      * Push a local variable to the stack.
      */
-    private void pushVar(Var var) {
+    private void pushVar(LocalVar var) {
         int slot = var.mSlot;
 
         if (slot < 0) {
@@ -1613,7 +1613,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     /**
      * Pop an item off the stack and store the result into a local variable.
      */
-    private void storeVar(Var var) {
+    private void storeVar(LocalVar var) {
         int slot = var.mSlot;
 
         byte op;
@@ -1803,7 +1803,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             constantType = Type.from(Class.class);
             Class clazz = (Class) value;
             if (clazz.isPrimitive()) {
-                new Var(Type.from(clazz).box()).field("TYPE").push();
+                new LocalVar(Type.from(clazz).box()).field("TYPE").push();
                 return addConversionOp(constantType, type);
             }
         } else if (value instanceof Number) {
@@ -2032,7 +2032,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             constantType = Type.from(Class.class);
             Type actualType = (Type) value;
             if (actualType.isPrimitive()) {
-                new Var(actualType.box()).field("TYPE").push();
+                new LocalVar(actualType.box()).field("TYPE").push();
                 return addConversionOp(constantType, type);
             }
         } else if (value instanceof MethodType) {
@@ -2045,14 +2045,14 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             }
         } else if (value instanceof Enum) {
             constantType = Type.from(value.getClass());
-            new Var(constantType).field(((Enum) value).name()).push();
+            new LocalVar(constantType).field(((Enum) value).name()).push();
             return addConversionOp(constantType, type);
         } else {
             Type actualType = ConstableSupport.THE.toConstantType(this, value);
             if (actualType != null) {
                 constantType = Type.from(Class.class);
                 if (actualType.isPrimitive()) {
-                    new Var(actualType.box()).field("TYPE").push();
+                    new LocalVar(actualType.box()).field("TYPE").push();
                     return addConversionOp(constantType, type);
                 }
                 value = actualType;
@@ -2103,18 +2103,18 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
         // Rebox without throwing NPE. Code is in the range 10..14.
 
-        Var fromVar;
+        LocalVar fromVar;
         if (mLastOp instanceof PushVarOp) {
             fromVar = ((PushVarOp) mLastOp).mVar;
         } else {
-            fromVar = new Var(from);
+            fromVar = new LocalVar(from);
             addOp(new StoreVarOp(fromVar));
             fromVar.push();
         }
 
         Lab nonNull = new Lab(this);
         addBranchOp(IFNONNULL, 1, nonNull);
-        Var toVar = new Var(to);
+        var toVar = new LocalVar(to);
         toVar.set(null);
         Lab cont = new Lab(this);
         goto_(cont);
@@ -2271,15 +2271,15 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     /**
      * Add a store to local variable operation without checking for proper ownership.
      */
-    private void addStoreOp(Var var) {
+    private void addStoreOp(LocalVar var) {
         addOp(new StoreVarOp(var));
     }
 
     /**
      * Stores the top stack item into a new local variable.
      */
-    private Var storeToNewVar(Type type) {
-        Var var = new Var(type);
+    private LocalVar storeToNewVar(Type type) {
+        LocalVar var = new LocalVar(type);
         addStoreOp(var);
         return var;
     }
@@ -2291,7 +2291,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
      * @param value must be null for unary operation
      * @return new variable
      */
-    private Var addMathOp(String name, byte op, OwnedVar var, Object value) {
+    private LocalVar addMathOp(String name, byte op, OwnedVar var, Object value) {
         Type varType = var.type();
         Type primType = varType.unbox();
 
@@ -2335,7 +2335,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
      * @param op ISHL, ISHR, IUSHR, IAND, IOR, or IXOR
      * @return new variable
      */
-    private Var addLogicalOp(String name, byte op, OwnedVar var, Object value) {
+    private LocalVar addLogicalOp(String name, byte op, OwnedVar var, Object value) {
         Type varType = var.type();
         Type primType = varType.unbox();
 
@@ -2433,7 +2433,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
      */
     final class Flow {
         // List of variables that have been visited and have a slot assigned.
-        final List<Var> mVarList;
+        final List<LocalVar> mVarList;
         final int mMinVars;
 
         // Bits are set for variables known to be available at the current flow position.
@@ -2446,7 +2446,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         private int mDepth;
         private Overflow mOverflow;
 
-        Flow(List<Var> varList, BitSet varUsage) {
+        Flow(List<LocalVar> varList, BitSet varUsage) {
             mVarList = varList;
             mMinVars = varList.size();
             mVarUsage = varUsage;
@@ -2521,11 +2521,11 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         int nextSlot() {
-            List<Var> vars = mVarList;
+            List<LocalVar> vars = mVarList;
             if (vars.isEmpty()) {
                 return 0;
             }
-            Var last = vars.get(vars.size() - 1);
+            LocalVar last = vars.get(vars.size() - 1);
             return last.mSlot + last.slotWidth();
         }
     }
@@ -2613,7 +2613,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             mAddress = m.mCodeLen;
 
             if (isTarget()) {
-                Var[] vars = m.mVars;
+                LocalVar[] vars = m.mVars;
                 BitSet usage = mVarUsage;
 
                 // First figure out the number of local codes to fill in. Assume that caller
@@ -2621,7 +2621,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
                 int numCodes = 0;
                 for (int i=vars.length; --i>=0; ) {
-                    Var var = vars[i];
+                    LocalVar var = vars[i];
                     int slot = var.mSlot;
                     if (usage.get(slot)) {
                         if (numCodes <= 0) {
@@ -2641,7 +2641,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                     localCodes = new int[numCodes];
 
                     int adjust = 0;
-                    for (Var var : vars) {
+                    for (LocalVar var : vars) {
                         int slot = var.mSlot;
                         int codeSlot = slot + adjust;
                         if (codeSlot >= localCodes.length) {
@@ -3192,20 +3192,20 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     /**
      * Accesses a local variable.
      */
-    abstract static class VarOp extends Op {
-        final Var mVar;
+    abstract static class LocalVarOp extends Op {
+        final LocalVar mVar;
 
-        VarOp(Var var) {
+        LocalVarOp(LocalVar var) {
             mVar = var;
         }
 
         @Override
         Op flow(Flow flow, Op prev) {
-            Var var = mVar;
+            LocalVar var = mVar;
             int slot = var.mSlot;
 
             if (slot < 0) {
-                List<Var> varList = flow.mVarList;
+                List<LocalVar> varList = flow.mVarList;
                 slot = flow.nextSlot();
                 var.mSlot = slot;
                 varList.add(var);
@@ -3220,8 +3220,8 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     /**
      * Push a local variable to the stack.
      */
-    static final class PushVarOp extends VarOp {
-        PushVarOp(Var var) {
+    static final class PushVarOp extends LocalVarOp {
+        PushVarOp(LocalVar var) {
             super(var);
             var.mPushCount++;
         }
@@ -3251,8 +3251,8 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     /**
      * Stores to a local variable from the stack.
      */
-    static final class StoreVarOp extends VarOp {
-        StoreVarOp(Var var) {
+    static final class StoreVarOp extends LocalVarOp {
+        StoreVarOp(LocalVar var) {
             super(var);
         }
 
@@ -3273,7 +3273,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             Op next = mNext;
             if (next instanceof PushVarOp) {
                 var push = (PushVarOp) next;
-                Var var = mVar;
+                LocalVar var = mVar;
                 if (var == push.mVar && var.mPushCount == 1) {
                     var.mPushCount = 0;
                     next = next.mNext;
@@ -3299,10 +3299,10 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     /**
      * Increments an integer variable.
      */
-    static final class IncOp extends VarOp {
+    static final class IncOp extends LocalVarOp {
         final int mAmount;
 
-        IncOp(Var var, int amount) {
+        IncOp(LocalVar var, int amount) {
             super(var);
             mAmount = amount;
             var.mPushCount++;
@@ -3341,11 +3341,11 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
     }
 
-    static final class LocalVarOp extends Op {
-        final Var mVar;
+    static final class NameLocalVarOp extends Op {
+        final LocalVar mVar;
         final String mName;
 
-        LocalVarOp(Var var, String name) {
+        NameLocalVarOp(LocalVar var, String name) {
             mVar = var;
             mName = name;
         }
@@ -3415,7 +3415,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         abstract void addStoreConstantOp(ExplicitConstantOp op);
 
         @Override
-        public Var get() {
+        public LocalVar get() {
             push();
             return storeToNewVar(type());
         }
@@ -3489,8 +3489,8 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
             Type typeCmp;
 
-            if (value instanceof Var) {
-                typeCmp = comparisonType(((Var) value).mType, eq);
+            if (value instanceof LocalVar) {
+                typeCmp = comparisonType(((LocalVar) value).mType, eq);
                 push(typeCmp);
                 addPushOp(typeCmp, value);
             } else {
@@ -3633,32 +3633,32 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
-        public Var add(Object value) {
+        public LocalVar add(Object value) {
             return addMathOp("add", IADD, this, value);
         }
 
         @Override
-        public Var sub(Object value) {
+        public LocalVar sub(Object value) {
             return addMathOp("subtract", ISUB, this, value);
         }
 
         @Override
-        public Var mul(Object value) {
+        public LocalVar mul(Object value) {
             return addMathOp("multiply", IMUL, this, value);
         }
 
         @Override
-        public Var div(Object value) {
+        public LocalVar div(Object value) {
             return addMathOp("divide", IDIV, this, value);
         }
 
         @Override
-        public Var rem(Object value) {
+        public LocalVar rem(Object value) {
             return addMathOp("remainder", IREM, this, value);
         }
 
         @Override
-        public Var eq(Object value) {
+        public LocalVar eq(Object value) {
             if (value == null) {
                 return isNull(IFNULL);
             } else {
@@ -3667,7 +3667,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
-        public Var ne(Object value) {
+        public LocalVar ne(Object value) {
             if (value == null) {
                 return isNull(IFNONNULL);
             } else {
@@ -3678,7 +3678,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         /**
          * @param op IFNULL or IFNONNULL
          */
-        private Var isNull(byte op) {
+        private LocalVar isNull(byte op) {
             Label match = label();
             pushForNull();
             addBranchOp(op, 1, match);
@@ -3692,22 +3692,22 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
-        public Var lt(Object value) {
+        public LocalVar lt(Object value) {
             return relational(value, false, IF_ICMPLT, IFLT);
         }
 
         @Override
-        public Var ge(Object value) {
+        public LocalVar ge(Object value) {
             return relational(value, false, IF_ICMPGE, IFGE);
         }
 
         @Override
-        public Var gt(Object value) {
+        public LocalVar gt(Object value) {
             return relational(value, false, IF_ICMPGT, IFGT);
         }
 
         @Override
-        public Var le(Object value) {
+        public LocalVar le(Object value) {
             return relational(value, false, IF_ICMPLE, IFLE);
         }
 
@@ -3716,7 +3716,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
          * @param op normal op to use for ints
          * @param zeroOp op to use when comparing against a constant zero int
          */
-        private Var relational(Object value, boolean eq, byte op, byte zeroOp) {
+        private LocalVar relational(Object value, boolean eq, byte op, byte zeroOp) {
             Label match = label();
             ifRelational(value, match, eq, op, zeroOp);
             addOp(new BasicConstantOp(false, BOOLEAN));
@@ -3729,7 +3729,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
-        public Var instanceOf(Object clazz) {
+        public LocalVar instanceOf(Object clazz) {
             requireNonNull(clazz);
 
             if (!type().isObject()) {
@@ -3754,7 +3754,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
-        public Var cast(Object clazz) {
+        public LocalVar cast(Object clazz) {
             requireNonNull(clazz);
 
             Type fromType = type();
@@ -3802,7 +3802,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                         }
                     }
                     if (fromType.equals(Type.from(Object.class))) {
-                        Var casted;
+                        LocalVar casted;
                         if (toType == Type.BOOLEAN) {
                             casted = cast(Boolean.class);
                         } else if (toType == Type.CHAR) {
@@ -3888,8 +3888,8 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
-        public Var not() {
-            Var var = new Var(BOOLEAN);
+        public LocalVar not() {
+            LocalVar var = new LocalVar(BOOLEAN);
             Label tru = label();
             ifTrue(tru);
             var.set(true);
@@ -3902,47 +3902,47 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
-        public Var and(Object value) {
+        public LocalVar and(Object value) {
             return addLogicalOp("and", IAND, this, value);
         }
 
         @Override
-        public Var or(Object value) {
+        public LocalVar or(Object value) {
             return addLogicalOp("or", IOR, this, value);
         }
 
         @Override
-        public Var xor(Object value) {
+        public LocalVar xor(Object value) {
             return addLogicalOp("xor", IXOR, this, value);
         }
 
         @Override
-        public Var shl(Object value) {
+        public LocalVar shl(Object value) {
             return addLogicalOp("shift", ISHL, this, value);
         }
 
         @Override
-        public Var shr(Object value) {
+        public LocalVar shr(Object value) {
             return addLogicalOp("shift", ISHR, this, value);
         }
 
         @Override
-        public Var ushr(Object value) {
+        public LocalVar ushr(Object value) {
             return addLogicalOp("shift", IUSHR, this, value);
         }
 
         @Override
-        public Var neg() {
+        public LocalVar neg() {
             return addMathOp("negate", INEG, this, null);
         }
 
         @Override
-        public Var com() {
+        public LocalVar com() {
             return addLogicalOp("complement", IXOR, this, -1);
         }
 
         @Override
-        public Var alength() {
+        public LocalVar alength() {
             arrayCheck();
             push();
             addBytecodeOp(ARRAYLENGTH, 0);
@@ -3950,7 +3950,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
-        public Var aget(Object index) {
+        public LocalVar aget(Object index) {
             byte op = aloadOp();
             push();
             addPushOp(INT, index);
@@ -3990,7 +3990,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
-        public Var invoke(String name, Object... values) {
+        public LocalVar invoke(String name, Object... values) {
             if (name.equals("new")) {
                 return doNew(type(), values, null);
             } else {
@@ -3999,7 +3999,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
-        public Var invoke(Object retType, String name, Object[] types, Object... values) {
+        public LocalVar invoke(Object retType, String name, Object[] types, Object... values) {
             Type returnType = null;
             Type[] paramTypes = null;
 
@@ -4161,7 +4161,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
     }
 
-    class Var extends OwnedVar implements Variable, Comparable<Var> {
+    class LocalVar extends OwnedVar implements Variable, Comparable<LocalVar> {
         final Type mType;
 
         int mSlot = -1;
@@ -4171,13 +4171,13 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
         private String mName;
 
-        Var(Type type) {
+        LocalVar(Type type) {
             requireNonNull(type);
             mType = type;
         }
 
         @Override
-        public int compareTo(Var other) {
+        public int compareTo(LocalVar other) {
             return Integer.compare(mSlot, other.mSlot);
         }
 
@@ -4217,18 +4217,18 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
-        public Var name(String name) {
+        public LocalVar name(String name) {
             Objects.requireNonNull(name);
             if (mName != null) {
                 throw new IllegalStateException("Already named");
             }
-            addOp(new LocalVarOp(this, name));
+            addOp(new NameLocalVarOp(this, name));
             mName = name;
             return this;
         }
 
         @Override
-        public Var set(Object value) {
+        public LocalVar set(Object value) {
             addPushOp(mType, value);
             addStoreOp(this);
             return this;
@@ -4262,13 +4262,13 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
     }
 
-    abstract class UnmodifiableVar extends Var {
+    abstract class UnmodifiableVar extends LocalVar {
         UnmodifiableVar(Type type) {
             super(type);
         }
 
         @Override
-        public Var set(Object value) {
+        public LocalVar set(Object value) {
             throw new IllegalStateException("Unmodifiable variable");
         }
 
@@ -4309,7 +4309,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
-        public Var name(String name) {
+        public LocalVar name(String name) {
             throw new IllegalStateException("Already named");
         }
 
@@ -4322,7 +4322,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     /**
      * Stack variable which represents an uninitialized new object.
      */
-    final class NewVar extends Var {
+    final class NewVar extends LocalVar {
         private final int mNewOffset;
 
         NewVar(Type type, int newOffset) {
@@ -4339,7 +4339,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     /**
      * Special variable which represents "this" inside a constructor.
      */
-    final class InitThisVar extends Var {
+    final class InitThisVar extends LocalVar {
         private int mSmCode;
 
         InitThisVar(Type type) {
@@ -4369,7 +4369,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
-        public Var getPlain() {
+        public LocalVar getPlain() {
             return vhGet("get");
         }
 
@@ -4379,7 +4379,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
-        public Var getOpaque() {
+        public LocalVar getOpaque() {
             return vhGet("getOpaque");
         }
 
@@ -4389,7 +4389,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
-        public Var getAcquire() {
+        public LocalVar getAcquire() {
             return vhGet("getAcquire");
         }
 
@@ -4399,7 +4399,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
-        public Var getVolatile() {
+        public LocalVar getVolatile() {
             return vhGet("getVolatile");
         }
 
@@ -4523,25 +4523,25 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             return vhGas("getAndBitwiseXorRelease", value);
         }
 
-        abstract Var vhGet(String name);
+        abstract LocalVar vhGet(String name);
 
         abstract void vhSet(String name, Object value);
 
-        abstract Var vhCas(String name, Type retType, Object expectedValue, Object newValue);
+        abstract LocalVar vhCas(String name, Type retType, Object expectedValue, Object newValue);
 
-        abstract Var vhGas(String name, Object value);
+        abstract LocalVar vhGas(String name, Object value);
     }
 
     /**
      * Normal static or instance field.
      */
     final class FieldVar extends BaseFieldVar {
-        final Var mInstance;
+        final LocalVar mInstance;
         final ConstantPool.C_Field mFieldRef;
 
         private ConstantPool.C_Dynamic mVarHandle;
 
-        FieldVar(Var instance, ConstantPool.C_Field fieldRef) {
+        FieldVar(LocalVar instance, ConstantPool.C_Field fieldRef) {
             mInstance = instance;
             mFieldRef = fieldRef;
         }
@@ -4634,7 +4634,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
-        Var vhGet(String name) {
+        LocalVar vhGet(String name) {
             Type thisType = type();
             Type vhType = pushVarHandle();
 
@@ -4678,7 +4678,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
-        Var vhCas(String name, Type retType, Object expectedValue, Object newValue) {
+        LocalVar vhCas(String name, Type retType, Object expectedValue, Object newValue) {
             Type thisType = type();
             Type vhType = pushVarHandle();
 
@@ -4709,7 +4709,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
-        Var vhGas(String name, Object value) {
+        LocalVar vhGas(String name, Object value) {
             Type thisType = type();
             Type vhType = pushVarHandle();
 
@@ -4774,7 +4774,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
      * Pseudo field which accesses a VarHandle.
      */
     final class HandleVar extends BaseFieldVar {
-        private final Var mHandleVar;
+        private final LocalVar mHandleVar;
         private final Type mType;
         private final Type[] mCoordinateTypes;
         private final Object[] mCoordinates;
@@ -4786,7 +4786,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
          * @param type VarHandle.varType
          * @param coordinates variables and constants
          */
-        HandleVar(Var handleVar, Type type, Type[] coordinateTypes, Object[] coordinates) {
+        HandleVar(LocalVar handleVar, Type type, Type[] coordinateTypes, Object[] coordinates) {
             mHandleVar = handleVar;
             mType = type;
             mCoordinateTypes = coordinateTypes;
@@ -4804,7 +4804,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
-        public Var get() {
+        public LocalVar get() {
             return getPlain();
         }
 
@@ -4847,7 +4847,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
-        Var vhGet(String name) {
+        LocalVar vhGet(String name) {
             vhPush(name);
             return storeToNewVar(mType);
         }
@@ -4892,7 +4892,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
-        Var vhCas(String name, Type retType, Object expectedValue, Object newValue) {
+        LocalVar vhCas(String name, Type retType, Object expectedValue, Object newValue) {
             mHandleVar.push();
 
             Type[] allTypes = new Type[mCoordinateTypes.length + 2];
@@ -4920,7 +4920,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
-        Var vhGas(String name, Object value) {
+        LocalVar vhGas(String name, Object value) {
             mHandleVar.push();
 
             Type[] allTypes = new Type[mCoordinateTypes.length + 1];
@@ -4952,11 +4952,11 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
-        public Var invoke(Object returnType, String name, Object[] types, Object... values) {
+        public LocalVar invoke(Object returnType, String name, Object[] types, Object... values) {
             Type retType = mClassMaker.typeFrom(returnType);
             int length = values == null ? 0 : values.length;
 
-            Var var;
+            LocalVar var;
 
             if (mCondy) {
                 if ((types != null && types.length != 0) || length != 0) {
@@ -4991,7 +4991,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                     return null;
                 }
 
-                var = new Var(retType);
+                var = new LocalVar(retType);
             }
 
             addStoreOp(var);
