@@ -736,9 +736,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             return null;
         }
 
-        Var var = new Var(returnType);
-        addStoreOp(var);
-        return var;
+        return storeToNewVar(returnType);
     }
 
     @Override
@@ -778,9 +776,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             return null;
         }
 
-        Var var = new Var(returnType);
-        addStoreOp(var);
-        return var;
+        return storeToNewVar(returnType);
     }
 
     @Override
@@ -869,9 +865,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             doInvoke(type, null, "<init>", -1, values, null, specificParamTypes);
         }
 
-        Var var = new Var(type);
-        addStoreOp(var);
-        return var;
+        return storeToNewVar(type);
     }
 
     @Override
@@ -934,9 +928,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
         mExceptionHandlers.add(handler);
 
-        Var var = new Var(catchType);
-        addStoreOp(var);
-        return var;
+        return storeToNewVar(catchType);
     }
 
     private static final class Handler implements ExceptionHandler {
@@ -1229,9 +1221,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
         addOp(new InvokeDynamicOp(valueTypes.size(), dynamic, strType));
 
-        Var var = new Var(strType);
-        addStoreOp(var);
-        return var;
+        return storeToNewVar(strType);
     }
 
     @Override
@@ -2279,16 +2269,19 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     }
 
     /**
-     * Add a store to variable operation.
+     * Add a store to variable operation without checking for proper ownership.
      */
     private void addStoreOp(Var var) {
-        if (var.owner() != this) {
-            throw new IllegalArgumentException("Unknown variable");
-        }
-        if (var instanceof ClassVar) {
-            throw new IllegalStateException("Unmodifiable variable");
-        }
         addOp(new StoreVarOp(var));
+    }
+
+    /**
+     * Stores the top stack item into a new variable.
+     */
+    private Var storeToNewVar(Type type) {
+        Var var = new Var(type);
+        addStoreOp(var);
+        return var;
     }
 
     /**
@@ -2333,9 +2326,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         addBytecodeOp(op, stackPop);
         addConversionOp(primType, varType);
 
-        Var dst = new Var(varType);
-        addStoreOp(dst);
-        return dst;
+        return storeToNewVar(varType);
     }
 
     /**
@@ -2377,9 +2368,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         addBytecodeOp(op, 1);
         addConversionOp(primType, varType);
 
-        Var dst = new Var(varType);
-        addStoreOp(dst);
-        return dst;
+        return storeToNewVar(varType);
     }
 
     private void addBranchOp(byte op, int stackPop, Label label) {
@@ -3684,7 +3673,6 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
          * @param op IFNULL or IFNONNULL
          */
         private Var isNull(byte op) {
-            Var var = new Var(BOOLEAN);
             Label match = label();
             pushForNull();
             addBranchOp(op, 1, match);
@@ -3694,8 +3682,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             match.here();
             addOp(new BasicConstantOp(true, BOOLEAN));
             cont.here();
-            addStoreOp(var);
-            return var;
+            return storeToNewVar(BOOLEAN);
         }
 
         @Override
@@ -3724,7 +3711,6 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
          * @param zeroOp op to use when comparing against a constant zero int
          */
         private Var relational(Object value, boolean eq, byte op, byte zeroOp) {
-            Var var = new Var(BOOLEAN);
             Label match = label();
             ifRelational(value, match, eq, op, zeroOp);
             addOp(new BasicConstantOp(false, BOOLEAN));
@@ -3733,8 +3719,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             match.here();
             addOp(new BasicConstantOp(true, BOOLEAN));
             cont.here();
-            addStoreOp(var);
-            return var;
+            return storeToNewVar(BOOLEAN);
         }
 
         @Override
@@ -3759,9 +3744,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                 }
             });
 
-            Var var = new Var(BOOLEAN);
-            addStoreOp(var);
-            return var;
+            return storeToNewVar(BOOLEAN);
         }
 
         @Override
@@ -3895,9 +3878,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                 });
             }
 
-            Var var = new Var(toType);
-            addStoreOp(var);
-            return var;
+            return storeToNewVar(toType);
         }
 
         @Override
@@ -3959,9 +3940,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             arrayCheck();
             push();
             addBytecodeOp(ARRAYLENGTH, 0);
-            Var var = new Var(INT);
-            addStoreOp(var);
-            return var;
+            return storeToNewVar(INT);
         }
 
         @Override
@@ -3970,9 +3949,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             push();
             addPushOp(INT, index);
             addBytecodeOp(op, 1);
-            Var var = new Var(type().elementType());
-            addStoreOp(var);
-            return var;
+            return storeToNewVar(type().elementType());
         }
 
         @Override
@@ -4286,10 +4263,31 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
     }
 
+    abstract class UnmodifiableVar extends Var {
+        UnmodifiableVar(Type type) {
+            super(type);
+        }
+
+        @Override
+        public Var set(Object value) {
+            throw new IllegalStateException("Unmodifiable variable");
+        }
+
+        @Override
+        public Variable setExact(Object value) {
+            throw new IllegalStateException("Unmodifiable variable");
+        }
+
+        @Override
+        public void inc(Object value) {
+            throw new IllegalStateException("Unmodifiable variable");
+        }
+    }
+
     /**
      * Special variable which refers to the enclosing class.
      */
-    final class ClassVar extends Var {
+    final class ClassVar extends UnmodifiableVar {
         ClassVar(Type type) {
             super(type);
         }
@@ -4341,7 +4339,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     /**
      * Unmodifiable variable which refers to a constant.
      */
-    final class ConstantVar extends Var {
+    final class ConstantVar extends UnmodifiableVar {
         final ConstantPool.Constant mConstant;
 
         ConstantVar(Type type, ConstantPool.Constant constant) {
@@ -4352,21 +4350,6 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         @Override
         void push() {
             addOp(new ExplicitConstantOp(mConstant, mType));
-        }
-
-        @Override
-        public Var set(Object value) {
-            throw new IllegalStateException("Unmodifiable variable");
-        }
-
-        @Override
-        public Variable setExact(Object value) {
-            throw new IllegalStateException("Unmodifiable variable");
-        }
-
-        @Override
-        public void inc(Object value) {
-            throw new IllegalStateException("Unmodifiable variable");
         }
     }
 
@@ -4571,10 +4554,8 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
         @Override
         public Var get() {
-            Var var = new Var(type());
             push();
-            addStoreOp(var);
-            return var;
+            return storeToNewVar(type());
         }
 
         @Override
@@ -4673,9 +4654,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             ConstantPool.C_Method ref = mConstants.addMethod(method);
             addOp(new InvokeOp(INVOKEVIRTUAL, stackPop, ref));
 
-            Var var = new Var(thisType);
-            addStoreOp(var);
-            return var;
+            return storeToNewVar(thisType);
         }
 
         @Override
@@ -4728,9 +4707,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             ConstantPool.C_Method ref = mConstants.addMethod(method);
             addOp(new InvokeOp(INVOKEVIRTUAL, stackPop, ref));
 
-            Var var = new Var(retType);
-            addStoreOp(var);
-            return var;
+            return storeToNewVar(retType);
         }
 
         @Override
@@ -4754,9 +4731,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             ConstantPool.C_Method ref = mConstants.addMethod(method);
             addOp(new InvokeOp(INVOKEVIRTUAL, stackPop, ref));
 
-            Var var = new Var(thisType);
-            addStoreOp(var);
-            return var;
+            return storeToNewVar(thisType);
         }
 
         private Type pushVarHandle() {
@@ -4876,9 +4851,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         @Override
         Var vhGet(String name) {
             vhPush(name);
-            Var var = new Var(mType);
-            addStoreOp(var);
-            return var;
+            return storeToNewVar(mType);
         }
 
         void vhPush(String name) {
@@ -4945,9 +4918,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             ConstantPool.C_Method ref = mConstants.addMethod(method);
             addOp(new InvokeOp(INVOKEVIRTUAL, 3 + mCoordinates.length, ref));
 
-            Var var = new Var(retType);
-            addStoreOp(var);
-            return var;
+            return storeToNewVar(retType);
         }
 
         @Override
@@ -4969,9 +4940,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             ConstantPool.C_Method ref = mConstants.addMethod(method);
             addOp(new InvokeOp(INVOKEVIRTUAL, 2 + mCoordinates.length, ref));
 
-            Var var = new Var(mType);
-            addStoreOp(var);
-            return var;
+            return storeToNewVar(mType);
         }
     }
 
