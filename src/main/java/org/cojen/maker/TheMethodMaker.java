@@ -1030,7 +1030,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                 }
 
                 if (retVar != null) {
-                    // Store the result into a variable before the return, which will be
+                    // Store the result into a local variable before the return, which will be
                     // replaced below.
                     var storeOp = new StoreVarOp(retVar);
                     prev.mNext = storeOp;
@@ -1454,15 +1454,15 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     }
 
     /**
-     * Push a variable to the stack.
+     * Push a local variable to the stack.
      */
     private void pushVar(Var var) {
-        if (var == mClassVar) {
-            pushConstant(mClassMaker.mThisClass, var.mType);
-            return;
-        }
-
         int slot = var.mSlot;
+
+        if (slot < 0) {
+            // Must be a local variable with a slot assigned by flow analysis.
+            throw new AssertionError();
+        }
 
         doPush: {
             byte op;
@@ -1611,7 +1611,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     }
 
     /**
-     * Pop an item off the stack and store the result into a variable.
+     * Pop an item off the stack and store the result into a local variable.
      */
     private void storeVar(Var var) {
         int slot = var.mSlot;
@@ -2269,14 +2269,14 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     }
 
     /**
-     * Add a store to variable operation without checking for proper ownership.
+     * Add a store to local variable operation without checking for proper ownership.
      */
     private void addStoreOp(Var var) {
         addOp(new StoreVarOp(var));
     }
 
     /**
-     * Stores the top stack item into a new variable.
+     * Stores the top stack item into a new local variable.
      */
     private Var storeToNewVar(Type type) {
         Var var = new Var(type);
@@ -3190,7 +3190,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     }
 
     /**
-     * Accesses a variable.
+     * Accesses a local variable.
      */
     abstract static class VarOp extends Op {
         final Var mVar;
@@ -3218,7 +3218,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     }
 
     /**
-     * Push a variable to the stack.
+     * Push a local variable to the stack.
      */
     static final class PushVarOp extends VarOp {
         PushVarOp(Var var) {
@@ -3249,7 +3249,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     }
 
     /**
-     * Stores to a variable from the stack.
+     * Stores to a local variable from the stack.
      */
     static final class StoreVarOp extends VarOp {
         StoreVarOp(Var var) {
@@ -4285,6 +4285,23 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     }
 
     /**
+     * Unmodifiable variable which refers to a constant.
+     */
+    final class ConstantVar extends UnmodifiableVar {
+        final ConstantPool.Constant mConstant;
+
+        ConstantVar(Type type, ConstantPool.Constant constant) {
+            super(type);
+            mConstant = constant;
+        }
+
+        @Override
+        void push() {
+            addOp(new ExplicitConstantOp(mConstant, mType));
+        }
+    }
+
+    /**
      * Special variable which refers to the enclosing class.
      */
     final class ClassVar extends UnmodifiableVar {
@@ -4295,6 +4312,11 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         @Override
         public Var name(String name) {
             throw new IllegalStateException("Already named");
+        }
+
+        @Override
+        void push() {
+            addOp(new ExplicitConstantOp(mClassMaker.mThisClass, mType));
         }
     }
 
@@ -4333,23 +4355,6 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
         void ready() {
             mSmCode = super.smCode();
-        }
-    }
-
-    /**
-     * Unmodifiable variable which refers to a constant.
-     */
-    final class ConstantVar extends UnmodifiableVar {
-        final ConstantPool.Constant mConstant;
-
-        ConstantVar(Type type, ConstantPool.Constant constant) {
-            super(type);
-            mConstant = constant;
-        }
-
-        @Override
-        void push() {
-            addOp(new ExplicitConstantOp(mConstant, mType));
         }
     }
 
