@@ -1782,12 +1782,11 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
      */
     private Type addPushOp(Type type, Object value) {
         if (value instanceof OwnedVar) {
-            OwnedVar owned = (OwnedVar) value;
-            if (owned.owner() != this) {
-                throw new IllegalArgumentException("Unknown variable");
+            var owned = (OwnedVar) value;
+            if (owned.tryPushTo(this)) {
+                return addConversionOp(owned.type(), type);
             }
-            owned.push();
-            return addConversionOp(owned.type(), type);
+            throw new IllegalArgumentException("Unknown variable");
         }
 
         Type constantType;
@@ -2232,9 +2231,8 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
         if (value instanceof Variable) {
             if (value instanceof ConstantVar) {
-                var constant = (ConstantVar) value;
-                if (constant.owner() == this) {
-                    return constant.mConstant;
+                if ((c = ((ConstantVar) value).tryObtain(this)) != null) {
+                    return c;
                 }
             }
             throw unsupportedConstant(value);
@@ -3366,10 +3364,6 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     }
 
     abstract class OwnedVar implements Variable, Typed {
-        TheMethodMaker owner() {
-            return TheMethodMaker.this;
-        }
-
         @Override
         public Class classType() {
             return type().clazz();
@@ -3378,6 +3372,14 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         @Override
         public ClassMaker makerType() {
             return type().maker();
+        }
+
+        boolean tryPushTo(TheMethodMaker mm) {
+            if (TheMethodMaker.this == mm) {
+                push();
+                return true;
+            }
+            return false;
         }
 
         abstract void push();
@@ -4091,7 +4093,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                     // Conversion to MethodHandle is automatic.
                     type = Type.from(MethodHandle.class);
                 } else {
-                    type = ConstableSupport.THE.toConstantDescType(owner(), arg);
+                    type = ConstableSupport.THE.toConstantDescType(TheMethodMaker.this, arg);
                     if (type == null) {
                         type = mClassMaker.typeFrom(arg.getClass());
                     }
@@ -4262,9 +4264,15 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
     }
 
-    abstract class UnmodifiableVar extends LocalVar {
-        UnmodifiableVar(Type type) {
+    /**
+     * Unmodifiable variable which refers to a constant.
+     */
+    class ConstantVar extends LocalVar {
+        final ConstantPool.Constant mConstant;
+
+        ConstantVar(Type type, ConstantPool.Constant constant) {
             super(type);
+            mConstant = constant;
         }
 
         @Override
@@ -4281,41 +4289,44 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         public void inc(Object value) {
             throw new IllegalStateException("Unmodifiable variable");
         }
-    }
 
-    /**
-     * Unmodifiable variable which refers to a constant.
-     */
-    final class ConstantVar extends UnmodifiableVar {
-        final ConstantPool.Constant mConstant;
+        /**
+         * @return null if the constant isn't defined in the same ClassMaker.
+         */
+        ConstantPool.Constant tryObtain(TheMethodMaker mm) {
+            return (mm.mClassMaker == TheMethodMaker.this.mClassMaker) ? mConstant : null;
+        }
 
-        ConstantVar(Type type, ConstantPool.Constant constant) {
-            super(type);
-            mConstant = constant;
+        @Override
+        boolean tryPushTo(TheMethodMaker mm) {
+            if (mClassMaker == mm.mClassMaker) {
+                pushTo(mm);
+                return true;
+            }
+            return false;
         }
 
         @Override
         void push() {
-            addOp(new ExplicitConstantOp(mConstant, mType));
+            pushTo(TheMethodMaker.this);
+        }
+
+        void pushTo(TheMethodMaker mm) {
+            mm.addOp(new ExplicitConstantOp(mConstant, mType));
         }
     }
 
     /**
      * Special variable which refers to the enclosing class.
      */
-    final class ClassVar extends UnmodifiableVar {
+    final class ClassVar extends ConstantVar {
         ClassVar(Type type) {
-            super(type);
+            super(type, mClassMaker.mThisClass);
         }
 
         @Override
         public LocalVar name(String name) {
             throw new IllegalStateException("Already named");
-        }
-
-        @Override
-        void push() {
-            addOp(new ExplicitConstantOp(mClassMaker.mThisClass, mType));
         }
     }
 
