@@ -2994,8 +2994,23 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             }
         }
 
+        /**
+         * @param an "if" opcode
+         */
         private void flip(byte op) {
-            mCode = (stackPop() << 8) | (flipIf(op) & 0xff);
+            /*
+              Adjust the opcode to branch to the opposite target.
+             
+              ==  to  !=
+              !=  to  ==
+              <   to  >=
+              >=  to  <
+              >   to  <=
+              <=  to  >
+            */
+            op = (byte) (op >= IFNULL ? (op ^ 1) : ((op - 1) ^ 1) + 1);
+
+            mCode = (stackPop() << 8) | (op & 0xff);
         }
     }
 

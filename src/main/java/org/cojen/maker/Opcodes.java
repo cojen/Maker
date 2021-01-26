@@ -222,20 +222,4 @@ class Opcodes {
         IFNULL = (byte) 198,
         IFNONNULL = (byte) 199,
         GOTO_W = (byte) 200;
-
-    /*
-     * Adjust the opcode to branch to the opposite target.
-     *
-     * ==  to  !=
-     * !=  to  ==
-     * <   to  >=
-     * >=  to  <
-     * >   to  <=
-     * <=  to  >
-     *
-     * @param an "if" opcode
-     */
-    static byte flipIf(byte op) {
-        return (byte) (op >= IFNULL ? (op ^ 1) : ((op - 1) ^ 1) + 1);
-    }
 }
