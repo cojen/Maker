@@ -204,6 +204,14 @@ public interface MethodMaker {
     public MethodMaker varargs();
 
     /**
+     * Declare that this method throws the given exception type.
+     *
+     * @param type a class or class name
+     * @return this
+     */
+    public MethodMaker throws_(Object type);
+
+    /**
      * Returns a variable which represents the enclosing class of this method. The type of the
      * variable is always {@code java.lang.Class}.
      *

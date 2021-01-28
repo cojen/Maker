@@ -354,20 +354,20 @@ abstract class Attribute extends Attributed {
         }
     }
 
-    static class NestMembers extends Attribute {
-        private ConstantPool.C_Class[] mMembers;
+    abstract static class ClassList extends Attribute {
+        private ConstantPool.C_Class[] mClasses;
         private int mSize;
 
-        NestMembers(ConstantPool cp) {
-            super(cp, "NestMembers");
-            mMembers = new ConstantPool.C_Class[8];
+        ClassList(ConstantPool cp, String name) {
+            super(cp, name);
+            mClasses = new ConstantPool.C_Class[8];
         }
 
         void add(ConstantPool.C_Class member) {
-            if (mSize >= mMembers.length) {
-                mMembers = Arrays.copyOf(mMembers, mMembers.length << 1);
+            if (mSize >= mClasses.length) {
+                mClasses = Arrays.copyOf(mClasses, mClasses.length << 1);
             }
-            mMembers[mSize++] = member;
+            mClasses[mSize++] = member;
         }
 
         @Override
@@ -379,8 +379,20 @@ abstract class Attribute extends Attributed {
         void writeDataTo(BytesOut out) throws IOException {
             out.writeShort(mSize);
             for (int i=0; i<mSize; i++) {
-                out.writeShort(mMembers[i].mIndex);
+                out.writeShort(mClasses[i].mIndex);
             }
+        }
+    }
+
+    static class NestMembers extends ClassList {
+        NestMembers(ConstantPool cp) {
+            super(cp, "NestMembers");
+        }
+    }
+
+    static class Exceptions extends ClassList {
+        Exceptions(ConstantPool cp) {
+            super(cp, "Exceptions");
         }
     }
 

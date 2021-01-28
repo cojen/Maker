@@ -126,4 +126,26 @@ public class ExceptionTest {
             assertTrue(e.getMessage().contains("handler"));
         }
     }
+
+    @Test
+    public void declare() throws Exception {
+        // Test the exception declaration.
+
+        ClassMaker cm = ClassMaker.begin().public_();
+        MethodMaker mm = cm.addMethod(void.class, "run").public_()
+            .throws_(NullPointerException.class).throws_(InterruptedException.class);
+
+        var clazz = cm.finish();
+        Class<?>[] types = clazz.getMethod("run").getExceptionTypes();
+
+        assertEquals(2, types.length);
+
+        if (types[0] == NullPointerException.class) {
+            assertEquals(InterruptedException.class, types[1]);
+        } else if (types[0] == InterruptedException.class) {
+            assertEquals(NullPointerException.class, types[1]);
+        } else {
+            fail();
+        }
+    }
 }

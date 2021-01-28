@@ -86,6 +86,8 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
     private Attribute.LocalVariableTable mLocalVariableTable;
 
+    private Attribute.Exceptions mExceptionsThrown;
+
     private int mFinished;
 
     TheMethodMaker(TheClassMaker classMaker, Type.Method method) {
@@ -378,6 +380,16 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
         mModifiers = Modifiers.toVarArgs(mModifiers);
         mMethod.makeVarargs();
+        return this;
+    }
+
+    @Override
+    public MethodMaker throws_(Object type) {
+        if (mExceptionsThrown == null) {
+            mExceptionsThrown = new Attribute.Exceptions(mConstants);
+            addAttribute(mExceptionsThrown);
+        }
+        mExceptionsThrown.add(mConstants.addClass(mClassMaker.typeFrom(type)));
         return this;
     }
 
