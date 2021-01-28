@@ -56,6 +56,47 @@ abstract class Attribute extends Attributed {
      */
     abstract void writeDataTo(BytesOut out) throws IOException;
 
+    /**
+     * Helpful base class for attributes that contain a list of entries.
+     */
+    abstract static class ListAttribute<E> extends Attribute {
+        private E[] mEntries;
+        private int mSize;
+
+        @SuppressWarnings("unchecked")
+        ListAttribute(ConstantPool cp, String name) {
+            super(cp, name);
+            mEntries = (E[]) new Object[4];
+        }
+
+        @Override
+        int length() {
+            return 2 + mSize * entryLength();
+        }
+
+        void writeDataTo(BytesOut out) throws IOException {
+            out.writeShort(mSize);
+            for (int i=0; i<mSize; i++) {
+                writeEntryTo(out, mEntries[i]);
+            }
+        }
+
+        protected void addEntry(E entry) {
+            if (mSize >= mEntries.length) {
+                mEntries = Arrays.copyOf(mEntries, mEntries.length << 1);
+            }
+            mEntries[mSize++] = entry;
+        }
+
+        protected int numEntries() {
+            return mSize;
+        }
+
+        protected abstract int entryLength();
+
+        protected abstract void writeEntryTo(BytesOut out, E e) throws IOException;
+    }
+
     static class Constant extends Attribute {
         private final ConstantPool.Constant mConstant;
 
@@ -199,24 +240,17 @@ abstract class Attribute extends Attributed {
         }
     }
 
-    static class LocalVariableTable extends Attribute {
-        private Entry[] mEntries;
-        private int mSize;
+    static class LocalVariableTable extends ListAttribute<LocalVariableTable.Entry> {
         private int mMaxOffset;
 
         LocalVariableTable(ConstantPool cp) {
             super(cp, "LocalVariableTable");
-            mEntries = new Entry[8];
         }
 
         void add(int startOffset, int endOffset,
                  ConstantPool.C_UTF8 name, ConstantPool.C_UTF8 type, int slot)
         {
-            Entry entry = new Entry(startOffset, endOffset, name, type, slot);
-            if (mSize >= mEntries.length) {
-                mEntries = Arrays.copyOf(mEntries, mEntries.length << 1);
-            }
-            mEntries[mSize++] = entry;
+            addEntry(new Entry(startOffset, endOffset, name, type, slot));
         }
 
         /**
@@ -224,27 +258,23 @@ abstract class Attribute extends Attributed {
          */
         boolean finish(int offset) {
             mMaxOffset = offset;
-            return mSize != 0;
+            return numEntries() != 0;
         }
 
         @Override
-        int length() {
-            return 2 + mSize * 10;
+        protected int entryLength() {
+            return 10;
         }
 
         @Override
-        void writeDataTo(BytesOut out) throws IOException {
-            out.writeShort(mSize);
-            for (int i=0; i<mSize; i++) {
-                Entry entry = mEntries[i];
-                int start = entry.mStartOffset;
-                out.writeShort(start);
-                int end = Math.min(mMaxOffset, entry.mEndOffset);
-                out.writeShort(Math.min(65535, Math.max(0, end - start)));
-                out.writeShort(entry.mName.mIndex);
-                out.writeShort(entry.mType.mIndex);
-                out.writeShort(entry.mSlot);
-            }
+        protected void writeEntryTo(BytesOut out, Entry entry) throws IOException {
+            int start = entry.mStartOffset;
+            out.writeShort(start);
+            int end = Math.min(mMaxOffset, entry.mEndOffset);
+            out.writeShort(Math.min(65535, Math.max(0, end - start)));
+            out.writeShort(entry.mName.mIndex);
+            out.writeShort(entry.mType.mIndex);
+            out.writeShort(entry.mSlot);
         }
 
         static class Entry {
@@ -354,33 +384,23 @@ abstract class Attribute extends Attributed {
         }
     }
 
-    abstract static class ClassList extends Attribute {
-        private ConstantPool.C_Class[] mClasses;
-        private int mSize;
-
+    abstract static class ClassList extends ListAttribute<ConstantPool.C_Class> {
         ClassList(ConstantPool cp, String name) {
             super(cp, name);
-            mClasses = new ConstantPool.C_Class[8];
         }
 
         void add(ConstantPool.C_Class member) {
-            if (mSize >= mClasses.length) {
-                mClasses = Arrays.copyOf(mClasses, mClasses.length << 1);
-            }
-            mClasses[mSize++] = member;
+            addEntry(member);
         }
 
         @Override
-        int length() {
-            return 2 + mSize * 2;
+        protected int entryLength() {
+            return 2;
         }
 
         @Override
-        void writeDataTo(BytesOut out) throws IOException {
-            out.writeShort(mSize);
-            for (int i=0; i<mSize; i++) {
-                out.writeShort(mClasses[i].mIndex);
-            }
+        protected void writeEntryTo(BytesOut out, ConstantPool.C_Class c) throws IOException {
+            out.writeShort(c.mIndex);
         }
     }
 
@@ -420,16 +440,13 @@ abstract class Attribute extends Attributed {
         }
     }
 
-    static class InnerClasses extends Attribute {
+    static class InnerClasses extends ListAttribute<InnerClasses.Entry> {
         private final ConstantPool.C_Class mOuterClass;
-        private Entry[] mEntries;
-        private int mSize;
         private HashMap<String, Integer> mClassNumbers;
 
         InnerClasses(ConstantPool cp, ConstantPool.C_Class outer) {
             super(cp, "InnerClasses");
             mOuterClass = outer;
-            mEntries = new Entry[4];
         }
 
         int classNumberFor(String name) {
@@ -449,31 +466,24 @@ abstract class Attribute extends Attributed {
          * @param name null for anonymous
          */
         void add(TheClassMaker inner, String name) {
-            if (mSize >= mEntries.length) {
-                mEntries = Arrays.copyOf(mEntries, mEntries.length << 1);
-            }
             ConstantPool.C_UTF8 cname = null;
             if (name != null) {
                 cname = mConstants.addUTF8(name);
             }
-            mEntries[mSize++] = new Entry(inner, mConstants.addClass(inner.type()), cname);
+            addEntry(new Entry(inner, mConstants.addClass(inner.type()), cname));
         }
 
         @Override
-        int length() {
-            return 2 + mSize * 8;
+        protected int entryLength() {
+            return 8;
         }
 
         @Override
-        void writeDataTo(BytesOut out) throws IOException {
-            out.writeShort(mSize);
-            for (int i=0; i<mSize; i++) {
-                Entry entry = mEntries[i];
-                out.writeShort(entry.mInnerClass.mIndex);
-                out.writeShort(mOuterClass.mIndex);
-                out.writeShort(entry.mInnerName == null ? 0 : entry.mInnerName.mIndex);
-                out.writeShort(entry.mInnerMaker.mModifiers);
-            }
+        protected void writeEntryTo(BytesOut out, Entry entry) throws IOException {
+            out.writeShort(entry.mInnerClass.mIndex);
+            out.writeShort(mOuterClass.mIndex);
+            out.writeShort(entry.mInnerName == null ? 0 : entry.mInnerName.mIndex);
+            out.writeShort(entry.mInnerMaker.mModifiers);
         }
 
         static class Entry {
