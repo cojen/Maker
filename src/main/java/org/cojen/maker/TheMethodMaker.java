@@ -1260,6 +1260,11 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     }
 
     @Override
+    public ClassMaker addClass(String className) {
+        return mClassMaker.addClass(className, mMethod);
+    }
+
+    @Override
     public MethodHandle finish() {
         throw new IllegalStateException("Not a standalone method");
     }

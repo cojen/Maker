@@ -87,6 +87,7 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
         throw new UnsupportedOperationException("Cannot define hidden classes");
     }
 
+    private final TheClassMaker mParent;
     private final boolean mExternal;
     private final MethodHandles.Lookup mLookup;
     private final ClassInjector mClassInjector;
@@ -98,7 +99,7 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
     // Stashed by Type.begin to prevent GC of this type being defined.
     Object mTypeCache;
 
-    private int mModifiers;
+    int mModifiers;
 
     private Set<ConstantPool.C_Class> mInterfaces;
     private Map<String, TheFieldMaker> mFields;
@@ -111,6 +112,8 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
     private Attribute.BootstrapMethods mBootstrapMethods;
 
     private Attribute.NestMembers mNestMembers;
+
+    private Attribute.InnerClasses mInnerClasses;
 
     // -1: finished, 0: not finished, 1: has complex constants
     private int mFinished;
@@ -128,14 +131,15 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
 
         ClassInjector injector = ClassInjector.lookup(explicit, parentLoader, domain);
 
-        return new TheClassMaker(external, className, lookup, injector);
+        return new TheClassMaker(null, external, className, lookup, injector);
     }
 
-    private TheClassMaker(boolean external,
+    private TheClassMaker(TheClassMaker parent, boolean external,
                           String className, MethodHandles.Lookup lookup, ClassInjector injector)
     {
         super(new ConstantPool());
 
+        mParent = parent;
         mExternal = external;
         mLookup = lookup;
         mClassInjector = injector;
@@ -152,7 +156,7 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
     }
 
     private TheClassMaker(TheClassMaker from, String className) {
-        this(from.mExternal, className, from.mLookup, from.mClassInjector);
+        this(from, from.mExternal, className, from.mLookup, from.mClassInjector);
     }
 
     @Override
@@ -164,6 +168,27 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
     public ClassMaker public_() {
         checkFinished();
         mModifiers = Modifiers.toPublic(mModifiers);
+        return this;
+    }
+
+    @Override
+    public ClassMaker private_() {
+        checkFinished();
+        mModifiers = Modifiers.toPrivate(mModifiers);
+        return this;
+    }
+
+    @Override
+    public ClassMaker protected_() {
+        checkFinished();
+        mModifiers = Modifiers.toProtected(mModifiers);
+        return this;
+    }
+
+    @Override
+    public ClassMaker static_() {
+        checkFinished();
+        mModifiers = Modifiers.toStatic(mModifiers);
         return this;
     }
 
@@ -348,7 +373,11 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
 
     @Override
     public TheClassMaker addClass(String className) {
-        checkFinished();
+        return addClass(className, null);
+    }
+
+    TheClassMaker addClass(final String className, final Type.Method hostMethod) {
+        TheClassMaker nestHost = nestHost(this);
 
         String prefix = name();
         int ix = prefix.lastIndexOf('-');
@@ -356,31 +385,70 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
             prefix = prefix.substring(0, ix);
         }
 
+        if (mInnerClasses == null) {
+            mInnerClasses = new Attribute.InnerClasses(mConstants, mThisClass);
+            addAttribute(mInnerClasses);
+        }
+
+        String fullName;
+
         if (className == null) {
-            className = prefix + '$' + (mNestMembers == null ? 0 : mNestMembers.size());
+            fullName = prefix + '$' +  + mInnerClasses.classNumberFor("");
         } else {
             if (className.indexOf('.') >= 0) {
                 throw new IllegalArgumentException("Not a simple name: " + className);
             }
-            className = prefix + '$' + className;
+            if (hostMethod == null ||
+                ((ix = prefix.indexOf('$')) >= 0 && ++ix < prefix.length()
+                 && !Character.isJavaIdentifierStart(prefix.charAt(ix))))
+            {
+                fullName = prefix + '$' + className;
+            } else {
+                fullName = prefix + '$' + mInnerClasses.classNumberFor(className) + className;
+            }
         }
 
-        var nest = new TheClassMaker(this, className);
-        nest.setNestHost(type());
+        var clazz = new TheClassMaker(this, fullName);
+        clazz.setNestHost(nestHost.type());
+        nestHost.addNestMember(clazz.type());
 
+        if (hostMethod != null) {
+            clazz.setEnclosingMethod(type(), hostMethod);
+        }
+
+        mInnerClasses.add(clazz, className);
+
+        return clazz;
+    }
+
+    private static TheClassMaker nestHost(TheClassMaker cm) {
+        while (true) {
+            cm.checkFinished();
+            TheClassMaker parent = cm.mParent;
+            if (parent == null) {
+                return cm;
+            }
+            cm = parent;
+        }
+    }
+
+    private void setNestHost(Type nestHost) {
+        addAttribute(new Attribute.NestHost(mConstants, mConstants.addClass(nestHost)));
+    }
+
+    private void addNestMember(Type nestMember) {
         if (mNestMembers == null) {
             mNestMembers = new Attribute.NestMembers(mConstants);
             addAttribute(mNestMembers);
         }
-
-        mNestMembers.add(mConstants.addClass(nest.type()));
-
-        return nest;
+        mNestMembers.add(mConstants.addClass(nestMember));
     }
 
-    private void setNestHost(Type type) {
-        addAttribute(new Attribute.NestHost(mConstants, mConstants.addClass(type)));
-    }
+    private void setEnclosingMethod(Type hostType, Type.Method hostMethod) {
+        addAttribute(new Attribute.EnclosingMethod
+                     (mConstants, mConstants.addClass(hostType),
+                      mConstants.addNameAndType(hostMethod.name(), hostMethod.descriptor())));
+    } 
 
     @Override
     public ClassMaker sourceFile(String fileName) {

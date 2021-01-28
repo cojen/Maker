@@ -107,6 +107,27 @@ public interface ClassMaker {
     public ClassMaker public_();
 
     /**
+     * Switch this class to be private. Classes are package-private by default.
+     *
+     * @return this
+     */
+    public ClassMaker private_();
+
+    /**
+     * Switch this class to be protected. Classes are package-private by default.
+     *
+     * @return this
+     */
+    public ClassMaker protected_();
+
+    /**
+     * Switch this class to be static. Classes are non-static by default.
+     *
+     * @return this
+     */
+    public ClassMaker static_();
+
+    /**
      * Switch this class to be final. Classes are non-final by default.
      *
      * @return this
@@ -200,7 +221,7 @@ public interface ClassMaker {
     public MethodMaker addClinit();
 
     /**
-     * Add a nested class to this class. The actual class name will have a suitable suffix
+     * Add an inner class to this class. The actual class name will have a suitable suffix
      * applied to ensure uniqueness.
      *
      * @param className simple class name; pass null to use default

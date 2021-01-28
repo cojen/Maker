@@ -41,8 +41,8 @@ public class NestTest {
         } catch (IllegalArgumentException e) {
         }
 
-        ClassMaker child1 = parent.addClass(null).public_();
-        ClassMaker child2 = parent.addClass("Child2");
+        ClassMaker child1 = parent.addClass(null).public_().static_();
+        ClassMaker child2 = parent.addClass("Child2").private_();
         ClassMaker child3 = parent.addClass(null).public_().interface_();
         child2.addConstructor().private_();
 
@@ -86,5 +86,58 @@ public class NestTest {
         parentClass.getConstructor().newInstance();
         child1Class.getMethod("test1").invoke(null);
         parentClass.getMethod("test2").invoke(null);
+    }
+
+    @Test
+    public void levels() throws Exception {
+        // The parent class defines the one nest. If defined wrong, a ClassFormatError is thrown.
+
+        ClassMaker parent = ClassMaker.begin().public_();
+        ClassMaker child1 = parent.addClass(null);
+        ClassMaker child2 = child1.addClass(null);
+
+        child1.finish();
+        child2.finish();
+        parent.finish();
+    }
+
+    @Test
+    public void innerClasses() throws Exception {
+        ClassMaker parent = ClassMaker.begin().public_();
+
+        MethodMaker mm = parent.addMethod(null, "foo").public_().static_();
+
+        ClassMaker inner1 = mm.addClass(null);
+        inner1.addConstructor().invokeSuperConstructor();
+
+        ClassMaker inner2 = mm.addClass("Inner");
+
+        MethodMaker mm2 = inner2.addConstructor();
+        mm2.invokeSuperConstructor();
+
+        ClassMaker inner3 = mm2.addClass(null);
+        inner3.addConstructor();
+
+        ClassMaker inner4 = mm2.addClass("Inner");
+        inner4.addConstructor();
+
+        ClassMaker inner5 = mm2.addClass(null);
+        inner5.addConstructor();
+
+        mm.new_(inner1);
+        mm.new_(inner2);
+
+        mm2.new_(inner3);
+        mm2.new_(inner4);
+        mm2.new_(inner5);
+
+        var clazz = parent.finish();
+        inner1.finish();
+        inner2.finish();
+        inner3.finish();
+        inner4.finish();
+        inner5.finish();
+
+        clazz.getMethod("foo").invoke(null);
     }
 }

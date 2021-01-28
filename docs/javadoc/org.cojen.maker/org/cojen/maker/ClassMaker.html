@@ -15,7 +15,7 @@
 <script type="text/javascript" src="../../../../script-dir/jquery-ui.min.js"></script>
 </head>
 <body class="class-declaration-page">
-<script type="text/javascript">var data = {"i0":6,"i1":6,"i2":6,"i3":18,"i4":6,"i5":6,"i6":6,"i7":18,"i8":6,"i9":1,"i10":1,"i11":1,"i12":1,"i13":1,"i14":6,"i15":6,"i16":6,"i17":6,"i18":6,"i19":6,"i20":6,"i21":6,"i22":6,"i23":6,"i24":6};
+<script type="text/javascript">var data = {"i0":6,"i1":6,"i2":6,"i3":18,"i4":6,"i5":6,"i6":6,"i7":18,"i8":6,"i9":1,"i10":1,"i11":1,"i12":1,"i13":1,"i14":6,"i15":6,"i16":6,"i17":6,"i18":6,"i19":6,"i20":6,"i21":6,"i22":6,"i23":6,"i24":6,"i25":6,"i26":6,"i27":6};
 var tabs = {65535:["t0","All Methods"],1:["t1","Static Methods"],2:["t2","Instance Methods"],4:["t3","Abstract Methods"],16:["t5","Default Methods"]};
 var altColor = "alt-color";
 var rowColor = "row-color";
@@ -114,7 +114,7 @@ loadScripts(document, 'script');</script>
 <td class="col-first"><code><a href="ClassMaker.html" title="interface in org.cojen.maker">ClassMaker</a></code></td>
 <th class="col-second" scope="row"><code><span class="member-name-link"><a href="#addClass(java.lang.String)">addClass</a></span>&#8203;(<a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;className)</code></th>
 <td class="col-last">
-<div class="block">Add a nested class to this class.</div>
+<div class="block">Add an inner class to this class.</div>
 </td>
 </tr>
 <tr class="alt-color" id="i2">
@@ -267,19 +267,40 @@ loadScripts(document, 'script');</script>
 </tr>
 <tr class="alt-color" id="i22">
 <td class="col-first"><code><a href="ClassMaker.html" title="interface in org.cojen.maker">ClassMaker</a></code></td>
+<th class="col-second" scope="row"><code><span class="member-name-link"><a href="#private_()">private_</a></span>()</code></th>
+<td class="col-last">
+<div class="block">Switch this class to be private.</div>
+</td>
+</tr>
+<tr class="row-color" id="i23">
+<td class="col-first"><code><a href="ClassMaker.html" title="interface in org.cojen.maker">ClassMaker</a></code></td>
+<th class="col-second" scope="row"><code><span class="member-name-link"><a href="#protected_()">protected_</a></span>()</code></th>
+<td class="col-last">
+<div class="block">Switch this class to be protected.</div>
+</td>
+</tr>
+<tr class="alt-color" id="i24">
+<td class="col-first"><code><a href="ClassMaker.html" title="interface in org.cojen.maker">ClassMaker</a></code></td>
 <th class="col-second" scope="row"><code><span class="member-name-link"><a href="#public_()">public_</a></span>()</code></th>
 <td class="col-last">
 <div class="block">Switch this class to be public.</div>
 </td>
 </tr>
-<tr class="row-color" id="i23">
+<tr class="row-color" id="i25">
 <td class="col-first"><code><a href="ClassMaker.html" title="interface in org.cojen.maker">ClassMaker</a></code></td>
 <th class="col-second" scope="row"><code><span class="member-name-link"><a href="#sourceFile(java.lang.String)">sourceFile</a></span>&#8203;(<a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;fileName)</code></th>
 <td class="col-last">
 <div class="block">Set the source file of this class file by adding a source file attribute.</div>
 </td>
 </tr>
-<tr class="alt-color" id="i24">
+<tr class="alt-color" id="i26">
+<td class="col-first"><code><a href="ClassMaker.html" title="interface in org.cojen.maker">ClassMaker</a></code></td>
+<th class="col-second" scope="row"><code><span class="member-name-link"><a href="#static_()">static_</a></span>()</code></th>
+<td class="col-last">
+<div class="block">Switch this class to be static.</div>
+</td>
+</tr>
+<tr class="row-color" id="i27">
 <td class="col-first"><code><a href="ClassMaker.html" title="interface in org.cojen.maker">ClassMaker</a></code></td>
 <th class="col-second" scope="row"><code><span class="member-name-link"><a href="#synthetic()">synthetic</a></span>()</code></th>
 <td class="col-last">
@@ -384,6 +405,39 @@ loadScripts(document, 'script');</script>
 <h3>public_</h3>
 <div class="member-signature"><span class="return-type"><a href="ClassMaker.html" title="interface in org.cojen.maker">ClassMaker</a></span>&nbsp;<span class="member-name">public_</span>()</div>
 <div class="block">Switch this class to be public. Classes are package-private by default.</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>this</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="private_()">
+<h3>private_</h3>
+<div class="member-signature"><span class="return-type"><a href="ClassMaker.html" title="interface in org.cojen.maker">ClassMaker</a></span>&nbsp;<span class="member-name">private_</span>()</div>
+<div class="block">Switch this class to be private. Classes are package-private by default.</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>this</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="protected_()">
+<h3>protected_</h3>
+<div class="member-signature"><span class="return-type"><a href="ClassMaker.html" title="interface in org.cojen.maker">ClassMaker</a></span>&nbsp;<span class="member-name">protected_</span>()</div>
+<div class="block">Switch this class to be protected. Classes are package-private by default.</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>this</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="static_()">
+<h3>static_</h3>
+<div class="member-signature"><span class="return-type"><a href="ClassMaker.html" title="interface in org.cojen.maker">ClassMaker</a></span>&nbsp;<span class="member-name">static_</span>()</div>
+<div class="block">Switch this class to be static. Classes are non-static by default.</div>
 <dl class="notes">
 <dt>Returns:</dt>
 <dd>this</dd>
@@ -537,7 +591,7 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="addClass(java.lang.String)">
 <h3>addClass</h3>
 <div class="member-signature"><span class="return-type"><a href="ClassMaker.html" title="interface in org.cojen.maker">ClassMaker</a></span>&nbsp;<span class="member-name">addClass</span>&#8203;(<span class="parameters"><a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;className)</span></div>
-<div class="block">Add a nested class to this class. The actual class name will have a suitable suffix
+<div class="block">Add an inner class to this class. The actual class name will have a suitable suffix
  applied to ensure uniqueness.</div>
 <dl class="notes">
 <dt>Parameters:</dt>

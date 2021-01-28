@@ -19,6 +19,7 @@ package org.cojen.maker;
 import java.io.IOException;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 
@@ -369,10 +370,6 @@ abstract class Attribute extends Attributed {
             mMembers[mSize++] = member;
         }
 
-        int size() {
-            return mSize;
-        }
-
         @Override
         int length() {
             return 2 + mSize * 2;
@@ -383,6 +380,99 @@ abstract class Attribute extends Attributed {
             out.writeShort(mSize);
             for (int i=0; i<mSize; i++) {
                 out.writeShort(mMembers[i].mIndex);
+            }
+        }
+    }
+
+    static class EnclosingMethod extends Attribute {
+        private final ConstantPool.C_Class mHostClass;
+        private final ConstantPool.C_NameAndType mHostMethod;
+
+        EnclosingMethod(ConstantPool cp,
+                        ConstantPool.C_Class hostClass, ConstantPool.C_NameAndType hostMethod)
+        {
+            super(cp, "EnclosingMethod");
+            mHostClass = hostClass;
+            mHostMethod = hostMethod;
+        }
+
+        @Override
+        int length() {
+            return 4;
+        }
+
+        @Override
+        void writeDataTo(BytesOut out) throws IOException {
+            out.writeShort(mHostClass.mIndex);
+            out.writeShort(mHostMethod.mIndex);
+        }
+    }
+
+    static class InnerClasses extends Attribute {
+        private final ConstantPool.C_Class mOuterClass;
+        private Entry[] mEntries;
+        private int mSize;
+        private HashMap<String, Integer> mClassNumbers;
+
+        InnerClasses(ConstantPool cp, ConstantPool.C_Class outer) {
+            super(cp, "InnerClasses");
+            mOuterClass = outer;
+            mEntries = new Entry[4];
+        }
+
+        int classNumberFor(String name) {
+            int num;
+            if (mClassNumbers == null) {
+                mClassNumbers = new HashMap<>(4);
+                num = 1;
+            } else {
+                Integer obj = mClassNumbers.get(name);
+                num = obj == null ? 1 : (obj + 1);
+            }
+            mClassNumbers.put(name, num);
+            return num;
+        }
+
+        /**
+         * @param name null for anonymous
+         */
+        void add(TheClassMaker inner, String name) {
+            if (mSize >= mEntries.length) {
+                mEntries = Arrays.copyOf(mEntries, mEntries.length << 1);
+            }
+            ConstantPool.C_UTF8 cname = null;
+            if (name != null) {
+                cname = mConstants.addUTF8(name);
+            }
+            mEntries[mSize++] = new Entry(inner, mConstants.addClass(inner.type()), cname);
+        }
+
+        @Override
+        int length() {
+            return 2 + mSize * 8;
+        }
+
+        @Override
+        void writeDataTo(BytesOut out) throws IOException {
+            out.writeShort(mSize);
+            for (int i=0; i<mSize; i++) {
+                Entry entry = mEntries[i];
+                out.writeShort(entry.mInnerClass.mIndex);
+                out.writeShort(mOuterClass.mIndex);
+                out.writeShort(entry.mInnerName == null ? 0 : entry.mInnerName.mIndex);
+                out.writeShort(entry.mInnerMaker.mModifiers);
+            }
+        }
+
+        static class Entry {
+            final TheClassMaker mInnerMaker;
+            final ConstantPool.C_Class mInnerClass;
+            final ConstantPool.C_UTF8 mInnerName;
+
+            Entry(TheClassMaker maker, ConstantPool.C_Class inner, ConstantPool.C_UTF8 name) {
+                mInnerMaker = maker;
+                mInnerClass = inner;
+                mInnerName = name;
             }
         }
     }

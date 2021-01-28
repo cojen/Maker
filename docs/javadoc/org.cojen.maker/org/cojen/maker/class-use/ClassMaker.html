@@ -79,31 +79,38 @@ loadScripts(document, 'script');</script>
 <td class="col-first"><code><a href="../ClassMaker.html" title="interface in org.cojen.maker">ClassMaker</a></code></td>
 <th class="col-second" scope="row"><span class="type-name-label">ClassMaker.</span><code><span class="member-name-link"><a href="../ClassMaker.html#addClass(java.lang.String)">addClass</a></span>&#8203;(<a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;className)</code></th>
 <td class="col-last">
-<div class="block">Add a nested class to this class.</div>
+<div class="block">Add an inner class to this class.</div>
 </td>
 </tr>
 <tr class="alt-color">
+<td class="col-first"><code><a href="../ClassMaker.html" title="interface in org.cojen.maker">ClassMaker</a></code></td>
+<th class="col-second" scope="row"><span class="type-name-label">MethodMaker.</span><code><span class="member-name-link"><a href="../MethodMaker.html#addClass(java.lang.String)">addClass</a></span>&#8203;(<a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;className)</code></th>
+<td class="col-last">
+<div class="block">Add an inner class to this method.</div>
+</td>
+</tr>
+<tr class="row-color">
 <td class="col-first"><code><a href="../ClassMaker.html" title="interface in org.cojen.maker">ClassMaker</a></code></td>
 <th class="col-second" scope="row"><span class="type-name-label">ClassMaker.</span><code><span class="member-name-link"><a href="../ClassMaker.html#another(java.lang.String)">another</a></span>&#8203;(<a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;className)</code></th>
 <td class="col-last">
 <div class="block">Begin defining another class with the same loader, domain, and lookup as this one.</div>
 </td>
 </tr>
-<tr class="row-color">
+<tr class="alt-color">
 <td class="col-first"><code>static <a href="../ClassMaker.html" title="interface in org.cojen.maker">ClassMaker</a></code></td>
 <th class="col-second" scope="row"><span class="type-name-label">ClassMaker.</span><code><span class="member-name-link"><a href="../ClassMaker.html#begin()">begin</a></span>()</code></th>
 <td class="col-last">
 <div class="block">Begin defining a class with an automatically assigned name.</div>
 </td>
 </tr>
-<tr class="alt-color">
+<tr class="row-color">
 <td class="col-first"><code>static <a href="../ClassMaker.html" title="interface in org.cojen.maker">ClassMaker</a></code></td>
 <th class="col-second" scope="row"><span class="type-name-label">ClassMaker.</span><code><span class="member-name-link"><a href="../ClassMaker.html#begin(java.lang.String)">begin</a></span>&#8203;(<a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;className)</code></th>
 <td class="col-last">
 <div class="block">Begin defining a class with the given name.</div>
 </td>
 </tr>
-<tr class="row-color">
+<tr class="alt-color">
 <td class="col-first"><code>static <a href="../ClassMaker.html" title="interface in org.cojen.maker">ClassMaker</a></code></td>
 <th class="col-second" scope="row"><span class="type-name-label">ClassMaker.</span><code><span class="member-name-link"><a href="../ClassMaker.html#begin(java.lang.String,java.lang.ClassLoader,java.security.ProtectionDomain)">begin</a></span>&#8203;(<a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;className,
 <a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/lang/ClassLoader.html" title="class or interface in java.lang" class="external-link">ClassLoader</a>&nbsp;parentLoader,
@@ -112,7 +119,7 @@ loadScripts(document, 'script');</script>
 <div class="block">Begin defining a class with the given name.</div>
 </td>
 </tr>
-<tr class="alt-color">
+<tr class="row-color">
 <td class="col-first"><code>static <a href="../ClassMaker.html" title="interface in org.cojen.maker">ClassMaker</a></code></td>
 <th class="col-second" scope="row"><span class="type-name-label">ClassMaker.</span><code><span class="member-name-link"><a href="../ClassMaker.html#begin(java.lang.String,java.lang.invoke.MethodHandles.Lookup)">begin</a></span>&#8203;(<a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;className,
 <a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/lang/invoke/MethodHandles.Lookup.html" title="class or interface in java.lang.invoke" class="external-link">MethodHandles.Lookup</a>&nbsp;lookup)</code></th>
@@ -120,21 +127,21 @@ loadScripts(document, 'script');</script>
 <div class="block">Begin defining a class with the given name.</div>
 </td>
 </tr>
-<tr class="row-color">
+<tr class="alt-color">
 <td class="col-first"><code>static <a href="../ClassMaker.html" title="interface in org.cojen.maker">ClassMaker</a></code></td>
 <th class="col-second" scope="row"><span class="type-name-label">ClassMaker.</span><code><span class="member-name-link"><a href="../ClassMaker.html#beginExternal(java.lang.String)">beginExternal</a></span>&#8203;(<a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;className)</code></th>
 <td class="col-last">
 <div class="block">Begin defining a class intended to be loaded from a file.</div>
 </td>
 </tr>
-<tr class="alt-color">
+<tr class="row-color">
 <td class="col-first"><code><a href="../ClassMaker.html" title="interface in org.cojen.maker">ClassMaker</a></code></td>
 <th class="col-second" scope="row"><span class="type-name-label">FieldMaker.</span><code><span class="member-name-link"><a href="../FieldMaker.html#classMaker()">classMaker</a></span>()</code></th>
 <td class="col-last">
 <div class="block">Returns the enclosing <code>ClassMaker</code> for this field.</div>
 </td>
 </tr>
-<tr class="row-color">
+<tr class="alt-color">
 <td class="col-first"><code><a href="../ClassMaker.html" title="interface in org.cojen.maker">ClassMaker</a></code></td>
 <th class="col-second" scope="row"><span class="type-name-label">MethodMaker.</span><code><span class="member-name-link"><a href="../MethodMaker.html#classMaker()">classMaker</a></span>()</code></th>
 <td class="col-last">
@@ -142,53 +149,74 @@ loadScripts(document, 'script');</script>
  type specification.</div>
 </td>
 </tr>
-<tr class="alt-color">
+<tr class="row-color">
 <td class="col-first"><code><a href="../ClassMaker.html" title="interface in org.cojen.maker">ClassMaker</a></code></td>
 <th class="col-second" scope="row"><span class="type-name-label">ClassMaker.</span><code><span class="member-name-link"><a href="../ClassMaker.html#extend(java.lang.Object)">extend</a></span>&#8203;(<a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>&nbsp;superClass)</code></th>
 <td class="col-last">
 <div class="block">Set an interface or class that this class extends.</div>
 </td>
 </tr>
-<tr class="row-color">
+<tr class="alt-color">
 <td class="col-first"><code><a href="../ClassMaker.html" title="interface in org.cojen.maker">ClassMaker</a></code></td>
 <th class="col-second" scope="row"><span class="type-name-label">ClassMaker.</span><code><span class="member-name-link"><a href="../ClassMaker.html#final_()">final_</a></span>()</code></th>
 <td class="col-last">
 <div class="block">Switch this class to be final.</div>
 </td>
 </tr>
-<tr class="alt-color">
+<tr class="row-color">
 <td class="col-first"><code><a href="../ClassMaker.html" title="interface in org.cojen.maker">ClassMaker</a></code></td>
 <th class="col-second" scope="row"><span class="type-name-label">ClassMaker.</span><code><span class="member-name-link"><a href="../ClassMaker.html#implement(java.lang.Object)">implement</a></span>&#8203;(<a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>&nbsp;iface)</code></th>
 <td class="col-last">
 <div class="block">Add an interface that this class implements.</div>
 </td>
 </tr>
-<tr class="row-color">
+<tr class="alt-color">
 <td class="col-first"><code><a href="../ClassMaker.html" title="interface in org.cojen.maker">ClassMaker</a></code></td>
 <th class="col-second" scope="row"><span class="type-name-label">ClassMaker.</span><code><span class="member-name-link"><a href="../ClassMaker.html#interface_()">interface_</a></span>()</code></th>
 <td class="col-last">
 <div class="block">Switch this class to be an interface.</div>
 </td>
 </tr>
-<tr class="alt-color">
+<tr class="row-color">
 <td class="col-first"><code><a href="../ClassMaker.html" title="interface in org.cojen.maker">ClassMaker</a></code></td>
 <th class="col-second" scope="row"><span class="type-name-label">Variable.</span><code><span class="member-name-link"><a href="../Variable.html#makerType()">makerType</a></span>()</code></th>
 <td class="col-last">
 <div class="block">Returns the type of this variable, if bound to a class which is being made.</div>
 </td>
 </tr>
+<tr class="alt-color">
+<td class="col-first"><code><a href="../ClassMaker.html" title="interface in org.cojen.maker">ClassMaker</a></code></td>
+<th class="col-second" scope="row"><span class="type-name-label">ClassMaker.</span><code><span class="member-name-link"><a href="../ClassMaker.html#private_()">private_</a></span>()</code></th>
+<td class="col-last">
+<div class="block">Switch this class to be private.</div>
+</td>
+</tr>
 <tr class="row-color">
+<td class="col-first"><code><a href="../ClassMaker.html" title="interface in org.cojen.maker">ClassMaker</a></code></td>
+<th class="col-second" scope="row"><span class="type-name-label">ClassMaker.</span><code><span class="member-name-link"><a href="../ClassMaker.html#protected_()">protected_</a></span>()</code></th>
+<td class="col-last">
+<div class="block">Switch this class to be protected.</div>
+</td>
+</tr>
+<tr class="alt-color">
 <td class="col-first"><code><a href="../ClassMaker.html" title="interface in org.cojen.maker">ClassMaker</a></code></td>
 <th class="col-second" scope="row"><span class="type-name-label">ClassMaker.</span><code><span class="member-name-link"><a href="../ClassMaker.html#public_()">public_</a></span>()</code></th>
 <td class="col-last">
 <div class="block">Switch this class to be public.</div>
 </td>
 </tr>
-<tr class="alt-color">
+<tr class="row-color">
 <td class="col-first"><code><a href="../ClassMaker.html" title="interface in org.cojen.maker">ClassMaker</a></code></td>
 <th class="col-second" scope="row"><span class="type-name-label">ClassMaker.</span><code><span class="member-name-link"><a href="../ClassMaker.html#sourceFile(java.lang.String)">sourceFile</a></span>&#8203;(<a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;fileName)</code></th>
 <td class="col-last">
 <div class="block">Set the source file of this class file by adding a source file attribute.</div>
+</td>
+</tr>
+<tr class="alt-color">
+<td class="col-first"><code><a href="../ClassMaker.html" title="interface in org.cojen.maker">ClassMaker</a></code></td>
+<th class="col-second" scope="row"><span class="type-name-label">ClassMaker.</span><code><span class="member-name-link"><a href="../ClassMaker.html#static_()">static_</a></span>()</code></th>
+<td class="col-last">
+<div class="block">Switch this class to be static.</div>
 </td>
 </tr>
 <tr class="row-color">

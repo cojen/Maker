@@ -396,6 +396,16 @@ public interface MethodMaker {
     public void nop();
 
     /**
+     * Add an inner class to this method. The actual class name will have a suitable suffix
+     * applied to ensure uniqueness. The inner class doesn't have access to the local variables
+     * of the enclosing method, and so they must be passed along explicitly.
+     *
+     * @param className simple class name; pass null to use default
+     * @throws IllegalArgumentException if not given a simple class name
+     */
+    public ClassMaker addClass(String className);
+
+    /**
      * Finishes the definition of a standalone method.
      *
      * @throws IllegalStateException if already finished or if not a standalone method

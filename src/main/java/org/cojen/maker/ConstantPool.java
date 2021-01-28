@@ -221,11 +221,11 @@ class ConstantPool {
         return addConstant(new C_MethodType(addUTF8(typeDesc)));
     }
 
-    private C_NameAndType addNameAndType(String name, String typeDesc) {
+    C_NameAndType addNameAndType(String name, String typeDesc) {
         return addNameAndType(addUTF8(name), addUTF8(typeDesc));
     } 
 
-    private C_NameAndType addNameAndType(C_UTF8 name, C_UTF8 typeDesc) {
+    C_NameAndType addNameAndType(C_UTF8 name, C_UTF8 typeDesc) {
         return addConstant(new C_NameAndType(name, typeDesc));
     }
 
