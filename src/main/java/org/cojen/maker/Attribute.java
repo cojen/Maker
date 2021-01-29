@@ -441,12 +441,10 @@ abstract class Attribute extends Attributed {
     }
 
     static class InnerClasses extends ListAttribute<InnerClasses.Entry> {
-        private final ConstantPool.C_Class mOuterClass;
         private HashMap<String, Integer> mClassNumbers;
 
-        InnerClasses(ConstantPool cp, ConstantPool.C_Class outer) {
+        InnerClasses(ConstantPool cp) {
             super(cp, "InnerClasses");
-            mOuterClass = outer;
         }
 
         int classNumberFor(String name) {
@@ -463,14 +461,16 @@ abstract class Attribute extends Attributed {
         }
 
         /**
-         * @param name null for anonymous
+         * @param innerName null for anonymous
          */
-        void add(TheClassMaker inner, String name) {
+        void add(TheClassMaker inner, TheClassMaker outer, String innerName) {
             ConstantPool.C_UTF8 cname = null;
-            if (name != null) {
-                cname = mConstants.addUTF8(name);
+            if (innerName != null) {
+                cname = mConstants.addUTF8(innerName);
             }
-            addEntry(new Entry(inner, mConstants.addClass(inner.type()), cname));
+            addEntry(new Entry(mConstants.addClass(inner.type()),
+                               mConstants.addClass(outer.type()),
+                               cname, inner));
         }
 
         @Override
@@ -481,20 +481,24 @@ abstract class Attribute extends Attributed {
         @Override
         protected void writeEntryTo(BytesOut out, Entry entry) throws IOException {
             out.writeShort(entry.mInnerClass.mIndex);
-            out.writeShort(mOuterClass.mIndex);
+            out.writeShort(entry.mOuterClass.mIndex);
             out.writeShort(entry.mInnerName == null ? 0 : entry.mInnerName.mIndex);
             out.writeShort(entry.mInnerMaker.mModifiers);
         }
 
         static class Entry {
-            final TheClassMaker mInnerMaker;
             final ConstantPool.C_Class mInnerClass;
+            final ConstantPool.C_Class mOuterClass;
             final ConstantPool.C_UTF8 mInnerName;
+            final TheClassMaker mInnerMaker;
 
-            Entry(TheClassMaker maker, ConstantPool.C_Class inner, ConstantPool.C_UTF8 name) {
-                mInnerMaker = maker;
+            Entry(ConstantPool.C_Class inner, ConstantPool.C_Class outer,
+                  ConstantPool.C_UTF8 innerName, TheClassMaker innerMaker)
+            {
                 mInnerClass = inner;
-                mInnerName = name;
+                mOuterClass = outer;
+                mInnerName = innerName;
+                mInnerMaker = innerMaker;
             }
         }
     }

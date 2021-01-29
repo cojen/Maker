@@ -385,15 +385,12 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
             prefix = prefix.substring(0, ix);
         }
 
-        if (mInnerClasses == null) {
-            mInnerClasses = new Attribute.InnerClasses(mConstants, mThisClass);
-            addAttribute(mInnerClasses);
-        }
+        var innerClasses = innerClasses();
 
         String fullName;
 
         if (className == null) {
-            fullName = prefix + '$' +  + mInnerClasses.classNumberFor("");
+            fullName = prefix + '$' +  + innerClasses.classNumberFor("");
         } else {
             if (className.indexOf('.') >= 0) {
                 throw new IllegalArgumentException("Not a simple name: " + className);
@@ -404,7 +401,7 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
             {
                 fullName = prefix + '$' + className;
             } else {
-                fullName = prefix + '$' + mInnerClasses.classNumberFor(className) + className;
+                fullName = prefix + '$' + innerClasses.classNumberFor(className) + className;
             }
         }
 
@@ -416,7 +413,8 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
             clazz.setEnclosingMethod(type(), hostMethod);
         }
 
-        mInnerClasses.add(clazz, className);
+        innerClasses.add(clazz, this, className);
+        clazz.innerClasses().add(clazz, this, className);
 
         return clazz;
     }
@@ -448,7 +446,15 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
         addAttribute(new Attribute.EnclosingMethod
                      (mConstants, mConstants.addClass(hostType),
                       mConstants.addNameAndType(hostMethod.name(), hostMethod.descriptor())));
-    } 
+    }
+
+    private Attribute.InnerClasses innerClasses() {
+        if (mInnerClasses == null) {
+            mInnerClasses = new Attribute.InnerClasses(mConstants);
+            addAttribute(mInnerClasses);
+        }
+        return mInnerClasses;
+    }
 
     @Override
     public ClassMaker sourceFile(String fileName) {

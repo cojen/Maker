@@ -131,13 +131,49 @@ public class NestTest {
         mm2.new_(inner4);
         mm2.new_(inner5);
 
-        var clazz = parent.finish();
-        inner1.finish();
-        inner2.finish();
-        inner3.finish();
-        inner4.finish();
-        inner5.finish();
+        var clazz0 = parent.finish();
+        var clazz1 = inner1.finish();
+        var clazz2 = inner2.finish();
+        var clazz3 = inner3.finish();
+        var clazz4 = inner4.finish();
+        var clazz5 = inner5.finish();
 
-        clazz.getMethod("foo").invoke(null);
+        clazz0.getMethod("foo").invoke(null);
+
+        assertExists(clazz0.getDeclaredClasses(), clazz1, clazz2);
+        assertExists(clazz1.getDeclaredClasses());
+        assertExists(clazz2.getDeclaredClasses(), clazz3, clazz4, clazz5);
+
+        assertNull(clazz0.getEnclosingClass());
+
+        assertEquals(clazz0, clazz1.getEnclosingClass());
+        assertEquals(clazz0, clazz2.getEnclosingClass());
+
+        assertEquals(clazz2, clazz3.getEnclosingClass());
+        assertEquals(clazz2, clazz4.getEnclosingClass());
+        assertEquals(clazz2, clazz5.getEnclosingClass());
+
+        assertEquals("foo", clazz1.getEnclosingMethod().getName());
+        assertEquals("foo", clazz2.getEnclosingMethod().getName());
+
+        assertEquals(0, clazz3.getEnclosingConstructor().getParameterCount());
+        assertEquals(0, clazz4.getEnclosingConstructor().getParameterCount());
+        assertEquals(0, clazz5.getEnclosingConstructor().getParameterCount());
+    }
+
+    private static void assertExists(Class<?>[] classes, Class<?> expect) {
+        for (var c : classes) {
+            if (c == expect) {
+                return;
+            }
+        }
+        fail("not found: " + expect);
+    }
+
+    private static void assertExists(Class<?>[] classes, Class<?>... expect) {
+        for (var e : expect) {
+            assertExists(classes, e);
+        }
+        assertEquals(expect.length, classes.length);
     }
 }
