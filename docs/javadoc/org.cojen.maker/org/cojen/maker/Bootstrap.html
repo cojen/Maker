@@ -147,7 +147,7 @@ loadScripts(document, 'script');</script>
  parameters.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
-<dd><code>type</code> - constant type or method return type</dd>
+<dd><code>type</code> - constant type or method return type (can be null for void)</dd>
 <dd><code>name</code> - constant or method name</dd>
 <dt>Returns:</dt>
 <dd>the constant value, or the result of the method, which is null if void</dd>
@@ -166,7 +166,7 @@ loadScripts(document, 'script');</script>
 <div class="block">Invoke a dynamically generated method.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
-<dd><code>returnType</code> - method return type</dd>
+<dd><code>returnType</code> - method return type (can be null for void)</dd>
 <dd><code>name</code> - method name</dd>
 <dd><code>types</code> - method parameter types (can be null if none)</dd>
 <dd><code>values</code> - variables or constants</dd>

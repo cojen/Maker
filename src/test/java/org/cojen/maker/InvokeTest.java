@@ -160,7 +160,7 @@ public class InvokeTest {
 
         Label start = mm.label().here();
         var bootstrap = mm.var(InvokeTest.class).indy("boot", handle, type);
-        var v0 = bootstrap.invoke(void.class, "throwIt", new Object[] {String.class}, "hello");
+        var v0 = bootstrap.invoke(null, "throwIt", new Object[] {String.class}, "hello");
         assertNull(v0);
         mm.return_();
         Label end = mm.label().here();

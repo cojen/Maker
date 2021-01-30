@@ -4995,8 +4995,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
-        public LocalVar invoke(Object returnType, String name, Object[] types, Object... values) {
-            Type retType = mClassMaker.typeFrom(returnType);
+        public LocalVar invoke(Object retType, String name, Object[] types, Object... values) {
             int length = values == null ? 0 : values.length;
 
             LocalVar var;
@@ -5006,12 +5005,18 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                     throw new IllegalStateException("Dynamic constant has no parameters");
                 }
 
+                if (retType == null) {
+                    throw unsupportedConstant(null);
+                }
+
+                Type returnType = mClassMaker.typeFrom(retType);
+
                 ConstantPool.C_Dynamic dynamic = mConstants
-                    .addDynamicConstant(mBootstrapIndex, name, retType);
+                    .addDynamicConstant(mBootstrapIndex, name, returnType);
 
-                addOp(new ExplicitConstantOp(dynamic, retType));
+                addOp(new ExplicitConstantOp(dynamic, returnType));
 
-                var = new ConstantVar(retType, dynamic);
+                var = new ConstantVar(returnType, dynamic);
             } else {
                 if ((types == null ? 0 : types.length) != length) {
                     throw new IllegalArgumentException("Mismatched parameter types and values");
@@ -5023,18 +5028,19 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                     addPushOp(paramTypes[i], values[i]);
                 }
 
-                String desc = Type.makeDescriptor(retType, paramTypes);
+                Type returnType = retType == null ? Type.VOID : mClassMaker.typeFrom(retType);
+                String desc = Type.makeDescriptor(returnType, paramTypes);
 
                 ConstantPool.C_Dynamic dynamic = mConstants
                     .addInvokeDynamic(mBootstrapIndex, name, desc);
 
-                addOp(new InvokeDynamicOp(length, dynamic, retType));
+                addOp(new InvokeDynamicOp(length, dynamic, returnType));
 
-                if (retType == VOID) {
+                if (returnType == VOID) {
                     return null;
                 }
 
-                var = new LocalVar(retType);
+                var = new LocalVar(returnType);
             }
 
             addStoreOp(var);

@@ -69,6 +69,20 @@ public class CondyTest {
             assertTrue(e.getMessage().contains("no parameters"));
         }
 
+        try {
+            bootstrap.invoke(String.class, "dummy", new Object[0], "bogus");
+            fail();
+        } catch (IllegalStateException e) {
+            assertTrue(e.getMessage().contains("no parameters"));
+        }
+
+        try {
+            bootstrap.invoke(null, "_", null, (Object[]) null);
+            fail();
+        } catch (IllegalArgumentException e) {
+            assertTrue(e.getMessage().equals("Unsupported constant type: null"));
+        }
+
         var v4 = bootstrap.invoke(String.class, "dummy");
         assertVar.invoke("assertEquals", "java.util.Map999", v4);
 

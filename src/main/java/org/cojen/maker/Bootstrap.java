@@ -29,7 +29,7 @@ public interface Bootstrap {
      * Invoke a dynamically generated constant, or a dynamically generated method that has no
      * parameters.
      *
-     * @param type constant type or method return type
+     * @param type constant type or method return type (can be null for void)
      * @param name constant or method name
      * @return the constant value, or the result of the method, which is null if void
      * @throws IllegalArgumentException if not given a variable or a constant
@@ -41,7 +41,7 @@ public interface Bootstrap {
     /**
      * Invoke a dynamically generated method.
      *
-     * @param returnType method return type
+     * @param returnType method return type (can be null for void)
      * @param name method name
      * @param types method parameter types (can be null if none)
      * @param values variables or constants
