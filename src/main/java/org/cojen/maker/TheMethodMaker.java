@@ -3012,7 +3012,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         /**
-         * @param an "if" opcode
+         * @param op an "if" opcode
          */
         private void flip(byte op) {
             /*

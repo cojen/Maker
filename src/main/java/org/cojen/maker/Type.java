@@ -1483,21 +1483,11 @@ abstract class Type {
             }
 
             if (methods.size() > 1 && specificReturnType != null) {
-                Iterator<Method> it = methods.iterator();
-                while (it.hasNext()) {
-                    if (!specificReturnType.equals(it.next().returnType())) {
-                        it.remove();
-                    }
-                }
+                methods.removeIf(m -> !specificReturnType.equals(m.returnType()));
             }
 
             if (methods.size() > 1 && specificParamTypes != null) {
-                Iterator<Method> it = methods.iterator();
-                while (it.hasNext()) {
-                    if (!Arrays.equals(specificParamTypes, it.next().paramTypes())) {
-                        it.remove();
-                    }
-                }
+                methods.removeIf(m -> !Arrays.equals(specificParamTypes, m.paramTypes()));
             }
 
             if (methods.size() > 1) {
@@ -1511,12 +1501,7 @@ abstract class Type {
                     }
                 }
                 if (nonBridges > 0 && bridges > 0) {
-                    Iterator<Method> it = methods.iterator();
-                    while (it.hasNext()) {
-                        if (it.next().isBridge()) {
-                            it.remove();
-                        }
-                    }
+                    methods.removeIf(Method::isBridge);
                 }
             }
 
