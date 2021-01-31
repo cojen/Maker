@@ -18,6 +18,8 @@ package org.cojen.maker;
 
 import java.io.ByteArrayOutputStream;
 
+import java.lang.invoke.MethodHandles;
+
 import java.lang.reflect.Modifier;
 
 import org.junit.*;
@@ -130,5 +132,17 @@ public class ExternalTest {
         mods = clazz.getDeclaredMethod("m4").getModifiers();
         assertTrue(Modifier.isStrict(mods));
         assertTrue((mods & 0x40) != 0);
+    }
+
+    @Test
+    public void finishAndLoad() throws Exception {
+        ClassMaker cm = ClassMaker.beginExternal("org.cojen.maker.Fake").public_();
+        MethodMaker mm = cm.addMethod(String.class, "test", (Object[]) null).public_().static_();
+        mm.return_("hello");
+        byte[] bytes = cm.finishBytes();
+        var clazz = MethodHandles.lookup().defineClass(bytes);
+        assertEquals("org.cojen.maker.Fake", clazz.getName());
+        Object result = clazz.getMethod("test").invoke(null);
+        assertEquals("hello", result);
     }
 }

@@ -233,6 +233,19 @@ public class UsageTest {
     }
 
     @Test
+    public void tooManyFields() {
+        for (int i=0; i<70_000; i++) {
+            mClassMaker.addField(String.class, "f" + i);
+        }
+        try {
+            mClassMaker.finish();
+            fail();
+        } catch (IllegalStateException e) {
+            check(e, "Field count");
+        }
+    }
+
+    @Test
     public void unknownVar() {
         MethodMaker mm1 = mClassMaker.addMethod(null, "test1");
         MethodMaker mm2 = mClassMaker.addMethod(null, "test2");
