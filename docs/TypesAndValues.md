@@ -50,7 +50,7 @@ A value can be a `Variable`, a `Field` or a constant:
 
 Constants of type `MethodHandleInfo` are treated specially when assigning them to variable or parameters of type `MethodHandle`. A lookup is performed at runtime which resolves the `MethodHandle` instance. Handling of `ConstantDesc` and `Constable` is also treated specially — the actual type is determined by the resolved constant.
 
-Constants that aren't in the above set can be specified via `Variable.setConstant` or `Variable.condy`. The `setConstant` method supports any kind of object, but this feature only works for classes which are directly made. If the class is written to a file and then loaded from it, the constant won't be found, resulting in a linkage error.
+Constants that aren't in the above set can be specified via `Variable.setExact` or `Variable.condy`. The `setExact` method supports any kind of object, but this feature only works for classes which are directly made. If the class is written to a file and then loaded from it, the constant won't be found, resulting in a linkage error.
 
 Value type conversions
 ----------------------
