@@ -2719,8 +2719,8 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                     return null;
                 }
             }
-            // Variable of usage at this label changed, so the code that follows will need to
-            // be revisited.
+            // Variable usage at this label changed, so the code that follows will need to be
+            // revisited.
             mVarUsage = (BitSet) flow.mVarUsage.clone();
             return mNext;
         }

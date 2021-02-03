@@ -1104,7 +1104,7 @@ public class InvokeTest {
             var bootstrap = mm.var("java.lang.runtime.ObjectMethods")
                 .indy("bootstrap", mm.class_(), "foo;bar",
                       //mm.field("foo").methodHandleGet(),
-                      mm.var(cm).methodHandle(int.class, "getFoo"),
+                      mm.var(cm).methodHandle(int.class, "getFoo", (Object[]) null),
                       mm.field("bar").methodHandleGet());
 
             mm.return_(bootstrap.invoke(String.class, "toString",

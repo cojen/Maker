@@ -391,13 +391,15 @@ public class MathTest {
         v1.inc(1);
         v1.inc(10_000);
         v1.inc(1_000_000_000);
-        mm.var(Assert.class).invoke("assertEquals", 1_000_010_001, v1.get());
+        v1.inc(-100_000);
+        mm.var(Assert.class).invoke("assertEquals", 999_910_001, v1.get());
 
         var v2 = mm.var(long.class).set(0);
         v2.inc(1);
         v2.inc(10_000);
         v2.inc(1_000_000_000);
-        mm.var(Assert.class).invoke("assertEquals", 1_000_010_001, v2.get());
+        v2.inc(-100_000L);
+        mm.var(Assert.class).invoke("assertEquals", 999_910_001, v2.get());
 
         var v3 = mm.var(int.class).set(1);
         mm.var(Assert.class).invoke("assertEquals", ~1, v3.com());
