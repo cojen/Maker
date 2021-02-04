@@ -15,7 +15,7 @@
 <script type="text/javascript" src="../../../../script-dir/jquery-ui.min.js"></script>
 </head>
 <body class="class-declaration-page">
-<script type="text/javascript">var data = {"i0":6,"i1":6,"i2":6,"i3":18,"i4":6,"i5":6,"i6":6,"i7":18,"i8":6,"i9":1,"i10":1,"i11":1,"i12":1,"i13":1,"i14":6,"i15":6,"i16":6,"i17":6,"i18":6,"i19":6,"i20":6,"i21":6,"i22":6,"i23":6,"i24":6,"i25":6,"i26":6,"i27":6};
+<script type="text/javascript">var data = {"i0":6,"i1":6,"i2":18,"i3":6,"i4":6,"i5":6,"i6":6,"i7":18,"i8":6,"i9":1,"i10":1,"i11":1,"i12":1,"i13":1,"i14":6,"i15":6,"i16":6,"i17":6,"i18":6,"i19":6,"i20":6,"i21":6,"i22":6,"i23":6,"i24":6,"i25":6,"i26":6,"i27":6};
 var tabs = {65535:["t0","All Methods"],1:["t1","Static Methods"],2:["t2","Instance Methods"],4:["t3","Abstract Methods"],16:["t5","Default Methods"]};
 var altColor = "alt-color";
 var rowColor = "row-color";
@@ -111,39 +111,39 @@ loadScripts(document, 'script');</script>
 </td>
 </tr>
 <tr class="row-color" id="i1">
-<td class="col-first"><code><a href="ClassMaker.html" title="interface in org.cojen.maker">ClassMaker</a></code></td>
-<th class="col-second" scope="row"><code><span class="member-name-link"><a href="#addClass(java.lang.String)">addClass</a></span>&#8203;(<a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;className)</code></th>
-<td class="col-last">
-<div class="block">Add an inner class to this class.</div>
-</td>
-</tr>
-<tr class="alt-color" id="i2">
 <td class="col-first"><code><a href="MethodMaker.html" title="interface in org.cojen.maker">MethodMaker</a></code></td>
 <th class="col-second" scope="row"><code><span class="member-name-link"><a href="#addClinit()">addClinit</a></span>()</code></th>
 <td class="col-last">
 <div class="block">Add code to the static initializer of this class.</div>
 </td>
 </tr>
-<tr class="row-color" id="i3">
+<tr class="alt-color" id="i2">
 <td class="col-first"><code>default <a href="MethodMaker.html" title="interface in org.cojen.maker">MethodMaker</a></code></td>
 <th class="col-second" scope="row"><code><span class="member-name-link"><a href="#addConstructor(java.lang.invoke.MethodType)">addConstructor</a></span>&#8203;(<a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/lang/invoke/MethodType.html" title="class or interface in java.lang.invoke" class="external-link">MethodType</a>&nbsp;type)</code></th>
 <td class="col-last">
 <div class="block">Add a constructor to this class.</div>
 </td>
 </tr>
-<tr class="alt-color" id="i4">
+<tr class="row-color" id="i3">
 <td class="col-first"><code><a href="MethodMaker.html" title="interface in org.cojen.maker">MethodMaker</a></code></td>
 <th class="col-second" scope="row"><code><span class="member-name-link"><a href="#addConstructor(java.lang.Object...)">addConstructor</a></span>&#8203;(<a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>...&nbsp;paramTypes)</code></th>
 <td class="col-last">
 <div class="block">Add a constructor to this class.</div>
 </td>
 </tr>
-<tr class="row-color" id="i5">
+<tr class="alt-color" id="i4">
 <td class="col-first"><code><a href="FieldMaker.html" title="interface in org.cojen.maker">FieldMaker</a></code></td>
 <th class="col-second" scope="row"><code><span class="member-name-link"><a href="#addField(java.lang.Object,java.lang.String)">addField</a></span>&#8203;(<a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>&nbsp;type,
 <a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;name)</code></th>
 <td class="col-last">
 <div class="block">Add a field to the class.</div>
+</td>
+</tr>
+<tr class="row-color" id="i5">
+<td class="col-first"><code><a href="ClassMaker.html" title="interface in org.cojen.maker">ClassMaker</a></code></td>
+<th class="col-second" scope="row"><code><span class="member-name-link"><a href="#addInnerClass(java.lang.String)">addInnerClass</a></span>&#8203;(<a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;className)</code></th>
+<td class="col-last">
+<div class="block">Add an inner class to this class.</div>
 </td>
 </tr>
 <tr class="alt-color" id="i6">
@@ -396,7 +396,7 @@ loadScripts(document, 'script');</script>
 <dd><code>className</code> - fully qualified class name; pass null to automatically assign a name
  (unless external)</dd>
 <dt>See Also:</dt>
-<dd><a href="#addClass(java.lang.String)"><code>addClass(java.lang.String)</code></a></dd>
+<dd><a href="#addInnerClass(java.lang.String)"><code>addInnerClass(java.lang.String)</code></a></dd>
 </dl>
 </section>
 </li>
@@ -588,9 +588,9 @@ loadScripts(document, 'script');</script>
 </section>
 </li>
 <li>
-<section class="detail" id="addClass(java.lang.String)">
-<h3>addClass</h3>
-<div class="member-signature"><span class="return-type"><a href="ClassMaker.html" title="interface in org.cojen.maker">ClassMaker</a></span>&nbsp;<span class="member-name">addClass</span>&#8203;(<span class="parameters"><a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;className)</span></div>
+<section class="detail" id="addInnerClass(java.lang.String)">
+<h3>addInnerClass</h3>
+<div class="member-signature"><span class="return-type"><a href="ClassMaker.html" title="interface in org.cojen.maker">ClassMaker</a></span>&nbsp;<span class="member-name">addInnerClass</span>&#8203;(<span class="parameters"><a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;className)</span></div>
 <div class="block">Add an inner class to this class. The actual class name will have a suitable suffix
  applied to ensure uniqueness.</div>
 <dl class="notes">

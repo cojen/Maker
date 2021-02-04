@@ -1272,8 +1272,8 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     }
 
     @Override
-    public ClassMaker addClass(String className) {
-        return mClassMaker.addClass(className, mMethod);
+    public ClassMaker addInnerClass(String className) {
+        return mClassMaker.addInnerClass(className, mMethod);
     }
 
     @Override

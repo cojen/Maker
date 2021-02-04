@@ -95,7 +95,7 @@ public interface ClassMaker {
      *
      * @param className fully qualified class name; pass null to automatically assign a name
      * (unless external)
-     * @see #addClass
+     * @see #addInnerClass
      */
     public ClassMaker another(String className);
 
@@ -228,7 +228,7 @@ public interface ClassMaker {
      * @throws IllegalArgumentException if not given a simple class name
      * @see #another
      */
-    public ClassMaker addClass(String className);
+    public ClassMaker addInnerClass(String className);
 
     /**
      * Set the source file of this class file by adding a source file attribute.

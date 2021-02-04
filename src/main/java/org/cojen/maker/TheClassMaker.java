@@ -372,11 +372,11 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
     }
 
     @Override
-    public TheClassMaker addClass(String className) {
-        return addClass(className, null);
+    public TheClassMaker addInnerClass(String className) {
+        return addInnerClass(className, null);
     }
 
-    TheClassMaker addClass(final String className, final Type.Method hostMethod) {
+    TheClassMaker addInnerClass(final String className, final Type.Method hostMethod) {
         TheClassMaker nestHost = nestHost(this);
 
         String prefix = name();

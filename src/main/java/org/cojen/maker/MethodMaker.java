@@ -411,7 +411,7 @@ public interface MethodMaker {
      * @param className simple class name; pass null to use default
      * @throws IllegalArgumentException if not given a simple class name
      */
-    public ClassMaker addClass(String className);
+    public ClassMaker addInnerClass(String className);
 
     /**
      * Finishes the definition of a standalone method.
