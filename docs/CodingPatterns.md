@@ -232,3 +232,39 @@ cont.here();
 <more code>
 mm.finally_(tryStart, () -> lock.invoke("unlock"));
 ```
+
+Final variables
+===============
+
+Consider referencing variables as final. This doesn't prevent their modification, but it does
+prevent mistakes like this:
+
+```java
+MethodMaker mm = ...
+var a = mm.param(0);
+var b = mm.param(1);
+Label skip = mm.label();
+b.ifLt(0, skip);
+a = a.add(b); // oops
+skip.here();
+mm.return_(a);
+```
+
+The above code causes a `VerifyError` because there's two `a` variables, which aren't guaranteed
+to be assigned for all execution paths. By declaring the variables as final, the original code
+won't compile, and the correct version is:
+
+```java
+MethodMaker mm = ...
+final var a = mm.param(0);
+final var b = mm.param(1);
+Label skip = mm.label();
+b.ifLt(0, skip);
+a.set(a.add(b)); // correct
+skip.here();
+mm.return_(a);
+```
+
+The correct version assigns a new value to the existing `a` variable instead of replacing it.
+Although a temporary variable is still created by the `add` operation, it doesn't appear in
+the generated code.
