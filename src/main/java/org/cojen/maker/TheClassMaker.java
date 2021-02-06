@@ -434,7 +434,7 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
         addAttribute(new Attribute.NestHost(mConstants, mConstants.addClass(nestHost)));
     }
 
-    private void addNestMember(Type nestMember) {
+    private synchronized void addNestMember(Type nestMember) {
         if (mNestMembers == null) {
             mNestMembers = new Attribute.NestMembers(mConstants);
             addAttribute(mNestMembers);
