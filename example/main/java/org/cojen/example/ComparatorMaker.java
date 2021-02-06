@@ -263,7 +263,7 @@ public class ComparatorMaker<T> {
                 Variable result;
 
                 if (clause.mUsing != null) {
-                    var using = mm.var(Comparator.class).setConstant(clause.mUsing);
+                    var using = mm.var(Comparator.class).setExact(clause.mUsing);
                     result = using.invoke("compare", orderBy0, orderBy1);
                 } else if (clauseType.isPrimitive()) {
                     result = orderBy0.invoke("compare", orderBy0, orderBy1);

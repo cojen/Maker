@@ -141,7 +141,7 @@ public class Switcher {
         }
 
         void addCheck(MethodMaker mm, Variable condition) {
-            mm.var(key.getClass()).setConstant(key).invoke("equals", condition).ifEq(true, label);
+            mm.var(key.getClass()).setExact(key).invoke("equals", condition).ifEq(true, label);
         }
     }
 }
