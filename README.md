@@ -19,3 +19,4 @@ clazz.getMethod("run").invoke(null);
 - [Coding patterns](docs/CodingPatterns.md)
 - [Examples](example/main/java/org/cojen/example)
 
+In addition to simplying basic class generation, the features of the `java.lang.invoke` package are fully integrated, hiding all the complexity. The `ObjectMethods` example shows how to define a bootstrap method which generates code "just in time".
