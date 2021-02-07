@@ -4364,6 +4364,12 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
     /**
      * Stack variable which represents an uninitialized new object.
+     *
+     * Note: This specialization is not currently used by anything. The smCode method is never
+     * called because a label cannot be inserted between the allocation of an object and a call
+     * to the constructor. In a Java program, such a pattern can be created by the ternary
+     * operator or a switch expression. When using MethodMaker, these types of expressions must
+     * store to a local variable first. They cannot leave results on the stack.
      */
     final class NewVar extends LocalVar {
         private final int mNewOffset;

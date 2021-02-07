@@ -202,7 +202,7 @@ class StackMapTable extends Attribute {
         private static void writeCode(BytesOut out, int code) throws IOException {
             int smCode = code & 0xff;
             out.writeByte(smCode);
-            if (smCode == Type.SM_OBJECT || smCode == Type.SM_UNINIT) {
+            if (smCode >= Type.SM_OBJECT) {
                 out.writeShort(code >> 8);
             }
         }

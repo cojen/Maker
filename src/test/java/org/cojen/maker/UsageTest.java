@@ -531,6 +531,59 @@ public class UsageTest {
         }
     }
 
+    @Test
+    public void noAccess() throws Exception {
+        noAccess(false);
+    }
+
+    @Test
+    public void noAccessHidden() throws Exception {
+        noAccess(true);
+    }
+
+    private void noAccess(boolean hidden) throws Exception {
+        mClassMaker = ClassMaker.begin
+            (null, MethodHandles.lookup().dropLookupMode(MethodHandles.Lookup.PACKAGE));
+
+        try {
+            if (hidden) {
+                mClassMaker.finishHidden();
+            } else {
+                mClassMaker.finish();
+            }
+            fail();
+        } catch (IllegalStateException e) {
+            check(e, "java.lang.IllegalAccessException");
+        }
+    }
+
+    @Test
+    public void wrongPackage() throws Exception {
+        mClassMaker = ClassMaker.begin("wrong.Place", MethodHandles.lookup());
+
+        try {
+            mClassMaker.finishHidden();
+            fail();
+        } catch (IllegalArgumentException e) {
+            check(e, "wrong.Place");
+        }
+    }
+
+    @Test
+    public void verifyError() throws Exception {
+        mClassMaker = ClassMaker.begin(null, MethodHandles.lookup());
+
+        MethodMaker mm = mClassMaker.addMethod(int.class, "test").public_().static_();
+        mm.return_(mm.var(int.class));
+
+        try {
+            var clazz = mClassMaker.finishHidden().lookupClass();
+            clazz.getMethod("test").invoke(null);
+            fail();
+        } catch (VerifyError e) {
+        }
+    }
+
     private static void check(Exception e, String message) {
         String actual = e.getMessage();
         assertTrue(message + "; " + actual, actual.startsWith(message));
