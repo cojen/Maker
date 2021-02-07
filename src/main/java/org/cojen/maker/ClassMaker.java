@@ -249,8 +249,8 @@ public interface ClassMaker {
      * method. Hidden classes are automatically unloaded when no longer referenced, even if the
      * class loader still is.
      *
-     * <p>This feature is only fully supported in Java 15. Hidden classes created with earlier
-     * versions don't support all the lookup features.
+     * <p>This feature is fully supported only with Java 15 and above. Hidden classes created
+     * with earlier versions don't support all the lookup features.
      *
      * @return the lookup for the class; call {@code lookupClass} to obtain the actual class
      * @throws IllegalStateException if already finished, or if the definition is broken, or if
