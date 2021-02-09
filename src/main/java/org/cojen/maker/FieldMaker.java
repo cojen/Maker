@@ -17,7 +17,8 @@
 package org.cojen.maker;
 
 /**
- * Allows new fields to be defined within a class.
+ * Allows new fields to be defined within a class. {@code FieldMaker} instances aren't
+ * thread-safe.
  *
  * @author Brian S O'Neill
  * @see ClassMaker#addField

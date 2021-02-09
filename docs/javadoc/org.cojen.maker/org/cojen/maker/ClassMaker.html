@@ -78,7 +78,8 @@ loadScripts(document, 'script');</script>
 <section class="description">
 <hr>
 <div class="type-signature"><span class="modifiers">public interface </span><span class="element-name type-name-label">ClassMaker</span></div>
-<div class="block">Allows new classes and interfaces to be defined dynamically.</div>
+<div class="block">Allows new classes and interfaces to be defined dynamically. <code>ClassMaker</code> instances
+ aren't thread-safe.</div>
 <dl class="notes">
 <dt>See Also:</dt>
 <dd><a href="#begin()"><code>begin()</code></a></dd>
@@ -290,7 +291,7 @@ loadScripts(document, 'script');</script>
 <dt>Parameters:</dt>
 <dd><code>className</code> - fully qualified class name; pass null to automatically assign a name</dd>
 <dd><code>parentLoader</code> - parent class loader; pass null to use default</dd>
-<dd><code>domain</code> - to define class in; pass null to use default</dd>
+<dd><code>domain</code> - domain to define the class in; pass null to use default</dd>
 </dl>
 </section>
 </li>
@@ -327,7 +328,10 @@ loadScripts(document, 'script');</script>
 <div class="member-signature"><span class="return-type"><a href="ClassMaker.html" title="interface in org.cojen.maker">ClassMaker</a></span>&nbsp;<span class="element-name">another</span>&#8203;<span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;className)</span></div>
 <div class="block">Begin defining another class with the same loader, domain, and lookup as this one. The
  actual class name will have a suffix applied to ensure uniqueness, unless this maker
- creates external classes.</div>
+ creates external classes.
+
+ <p>The returned <code>ClassMaker</code> instance isn't attached to this maker, and so it can
+ be acted upon by a different thread.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>className</code> - fully qualified class name; pass null to automatically assign a name
@@ -529,7 +533,10 @@ loadScripts(document, 'script');</script>
 <h3>addInnerClass</h3>
 <div class="member-signature"><span class="return-type"><a href="ClassMaker.html" title="interface in org.cojen.maker">ClassMaker</a></span>&nbsp;<span class="element-name">addInnerClass</span>&#8203;<span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;className)</span></div>
 <div class="block">Add an inner class to this class. The actual class name will have a suitable suffix
- applied to ensure uniqueness.</div>
+ applied to ensure uniqueness.
+
+ <p>The returned <code>ClassMaker</code> instance isn't attached to this maker, and so it can
+ be acted upon by a different thread.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>className</code> - simple class name; pass null to use default</dd>

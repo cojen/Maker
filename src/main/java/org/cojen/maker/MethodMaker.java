@@ -22,7 +22,8 @@ import java.lang.invoke.MethodType;
 import java.lang.invoke.VarHandle;
 
 /**
- * Allows new methods to be defined within a class.
+ * Allows new methods to be defined within a class. {@code MethdodMaker} instances aren't
+ * thread-safe.
  *
  * @author Brian S O'Neill
  * @see ClassMaker#addMethod
@@ -407,6 +408,9 @@ public interface MethodMaker {
      * Add an inner class to this method. The actual class name will have a suitable suffix
      * applied to ensure uniqueness. The inner class doesn't have access to the local variables
      * of the enclosing method, and so they must be passed along explicitly.
+     *
+     * <p>The returned {@code ClassMaker} instance isn't attached to this maker, and so it can
+     * be acted upon by a different thread.
      *
      * @param className simple class name; pass null to use default
      * @throws IllegalArgumentException if not given a simple class name

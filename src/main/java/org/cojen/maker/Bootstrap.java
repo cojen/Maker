@@ -18,7 +18,7 @@ package org.cojen.maker;
 
 /**
  * Represents an invoke dynamic bootstrap method which is bound to a {@link MethodMaker
- * method}.
+ * method}. {@code Bootstrap} instances aren't thread-safe.
  *
  * @author Brian S O'Neill
  * @see Variable#indy indy

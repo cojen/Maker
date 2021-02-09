@@ -27,7 +27,8 @@ import java.security.ProtectionDomain;
 import java.util.Objects;
 
 /**
- * Allows new classes and interfaces to be defined dynamically.
+ * Allows new classes and interfaces to be defined dynamically. {@code ClassMaker} instances
+ * aren't thread-safe.
  *
  * @author Brian S O'Neill
  * @see #begin
@@ -56,7 +57,7 @@ public interface ClassMaker {
      *
      * @param className fully qualified class name; pass null to automatically assign a name
      * @param parentLoader parent class loader; pass null to use default
-     * @param domain to define class in; pass null to use default
+     * @param domain domain to define the class in; pass null to use default
      */
     public static ClassMaker begin(String className,
                                    ClassLoader parentLoader, ProtectionDomain domain)
@@ -92,6 +93,9 @@ public interface ClassMaker {
      * Begin defining another class with the same loader, domain, and lookup as this one. The
      * actual class name will have a suffix applied to ensure uniqueness, unless this maker
      * creates external classes.
+     *
+     * <p>The returned {@code ClassMaker} instance isn't attached to this maker, and so it can
+     * be acted upon by a different thread.
      *
      * @param className fully qualified class name; pass null to automatically assign a name
      * (unless external)
@@ -223,6 +227,9 @@ public interface ClassMaker {
     /**
      * Add an inner class to this class. The actual class name will have a suitable suffix
      * applied to ensure uniqueness.
+     *
+     * <p>The returned {@code ClassMaker} instance isn't attached to this maker, and so it can
+     * be acted upon by a different thread.
      *
      * @param className simple class name; pass null to use default
      * @throws IllegalArgumentException if not given a simple class name

@@ -17,7 +17,8 @@
 package org.cojen.maker;
 
 /**
- * Represents a label bound to a {@link MethodMaker method} body.
+ * Represents a label bound to a {@link MethodMaker method} body. {@code Label} instances
+ * aren't thread-safe.
  *
  * @author Brian S O'Neill
  * @see MethodMaker#label
