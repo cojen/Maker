@@ -37,17 +37,22 @@ public class ExternalTest {
 
     @Test
     public void basic() throws Exception {
-        ClassMaker cm = basic(null, "org.cojen.maker.FakeClass", false, true);
-        basic(cm, "org.cojen.maker.AnotherFakeClass", true, true);
+        ClassMaker cm = basic(null, "org.cojen.maker.FakeClass", true);
+        basic(cm, "org.cojen.maker.AnotherFakeClass", false);
     }
 
-    private ClassMaker basic(ClassMaker cm, String name, boolean dynamic, boolean retry)
-        throws Exception
-    {
+    private ClassMaker basic(ClassMaker cm, String name, boolean dynamic) throws Exception {
         if (cm == null) {
             cm = ClassMaker.beginExternal(name);
         } else {
             cm = cm.another(name);
+        }
+
+        try {
+            cm.another(name);
+            fail();
+        } catch (IllegalStateException e) {
+            assertTrue(e.getMessage().startsWith("Already"));
         }
 
         cm.public_().addConstructor().public_();
@@ -85,20 +90,8 @@ public class ExternalTest {
         var instance = clazz.getConstructor().newInstance();
         assertEquals("hello", clazz.getMethod("test").invoke(instance));
 
-        if (!dynamic) {
-            try {
-                cm.another(name);
-                fail();
-            } catch (IllegalStateException e) {
-                assertTrue(e.getMessage().startsWith("Already"));
-            }
-
-            // Duplicate name is allowed when a different internal ClassInjector is used.
-
-            if (retry) {
-                basic(null, name, false, false);
-            }
-        }
+        // Name isn't reserved anymore.
+        cm.another(name);
 
         return cm;
     }

@@ -765,7 +765,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         Type handleType = Type.from(MethodHandle.class);
         var handleVar = new LocalVar(handleType);
 
-        if (mClassMaker.allowComplexConstants()) {
+        if (mClassMaker.allowExactConstants()) {
             handleVar.setExact(handle);
         } else {
             handleVar.set(handle);
@@ -1257,7 +1257,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         Type handleType = Type.from(VarHandle.class);
         var handleVar = new LocalVar(handleType);
 
-        if (mClassMaker.allowComplexConstants()) {
+        if (mClassMaker.allowExactConstants()) {
             handleVar.setExact(handle);
         } else {
             handleVar.set(handle);
@@ -2147,7 +2147,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     /**
      * Adds a constant using the ConstantsRegistry.
      */
-    private ConstantPool.C_Dynamic addComplexConstant(Type type, Object value) {
+    private ConstantPool.C_Dynamic addExactConstant(Type type, Object value) {
         Set<Type.Method> bootstraps = Type.from(ConstantsRegistry.class).findMethods
             ("remove",
              new Type[] {Type.from(MethodHandles.Lookup.class), Type.from(String.class),
@@ -2161,7 +2161,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         ConstantPool.C_Method ref = mConstants.addMethod(bootstraps.iterator().next());
         ConstantPool.C_MethodHandle bootHandle = mConstants.addMethodHandle(REF_invokeStatic, ref);
 
-        int slot = mClassMaker.addComplexConstant(value);
+        int slot = mClassMaker.addExactConstant(value);
 
         ConstantPool.Constant[] bootArgs = {
             addLoadableConstant(Type.INT, slot)
@@ -2257,16 +2257,16 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
         // If the value is Constable, toConstantVar might still work, but the resulting
         // ConstantDesc might throw some state away. VarHandle and MethodHandle are Constable,
-        // but the Lookup object is lost. For this reason, always pass the value as a complex
+        // but the Lookup object is lost. For this reason, always pass the value as an exact
         // constant if allowed. If for some reason the "lossy" behavior is desired, the
         // application must provide a ConstantDesc instead of a Constable.
 
-        if (!mClassMaker.allowComplexConstants() || ConstableSupport.THE.isConstantDesc(value)) {
+        if (!mClassMaker.allowExactConstants() || ConstableSupport.THE.isConstantDesc(value)) {
             ConstantVar cv = ConstableSupport.THE.toConstantVar(this, value);
             if (cv != null) {
                 return cv.mConstant;
             }
-            if (!mClassMaker.allowComplexConstants()) {
+            if (!mClassMaker.allowExactConstants()) {
                 throw unsupportedConstant(value);
             }
         }
@@ -2275,7 +2275,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             type = Type.from(value.getClass());
         }
 
-        return addComplexConstant(type, value);
+        return addExactConstant(type, value);
     }
 
     private static IllegalArgumentException unsupportedConstant(Object value) {
@@ -3441,7 +3441,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                 throw new IllegalStateException("Mismatched type");
             }
 
-            addStoreConstantOp(new ExplicitConstantOp(addComplexConstant(type, value), type));
+            addStoreConstantOp(new ExplicitConstantOp(addExactConstant(type, value), type));
 
             return this;
         }

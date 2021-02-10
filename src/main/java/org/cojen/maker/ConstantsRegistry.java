@@ -22,7 +22,7 @@ import java.util.Arrays;
 import java.util.WeakHashMap;
 
 /**
- * Support for loading complex constants into generated classes.
+ * Support for loading exact constants into generated classes.
  *
  * @author Brian S O'Neill
  * @hidden

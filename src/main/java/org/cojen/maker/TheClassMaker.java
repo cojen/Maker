@@ -115,7 +115,7 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
 
     private Attribute.InnerClasses mInnerClasses;
 
-    // -1: finished, 0: not finished, 1: has complex constants
+    // -1: finished, 0: not finished, 1: has exact constants
     private int mFinished;
 
     static TheClassMaker begin(boolean external, String className, boolean explicit,
@@ -469,7 +469,7 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
 
     @Override
     public Class<?> finish() {
-        boolean hasComplexConstants = mFinished == 1;
+        boolean hasExactConstants = mFinished == 1;
         String name = name();
 
         Class clazz;
@@ -487,7 +487,7 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
             Type.uncache(mTypeCache, name);
         }
 
-        if (hasComplexConstants) {
+        if (hasExactConstants) {
             ConstantsRegistry.finish(this, clazz);
         }
 
@@ -503,7 +503,7 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
         Method m = defineHidden();
         Object options = cHiddenClassOptions;
 
-        boolean hasComplexConstants = mFinished == 1;
+        boolean hasExactConstants = mFinished == 1;
         String originalName = name();
 
         byte[] bytes = finishBytes(true);
@@ -535,7 +535,7 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
             mClassInjector.unreserve(originalName);
         }
 
-        if (hasComplexConstants) {
+        if (hasExactConstants) {
             ConstantsRegistry.finish(this, result.lookupClass());
         }
 
@@ -544,7 +544,14 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
 
     @Override
     public byte[] finishBytes() {
-        return finishBytes(false);
+        noExactConstants();
+        String name = name();
+        try {
+            return finishBytes(false);
+        } finally {
+            Type.uncache(mTypeCache, name);
+            mClassInjector.unreserve(name);
+        }
     }
 
     private byte[] finishBytes(boolean hidden) {
@@ -578,9 +585,16 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
 
     @Override
     public void finishTo(OutputStream out) throws IOException {
-        var bout = new BytesOut(out, 1000);
-        finishTo(bout, false);
-        bout.flush();
+        noExactConstants();
+        String name = name();
+        try {
+            var bout = new BytesOut(out, 1000);
+            finishTo(bout, false);
+            bout.flush();
+        } finally {
+            Type.uncache(mTypeCache, name);
+            mClassInjector.unreserve(name);
+        }
     }
 
     /**
@@ -688,6 +702,12 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
         }
     }
 
+    private void noExactConstants() {
+        if (mFinished == 1) {
+            throw new IllegalStateException("Class has exact constants defined");
+        }
+    }
+
     @Override
     public Type type() {
         return mThisClass.mType;
@@ -708,14 +728,14 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
         return mBootstrapMethods.add(method, args);
     }
 
-    boolean allowComplexConstants() {
+    boolean allowExactConstants() {
         return !mExternal;
     }
 
     /**
      * @return slot
      */
-    int addComplexConstant(Object value) {
+    int addExactConstant(Object value) {
         checkFinished();
         if (mExternal) {
             throw new IllegalStateException("Making an external class");

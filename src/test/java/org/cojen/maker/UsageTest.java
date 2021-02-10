@@ -584,6 +584,17 @@ public class UsageTest {
         }
     }
 
+    @Test
+    public void exactConstants() {
+        MethodMaker mm = mClassMaker.addMethod(null, "test");
+        mm.var(Object.class).setExact(new java.util.HashMap());
+        try {
+            mClassMaker.finishBytes();
+        } catch (IllegalStateException e) {
+            check(e, "Class has exact");
+        }
+    }
+
     private static void check(Exception e, String message) {
         String actual = e.getMessage();
         assertTrue(message + "; " + actual, actual.startsWith(message));
