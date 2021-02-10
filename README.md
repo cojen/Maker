@@ -19,4 +19,6 @@ clazz.getMethod("run").invoke(null);
 - [Coding patterns](docs/CodingPatterns.md)
 - [Examples](example/main/java/org/cojen/example)
 
-In addition to simplying basic class generation, the features of the `java.lang.invoke` package are fully integrated, hiding all the complexity. The `ObjectMethods` example shows how to define a bootstrap method which generates code "just in time".
+A key feature of this library is that the JVM operand stack isn't directly accessible. Local variables are used exclusively, and conversion to the stack-based representation is automatic. In some cases this can result in suboptimal bytecode, but this only affects performance when the code is interpreted. Modern JVMs perform liveness analysis when generating machine code, and this eliminates the need to carefully utilize the operand stack.
+
+In addition to simplying basic class generation, the features of the `java.lang.invoke` package are fully integrated, hiding most of the complexity. The `ObjectMethods` example shows how to define a bootstrap method which generates code "just in time".
