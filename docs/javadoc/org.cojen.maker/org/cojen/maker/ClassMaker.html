@@ -575,7 +575,7 @@ loadScripts(document, 'script');</script>
 <div class="member-signature"><span class="return-type"><a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/lang/invoke/MethodHandles.Lookup.html" title="class or interface in java.lang.invoke" class="external-link">MethodHandles.Lookup</a></span>&nbsp;<span class="element-name">finishHidden</span>()</div>
 <div class="block">Finishes the definition of a new hidden class, using the lookup passed to the begin
  method. Hidden classes are automatically unloaded when no longer referenced, even if the
- class loader still is.
+ class loader still is. The hidden class is defined in the same nest as the lookup class.
 
  <p>This feature is fully supported only with Java 15 and above. Hidden classes created
  with earlier versions don't support all the lookup features.</div>

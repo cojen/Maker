@@ -30,7 +30,7 @@ import java.lang.invoke.VarHandle;
  */
 public interface MethodMaker {
     /**
-     * Begin defining a standalone method.
+     * Begin defining a standalone method, defined in the same nest as the lookup class.
      *
      * @param lookup define the method using this lookup object
      * @param retType a class or name; can be null if method returns void
@@ -45,7 +45,7 @@ public interface MethodMaker {
     }
 
     /**
-     * Begin defining a standalone method.
+     * Begin defining a standalone method, defined in the same nest as the lookup class.
      *
      * @param lookup define the method using this lookup object
      * @param name method name; use null or "_" if unnamed

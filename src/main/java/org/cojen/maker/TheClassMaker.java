@@ -62,8 +62,9 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
         }
 
         try {
-            Object options = Array.newInstance
-                (Class.forName("java.lang.invoke.MethodHandles$Lookup$ClassOption"), 0);
+            var optionClass = Class.forName("java.lang.invoke.MethodHandles$Lookup$ClassOption");
+            Object options = Array.newInstance(optionClass, 1);
+            Array.set(options, 0, optionClass.getField("NESTMATE").get(null));
             m = MethodHandles.Lookup.class.getMethod
                 ("defineHiddenClass", byte[].class, boolean.class, options.getClass());
             cHiddenClassOptions = options;

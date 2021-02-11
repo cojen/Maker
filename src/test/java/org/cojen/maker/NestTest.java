@@ -16,6 +16,8 @@
 
 package org.cojen.maker;
 
+import java.lang.invoke.MethodHandles;
+
 import org.junit.*;
 import static org.junit.Assert.*;
 
@@ -176,4 +178,17 @@ public class NestTest {
         }
         assertEquals(expect.length, classes.length);
     }
+
+    @Test
+    public void privateAccess() throws Throwable {
+        // Hidden classes are in the same nest as the lookup.
+        MethodMaker mm = MethodMaker.begin(MethodHandles.lookup(), int.class, null);
+        mm.return_(mm.var(NestTest.class).field("special"));
+        var handle = mm.finish();
+
+        special = 100;
+        assertEquals(special, handle.invoke());
+    }
+
+    private static int special;
 }
