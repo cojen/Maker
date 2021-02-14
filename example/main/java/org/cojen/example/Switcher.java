@@ -16,6 +16,11 @@
 
 package org.cojen.example;
 
+import java.lang.invoke.CallSite;
+import java.lang.invoke.ConstantCallSite;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -28,6 +33,10 @@ import org.cojen.maker.Variable;
  * Example utility which generates switch statements for any kind of hashable key. The
  * generated class can only be dynamically loaded instead of loaded from a file.
  *
+ * <p>For classes to be loaded externally, the 'ordinals' bootstrap method can be used
+ * alongside a normal switch instruction. External classes require that all case keys be
+ * Constable because they get passed as invokedynamic boostrap arguments.
+ *
  * @author Brian S O'Neill
  */
 public class Switcher {
@@ -37,7 +46,6 @@ public class Switcher {
      */
     public static void main(String[] args) throws Exception {
         ClassMaker cm = ClassMaker.begin().public_();
-
         MethodMaker mm = cm.addMethod(null, "check", String.class).public_().static_();
 
         // Note: the last two cases are there to test hash collisions.
@@ -66,6 +74,21 @@ public class Switcher {
 
         for (String arg : args) {
             method.invoke(null, arg);
+        }
+
+        // Now use the 'ordinals' bootstrap method.
+
+        cm = ClassMaker.beginExternal("org.cojen.example.Foo").public_();
+        mm = cm.addMethod(int.class, "match", String.class).public_().static_();
+
+        var bootstrap = mm.var(Switcher.class).indy("ordinals", (Object[]) caseKeys);
+        mm.return_(bootstrap.invoke(int.class, "_", new Object[] {Object.class}, mm.param(0)));
+
+        clazz = cm.finish();
+        method = clazz.getMethod("match", String.class);
+
+        for (String arg : args) {
+            System.out.println(method.invoke(null, arg));
         }
     }
 
@@ -129,6 +152,39 @@ public class Switcher {
 
             mm.goto_(defaultLabel);
         }
+    }
+
+    /**
+     * Bootstrap method which makes a method that accepts a single argument and returns a
+     * zero-based ordinal value corresponding to one of the case keys. If none match, -1 is
+     * returned.
+     */
+    public static CallSite ordinals(MethodHandles.Lookup lookup, String name, MethodType type,
+                                    Object... caseKeys)
+    {
+        if (type.returnType() != int.class || type.parameterCount() != 1) {
+            throw new IllegalArgumentException();
+        }
+
+        MethodMaker mm = MethodMaker.begin(lookup, name, type);
+
+        var labels = new Label[caseKeys.length];
+        for (int i=0; i<labels.length; i++) {
+            labels[i] = mm.label();
+        }
+
+        Label defaultLabel = mm.label();
+
+        switchExact(mm, mm.param(0), defaultLabel, caseKeys, labels);
+
+        for (int i=0; i<labels.length; i++) {
+            labels[i].here();
+            mm.return_(i);
+        }
+        defaultLabel.here();
+        mm.return_(-1);
+
+        return new ConstantCallSite(mm.finish());
     }
 
     private static class Match {
