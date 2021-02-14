@@ -20,7 +20,6 @@ import java.lang.invoke.CallSite;
 import java.lang.invoke.ConstantCallSite;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
-import java.lang.invoke.VarHandle;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -117,13 +116,13 @@ public class ObjectMethods {
 
         switch (methodName) {
         case "hashCode":
-            bootHashCode(lookup, mm, fields);
+            bootHashCode(mm, fields);
             break;
         case "equals":
-            bootEquals(lookup, mm, fields, targetClass);
+            bootEquals(mm, fields, targetClass);
             break;
         case "toString":
-            bootToString(lookup, mm, fields, targetClass.getSimpleName());
+            bootToString(mm, fields, targetClass.getSimpleName());
             break;
         default:
             throw new Error();
@@ -132,28 +131,16 @@ public class ObjectMethods {
         return new ConstantCallSite(mm.finish());
     }
 
-    /**
-     * Returns a VarHandle to the field, enabling private access.
-     *
-     * @return null if unsupported
-     */
-    private static VarHandle varHandle(MethodHandles.Lookup lookup, Field field) {
-        if (!Modifier.isStatic(field.getModifiers())) {
-            try {
-                return lookup.unreflectVarHandle(field);
-            } catch (IllegalAccessException e) {
-            }
-        }
-        return null;
+    private static boolean isStatic(Field field) {
+        return Modifier.isStatic(field.getModifiers());
     }
 
-    private static void bootHashCode(MethodHandles.Lookup lookup, MethodMaker mm, Field[] fields) {
+    private static void bootHashCode(MethodMaker mm, Field[] fields) {
         var target = mm.param(0);
         Variable result = null;
 
         for (Field field : fields) {
-            VarHandle vh = varHandle(lookup, field);
-            if (vh != null) {
+            if (!isStatic(field)) {
                 Class<?> fieldType = field.getType();
 
                 Class invoker;
@@ -170,7 +157,7 @@ public class ObjectMethods {
                     }
                 }
 
-                final var subHash = mm.var(invoker).invoke(method, mm.access(vh, target));
+                final var subHash = mm.var(invoker).invoke(method, target.field(field.getName()));
 
                 if (result == null) {
                     result = mm.var(int.class).set(subHash);
@@ -183,9 +170,7 @@ public class ObjectMethods {
         mm.return_(result == null ? 0 : result);
     }
 
-    private static void bootEquals(MethodHandles.Lookup lookup,
-                                   MethodMaker mm, Field[] fields, Class<?> targetClass)
-    {
+    private static void bootEquals(MethodMaker mm, Field[] fields, Class<?> targetClass) {
         var target = mm.param(0);
         var other = mm.param(1);
 
@@ -204,12 +189,12 @@ public class ObjectMethods {
         other = other.cast(targetClass);
 
         for (Field field : fields) {
-            VarHandle vh = varHandle(lookup, field);
-            if (vh != null) {
+            if (!isStatic(field)) {
+                String fieldName = field.getName();
                 Class<?> fieldType = field.getType();
 
-                var targetField = mm.access(vh, target);
-                var otherField = mm.access(vh, other);
+                var targetField = target.field(fieldName);
+                var otherField = other.field(fieldName);
 
                 if (fieldType.isPrimitive()) {
                     targetField.ifNe(otherField, notEqual);
@@ -226,9 +211,7 @@ public class ObjectMethods {
         mm.return_(false);
     }
 
-    private static void bootToString(MethodHandles.Lookup lookup,
-                                     MethodMaker mm, Field[] fields, String prefix)
-    {
+    private static void bootToString(MethodMaker mm, Field[] fields, String prefix) {
         var target = mm.param(0);
         var toConcat = new ArrayList<Object>();
 
@@ -237,14 +220,14 @@ public class ObjectMethods {
 
         boolean any = false;
         for (Field field : fields) {
-            VarHandle vh = varHandle(lookup, field);
-            if (vh != null) {
+            if (!isStatic(field)) {
                 if (any) {
                     toConcat.add(", ");
                 }
-                toConcat.add(field.getName());
+                String fieldName = field.getName();
+                toConcat.add(fieldName);
                 toConcat.add('=');
-                toConcat.add(mm.access(vh, target));
+                toConcat.add(target.field(fieldName));
                 any = true;
             }
         }

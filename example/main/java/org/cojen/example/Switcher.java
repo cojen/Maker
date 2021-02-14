@@ -50,7 +50,7 @@ public class Switcher {
         var out = mm.var(System.class).field("out");
 
         Label defaultLabel = mm.label();
-        switchConstant(mm, mm.param(0), defaultLabel, caseKeys, labels);
+        switchExact(mm, mm.param(0), defaultLabel, caseKeys, labels);
 
         for (int i=0; i<labels.length; i++) {
             labels[i].here();
@@ -75,8 +75,8 @@ public class Switcher {
      * @param caseKeys dynamically loaded constants
      */
     @SuppressWarnings("unchecked")
-    public static void switchConstant(MethodMaker mm, Variable condition,
-                                      Label defaultLabel, Object[] caseKeys, Label... labels)
+    public static void switchExact(MethodMaker mm, Variable condition,
+                                   Label defaultLabel, Object[] caseKeys, Label... labels)
     {
         if (caseKeys.length != labels.length) {
             throw new IllegalArgumentException();
