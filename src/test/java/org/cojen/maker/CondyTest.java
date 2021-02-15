@@ -60,8 +60,8 @@ public class CondyTest {
         var v3 = bootstrap.invoke(long.class, "dummy");
         assertVar.invoke("assertEquals", Long.MAX_VALUE, v3);
 
-        // Duplicate use of a constant. Only one constant pool entry should be generated,
-        // although there's no convenient way to verify this.
+        // Duplicate use of a constant. Only one constant pool entry should be generated, and
+        // so bootstrap should be called once as well.
         var v4 = bootstrap.invoke(long.class, "dummy");
         assertVar.invoke("assertEquals", Long.MAX_VALUE, v4);
 
@@ -91,8 +91,16 @@ public class CondyTest {
         var v5 = bootstrap.invoke(String.class, "dummy");
         assertVar.invoke("assertEquals", "java.util.Map999", v5);
 
+        // Check the duplicate constant.
+        longBootCount = 0;
+
         cm.finish().getMethod("run").invoke(null);
+
+        // Bootstrap was called once for the duplicate.
+        assertEquals(1, longBootCount);
     }
+
+    private static int longBootCount;
 
     public static Object boot(MethodHandles.Lookup lookup, String name, Class type)
         throws Exception
@@ -100,6 +108,7 @@ public class CondyTest {
         if (type == int.class) {
             return 123;
         } else if (type == long.class) {
+            longBootCount++;
             return Long.MAX_VALUE;
         } else {
             return name + "-world";
