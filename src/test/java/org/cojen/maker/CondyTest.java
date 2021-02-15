@@ -60,6 +60,11 @@ public class CondyTest {
         var v3 = bootstrap.invoke(long.class, "dummy");
         assertVar.invoke("assertEquals", Long.MAX_VALUE, v3);
 
+        // Duplicate use of a constant. Only one constant pool entry should be generated,
+        // although there's no convenient way to verify this.
+        var v4 = bootstrap.invoke(long.class, "dummy");
+        assertVar.invoke("assertEquals", Long.MAX_VALUE, v4);
+
         bootstrap = mm.var(CondyTest.class).condy("boot", java.util.Map.class, 999);
 
         try {
@@ -83,8 +88,8 @@ public class CondyTest {
             assertTrue(e.getMessage().equals("Unsupported constant type: null"));
         }
 
-        var v4 = bootstrap.invoke(String.class, "dummy");
-        assertVar.invoke("assertEquals", "java.util.Map999", v4);
+        var v5 = bootstrap.invoke(String.class, "dummy");
+        assertVar.invoke("assertEquals", "java.util.Map999", v5);
 
         cm.finish().getMethod("run").invoke(null);
     }
