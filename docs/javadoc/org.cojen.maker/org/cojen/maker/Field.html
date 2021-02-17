@@ -687,7 +687,8 @@ extends <a href="Variable.html" title="interface in org.cojen.maker">Variable</a
 <div class="member-signature"><span class="return-type"><a href="Variable.html" title="interface in org.cojen.maker">Variable</a></span>&nbsp;<span class="element-name">varHandle</span>()</div>
 <div class="block">Returns a <code>VarHandle</code> variable which accesses the field. If this is an ordinary
  field, the variable is actually a constant, and so it can be supplied as an argument to
- a bootstrap method.</div>
+ a bootstrap method. For non-static fields, the first <code>VarHandle</code> coordinate is the
+ object instance which owns the field. Static fields have no coordinates.</div>
 </section>
 </li>
 <li>
@@ -695,8 +696,10 @@ extends <a href="Variable.html" title="interface in org.cojen.maker">Variable</a
 <h3>methodHandleSet</h3>
 <div class="member-signature"><span class="return-type"><a href="Variable.html" title="interface in org.cojen.maker">Variable</a></span>&nbsp;<span class="element-name">methodHandleSet</span>()</div>
 <div class="block">Returns a <code>MethodHandle</code> variable for setting the field value. If this is an
- ordinary field, the variable is actually a constant, and so it can be supplied as
- an argument to a bootstrap method.</div>
+ ordinary field, the variable is actually a constant, and so it can be supplied as an
+ argument to a bootstrap method. For non-static fields, the <code>MethodHandle</code> accepts
+ two arguments: the object instance which owns the field, and the value to set. For
+ static fields, the only argument is the value to set.</div>
 </section>
 </li>
 <li>
@@ -704,8 +707,10 @@ extends <a href="Variable.html" title="interface in org.cojen.maker">Variable</a
 <h3>methodHandleGet</h3>
 <div class="member-signature"><span class="return-type"><a href="Variable.html" title="interface in org.cojen.maker">Variable</a></span>&nbsp;<span class="element-name">methodHandleGet</span>()</div>
 <div class="block">Returns a <code>MethodHandle</code> variable for getting the field value. If this is an
- ordinary field, the variable is actually a constant, and so it can be supplied as
- an argument to a bootstrap method.</div>
+ ordinary field, the variable is actually a constant, and so it can be supplied as an
+ argument to a bootstrap method. For non-static fields, the <code>MethodHandle</code> accepts
+ one argument: the object instance which owns the field. For static fields, there are no
+ arguments.</div>
 </section>
 </li>
 </ul>

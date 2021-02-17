@@ -243,21 +243,26 @@ public interface Field extends Variable {
     /**
      * Returns a {@code VarHandle} variable which accesses the field. If this is an ordinary
      * field, the variable is actually a constant, and so it can be supplied as an argument to
-     * a bootstrap method.
+     * a bootstrap method. For non-static fields, the first {@code VarHandle} coordinate is the
+     * object instance which owns the field. Static fields have no coordinates.
      */
     public Variable varHandle();
 
     /**
      * Returns a {@code MethodHandle} variable for setting the field value. If this is an
-     * ordinary field, the variable is actually a constant, and so it can be supplied as
-     * an argument to a bootstrap method.
+     * ordinary field, the variable is actually a constant, and so it can be supplied as an
+     * argument to a bootstrap method. For non-static fields, the {@code MethodHandle} accepts
+     * two arguments: the object instance which owns the field, and the value to set. For
+     * static fields, the only argument is the value to set.
      */
     public Variable methodHandleSet();
 
     /**
      * Returns a {@code MethodHandle} variable for getting the field value. If this is an
-     * ordinary field, the variable is actually a constant, and so it can be supplied as
-     * an argument to a bootstrap method.
+     * ordinary field, the variable is actually a constant, and so it can be supplied as an
+     * argument to a bootstrap method. For non-static fields, the {@code MethodHandle} accepts
+     * one argument: the object instance which owns the field. For static fields, there are no
+     * arguments.
      */
     public Variable methodHandleGet();
 }

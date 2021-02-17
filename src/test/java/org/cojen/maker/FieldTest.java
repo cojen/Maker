@@ -293,7 +293,39 @@ public class FieldTest {
 
         cm.finish().getMethod("run").invoke(null);
     }
-    
+
+    @Test
+    public void methodHandlesNonStatic() throws Exception {
+        ClassMaker cm = ClassMaker.begin().public_();
+
+        cm.addConstructor().public_();
+
+        cm.addField(int.class, "f1");
+        cm.addField(String.class, "f2").private_();
+
+        MethodMaker mm = cm.addMethod(null, "run").public_();
+        var assertVar = mm.var(Assert.class);
+
+        mm.field("f1").set(10);
+        var mh1 = mm.field("f1").methodHandleGet();
+        var result = mh1.invoke(int.class, "invokeExact", new Object[] {cm}, mm.this_());
+        assertVar.invoke("assertEquals", 10, result);
+
+        var mh2 = mm.field("f2").methodHandleSet();
+        mh2.invoke(void.class, "invokeExact", new Object[]{cm, String.class}, mm.this_(), "hello"); 
+        assertVar.invoke("assertEquals", "hello", mm.field("f2").get());
+
+        try {
+            mh2.set(null);
+        } catch (IllegalStateException e) {
+            assertTrue(e.getMessage().contains("Unmodifiable"));
+        }
+
+        var clazz = cm.finish();
+        var instance = clazz.getConstructor().newInstance();
+        clazz.getMethod("run").invoke(instance);
+    }
+
     @Test
     public void methodHandlesBootstrap() throws Exception {
         // Test passing the field MethodHandle to an indy bootstrap method.
@@ -347,6 +379,38 @@ public class FieldTest {
         }
 
         cm.finish().getMethod("run").invoke(null);
+    }
+
+   @Test
+    public void varHandlesNonStatic() throws Exception {
+        ClassMaker cm = ClassMaker.begin().public_();
+
+        cm.addConstructor().public_();
+
+        cm.addField(int.class, "f1");
+        cm.addField(String.class, "f2").private_();
+
+        MethodMaker mm = cm.addMethod(null, "run").public_();
+        var assertVar = mm.var(Assert.class);
+
+        mm.field("f1").set(10);
+        var vh1 = mm.field("f1").varHandle();
+        var result = vh1.invoke(int.class, "getOpaque", new Object[] {cm}, mm.this_());
+        assertVar.invoke("assertEquals", 10, result);
+
+        var vh2 = mm.field("f2").varHandle();
+        vh2.invoke(void.class, "setRelease", new Object[] {cm, String.class}, mm.this_(), "hello"); 
+        assertVar.invoke("assertEquals", "hello", mm.field("f2").get());
+
+        try {
+            vh2.set(null);
+        } catch (IllegalStateException e) {
+            assertTrue(e.getMessage().contains("Unmodifiable"));
+        }
+
+        var clazz = cm.finish();
+        var instance = clazz.getConstructor().newInstance();
+        clazz.getMethod("run").invoke(instance);
     }
 
     @Test
