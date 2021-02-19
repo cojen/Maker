@@ -391,7 +391,7 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
         String fullName;
 
         if (className == null) {
-            fullName = prefix + '$' +  + innerClasses.classNumberFor("");
+            fullName = prefix + '$' + innerClasses.classNumberFor("");
         } else {
             if (className.indexOf('.') >= 0) {
                 throw new IllegalArgumentException("Not a simple name: " + className);
