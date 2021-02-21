@@ -288,13 +288,14 @@ public interface MethodMaker {
     /**
      * Invoke a static or instance method on the enclosing object of this method.
      *
-     * @param name the method name; can be "new" to construct an instance of the enclosing class
+     * @param name the method name; can be {@code "<new>"} to construct an instance of the
+     * enclosing class
      * @param values variables or constants
      * @return the result of the method, which is null if void
      * @throws IllegalArgumentException if not given a variable or a constant
      * @throws IllegalStateException if method isn't found
-     * @see Variable#invoke
-     * @see #new_
+     * @see Variable#invoke Variable.invoke
+     * @see #new_ new_
      */
     public Variable invoke(String name, Object... values);
 

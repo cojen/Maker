@@ -1021,7 +1021,7 @@ public class InvokeTest {
         MethodMaker mm = cm.addMethod(null, "run").public_().static_();
         var assertVar = mm.var(Assert.class);
 
-        var mhVar = mm.var(ArrayList.class).methodHandle(null, "new", int.class);
+        var mhVar = mm.var(ArrayList.class).methodHandle(null, "<new>", int.class);
         var bootstrap = mm.var(InvokeTest.class).indy("bootTest2", mhVar);
 
         var result = bootstrap.invoke(List.class, "xxx", new Object[] {int.class}, 10);
@@ -1044,23 +1044,23 @@ public class InvokeTest {
 
     @Test
     public void invokeNew() throws Exception {
-        // Test that "new" can be used as a method name in place of calling the new_ method.
+        // Test that "<new>" can be used as a method name in place of calling the new_ method.
 
         ClassMaker cm = ClassMaker.begin().public_();
         MethodMaker mm = cm.addMethod(null, "run").public_().static_();
 
-        var v1 = mm.var(ArrayList.class).invoke("new", 10);
-        var v2 = mm.var(String[].class).invoke("new", 10);
+        var v1 = mm.var(ArrayList.class).invoke("<new>", 10);
+        var v2 = mm.var(String[].class).invoke("<new>", 10);
 
         var v3 = mm.var(ArrayList.class)
-            .invoke(ArrayList.class, "new", new Object[] {int.class}, 10);
+            .invoke(ArrayList.class, "<new>", new Object[] {int.class}, 10);
         var v4 = mm.var(ArrayList.class)
-            .invoke((Object) null, "new", new Object[] {int.class}, 10);
+            .invoke((Object) null, "<new>", new Object[] {int.class}, 10);
 
-        var v5 = mm.var(String[].class).invoke(String[].class, "new", null, 10);
+        var v5 = mm.var(String[].class).invoke(String[].class, "<new>", null, 10);
 
         try {
-            mm.var(int.class).invoke("new", 10);
+            mm.var(int.class).invoke("<new>", 10);
         } catch (IllegalArgumentException e) {
         }
 

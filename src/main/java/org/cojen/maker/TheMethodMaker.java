@@ -552,7 +552,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
     @Override
     public Variable invoke(String name, Object... values) {
-        if (name.equals("new")) {
+        if (name.equals("<new>")) {
             return doNew(mClassMaker.type(), values, null);
         } else {
             return doInvoke(name, 0, values);
@@ -4025,7 +4025,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
         @Override
         public LocalVar invoke(String name, Object... values) {
-            if (name.equals("new")) {
+            if (name.equals("<new>")) {
                 return doNew(type(), values, null);
             } else {
                 return doInvoke(type(), this, name, 0, values, null, null);
@@ -4048,7 +4048,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                 }
             }
 
-            if (name.equals("new") && (returnType == null || returnType == type())) {
+            if (name.equals("<new>") && (returnType == null || returnType == type())) {
                 return doNew(type(), values, paramTypes);
             } else {
                 return doInvoke(type(), this, name, 0, values, returnType, paramTypes);
@@ -4073,7 +4073,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             Type.Method method;
             int kind;
 
-            if (name.equals("new") && (retType == null || returnType == type)) {
+            if (name.equals("<new>") && (retType == null || returnType == type)) {
                 method = type.findMethod("<init>", paramTypes, -1, -1, null, paramTypes);
                 kind = REF_newInvokeSpecial;
             } else {
