@@ -428,10 +428,12 @@ public interface Variable {
     /**
      * Invoke a static or instance method on the object referenced by this variable.
      *
-     * @param name method name
+     * @param name method name; can be "new" to construct an instance of this variable type
      * @param values variables or constants
      * @return the result of the method, which is null if void
      * @throws IllegalArgumentException if not given a variable or a constant
+     * @throws IllegalStateException if method isn't found
+     * @see MethodMaker#new_
      */
     public Variable invoke(String name, Object... values);
 
@@ -439,11 +441,12 @@ public interface Variable {
      * Invoke a static or instance method on the object referenced by this variable.
      *
      * @param returnType method return type
-     * @param name method name
+     * @param name method name; can be "new" to construct an instance of this variable type
      * @param types method parameter types (can be null if none)
      * @param values variables or constants
      * @return the result of the method, which is null if void
      * @throws IllegalArgumentException if not given a variable or a constant
+     * @throws IllegalStateException if method isn't found
      */
     public Variable invoke(Object returnType, String name, Object[] types, Object... values);
 
@@ -453,9 +456,10 @@ public interface Variable {
      * and so it can be supplied as an argument to a bootstrap method.
      *
      * @param returnType method return type
-     * @param name method name
+     * @param name method name; can be "new" to construct an instance of this variable type
      * @param types method parameter types (can be null if none)
      * @throws IllegalArgumentException if not given a supported type object
+     * @throws IllegalStateException if method isn't found
      */
     public Variable methodHandle(Object returnType, String name, Object... types);
 

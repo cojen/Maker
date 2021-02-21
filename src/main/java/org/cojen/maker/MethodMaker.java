@@ -263,6 +263,8 @@ public interface MethodMaker {
 
     /**
      * Generates a return void statement.
+     *
+     * @throws IllegalStateException if method cannot return void
      */
     public void return_();
 
@@ -271,6 +273,7 @@ public interface MethodMaker {
      *
      * @param value variable or constant
      * @throws IllegalArgumentException if not given a variable or a constant
+     * @throws IllegalStateException if method must return void
      */
     public void return_(Object value);
 
@@ -285,11 +288,13 @@ public interface MethodMaker {
     /**
      * Invoke a static or instance method on the enclosing object of this method.
      *
-     * @param name the method name
+     * @param name the method name; can be "new" to construct an instance of the enclosing class
      * @param values variables or constants
      * @return the result of the method, which is null if void
      * @throws IllegalArgumentException if not given a variable or a constant
+     * @throws IllegalStateException if method isn't found
      * @see Variable#invoke
+     * @see #new_
      */
     public Variable invoke(String name, Object... values);
 
@@ -300,6 +305,7 @@ public interface MethodMaker {
      * @param values variables or constants
      * @return the result of the method, which is null if void
      * @throws IllegalArgumentException if not given a variable or a constant
+     * @throws IllegalStateException if method isn't found
      */
     public Variable invokeSuper(String name, Object... values);
 
@@ -309,6 +315,7 @@ public interface MethodMaker {
      *
      * @param values variables or constants
      * @throws IllegalArgumentException if not given a variable or a constant
+     * @throws IllegalStateException if not defining a constructor or if constructor isn't found
      */
     public void invokeSuperConstructor(Object... values);
 
@@ -318,6 +325,7 @@ public interface MethodMaker {
      *
      * @param values variables or constants
      * @throws IllegalArgumentException if not given a variable or a constant
+     * @throws IllegalStateException if not defining a constructor or if constructor isn't found
      */
     public void invokeThisConstructor(Object... values);
 
@@ -342,8 +350,8 @@ public interface MethodMaker {
      * @param type class name or {@code Class} instance
      * @param values variables or constants
      * @return the new object
-     * @throws IllegalArgumentException if the type is unsupported, or if the constructor isn't
-     * found
+     * @throws IllegalArgumentException if the type is unsupported
+     * @throws IllegalStateException if constructor isn't found
      */
     public Variable new_(Object type, Object... values);
 
@@ -361,6 +369,7 @@ public interface MethodMaker {
      * start label and here.
      *
      * @param handler called for each exit path to generate handler code
+     * @throws IllegalStateException if start is unpositioned
      */
     public void finally_(Label start, Runnable handler);
 
@@ -414,6 +423,7 @@ public interface MethodMaker {
      *
      * @param className simple class name; pass null to use default
      * @throws IllegalArgumentException if not given a simple class name
+     * @throws IllegalStateException if enclosing class or method is finished
      */
     public ClassMaker addInnerClass(String className);
 
