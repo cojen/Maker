@@ -24,61 +24,63 @@ import java.lang.reflect.Modifier;
  * @author Brian S O'Neill
  */
 class Modifiers {
+    // For classes, fields, and methods.
     static int toPublic(int bitmask) {
         return (bitmask | Modifier.PUBLIC) & (~Modifier.PROTECTED & ~Modifier.PRIVATE);
     }
     
+    // For classes, fields, and methods.
     static int toPrivate(int bitmask) {
         return (bitmask | Modifier.PRIVATE) & (~Modifier.PUBLIC & ~Modifier.PROTECTED);
     }
 
+    // For classes, fields, and methods.
     static int toProtected(int bitmask) {
         return (bitmask | Modifier.PROTECTED) & (~Modifier.PUBLIC & ~Modifier.PRIVATE);
     }
     
+    // For classes, fields, and methods.
     static int toStatic(int bitmask) {
         return bitmask | Modifier.STATIC;
     }
 
+    // For classes, fields, and methods.
     static int toFinal(int bitmask) {
         return (bitmask | Modifier.FINAL) & (~Modifier.INTERFACE & ~Modifier.ABSTRACT);
     }
     
+    // For methods.
     static int toSynchronized(int bitmask) {
-        return (bitmask | Modifier.SYNCHRONIZED) &
-            (~Modifier.VOLATILE & ~Modifier.TRANSIENT & ~Modifier.INTERFACE);
+        return bitmask | Modifier.SYNCHRONIZED;
     }
     
+    // For fields.
     static int toVolatile(int bitmask) {
-        return (bitmask | Modifier.VOLATILE) &
-            (~Modifier.SYNCHRONIZED & ~Modifier.NATIVE & ~Modifier.INTERFACE &
-             ~Modifier.ABSTRACT & ~Modifier.STRICT);
+        return bitmask | Modifier.VOLATILE;
     }
     
+    // For fields.
     static int toTransient(int bitmask) {
-        return (bitmask | Modifier.TRANSIENT) &
-            (~Modifier.SYNCHRONIZED & ~Modifier.NATIVE &
-             ~Modifier.INTERFACE & ~Modifier.ABSTRACT & ~Modifier.STRICT);
+        return bitmask | Modifier.TRANSIENT;
     }
     
+    // For methods.
     static int toNative(int bitmask) {
-        return (bitmask | Modifier.NATIVE) & 
-            (~Modifier.VOLATILE & ~Modifier.TRANSIENT &
-             ~Modifier.INTERFACE & ~Modifier.ABSTRACT & ~Modifier.STRICT);
+        return (bitmask | Modifier.NATIVE) & (~Modifier.ABSTRACT & ~Modifier.STRICT);
     }
     
+    // For classes.
     static int toInterface(int bitmask) {
-        return (bitmask | (Modifier.INTERFACE | Modifier.ABSTRACT)) & 
-            (~Modifier.FINAL & ~Modifier.SYNCHRONIZED &
-             ~Modifier.VOLATILE & ~Modifier.TRANSIENT & ~Modifier.NATIVE);
+        return (bitmask | (Modifier.INTERFACE | Modifier.ABSTRACT)) & ~Modifier.FINAL;
     }
 
+    // For classes and methods.
     static int toAbstract(int bitmask) {
-        return (bitmask | Modifier.ABSTRACT) & 
-            (~Modifier.FINAL & ~Modifier.VOLATILE & ~Modifier.TRANSIENT & ~Modifier.NATIVE &
-             ~Modifier.SYNCHRONIZED & ~Modifier.STRICT);
+        return (bitmask | Modifier.ABSTRACT) &
+            (~Modifier.FINAL & ~Modifier.NATIVE & ~Modifier.SYNCHRONIZED & ~Modifier.STRICT);
     }
 
+    // For methods.
     static int toStrict(int bitmask) {
         if ((bitmask & (Modifier.NATIVE | Modifier.ABSTRACT)) == 0) {
             bitmask |= Modifier.STRICT;
@@ -86,23 +88,24 @@ class Modifiers {
         return bitmask;
     }
 
+    // For methods.
     static int toBridge(int bitmask) {
         // Bridge re-uses the Modifier.VOLATILE modifier, which used to only apply to fields.
-        return (bitmask | Modifier.VOLATILE) &
-            (~Modifier.NATIVE & ~Modifier.INTERFACE & ~Modifier.ABSTRACT);
+        return bitmask | Modifier.VOLATILE;
     }
 
+    // For classes and fields.
     static int toEnum(int bitmask) {
-        return (bitmask | 0x4000) &
-            (~Modifier.ABSTRACT & ~Modifier.INTERFACE &
-             ~Modifier.STRICT & ~Modifier.SYNCHRONIZED);
+        return (bitmask | 0x4000) & (~Modifier.INTERFACE & ~Modifier.ABSTRACT);
     }
 
+    // For methods.
     static int toVarArgs(int bitmask) {
         // Varargs re-uses the Modifier.TRANSIENT modifier, which used to only apply to fields.
-        return (bitmask | Modifier.TRANSIENT) & (~Modifier.INTERFACE & ~Modifier.VOLATILE);
+        return bitmask | Modifier.TRANSIENT;
     }
 
+    // For classes, fields, and methods.
     static int toSynthetic(int bitmask) {
         return bitmask | 0x1000;
     }
