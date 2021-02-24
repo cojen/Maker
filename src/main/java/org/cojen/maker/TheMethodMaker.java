@@ -3159,7 +3159,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     }
 
     /**
-     * Push a constant to the stack an optionally performs a conversion.
+     * Push a constant to the stack and optionally perform a conversion.
      */
     abstract static class ConstantOp extends Op {
         @Override
