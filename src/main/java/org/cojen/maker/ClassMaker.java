@@ -160,7 +160,7 @@ public interface ClassMaker {
     public ClassMaker synthetic();
 
     /**
-     * Set an interface or class that this class extends.
+     * Set a class that this class extends.
      *
      * @param superClass non-null Class or String
      * @return this
@@ -169,7 +169,7 @@ public interface ClassMaker {
     public ClassMaker extend(Object superClass);
 
     /**
-     * Add an interface that this class implements.
+     * Add an interface that this class or interface implements.
      *
      * @param iface Class or String
      * @return this
