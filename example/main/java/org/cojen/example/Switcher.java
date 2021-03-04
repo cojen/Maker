@@ -35,7 +35,7 @@ import org.cojen.maker.Variable;
  *
  * <p>For classes to be loaded externally, the 'ordinals' bootstrap method can be used
  * alongside a normal switch instruction. External classes require that all case keys be
- * Constable because they get passed as invokedynamic boostrap arguments.
+ * Constable because they get passed as invokedynamic bootstrap arguments.
  *
  * @author Brian S O'Neill
  */
