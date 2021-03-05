@@ -2064,8 +2064,9 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             new LocalVar(constantType).field(((Enum) value).name()).push();
             return addConversionOp(constantType, type);
         } else {
-            Type actualType = ConstableSupport.THE.toConstantType(this, value);
-            if (actualType != null) {
+            String actualTypeDesc = ConstableSupport.THE.toTypeDescriptor(value);
+            if (actualTypeDesc != null) {
+                Type actualType = mClassMaker.typeFrom(actualTypeDesc);
                 constantType = Type.from(Class.class);
                 if (actualType.isPrimitive()) {
                     new LocalVar(actualType.box()).field("TYPE").push();

@@ -57,7 +57,7 @@ abstract class ConstableSupport {
      *
      * @param value expected to be a ClassDesc
      */
-    abstract Type toConstantType(TheMethodMaker mm, Object value);
+    abstract String toTypeDescriptor(Object value);
 
     /**
      * Returns null if not supported.
@@ -77,9 +77,9 @@ abstract class ConstableSupport {
 
     private static class Supported extends ConstableSupport {
         @Override
-        Type toConstantType(TheMethodMaker mm, Object value) {
+        String toTypeDescriptor(Object value) {
             if (value instanceof ClassDesc) {
-                return mm.mClassMaker.typeFrom(((ClassDesc) value).descriptorString());
+                return ((ClassDesc) value).descriptorString();
             }
             return null;
         }
@@ -207,7 +207,7 @@ abstract class ConstableSupport {
 
     private static class Unsupported extends ConstableSupport {
         @Override
-        Type toConstantType(TheMethodMaker mm, Object value) {
+        String toTypeDescriptor(Object value) {
             return null;
         }
 

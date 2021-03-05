@@ -16,6 +16,8 @@
 
 package org.cojen.maker;
 
+import java.lang.constant.ConstantDescs;
+
 import java.io.Serializable;
 
 import java.net.URL;
@@ -255,5 +257,30 @@ public class TypeTest {
         } catch (IllegalArgumentException e) {
             assertTrue(e.getMessage().startsWith("Unknown"));
         }
+    }
+
+    @Test
+    public void classDesc() throws Exception {
+        // ClassDesc added in Java 12.
+        Assume.assumeTrue(Runtime.getRuntime().version().feature() >= 12);
+
+        ClassMaker cm = ClassMaker.begin().public_();
+        MethodMaker mm = cm.addMethod(Object.class, "test").public_().static_();
+
+        try {
+            mm.var(ConstantDescs.CD_void).set(1);
+            fail();
+        } catch (IllegalStateException e) {
+            assertTrue(e.getMessage().startsWith("Automatic conversion"));
+        }
+
+        var a = mm.var(ConstantDescs.CD_int).set(123);
+        var b = mm.var(ConstantDescs.CD_Number).set(a);
+
+        mm.return_(b);
+
+        Object result = cm.finish().getMethod("test").invoke(null);
+
+        assertEquals(123, result);
     }
 }
