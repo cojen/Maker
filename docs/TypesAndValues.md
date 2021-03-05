@@ -1,4 +1,4 @@
-The Cojen/Maker library supports many different kinds of data types and values. To keep the API simple, types and values are passed as any kind of `Object`, but only a subset is allowed.
+The Cojen/Maker module supports many different kinds of data types and values. To keep the API simple, types and values are passed as any kind of `Object`, but only a subset is allowed.
 
 Types
 -----
