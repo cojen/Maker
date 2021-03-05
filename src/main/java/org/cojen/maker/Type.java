@@ -91,10 +91,8 @@ abstract class Type {
     /**
      * Should be called after the class has been defined, to eagerly remove the cache entry.
      */
-    static void uncache(Object cache, String name) {
-        if (cache instanceof ConcurrentHashMap) {
-            ((ConcurrentHashMap) cache).remove(name);
-        }
+    static void uncache(Map cache, String name) {
+        cache.remove(name);
     }
 
     static Type from(ClassLoader loader, Object type) {

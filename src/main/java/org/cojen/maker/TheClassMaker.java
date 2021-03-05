@@ -98,7 +98,7 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
     private ConstantPool.C_Class mSuperClass;
 
     // Stashed by Type.begin to prevent GC of this type being defined.
-    Object mTypeCache;
+    Map mTypeCache;
 
     int mModifiers;
 
