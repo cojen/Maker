@@ -510,7 +510,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         byte op;
         switch (type.stackMapCode()) {
         default:
-            throw new IllegalStateException("Unsupported return type");
+            throw new IllegalStateException("Unsupported return type: " + type.name());
         case SM_INT:
             op = IRETURN;
             break;
@@ -1495,7 +1495,8 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             tiny: {
                 switch (var.mType.stackMapCode()) {
                 default:
-                    throw new IllegalStateException("Unsupported variable type");
+                    throw new IllegalStateException
+                        ("Unsupported variable type: " + var.mType.name());
                 case SM_INT:
                     if (slot <= 3) {
                         op = ILOAD_0;
@@ -1646,7 +1647,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         tiny: {
             switch (var.mType.stackMapCode()) {
             default:
-                throw new IllegalStateException("Unsupported variable type");
+                throw new IllegalStateException("Unsupported variable type: " + var.mType.name());
             case SM_INT:
                 if (slot <= 3) {
                     op = ISTORE_0;
@@ -3801,9 +3802,9 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         public LocalVar cast(Object clazz) {
             requireNonNull(clazz);
 
-            Type fromType = type();
-            Type toType = mClassMaker.typeFrom(clazz);
-            int code = fromType.canConvertTo(toType);
+            final Type fromType = type();
+            final Type toType = mClassMaker.typeFrom(clazz);
+            final int code = fromType.canConvertTo(toType);
 
             if (code != Integer.MAX_VALUE) {
                 // Widening conversion, boxing, unboxing, or equal types.
@@ -3818,7 +3819,8 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                         // Narrowing and boxing conversion.
                         return cast(unbox.clazz()).cast(clazz);
                     }
-                    throw new IllegalStateException("Unsupported cast");
+                    throw new IllegalStateException
+                        ("Unsupported cast: " + fromType.name() + " to " + toType.name());
                 }
 
                 // Basic object cast.
@@ -3856,7 +3858,8 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                         }
                         return casted.cast(clazz);
                     }
-                    throw new IllegalStateException("Unsupported conversion");
+                    throw new IllegalStateException
+                        ("Unsupported conversion: " + fromType.name() + " to " + toType.name());
                 }
 
                 int toTypeCode = toType.typeCode();
@@ -3911,7 +3914,8 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                         }
                         // fallthrough
                     default:
-                        throw new IllegalStateException("Unsupported conversion");
+                        throw new IllegalStateException
+                            ("Unsupported conversion: " + fromType.name() + " to " + toType.name());
                     }
 
                     return cast(int.class).cast(clazz);
