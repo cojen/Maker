@@ -148,7 +148,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                 {
                     invokeSuperConstructor();
                 }
-                return_();
+                doReturn();
             } else {
                 throw new IllegalStateException
                     ("End reached without returning: " + mMethod.returnType().name());
@@ -484,6 +484,10 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         if (mMethod.returnType() != VOID) {
             throw new IllegalStateException("Must return a value from this method");
         }
+        doReturn();
+    }
+
+    private void doReturn() {
         if (mReturnLabel == null) {
             addOp(new ReturnOp(RETURN, 0));
         } else {
@@ -494,7 +498,12 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     @Override
     public void return_(Object value) {
         Type type = mMethod.returnType();
+
         if (type == VOID) {
+            if (value instanceof Typed && ((Typed) value).type() == VOID) {
+                doReturn();
+                return;
+            }
             throw new IllegalStateException("Cannot return a value from this method");
         }
 
@@ -1087,7 +1096,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             retHandler.here();
             handler.run();
             if (retVar == null) {
-                return_();
+                doReturn();
             } else {
                 return_(retVar);
             }

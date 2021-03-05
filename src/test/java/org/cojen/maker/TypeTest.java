@@ -283,4 +283,38 @@ public class TypeTest {
 
         assertEquals(123, result);
     }
+
+    @Test
+    public void voidType() throws Exception {
+        ClassMaker cm = ClassMaker.begin().public_();
+        MethodMaker mm = cm.addMethod(void.class, "test").public_().static_();
+
+        var v = mm.var(void.class);
+
+        try {
+            v.invoke("getClass");
+            cm.finish();
+            fail();
+        } catch (IllegalStateException e) {
+            assertTrue(e.getMessage().startsWith("Unsupported"));
+        }
+
+        cm = ClassMaker.begin().public_();
+        mm = cm.addMethod(v, "test").public_().static_();
+        var v2 = mm.var(v);
+        mm.return_(v2);
+
+        cm.finish().getMethod("test").invoke(null);
+
+        cm = ClassMaker.begin().public_();
+        mm = cm.addMethod(v, "test").public_().static_();
+        var v3 = mm.var(int.class);
+
+        try {
+            mm.return_(v3);
+            fail();
+        } catch (IllegalStateException e) {
+            assertTrue(e.getMessage().startsWith("Cannot return"));
+        }
+    }
 }
