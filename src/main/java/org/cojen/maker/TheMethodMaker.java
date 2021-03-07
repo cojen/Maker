@@ -878,7 +878,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                     super.appendTo(m);
                     m.appendShort(constant.mIndex);
                     m.stackPush(type, newOffset);
-                    m.appendOp(DUP, 0);
+                    m.appendByte(DUP);
                     m.stackPush(type, newOffset);
                 }
             });
@@ -1356,7 +1356,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
      */
     private void pushConstant(Object value, Type type) {
         if (value == null) {
-            appendOp(ACONST_NULL, 0);
+            appendByte(ACONST_NULL);
             stackPush(Null.THE);
         } else if (value instanceof String) {
             pushConstant(mConstants.addString((String) value), type);
@@ -1396,12 +1396,12 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
      */
     private void pushConstant(int value, Type type) {
         if (value >= -1 && value <= 5) {
-            appendOp((byte) (ICONST_0 + value), 0);
+            appendByte(ICONST_0 + value);
         } else if (value >= -128 && value < 128) {
-            appendOp(BIPUSH, 0);
+            appendByte(BIPUSH);
             appendByte(value);
         } else if (value >= -32768 && value < 32768) {
-            appendOp(SIPUSH, 0);
+            appendByte(SIPUSH);
             appendShort(value);
         } else {
             pushConstant(mConstants.addInteger(value), type);
@@ -1415,9 +1415,9 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
      */
     private void pushConstant(long value, Type type) {
         if (value >= 0 && value <= 1) {
-            appendOp((byte) (LCONST_0 + value), 0);
+            appendByte((byte) (LCONST_0 + value));
         } else {
-            appendOp(LDC2_W, 0);
+            appendByte(LDC2_W);
             appendShort(mConstants.addLong(value).mIndex);
         }
         stackPush(type);
@@ -1438,7 +1438,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             pushConstant(mConstants.addFloat(value), type);
             return;
         }
-        appendOp(op, 0);
+        appendByte(op);
         stackPush(type);
     }
 
@@ -1453,11 +1453,11 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             } else if (value == 1) {
                 op = DCONST_1;
             } else {
-                appendOp(LDC2_W, 0);
+                appendByte(LDC2_W);
                 appendShort(mConstants.addDouble(value).mIndex);
                 break doAppend;
             }
-            appendOp(op, 0);
+            appendByte(op);
         }
         stackPush(type);
     }
@@ -1469,10 +1469,10 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         int index = constant.mIndex;
 
         if (index < 256) {
-            appendOp(LDC, 0);
+            appendByte(LDC);
             appendByte(index);
         } else {
-            appendOp(LDC_W, 0);
+            appendByte(LDC_W);
             appendShort(index);
         }
 
@@ -1534,17 +1534,17 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                     break;
                 }
                 if (slot < 256) {
-                    appendOp(op, 0);
+                    appendByte(op);
                     appendByte(slot);
                 } else {
-                    appendOp(WIDE, 0);
+                    appendByte(WIDE);
                     appendByte(op);
                     appendShort(slot);
                 }
                 break doPush;
             }
 
-            appendOp((byte) (op + slot), 0);
+            appendByte(op + slot);
         }
 
         stackPush(var.mType);
@@ -3221,7 +3221,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             int typeCode = mType.typeCode();
             if (typeCode == T_DOUBLE || typeCode == T_LONG) {
                 int index = mConstant.mIndex;
-                m.appendOp(LDC2_W, 0);
+                m.appendByte(LDC2_W);
                 m.appendShort(index);
                 m.stackPush(mType);
             } else {
@@ -3353,11 +3353,11 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         void appendTo(TheMethodMaker m) {
             int slot = mVar.mSlot;
             if (-128 <= mAmount && mAmount < 128 && slot < 256) {
-                m.appendOp(IINC, 0);
+                m.appendByte(IINC);
                 m.appendByte(slot);
                 m.appendByte(mAmount);
             } else {
-                m.appendOp(WIDE, 0);
+                m.appendByte(WIDE);
                 m.appendByte(IINC);
                 m.appendShort(slot);
                 m.appendShort(mAmount);
