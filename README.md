@@ -15,7 +15,6 @@ Class<?> clazz = cm.finish();
 clazz.getMethod("run").invoke(null);
 ```
 
-- [Types and values](docs/TypesAndValues.md)
 - [Coding patterns](docs/CodingPatterns.md)
 - [Examples](example/main/java/org/cojen/example)
 

@@ -59,7 +59,7 @@ loadScripts(document, 'script');</script>
 <section class="package-description" id="package.description">
 <div class="block">Dynamic Java class file generator. Here's a simple "hello, world" example:
 
- <pre>
+ <blockquote><pre><code>
  ClassMaker cm = ClassMaker.begin().public_();
 
  // public static void run()...
@@ -68,13 +68,94 @@ loadScripts(document, 'script');</script>
  // System.out.println(...
  mm.var(System.class).field("out").invoke("println", "hello, world");
 
- Class&lt;?&gt; clazz = cm.finish();
+ Class&amp;lt;?&amp;gt; clazz = cm.finish();
  clazz.getMethod("run").invoke(null);
- </pre>
+ </code></pre></blockquote>
 
  <p>The classes which implement the interfaces in this package aren't designed to be
  thread-safe. Only one thread at a time should be interacting with a <code>ClassMaker</code>
- instance and any other objects that affect its state.</div>
+ instance and any other objects that affect its state.
+
+ <h2>Types and Values</h2>
+
+ The API supports many different kinds of data types and values. To keep things simple, types
+ and values are passed as any kind of <code>Object</code>, but only a subset is allowed.
+
+ <h3>Types</h3>
+
+ The following kinds of types are supported:
+
+ <ul>
+ <li><a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/lang/Class.html" title="class or interface in java.lang" class="external-link"><code>Class</code></a> — Examples: <code>int.class</code>, <code>String.class</code>, <code>int[].class</code>, etc.
+ <li><a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link"><code>String</code></a> — Fully qualified class name or descriptor: <code>"int"</code>, <code>"java.lang.String"</code>, <code>"int[]"</code>, <code>"I"</code>, <code>"Ljava/lang/String;"</code>, <code>"[I"</code>, etc.
+ <li><a href="ClassMaker.html" title="interface in org.cojen.maker"><code>ClassMaker</code></a> — Specifies the class being made.
+ <li><a href="Variable.html" title="interface in org.cojen.maker"><code>Variable</code></a> or <a href="Field.html" title="interface in org.cojen.maker"><code>Field</code></a> — Specifies the type used by the given <code>Variable</code> or <code>Field</code>.
+ <li><code>null</code> — Specifies the <code>null</code> type or a context specific default such as <code>void.class</code>.
+ <li><a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/lang/constant/ClassDesc.html" title="class or interface in java.lang.constant" class="external-link"><code>ClassDesc</code></a> — Specifies a type descriptor.
+ </ul>
+
+ When making a factory method that constructs the class being made, pass the current <code>
+ ClassMaker</code>. Unless explicitly specified, the actual name of the class being made isn't
+ known until it's finished.
+
+ <blockquote><pre><code>
+ ClassMaker cm = ...
+ MethodMaker factory = ...
+
+ // Pass the ClassMaker as the type to instantiate.
+ var instance = factory.new_(cm, ...);
+ ...
+ factory.return_(instance)
+ </code></pre></blockquote>
+
+ A <code>Variable</code> can be used as a generic type carrier, and this won't actually allocate a variable slot.
+
+ <blockquote><pre><code>
+ MethodMaker mm = ...
+ var builderType = mm.var(StringBuilder.class);
+ var b1 = mm.new_(builderType, ...);
+ var b2 = mm.new_(builderType, ...);
+ ...
+ </code></pre></blockquote>
+
+ <h3>Values</h3>
+
+ A value can be a <a href="Variable.html" title="interface in org.cojen.maker"><code>Variable</code></a>, a <a href="Field.html" title="interface in org.cojen.maker"><code>Field</code></a> or a constant:
+
+ <ul>
+ <li>Primitive constant — Examples: <code>123</code>, <code>true</code>, etc.
+ <li>Boxed constant — <code>Integer</code>, <code>Boolean</code>, etc.
+ <li><a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link"><code>String</code></a> constant
+ <li><a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/lang/Class.html" title="class or interface in java.lang" class="external-link"><code>Class</code></a> constant
+ <li><a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/lang/Enum.html" title="class or interface in java.lang" class="external-link"><code>Enum</code></a> constant
+ <li><a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/lang/invoke/MethodType.html" title="class or interface in java.lang.invoke" class="external-link"><code>MethodType</code></a> constant
+ <li><a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/lang/invoke/MethodHandleInfo.html" title="class or interface in java.lang.invoke" class="external-link"><code>MethodHandleInfo</code></a> constant
+ <li><a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/lang/constant/ConstantDesc.html" title="class or interface in java.lang.constant" class="external-link"><code>ConstantDesc</code></a> constant
+ <li><a href="https://docs.oracle.com/en/java/javase/15/docs/api/java.base/java/lang/constant/Constable.html" title="class or interface in java.lang.constant" class="external-link"><code>Constable</code></a> constant
+ </ul>
+
+ Constants of type <code>MethodHandleInfo</code> are treated specially when assigning them to
+ variables or parameters of type <code>MethodHandle</code>. A lookup is performed at runtime which
+ resolves the MethodHandle instance. Handling of <code>ConstantDesc</code> and <code>Constable</code>
+ is also treated specially — the actual type is determined by the resolved constant.
+
+ <p>Constants that aren't in the above set can be specified via <a href="Variable.html#setExact(java.lang.Object)"><code>Variable.setExact</code></a> or <a href="Variable.html#condy(java.lang.String,java.lang.Object...)"><code>Variable.condy</code></a>. The <code>setExact</code> method
+ supports any kind of object, but this feature only works for classes which are directly
+ <a href="ClassMaker.html#finish()"><code>finished</code></a>. If the class is written to a file and then loaded from
+ it, the constant won't be found, resulting in a linkage error.
+
+ <h3>Value type conversions</h3>
+
+ Automatic value type conversions are performed when setting variables or invoking methods:
+
+ <ul>
+ <li>Widening — Example: <code>int</code> to <code>long</code>
+ <li>Boxing — Example: <code>int</code> to <code>Integer</code>
+ <li>Widening and boxing — Example: <code>int</code> to <code>Long</code>, <code>Number</code> or <code>Object</code>
+ <li>Reboxing and widening — Example: <code>Integer</code> to <code>Long</code>
+ <li>Unboxing — Example: <code>Integer</code> to <code>int</code> (<code>NullPointerException</code> is possible)
+ <li>Unboxing and widening — Example: <code>Integer</code> to <code>long</code> (<code>NullPointerException</code> is possible)
+ </ul></div>
 <dl class="notes">
 <dt>See Also:</dt>
 <dd><a href="ClassMaker.html#begin()"><code>ClassMaker.begin()</code></a></dd>

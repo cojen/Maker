@@ -286,19 +286,19 @@ public interface Variable {
      * Determine if this variable is an instance of the given class or interface, and assign
      * the result to a new boolean variable.
      *
-     * @param clazz class or interface
+     * @param type class or interface
      * @return the result in a new boolean variable
      */
-    public Variable instanceOf(Object clazz);
+    public Variable instanceOf(Object type);
 
     /**
      * Cast this variable to another type, and assign the result to a new variable. If the
      * variable represents a primitive type, a conversion might be applied.
      *
-     * @param clazz class or interface
+     * @param type class or interface
      * @return the result in a new variable
      */
-    public Variable cast(Object clazz);
+    public Variable cast(Object type);
 
     /**
      * Compute the logical negation of this boolean variable, and assign the result to a new
