@@ -26,7 +26,7 @@
  * // System.out.println(...
  * mm.var(System.class).field("out").invoke("println", "hello, world");
  *
- * Class&lt;?&gt; clazz = cm.finish();
+ * Class<?> clazz = cm.finish();
  * clazz.getMethod("run").invoke(null);
  * }</pre></blockquote>
  *
