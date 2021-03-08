@@ -1277,7 +1277,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
     @Override
     public void nop() {
-        addOp(new BytecodeOp(NOP, 0));
+        addBytecodeOp(NOP, 0);
     }
 
     @Override
