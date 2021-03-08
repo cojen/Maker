@@ -1146,9 +1146,13 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             return var(String.class).set(strValue);
         }
 
+        // StringConcatFactory is limited to 200 values.
         if (values.length > 200) {
-            // StringConcatFactory is limited to 200 values.
-            var sb = new_(StringBuilder.class, values.length * 10);
+            long capacity = values.length * 8L;
+            while (capacity > Integer.MAX_VALUE) {
+                capacity >>= 1;
+            }
+            var sb = new_(StringBuilder.class, (int) capacity);
             for (Object value : values) {
                 sb = sb.invoke("append", value);
             }
