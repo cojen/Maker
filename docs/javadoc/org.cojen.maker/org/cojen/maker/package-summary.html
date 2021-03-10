@@ -155,7 +155,11 @@ loadScripts(document, 'script');</script>
  <li>Reboxing and widening — Example: <code>Integer</code> to <code>Long</code>
  <li>Unboxing — Example: <code>Integer</code> to <code>int</code> (<code>NullPointerException</code> is possible)
  <li>Unboxing and widening — Example: <code>Integer</code> to <code>long</code> (<code>NullPointerException</code> is possible)
- </ul></div>
+ </ul>
+
+ Automatic widening rules are stricter than what the Java language permits. In particular,
+ <code>int</code> cannot be automatically widened to <code>float</code>, and <code>long</code> cannot be
+ automatically widened to <code>double</code>. For these cases, an explicit cast is required.</div>
 <dl class="notes">
 <dt>See Also:</dt>
 <dd><a href="ClassMaker.html#begin()"><code>ClassMaker.begin()</code></a></dd>

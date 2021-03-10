@@ -116,6 +116,10 @@
  * <li>Unboxing and widening — Example: {@code Integer} to {@code long} ({@code NullPointerException} is possible)
  * </ul>
  *
+ * Automatic widening rules are stricter than what the Java language permits. In particular,
+ * {@code int} cannot be automatically widened to {@code float}, and {@code long} cannot be
+ * automatically widened to {@code double}. For these cases, an explicit cast is required.
+ *
  * @see ClassMaker#begin()
  */
 package org.cojen.maker;
