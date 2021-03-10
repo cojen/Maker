@@ -1,4 +1,4 @@
-The Cojen/Maker module is a dynamic Java class generator which is designed for ease of use.
+The Cojen/Maker module is a low-level dynamic Java class generator which is designed for ease of use.
 
 Here's a simple "hello, world" example:
 
