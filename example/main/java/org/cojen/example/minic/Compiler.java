@@ -25,9 +25,6 @@ import java.util.Scanner;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.TokenStream;
-
-import org.antlr.v4.runtime.tree.ParseTreeWalker;
 
 import org.cojen.maker.Label;
 import org.cojen.maker.MethodMaker;
@@ -42,7 +39,7 @@ import static org.cojen.example.minic.MiniCParser.*;
  */
 public class Compiler extends MiniCBaseVisitor<Object> {
     /**
-     * Parse, compile, and then run a minic program.
+     * Parse, compile, and then run a Mini-C program.
      *
      * @param args [0] - path to source file
      */
