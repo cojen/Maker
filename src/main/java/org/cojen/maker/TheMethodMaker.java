@@ -3402,11 +3402,14 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             if (table == null) {
                 m.mLocalVariableTable = table = new Attribute.LocalVariableTable(constants);
             }
-            // Without support for variable scopes, just cover the whole range.
-            table.add(0, Integer.MAX_VALUE,
-                      constants.addUTF8(mName),
-                      constants.addUTF8(mVar.mType.descriptor()),
-                      mVar.mSlot);
+            int slot = mVar.mSlot;
+            if (slot >= 0) {
+                // Without support for variable scopes, just cover the whole range.
+                table.add(0, Integer.MAX_VALUE,
+                          constants.addUTF8(mName),
+                          constants.addUTF8(mVar.mType.descriptor()),
+                          slot);
+            }
         }
     }
 
