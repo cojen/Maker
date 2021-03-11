@@ -19,6 +19,7 @@ package org.cojen.example.minic;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Scanner;
 
@@ -273,20 +274,35 @@ public class Compiler extends MiniCBaseVisitor<Object> {
 
     @Override
     public Object visitBinaryOperation(BinaryOperationContext ctx) {
-        Variable left;
-        {
-            Object leftResult = visit(ctx.left);
-            if (leftResult instanceof Variable) {
-                left = (Variable) leftResult;
+        int op = ctx.op.getType();
+
+        if (op == PLUS) {
+            var elements = new ArrayList<ExpressionContext>();
+            flattenPlus(ctx, elements);
+            var results = new Object[elements.size()];
+            boolean isString = false;
+            for (int i=0; i<elements.size(); i++) {
+                results[i] = visit(elements.get(i));
+                if (!isString && typeOf(results[i]) == String.class) {
+                    isString = true;
+                }
+            }
+            if (isString) {
+                return mm.concat(results);
             } else {
                 // Don't bother with constant folding or flipping things around.
-                left = mm.var(leftResult.getClass()).set(leftResult);
+                var sum = asVariable(results[0]);
+                for (int i=1; i<results.length; i++) {
+                    sum = sum.add(results[i]);
+                }
+                return sum;
             }
         }
 
-        var right = visit(ctx.right);
+        // Don't bother with constant folding or flipping things around.
+        var left = asVariable(visit(ctx.left));
 
-        int op = ctx.op.getType();
+        var right = visit(ctx.right);
 
         switch (op) {
         case MUL: return left.mul(right);
@@ -310,13 +326,6 @@ public class Compiler extends MiniCBaseVisitor<Object> {
                 return op == EQ ? left.eq(right) : left.ne(right);
             }
 
-        case PLUS:
-            if (typeOf(left) == String.class || typeOf(right) == String.class) {
-                return mm.concat(left, right);
-            } else {
-                return left.add(right);
-            }
-
             // Note: These aren't short-circuit operators, and they don't need to be.
         case AND: return left.and(right);
         case OR: return left.or(right);
@@ -334,24 +343,49 @@ public class Compiler extends MiniCBaseVisitor<Object> {
         }
     }
 
-    @Override
-    public Object visitUnaryOperation(UnaryOperationContext ctx) {
-        Variable value;
-        {
-            Object result = visit(ctx.expression());
-            if (result instanceof Variable) {
-                value = (Variable) result;
-            } else {
-                // Don't bother with constant folding.
-                value = mm.var(result.getClass()).set(result);
+    /**
+     * Gather a list of all child expressions which can be combined together for a plus operation.
+     *
+     * @param ctx must be a plus operation
+     */
+    private static void flattenPlus(BinaryOperationContext ctx,
+                                    ArrayList<ExpressionContext> elements)
+    {
+        flattenPlus(ctx.left, elements);
+        flattenPlus(ctx.right, elements);
+    }
+
+    private static void flattenPlus(ExpressionContext ctx,
+                                    ArrayList<ExpressionContext> elements)
+    {
+        if (ctx instanceof BinaryOperationContext) {
+            var binCtx = (BinaryOperationContext) ctx;
+            if (binCtx.op.getType() == PLUS) {
+                flattenPlus(binCtx, elements);
+                return;
             }
         }
+        elements.add(ctx);
+    }
+
+    @Override
+    public Object visitUnaryOperation(UnaryOperationContext ctx) {
+        // Don't bother with constant folding or flipping binary expressions.
+        var value = asVariable(ctx.expression());
 
         switch (ctx.op.getType()) {
         case MINUS: return value.neg();
         case NOT: return value.not();
         default:
             throw new AssertionError();
+        }
+    }
+
+    private Variable asVariable(Object value) {
+        if (value instanceof Variable) {
+            return (Variable) value;
+        } else {
+            return mm.var(value.getClass()).set(value);
         }
     }
 
