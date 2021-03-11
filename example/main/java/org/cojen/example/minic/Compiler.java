@@ -77,7 +77,7 @@ public class Compiler extends MiniCBaseVisitor<Object> {
 
     // Objects returned by the visit methods are Variables, constants, or null (for statements).
 
-	@Override
+    @Override
     public Object visitBlock(BlockContext ctx) {
         scope = new Scope(scope);
         visitChildren(ctx);
@@ -85,7 +85,7 @@ public class Compiler extends MiniCBaseVisitor<Object> {
         return null;
     }
 
-	@Override
+    @Override
     public Object visitIfStatement(IfStatementContext ctx) {
         Object test = visit(ctx.parExpression());
 
@@ -119,7 +119,7 @@ public class Compiler extends MiniCBaseVisitor<Object> {
         throw new IllegalArgumentException("If test doesn't evaluate to a boolean");
     }
 
-	@Override
+    @Override
     public Object visitWhileStatement(WhileStatementContext ctx) {
         scope = new Scope(scope);
         scope.breakTarget = mm.label();
@@ -146,7 +146,7 @@ public class Compiler extends MiniCBaseVisitor<Object> {
         return null;
     }
 
-	@Override
+    @Override
     public Object visitBreakStatement(BreakStatementContext ctx) {
         Label breakTarget = scope.breakOut();
         if (breakTarget == null) {
@@ -156,7 +156,7 @@ public class Compiler extends MiniCBaseVisitor<Object> {
         return null;
     }
 
-	@Override
+    @Override
     public Object visitExitStatement(ExitStatementContext ctx) {
         mm.return_();
         return null;
