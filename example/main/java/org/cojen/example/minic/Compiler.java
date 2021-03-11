@@ -16,6 +16,8 @@
 
 package org.cojen.example.minic;
 
+import java.io.File;
+
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 
@@ -26,6 +28,7 @@ import java.util.Scanner;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.ParserRuleContext;
 
 import org.cojen.maker.Label;
 import org.cojen.maker.MethodMaker;
@@ -48,21 +51,33 @@ public class Compiler extends MiniCBaseVisitor<Object> {
         CharStream chars = CharStreams.fromFileName(args[0]);
         var tokens = new CommonTokenStream(new MiniCLexer(chars));
         var parser = new MiniCParser(tokens);
-        var mh = new Compiler().compile(parser.program());
+        var mh = new Compiler().compile(args[0], parser.program());
         mh.invoke();
     }
+
+    private final boolean debug = true;
 
     private MethodMaker mm;
     private Variable scanner;
     private Scope scope;
 
+    private int lastLineNum;
+
     public Compiler() {
     }
 
-    public MethodHandle compile(ProgramContext ctx) {
+    public MethodHandle compile(String path, ProgramContext ctx) {
         mm = MethodMaker.begin(MethodHandles.lookup(), null, "_");
+
+        if (path != null && debug) {
+            mm.classMaker().sourceFile(new File(path).getName());
+        }
+
         scanner = mm.var(Scanner.class).set(null);
         scope = new Scope(null);
+
+        lastLineNum = 0;
+
         try {
             visit(ctx);
             return mm.finish();
@@ -73,10 +88,21 @@ public class Compiler extends MiniCBaseVisitor<Object> {
         }
     }
 
+    private void lineNum(ParserRuleContext ctx) {
+        if (debug) {
+            int lineNum = ctx.getStart().getLine();
+            if (lineNum != lastLineNum) {
+                lastLineNum = lineNum;
+                mm.lineNum(lineNum);
+            }
+        }
+    }
+
     // Objects returned by the visit methods are Variables, constants, or null (for statements).
 
     @Override
     public Object visitBlock(BlockContext ctx) {
+        lineNum(ctx);
         scope = new Scope(scope);
         visitChildren(ctx);
         scope = scope.parent;
@@ -85,6 +111,8 @@ public class Compiler extends MiniCBaseVisitor<Object> {
 
     @Override
     public Object visitIfStatement(IfStatementContext ctx) {
+        lineNum(ctx);
+
         Object test = visit(ctx.parExpression());
 
         if (test instanceof Variable) {
@@ -119,6 +147,8 @@ public class Compiler extends MiniCBaseVisitor<Object> {
 
     @Override
     public Object visitWhileStatement(WhileStatementContext ctx) {
+        lineNum(ctx);
+
         scope = new Scope(scope);
         scope.breakTarget = mm.label();
 
@@ -146,6 +176,7 @@ public class Compiler extends MiniCBaseVisitor<Object> {
 
     @Override
     public Object visitBreakStatement(BreakStatementContext ctx) {
+        lineNum(ctx);
         Label breakTarget = scope.breakOut();
         if (breakTarget == null) {
             throw new IllegalArgumentException("Not in a while loop");
@@ -156,12 +187,14 @@ public class Compiler extends MiniCBaseVisitor<Object> {
 
     @Override
     public Object visitExitStatement(ExitStatementContext ctx) {
+        lineNum(ctx);
         mm.return_();
         return null;
     }
 
     @Override
     public Object visitPrintStatement(PrintStatementContext ctx) {
+        lineNum(ctx);
         var v = visit(ctx.parExpression());
         mm.var(System.class).field("out").invoke("print", v);
         return null;
@@ -169,6 +202,7 @@ public class Compiler extends MiniCBaseVisitor<Object> {
 
     @Override
     public Object visitPrintlnStatement(PrintlnStatementContext ctx) {
+        lineNum(ctx);
         var v = visit(ctx.parExpression());
         mm.var(System.class).field("out").invoke("println", v);
         return null;
@@ -176,16 +210,19 @@ public class Compiler extends MiniCBaseVisitor<Object> {
 
     @Override
     public Object visitReadInt(ReadIntContext ctx) {
+        lineNum(ctx);
         return mm.var(Integer.class).invoke("parseInt", scanner().invoke("nextLine"));
     }
 
     @Override
     public Object visitReadDouble(ReadDoubleContext ctx) {
+        lineNum(ctx);
         return mm.var(Double.class).invoke("parseDouble", scanner().invoke("nextLine"));
     }
 
     @Override
     public Object visitReadLine(ReadLineContext ctx) {
+        lineNum(ctx);
         return scanner().invoke("nextLine");
     }
 
@@ -199,12 +236,15 @@ public class Compiler extends MiniCBaseVisitor<Object> {
 
     @Override
     public Object visitDeclaration(DeclarationContext ctx) {
+        lineNum(ctx);
         String name = ctx.Identifier().getText();
         if (scope.findLocal(name) != null) {
             throw new IllegalArgumentException("Variable is already declared: " + name);
         }
         var decl = (Variable) visit(ctx.type());
-        decl.name(name);
+        if (debug) {
+            decl.name(name);
+        }
         var expr = ctx.expression();
         if (expr != null) {
             assign(decl, visit(expr));
@@ -215,6 +255,7 @@ public class Compiler extends MiniCBaseVisitor<Object> {
 
     @Override
     public Object visitAssignment(AssignmentContext ctx) {
+        lineNum(ctx);
         String name = ctx.Identifier().getText();
         var local = scope.findLocal(name);
         if (local == null) {
@@ -259,6 +300,7 @@ public class Compiler extends MiniCBaseVisitor<Object> {
 
     @Override
     public Object visitVariableReference(VariableReferenceContext ctx) {
+        lineNum(ctx);
         String name = ctx.Identifier().getText();
         var local = scope.findLocal(name);
         if (local == null) {
@@ -269,11 +311,14 @@ public class Compiler extends MiniCBaseVisitor<Object> {
 
     @Override
     public Object visitToString(ToStringContext ctx) {
+        lineNum(ctx);
         return mm.var(String.class).invoke("valueOf", visit(ctx.parExpression()));
     }
 
     @Override
     public Object visitBinaryOperation(BinaryOperationContext ctx) {
+        lineNum(ctx);
+
         int op = ctx.op.getType();
 
         if (op == PLUS) {
