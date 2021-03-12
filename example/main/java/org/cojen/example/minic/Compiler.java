@@ -20,6 +20,7 @@ import java.io.File;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -30,6 +31,7 @@ import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ParserRuleContext;
 
+import org.cojen.maker.ClassMaker;
 import org.cojen.maker.Label;
 import org.cojen.maker.MethodMaker;
 import org.cojen.maker.Variable;
@@ -55,8 +57,7 @@ public class Compiler extends MiniCBaseVisitor<Object> {
         mh.invoke();
     }
 
-    private final boolean debug = true;
-
+    private boolean debug;
     private MethodMaker mm;
     private Variable scanner;
     private Scope scope;
@@ -67,10 +68,17 @@ public class Compiler extends MiniCBaseVisitor<Object> {
     }
 
     public MethodHandle compile(String path, ProgramContext ctx) {
-        mm = MethodMaker.begin(MethodHandles.lookup(), null, "_");
-
-        if (path != null && debug) {
-            mm.classMaker().sourceFile(new File(path).getName());
+        ClassMaker cm;
+        if (path == null) {
+            debug = false;
+            cm = null;
+            mm = MethodMaker.begin(MethodHandles.lookup(), null, "_");
+        } else {
+            debug = true;
+            String name = new File(path).getName();
+            cm = ClassMaker.begin().public_();
+            cm.sourceFile(name);
+            mm = cm.addMethod(null, "_").public_().static_();
         }
 
         scanner = mm.var(Scanner.class).set(null);
@@ -80,7 +88,15 @@ public class Compiler extends MiniCBaseVisitor<Object> {
 
         try {
             visit(ctx);
-            return mm.finish();
+            if (cm == null) {
+                return mm.finish();
+            }
+            try {
+                var mt = MethodType.methodType(void.class);
+                return MethodHandles.lookup().findStatic(cm.finish(), "_", mt);
+            } catch (NoSuchMethodException | IllegalAccessException e) {
+                throw new Error(e);
+            }
         } finally {
             mm = null;
             scanner = null;
