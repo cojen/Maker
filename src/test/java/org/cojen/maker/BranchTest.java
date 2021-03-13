@@ -592,4 +592,46 @@ public class BranchTest {
         var clazz = cm.finish();
         clazz.getMethod("run").invoke(null);
     }
+
+    @Test
+    public void booleanConstants() throws Exception {
+        // Test comparisons to boolean constants.
+
+        ClassMaker cm = ClassMaker.begin().public_();
+        MethodMaker mm = cm.addMethod(null, "run").static_().public_();
+        var assertVar = mm.var(Assert.class);
+
+        {
+            var v1 = mm.var(boolean.class).set(false);
+            Label l1 = mm.label();
+            v1.ifEq(false, l1);
+            assertVar.invoke("fail");
+            l1.here();
+            Label l2 = mm.label();
+            v1.ifEq(true, l2);
+            Label cont = mm.label();
+            mm.goto_(cont);
+            l2.here();
+            assertVar.invoke("fail");
+            cont.here();
+        }
+
+        {
+            var v1 = mm.var(Boolean.class).set(true);
+            Label l1 = mm.label();
+            v1.ifEq(true, l1);
+            assertVar.invoke("fail");
+            l1.here();
+            Label l2 = mm.label();
+            v1.ifEq(false, l2);
+            Label cont = mm.label();
+            mm.goto_(cont);
+            l2.here();
+            assertVar.invoke("fail");
+            cont.here();
+        }
+
+        var clazz = cm.finish();
+        clazz.getMethod("run").invoke(null);
+    }
 }

@@ -952,6 +952,23 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         return storeToNewVar(catchType);
     }
 
+    /**
+     * @param op an "if" opcode
+     */
+    private static byte flipIf(byte op) {
+        /*
+          Adjust the opcode to branch to the opposite target.
+
+          ==  to  !=
+          !=  to  ==
+          <   to  >=
+          >=  to  <
+          >   to  <=
+          <=  to  >
+        */
+        return (byte) (op >= IFNULL ? (op ^ 1) : ((op - 1) ^ 1) + 1);
+    }
+
     private static final class Handler implements ExceptionHandler {
         final Lab mStartLab, mEndLab;
         final HandlerLab mHandlerLab;
@@ -3030,19 +3047,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
          * @param op an "if" opcode
          */
         private void flip(byte op) {
-            /*
-              Adjust the opcode to branch to the opposite target.
-             
-              ==  to  !=
-              !=  to  ==
-              <   to  >=
-              >=  to  <
-              >   to  <=
-              <=  to  >
-            */
-            op = (byte) (op >= IFNULL ? (op ^ 1) : ((op - 1) ^ 1) + 1);
-
-            mCode = (stackPop() << 8) | (op & 0xff);
+            mCode = (stackPop() << 8) | (flipIf(op) & 0xff);
         }
     }
 
@@ -3561,6 +3566,17 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                                 return;
                             }
                         }
+                    }
+                } else if (value instanceof Boolean) {
+                    Type unbox = type().unbox();
+                    if (unbox == BOOLEAN) {
+                        // Simple boolean comparison.
+                        if ((boolean) value) {
+                            zeroOp = flipIf(zeroOp);
+                        }
+                        push(unbox);
+                        addBranchOp(zeroOp, 1, label);
+                        return;
                     }
                 }
 
