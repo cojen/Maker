@@ -567,10 +567,11 @@ public class BranchTest {
         var assertVar = mm.var(Assert.class);
 
         var v1 = mm.var(int.class).set(10);
+        var v11 = mm.var(int.class).set(11);
 
         mm.var(Assert.class).invoke("assertEquals", true, v1.eq(10));
         mm.var(Assert.class).invoke("assertEquals", false, v1.eq(11));
-        mm.var(Assert.class).invoke("assertEquals", true, v1.ne(11));
+        mm.var(Assert.class).invoke("assertEquals", true, v1.ne(v11));
         mm.var(Assert.class).invoke("assertEquals", false, v1.ne(10));
         mm.var(Assert.class).invoke("assertEquals", true, v1.lt(11));
         mm.var(Assert.class).invoke("assertEquals", false, v1.lt(10));
@@ -578,7 +579,7 @@ public class BranchTest {
         mm.var(Assert.class).invoke("assertEquals", true, v1.ge(10));
         mm.var(Assert.class).invoke("assertEquals", false, v1.gt(11));
         mm.var(Assert.class).invoke("assertEquals", false, v1.gt(10));
-        mm.var(Assert.class).invoke("assertEquals", true, v1.le(11));
+        mm.var(Assert.class).invoke("assertEquals", true, v1.le(v11));
         mm.var(Assert.class).invoke("assertEquals", true, v1.le(10));
 
         var v2 = mm.var(String.class).set(null);
@@ -633,5 +634,111 @@ public class BranchTest {
 
         var clazz = cm.finish();
         clazz.getMethod("run").invoke(null);
+    }
+
+    @Test
+    public void rebranch() throws Exception {
+        // Test conversion of a conditional store into a boolean variable back into a direct
+        // branch operation.
+
+        for (int variant=0; variant<=6; variant++) {
+            ClassMaker cm = ClassMaker.begin().public_();
+            rebranch(cm, 0, variant);
+            var method = cm.finish().getMethod("run", Integer.class);
+            assertEquals("true", method.invoke(null, 5));
+            assertEquals("false", method.invoke(null, 10));
+            assertEquals("false", method.invoke(null, 11));
+        }
+
+        for (int variant=0; variant<=6; variant++) {
+            ClassMaker cm = ClassMaker.begin().public_();
+            rebranch(cm, 1, variant);
+            var method = cm.finish().getMethod("run", Integer.class);
+            assertEquals("true", method.invoke(null, (Integer) null));
+            assertEquals("false", method.invoke(null, 5));
+        }
+
+        // Verify that the code is the same in all cases.
+        for (int test=0; test<=1; test++) {
+            byte[] last = null;
+            for (int variant=0; variant<=6; variant++) {
+                ClassMaker cm = ClassMaker.beginExternal("Test").public_();
+                rebranch(cm, test, variant);
+                byte[] code = cm.finishBytes();
+                if (last != null) {
+                    assertArrayEquals(last, code);
+                }
+                last = code;
+            }
+        }
+    }
+
+    /**
+     * @param test 0: "p < 10",  1: "p == null"
+     * @param variant conditional code variant
+     */
+    private void rebranch(ClassMaker cm, int test, int variant) throws Exception {
+        MethodMaker mm = cm.addMethod(String.class, "run", Integer.class).static_().public_();
+
+        var isTrue = mm.label();
+        var isFalse = mm.label();
+
+        if (variant == 0) {
+            // The desired outcome in all cases.
+            if (test == 0) {
+                mm.param(0).ifLt(10, isTrue);
+            } else {
+                mm.param(0).ifEq(null, isTrue);
+            }
+            mm.goto_(isFalse);
+        } else {
+            Variable x;
+            if (test == 0) {
+                x = mm.param(0).lt(10);
+            } else {
+                x = mm.param(0).eq(null);
+            }
+
+            switch (variant) {
+            case 1:
+                x.ifEq(true, isTrue);
+                mm.goto_(isFalse);
+                break;
+
+            case 2:
+                x.ifEq(false, isFalse);
+                mm.goto_(isTrue);
+                break;
+
+            case 3:
+                x.ifNe(false, isTrue);
+                mm.goto_(isFalse);
+                break;
+
+            case 4:
+                x.ifNe(true, isFalse);
+                mm.goto_(isTrue);
+                break;
+
+            case 5:
+                x.ifTrue(isTrue);
+                mm.goto_(isFalse);
+                break;
+
+            case 6:
+                x.ifFalse(isFalse);
+                mm.goto_(isTrue);
+                break;
+
+            default:
+                fail();
+            }
+        }
+
+        isTrue.here();
+        mm.return_("true");
+
+        isFalse.here();
+        mm.return_("false");
     }
 }

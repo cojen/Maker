@@ -952,6 +952,12 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         return storeToNewVar(catchType);
     }
 
+    private static void adjustPushCount(Object value, int amt) {
+        if (value instanceof LocalVar) {
+            ((LocalVar) value).mPushCount += amt;
+        }
+    }
+
     /**
      * @param op an "if" opcode
      */
@@ -1783,6 +1789,15 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         mLastOp = op;
     }
 
+    private void addOps(Op op, Op last) {
+        if (mLastOp == null) {
+            mFirstOp = op;
+        } else {
+            mLastOp.mNext = op;
+        }
+        mLastOp = last;
+    }
+
     /**
      * Assigns next op for the previous op.
      */
@@ -1791,6 +1806,9 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             mFirstOp = next;
         } else {
             prev.mNext = next;
+        }
+        if (next == null) {
+            mLastOp = prev;
         }
     }
 
@@ -2565,6 +2583,18 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             mRemoved = op;
             TheMethodMaker.this.removeOps(prev, next);
             mOpCount -= amt;
+        }
+
+        Op nextOpFor(Op op) {
+            return op == null ? mFirstOp : op.mNext;
+        }
+
+        Op lastOp() {
+            return TheMethodMaker.this.mLastOp;
+        }
+
+        void addOps(Op op, Op last) {
+            TheMethodMaker.this.addOps(op, last);
         }
 
         int nextSlot() {
@@ -3492,7 +3522,8 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         @Override
         public void ifEq(Object value, Label label) {
             if (value == null) {
-                pushForNull();
+                nullCompareCheck();
+                push();
                 addBranchOp(IFNULL, 1, label);
             } else {
                 ifRelational(value, label, true, IF_ICMPEQ, IFEQ);
@@ -3502,18 +3533,18 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         @Override
         public void ifNe(Object value, Label label) {
             if (value == null) {
-                pushForNull();
+                nullCompareCheck();
+                push();
                 addBranchOp(IFNONNULL, 1, label);
             } else {
                 ifRelational(value, label, true, IF_ICMPNE, IFNE);
             }
         }
 
-        private void pushForNull() {
+        private void nullCompareCheck() {
             if (type().isPrimitive()) {
                 throw new IllegalArgumentException("Cannot compare a primitive type to null");
             }
-            push();
         }
 
         @Override
@@ -3727,36 +3758,12 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
         @Override
         public LocalVar eq(Object value) {
-            if (value == null) {
-                return isNull(IFNULL);
-            } else {
-                return relational(value, true, IF_ICMPEQ, IFEQ);
-            }
+            return relational(value, true, IF_ICMPEQ, IFEQ);
         }
 
         @Override
         public LocalVar ne(Object value) {
-            if (value == null) {
-                return isNull(IFNONNULL);
-            } else {
-                return relational(value, true, IF_ICMPNE, IFNE);
-            }
-        }
-
-        /**
-         * @param op IFNULL or IFNONNULL
-         */
-        private LocalVar isNull(byte op) {
-            Label match = label();
-            pushForNull();
-            addBranchOp(op, 1, match);
-            addOp(new BasicConstantOp(false, BOOLEAN));
-            Label cont = new StackLab(TheMethodMaker.this, SM_INT);
-            goto_(cont);
-            match.here();
-            addOp(new BasicConstantOp(true, BOOLEAN));
-            cont.here();
-            return storeToNewVar(BOOLEAN);
+            return relational(value, true, IF_ICMPNE, IFNE);
         }
 
         @Override
@@ -3785,15 +3792,104 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
          * @param zeroOp op to use when comparing against a constant zero int
          */
         private LocalVar relational(Object value, boolean eq, byte op, byte zeroOp) {
-            Label match = label();
-            ifRelational(value, match, eq, op, zeroOp);
-            addOp(new BasicConstantOp(false, BOOLEAN));
-            Label cont = new StackLab(TheMethodMaker.this, SM_INT);
-            goto_(cont);
-            match.here();
-            addOp(new BasicConstantOp(true, BOOLEAN));
-            cont.here();
-            return storeToNewVar(BOOLEAN);
+            if (value == null) {
+                nullCompareCheck();
+                if (!eq) {
+                    requireNonNull(value);
+                }
+            }
+
+            LocalVar result = new LocalVar(BOOLEAN);
+
+            // Indicate that the arguments will be used at some point, preventing premature
+            // elimination of local variables.
+            adjustPushCount(this, 1);
+            adjustPushCount(value, 1);
+
+            // Add a temporary operation which gets replaced during flow analysis.
+
+            addOp(new Op() {
+                @Override
+                void appendTo(TheMethodMaker m) {
+                    // Should always get replaced.
+                    throw new AssertionError();
+                }
+
+                @Override
+                Op flow(Flow flow, Op prev) {
+                    // Replace this operation with real ones.
+
+                    // Fix the push counts. They'll get adjusted again by the new operations.
+                    // This correction isn't strictly necessary, but it might help with future
+                    // optimizations which reduce variable usage.
+                    adjustPushCount(OwnedVar.this, -1);
+                    adjustPushCount(value, -1);
+
+                    Op next = mNext;
+                    final Op last = flow.lastOp();
+
+                    PushVarOp push;
+                    BranchOp branch;
+                    byte branchOp;
+                    if (result.mPushCount == 1 && next instanceof PushVarOp
+                        && (push = (PushVarOp) next).mVar == result
+                        && push.mNext instanceof BranchOp
+                        && ((branchOp = (branch = (BranchOp) push.mNext).op()) == IFEQ
+                            || branchOp == IFNE))
+                    {
+                        // Remove this operation up to the branch operation, and insert a new
+                        // branch. The amount removed is actually more than three at this
+                        // point, but the trailing ones will be added back.
+                        flow.removeOps(prev, this, null, 3);
+                        branch.mTarget.lessUsed();
+
+                        if (value == null) {
+                            byte effectiveOp = (byte) (zeroOp + (IFNULL - IFEQ));
+                            if (branchOp == IFEQ) {
+                                effectiveOp = flipIf(effectiveOp);
+                            }
+                            push();
+                            addBranchOp(effectiveOp, 1, branch.mTarget);
+                        } else {
+                            byte effectiveOp = op;
+                            byte effectiveZeroOp = zeroOp;
+                            if (branchOp == IFEQ) {
+                                effectiveOp = flipIf(effectiveOp);
+                                effectiveZeroOp = flipIf(effectiveZeroOp);
+                            }
+                            ifRelational(value, branch.mTarget, eq, effectiveOp, effectiveZeroOp);
+                        }
+
+                        next = branch.mNext;
+                    } else {
+                        // Remove this operation and insert new operations that store to a
+                        // boolean variable. The amount removed is actually more than one at
+                        // this point, but the trailing ones will be added back.
+                        flow.removeOps(prev, this, null, 1);
+
+                        Label match = label();
+                        if (value == null) {
+                            push();
+                            addBranchOp((byte) (zeroOp + (IFNULL - IFEQ)), 1, match);
+                        } else {
+                            ifRelational(value, match, eq, op, zeroOp);
+                        }
+                        addOp(new BasicConstantOp(false, BOOLEAN));
+                        Label cont = new StackLab(TheMethodMaker.this, SM_INT);
+                        goto_(cont);
+                        match.here();
+                        addOp(new BasicConstantOp(true, BOOLEAN));
+                        cont.here();
+                        addStoreOp(result);
+                    }
+
+                    flow.addOps(next, last);
+
+                    return flow.nextOpFor(prev);
+                }
+            });
+
+            return result;
         }
 
         @Override
@@ -3960,16 +4056,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
         @Override
         public LocalVar not() {
-            LocalVar var = new LocalVar(BOOLEAN);
-            Label tru = label();
-            ifTrue(tru);
-            var.set(true);
-            Label end = label();
-            goto_(end);
-            tru.here();
-            var.set(false);
-            end.here();
-            return var;
+            return eq(false);
         }
 
         @Override
