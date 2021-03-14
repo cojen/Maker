@@ -2157,6 +2157,10 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                 ("Automatic conversion disallowed: " + from.name() + " to " + to.name());
         }
 
+        if (code == 0) {
+            return;
+        }
+
         if (code < 10 || code >= 15) {
             addOp(new Op() {
                 @Override
