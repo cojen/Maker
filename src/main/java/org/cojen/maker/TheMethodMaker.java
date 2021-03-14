@@ -3932,9 +3932,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             if (code != Integer.MAX_VALUE) {
                 // Widening conversion, boxing, unboxing, or equal types.
                 push();
-                if (code != 0) {
-                    doAddConversionOp(fromType, toType, code);
-                }
+                doAddConversionOp(fromType, toType, code);
             } else if (toType.isObject()) {
                 if (!fromType.isObject()) {
                     Type unbox;
