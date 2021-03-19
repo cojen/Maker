@@ -20,7 +20,7 @@ import java.lang.invoke.VarHandle;
 
 /**
  * Represents a field accessible by the body of a {@link MethodMaker method}. Note that the
- * most commonly used features are inherited from the {@link Variable} class. {@code Field}
+ * most commonly used features are inherited from the {@link Variable} interface. {@code Field}
  * instances aren't thread-safe.
  *
  * @author Brian S O'Neill
