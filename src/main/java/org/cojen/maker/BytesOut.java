@@ -24,6 +24,8 @@ import java.nio.ByteOrder;
 import java.io.IOException;
 import java.io.OutputStream;
 
+import java.util.Arrays;
+
 /**
  * Simple buffer/stream for writing ClassFile output.
  *
@@ -160,9 +162,7 @@ final class BytesOut {
     }
 
     public byte[] toByteArray() {
-        byte[] copy = new byte[mSize];
-        System.arraycopy(mBuffer, 0, copy, 0, mSize);
-        return copy;
+        return Arrays.copyOf(mBuffer, mSize);
     }
 
     private void ensureCapacity(int amt) throws IOException {
@@ -195,8 +195,6 @@ final class BytesOut {
     }
 
     private void expand(int amt) {
-        byte[] newBuffer = new byte[Math.max(mSize + amt, mSize << 1)];
-        System.arraycopy(mBuffer, 0, newBuffer, 0, mSize);
-        mBuffer = newBuffer;
+        mBuffer = Arrays.copyOf(mBuffer, Math.max(mSize + amt, mSize << 1));
     }
 }
