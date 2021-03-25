@@ -1441,6 +1441,11 @@ abstract class Type {
                                                  Type specificReturnType,
                                                  Type[] specificParamTypes)
         {
+            if (methodName.equals("<clinit>")) {
+                // Can't be invoked.
+                return Collections.emptySet();
+            }
+
             var methods = new LinkedHashSet<Method>(4);
             addMethods(methods, type, methodName, params, staticAllowed);
 
@@ -1505,6 +1510,10 @@ abstract class Type {
                 if (nonBridges > 0 && bridges > 0) {
                     methods.removeIf(Method::isBridge);
                 }
+            }
+
+            if (methods.isEmpty()) {
+                return Collections.emptySet();
             }
 
             return methods;

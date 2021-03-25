@@ -1044,7 +1044,7 @@ loadScripts(document, 'script');</script>
 <div class="block">Invoke a static or instance method on the object referenced by this variable.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
-<dd><code>name</code> - method name; can be <code>"&lt;new&gt;"</code> to construct an instance of this variable
+<dd><code>name</code> - method name
 type</dd>
 <dd><code>values</code> - variables or constants</dd>
 <dt>Returns:</dt>
@@ -1052,8 +1052,6 @@ type</dd>
 <dt>Throws:</dt>
 <dd><code><a href="https://docs.oracle.com/en/java/javase/16/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if not given a variable or a constant</dd>
 <dd><code><a href="https://docs.oracle.com/en/java/javase/16/docs/api/java.base/java/lang/IllegalStateException.html" title="class or interface in java.lang" class="external-link">IllegalStateException</a></code> - if method isn't found</dd>
-<dt>See Also:</dt>
-<dd><a href="MethodMaker.html#new_(java.lang.Object,java.lang.Object...)"><code>MethodMaker.new_</code></a></dd>
 </dl>
 </section>
 </li>
@@ -1068,7 +1066,8 @@ type</dd>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>returnType</code> - method return type</dd>
-<dd><code>name</code> - method name; can be <code>"&lt;new&gt;"</code> to construct an instance of this variable
+<dd><code>name</code> - method name; can be <code>".new"</code> to construct an instance of this variable
+ type
  type</dd>
 <dd><code>types</code> - method parameter types (can be null if none)</dd>
 <dd><code>values</code> - variables or constants</dd>
@@ -1092,7 +1091,7 @@ type</dd>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>returnType</code> - method return type</dd>
-<dd><code>name</code> - method name; can be <code>"&lt;new&gt;"</code> to construct an instance of this variable
+<dd><code>name</code> - method name; can be <code>".new"</code> to construct an instance of this variable
  type</dd>
 <dd><code>types</code> - method parameter types (can be null if none)</dd>
 <dt>Throws:</dt>

@@ -561,11 +561,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
     @Override
     public Variable invoke(String name, Object... values) {
-        if (name.equals("<new>")) {
-            return doNew(mClassMaker.type(), values, null);
-        } else {
-            return doInvoke(name, 0, values);
-        }
+        return doInvoke(name, 0, values);
     }
 
     @Override
@@ -626,19 +622,22 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                       Type specificReturnType,
                       Type[] specificParamTypes)
     {
-        if (type.isPrimitive()) {
-            type = type.box();
-        }
-
         int staticAllowed;
-
-        if (instance != null) {
+        if (methodName.equals("<init>")) {
+            if (inherit == -1) {
+                // Calling a constructor for new object allocation.
+                staticAllowed = -1; // not static
+            } else {
+                throw new IllegalStateException("Unsupported method: " + methodName);
+            }
+        } else if (instance != null) {
             staticAllowed = 0; // maybe static
-        } else if ("<init>".equals(methodName)) {
-            // Calling a constructor for new object allocation.
-            staticAllowed = -1; // not static
         } else {
             staticAllowed = 1; // only static
+        }
+
+        if (type.isPrimitive()) {
+            type = type.box();
         }
 
         Op savepoint = mLastOp;
@@ -4151,11 +4150,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
         @Override
         public LocalVar invoke(String name, Object... values) {
-            if (name.equals("<new>")) {
-                return doNew(type(), values, null);
-            } else {
-                return doInvoke(type(), this, name, 0, values, null, null);
-            }
+            return doInvoke(type(), this, name, 0, values, null, null);
         }
 
         @Override
@@ -4174,10 +4169,12 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                 }
             }
 
-            if (name.equals("<new>") && (returnType == null || returnType == type())) {
-                return doNew(type(), values, paramTypes);
+            Type type = type();
+
+            if (name.equals(".new") && returnType == type) {
+                return doNew(type, values, paramTypes);
             } else {
-                return doInvoke(type(), this, name, 0, values, returnType, paramTypes);
+                return doInvoke(type, this, name, 0, values, returnType, paramTypes);
             }
         }
 
@@ -4199,7 +4196,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             Type.Method method;
             int kind;
 
-            if (name.equals("<new>") && (retType == null || returnType == type)) {
+            if (name.equals(".new") && returnType == type) {
                 method = type.findMethod("<init>", paramTypes, -1, -1, null, paramTypes);
                 kind = REF_newInvokeSpecial;
             } else {
