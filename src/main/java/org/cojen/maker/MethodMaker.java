@@ -221,11 +221,17 @@ public interface MethodMaker {
     public Variable class_();
 
     /**
-     * Returns the variable which accesses the enclosing object of this method.
+     * Returns a variable which accesses the enclosing object of this method.
      *
      * @throws IllegalStateException if making a static method
      */
     public Variable this_();
+
+    /**
+     * Returns a variable which is used for invoking superclass methods. The type of the
+     * variable is the superclass, and when applicable, the instance is {@link #this_ this_}.
+     */
+    public Variable super_();
 
     /**
      * Returns a variable which accesses a parameter of the method being built.
@@ -297,17 +303,6 @@ public interface MethodMaker {
      * @see Variable#invoke Variable.invoke
      */
     public Variable invoke(String name, Object... values);
-
-    /**
-     * Invoke a static or instance super class method on the enclosing object of this method.
-     *
-     * @param name the method name
-     * @param values variables or constants
-     * @return the result of the method, which is null if void
-     * @throws IllegalArgumentException if not given a variable or a constant
-     * @throws IllegalStateException if method isn't found
-     */
-    public Variable invokeSuper(String name, Object... values);
 
     /**
      * Invoke a super class constructor method on the enclosing object of this method, from

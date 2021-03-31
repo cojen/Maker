@@ -381,7 +381,7 @@ public class FieldTest {
         cm.finish().getMethod("run").invoke(null);
     }
 
-   @Test
+    @Test
     public void varHandlesNonStatic() throws Exception {
         ClassMaker cm = ClassMaker.begin().public_();
 
@@ -438,5 +438,49 @@ public class FieldTest {
         MethodMaker mm = MethodMaker.begin(MethodHandles.lookup(), void.class, "_");
         mm.access(fieldHandle).setVolatile(-Integer.parseInt(name));
         return new ConstantCallSite(mm.finish());
+    }
+
+    @Test
+    public void superField() throws Exception {
+        ClassMaker cm = ClassMaker.begin().public_().extend(FieldTest.class);
+        cm.addConstructor().public_();
+
+        MethodMaker mm = cm.addMethod(null, "run").public_();
+        assertNull(mm.super_().name());
+
+        try {
+            mm.super_().name("foo");
+            fail();
+        } catch (IllegalStateException e) {
+        }
+
+        try {
+            mm.super_().set(null);
+            fail();
+        } catch (IllegalStateException e) {
+        }
+
+        try {
+            mm.super_().setExact(this);
+            fail();
+        } catch (IllegalStateException e) {
+        }
+
+        try {
+            mm.super_().inc(1);
+            fail();
+        } catch (IllegalStateException e) {
+        }
+
+        Field field = mm.super_().field("next");
+        // Actual instance should be the same as 'this'.
+        field.set(mm.super_());
+
+        var assertVar = mm.var(Assert.class);
+        assertVar.invoke("assertEquals", mm.this_(), mm.field("next"));
+
+        var clazz = cm.finish();
+        var instance = clazz.getConstructor().newInstance();
+        clazz.getMethod("run").invoke(instance);
     }
 }

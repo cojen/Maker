@@ -21,6 +21,7 @@ import java.io.Serializable;
 import java.lang.invoke.*;
 
 import java.util.*;
+import java.util.function.IntSupplier;
 
 import org.junit.*;
 import static org.junit.Assert.*;
@@ -277,6 +278,15 @@ public class InvokeTest {
 
     @Test
     public void override() throws Exception {
+        override(false);
+    }
+
+    @Test
+    public void overrideQualified() throws Exception {
+        override(true);
+    }
+
+    private void override(boolean qualified) throws Exception {
         ClassMaker cm = ClassMaker.begin(null).extend(InvokeTest.class).public_();
 
         {
@@ -291,7 +301,13 @@ public class InvokeTest {
 
         {
             MethodMaker mm = cm.addMethod(int.class, "calc", int.class, int.class).protected_();
-            var v1 = mm.invokeSuper("calc", mm.param(0), mm.param(1));
+            Variable v1;
+            if (qualified) {
+                v1 = mm.super_().invoke(int.class, "calc", new Object[] {int.class, int.class},
+                                        mm.param(0), mm.param(1));
+            } else {
+                v1 = mm.super_().invoke("calc", mm.param(0), mm.param(1));
+            }
             var v2 = mm.var(v1).set(v1);
             mm.return_(v2.add(10));
         }
@@ -1013,7 +1029,7 @@ public class InvokeTest {
     }
 
     @Test
-    public void methodHandleBootstrap2() throws Exception {
+    public void methodHandleBootstrapNew() throws Exception {
         // Test passing a MethodHandle newInvokeSpecial constant to an indy bootstrap method.
 
         ClassMaker cm = ClassMaker.begin().public_();
@@ -1049,6 +1065,122 @@ public class InvokeTest {
     }
 
     @Test
+    public void methodHandleBootstrapNewSuper() throws Exception {
+        // Like methodHandleBootstrapNew except against the superclass.
+
+        ClassMaker cm = ClassMaker.begin(null).extend(InvokeTest.class).public_();
+
+        MethodMaker mm = cm.addMethod(null, "run").public_().static_();
+        var assertVar = mm.var(Assert.class);
+
+        var mhVar = mm.super_().methodHandle(InvokeTest.class, ".new");
+        var bootstrap = mm.var(InvokeTest.class).indy("bootTest3", mhVar);
+
+        var result = bootstrap.invoke(Object.class, "xxx", null);
+
+        assertVar.invoke("assertTrue", result.instanceOf(InvokeTest.class));
+
+        cm.finish().getMethod("run").invoke(null);
+    }
+
+    public static CallSite bootTest3(MethodHandles.Lookup caller, String name, MethodType type,
+                                     MethodHandle mh)
+    {
+        MethodMaker mm = MethodMaker.begin(caller, name, type);
+        var result = mm.var(MethodHandle.class).set(mh).invoke("invoke");
+        mm.return_(result);
+
+        return new ConstantCallSite(mm.finish());
+    }
+
+    @Test
+    public void methodHandleBootstrapInterface() throws Exception {
+        // Test passing an interface MethodHandle constant to an indy bootstrap method.
+
+        ClassMaker cm = ClassMaker.begin().public_();
+
+        MethodMaker mm = cm.addMethod(null, "run", IntSupplier.class).public_().static_();
+        var assertVar = mm.var(Assert.class);
+
+        var mhVar = mm.param(0).methodHandle(int.class, "getAsInt");
+        var bootstrap = mm.var(InvokeTest.class).indy("bootTest4", mhVar);
+
+        var result = bootstrap.invoke(int.class, "xxx",
+                                      new Object[] {IntSupplier.class}, mm.param(0));
+
+        assertVar.invoke("assertEquals", 123, result);
+
+        cm.finish().getMethod("run", IntSupplier.class).invoke(null, (IntSupplier) (() -> 123));
+    }
+
+    public static CallSite bootTest4(MethodHandles.Lookup caller, String name, MethodType type,
+                                     MethodHandle mh)
+    {
+        MethodMaker mm = MethodMaker.begin(caller, name, type);
+        var result = mm.var(MethodHandle.class).setExact(mh)
+            .invoke(type.returnType(), "invoke", type.parameterArray(), mm.param(0));
+        mm.return_(result);
+
+        return new ConstantCallSite(mm.finish());
+    }
+
+    @Test
+    public void methodHandleBootstrapBoxed() throws Exception {
+        // Test passing a boxed primitive MethodHandle constant to an indy bootstrap method.
+
+        ClassMaker cm = ClassMaker.begin().public_();
+
+        MethodMaker mm = cm.addMethod(null, "run", int.class).public_().static_();
+        var assertVar = mm.var(Assert.class);
+
+        var mhVar = mm.param(0).methodHandle(int.class, "toString");
+        var bootstrap = mm.var(InvokeTest.class).indy("bootTest4", mhVar);
+
+        var result = bootstrap.invoke(String.class, "xxx",
+                                      new Object[] {int.class}, mm.param(0));
+
+        assertVar.invoke("assertEquals", "456", result);
+
+        cm.finish().getMethod("run", int.class).invoke(null, 456);
+    }
+
+    @Test
+    public void methodHandleBootstrapSuper() throws Exception {
+        // Test passing a superclass MethodHandle constant to an indy bootstrap method.
+
+        ClassMaker cm = ClassMaker.begin(null).extend(InvokeTest.class).public_();
+        cm.addConstructor().public_();
+
+        MethodMaker mm = cm.addMethod(null, "run", int.class, int.class).public_();
+        var assertVar = mm.var(Assert.class);
+
+        var mhVar = mm.super_().methodHandle(int.class, "calc", int.class, int.class);
+        var bootstrap = mm.var(InvokeTest.class).indy("bootTest5", mhVar);
+
+        var result = bootstrap.invoke(int.class, "xxx",
+                                      new Object[] {cm, int.class, int.class},
+                                      mm.this_(), mm.param(0), mm.param(1));
+
+        assertVar.invoke("assertEquals", 101, result);
+
+        var clazz = cm.finish();
+        var obj = clazz.getConstructor().newInstance();
+        clazz.getMethod("run", int.class, int.class).invoke(obj, 100, 1);
+    }
+
+    public static CallSite bootTest5(MethodHandles.Lookup caller, String name, MethodType type,
+                                     MethodHandle mh)
+    {
+        MethodMaker mm = MethodMaker.begin(caller, name, type);
+        var result = mm.var(MethodHandle.class).setExact(mh)
+            .invoke(type.returnType(), "invoke", type.parameterArray(),
+                    mm.param(0), mm.param(1), mm.param(2));
+        mm.return_(result);
+
+        return new ConstantCallSite(mm.finish());
+    }
+
+    @Test
     public void invokeNew() throws Exception {
         // Test that ".new" can be used as a method name in place of calling the new_ method.
 
@@ -1072,9 +1204,12 @@ public class InvokeTest {
         } catch (IllegalStateException e) {
         }
 
+        var v3 = mm.super_().invoke(Object.class, ".new", null);
+
         var assertVar = mm.var(Assert.class);
         assertVar.invoke("assertTrue", v1.instanceOf(ArrayList.class));
         assertVar.invoke("assertTrue", v2.instanceOf(String[].class));
+        assertVar.invoke("assertTrue", v3.invoke("getClass").invoke("equals", Object.class));
 
         cm.finish().getMethod("run").invoke(null);
     }

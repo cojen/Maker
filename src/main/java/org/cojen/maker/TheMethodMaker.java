@@ -59,8 +59,9 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     private Op mFirstOp;
     private Op mLastOp;
 
-    private LocalVar mThisVar;
     private ClassVar mClassVar;
+    private LocalVar mThisVar;
+    private SuperVar mSuperVar;
 
     private List<Handler> mExceptionHandlers;
 
@@ -415,6 +416,23 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
     }
 
+    /**
+     * @return null if defining a static method
+     */
+    LocalVar tryThis() {
+        LocalVar this_ = mThisVar;
+        if (this_ == null && mParams == null) {
+            initParams();
+            this_ = mThisVar;
+        }
+        return this_;
+    }
+
+    @Override
+    public Variable super_() {
+        return mSuperVar == null ? (mSuperVar = new SuperVar()) : mSuperVar;
+    }
+
     @Override
     public LocalVar param(int index) {
         if (index < 0) {
@@ -534,7 +552,10 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
     @Override
     public FieldVar field(String name) {
-        Type type = mClassMaker.type();
+        return field(mClassMaker.type(), name);
+    }
+
+    FieldVar field(Type type, String name) {
         Type.Field field = findField(type, name);
 
         LocalVar instance = mThisVar;
@@ -561,22 +582,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
     @Override
     public Variable invoke(String name, Object... values) {
-        return doInvoke(name, 0, values);
-    }
-
-    @Override
-    public Variable invokeSuper(String name, Object... values) {
-        return doInvoke(name, 1, values);
-    }
-
-    private LocalVar doInvoke(String name, int inherit, Object... values) {
-        LocalVar this_ = mThisVar;
-        if (this_ == null && mParams == null) {
-            initParams();
-            this_ = mThisVar;
-        }
-
-        return doInvoke(mClassMaker.type(), this_, name, inherit, values, null, null);
+        return doInvoke(mClassMaker.type(), tryThis(), name, 0, values, null, null);
     }
 
     @Override
@@ -4150,7 +4156,8 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
         @Override
         public LocalVar invoke(String name, Object... values) {
-            return doInvoke(type(), this, name, 0, values, null, null);
+            return doInvoke(invocationType(), invocationInstance(),
+                            name, inherit(), values, null, null);
         }
 
         @Override
@@ -4169,12 +4176,11 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                 }
             }
 
-            Type type = type();
-
-            if (name.equals(".new") && returnType == type) {
-                return doNew(type, values, paramTypes);
+            if (name.equals(".new") && returnType == type()) {
+                return doNew(returnType, values, paramTypes);
             } else {
-                return doInvoke(type, this, name, 0, values, returnType, paramTypes);
+                return doInvoke(invocationType(), invocationInstance(),
+                                name, inherit(), values, returnType, paramTypes);
             }
         }
 
@@ -4192,31 +4198,56 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                 }
             }
 
-            Type type = type();
             Type.Method method;
             int kind;
 
-            if (name.equals(".new") && returnType == type) {
-                method = type.findMethod("<init>", paramTypes, -1, -1, null, paramTypes);
+            if (name.equals(".new") && returnType == type()) {
+                method = returnType.findMethod("<init>", paramTypes, -1, -1, null, paramTypes);
                 kind = REF_newInvokeSpecial;
             } else {
+                Type type = invocationType();
                 if (type.isPrimitive()) {
                     type = type.box();
                 }
 
-                method = type.findMethod(name, paramTypes, 0, 0, returnType, paramTypes);
+                int inherit = inherit();
+                method = type.findMethod(name, paramTypes, inherit, 0, returnType, paramTypes);
 
                 if (method.isStatic()) {
                     kind = REF_invokeStatic;
                 } else if (method.enclosingType().isInterface()) {
                     kind = REF_invokeInterface;
-                } else {
+                } else if (inherit == 0) {
                     kind = REF_invokeVirtual;
+                } else {
+                    kind = REF_invokeSpecial;
                 }
             }
 
             return new ConstantVar(Type.from(MethodHandle.class),
                                    mConstants.addMethodHandle(kind, mConstants.addMethod(method)));
+        }
+
+        /**
+         * Called to supply the object type for method invocation.
+         */
+        Type invocationType() {
+            return type();
+        }
+
+        /**
+         * Called to supply the object instance for method invocation.
+         */
+        OwnedVar invocationInstance() {
+            return this;
+        }
+
+        /**
+         * Called to supply the inherit option for method invocation. See doInvoke.
+         */
+        int inherit() {
+            // 0: can invoke inherited method
+            return 0;
         }
 
         @Override
@@ -4526,6 +4557,64 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
         void ready() {
             mSmCode = super.smCode();
+        }
+    }
+
+    final class SuperVar extends OwnedVar {
+        @Override
+        public Type type() {
+            return mClassMaker.superType();
+        }
+
+        @Override
+        void push() {
+            this_().push();
+        }
+
+        @Override
+        public String name() {
+            return null;
+        }
+
+        @Override
+        public LocalVar name(String name) {
+            throw new IllegalStateException("Already named");
+        }
+
+        @Override
+        public LocalVar set(Object value) {
+            throw new IllegalStateException("Unmodifiable variable");
+        }
+
+        @Override
+        void addStoreConstantOp(ExplicitConstantOp op) {
+            throw new IllegalStateException("Unmodifiable variable");
+        }
+
+        @Override
+        public void inc(Object value) {
+            throw new IllegalStateException("Unmodifiable variable");
+        }
+
+        @Override
+        public FieldVar field(String name) {
+            return TheMethodMaker.this.field(type(), name);
+        }
+
+        @Override
+        Type invocationType() {
+            return mClassMaker.type();
+        }
+
+        @Override
+        OwnedVar invocationInstance() {
+            return tryThis();
+        }
+
+        @Override
+        int inherit() {
+            // 1: can only invoke super class method
+            return 1;
         }
     }
 
