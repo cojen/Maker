@@ -5077,7 +5077,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
         @Override
         public Variable varHandle() {
-            // Return a copy.
+            // Return a new variable each time because it can be modified.
             return mHandleVar.get();
         }
 
@@ -5086,7 +5086,8 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             if (mHandleGet == null) {
                 mHandleGet = mHandleVar.invoke("toMethodHandle", VarHandle.AccessMode.GET);
             }
-            return mHandleGet;
+            // Return a new variable each time because it can be modified.
+            return mHandleGet.get();
         }
 
         @Override
@@ -5094,7 +5095,8 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             if (mHandleSet == null) {
                 mHandleSet = mHandleVar.invoke("toMethodHandle", VarHandle.AccessMode.SET);
             }
-            return mHandleSet;
+            // Return a new variable each time because it can be modified.
+            return mHandleSet.get();
         }
 
         @Override

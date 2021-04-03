@@ -273,8 +273,14 @@ public class VarHandleTest {
         ClassMaker cm = ClassMaker.begin().public_();
         MethodMaker mm = cm.addMethod(null, "run").public_().static_();
 
-        var mh1 = mm.access(vh).methodHandleGet();
-        var mh2 = mm.access(vh).methodHandleSet();
+        var access = mm.access(vh);
+
+        var mh1 = access.methodHandleGet();
+        var mh2 = access.methodHandleSet();
+
+        // Must be a new instance each time and not a copy.
+        assertTrue(mh1 != access.methodHandleGet());
+        assertTrue(mh2 != access.methodHandleSet());
 
         var value = mh1.invoke(String.class, "invokeExact", null);
         var concat = mm.concat(value, "world");
