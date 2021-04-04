@@ -62,13 +62,13 @@ public interface MethodMaker {
     private static MethodMaker begin(MethodHandles.Lookup lookup, MethodType type,
                                      Object retType, String methodName, Object... paramTypes)
     {
+        final String mname = methodName == null ? "_" : methodName;
+
         Class<?> lookupClass = lookup.lookupClass();
         String className = lookupClass.getName();
-        className = className.substring(0, className.lastIndexOf('.') + 1) + "_";
+        className = className.substring(0, className.lastIndexOf('.') + 1) + mname;
         ClassLoader loader = lookupClass.getClassLoader();
         TheClassMaker cm = TheClassMaker.begin(false, className, true, loader, null, lookup);
-
-        final String mname = methodName == null ? "_" : methodName;
 
         Type.Method method = cm.defineMethod(retType, mname, paramTypes);
 
