@@ -16,6 +16,9 @@
 
 package org.cojen.maker;
 
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.VarHandle;
+
 import java.lang.ref.WeakReference;
 
 import java.lang.reflect.Executable;
@@ -529,10 +532,40 @@ abstract class Type {
             (methodName, params, inherit, staticAllowed, specificReturnType, specificParamTypes);
 
         if (candidates.size() == 1) {
-            return candidates.iterator().next();
+            Method method = candidates.iterator().next();
+
+            // Check if a signature polymorphic method should be invented.
+            if (!method.isStatic() && method.isVarargs()) {
+                Class clazz = clazz();
+                if ((clazz == MethodHandle.class || clazz == VarHandle.class)
+                    && verifyTypes(params, specificParamTypes))
+                {
+                    Type returnType = specificReturnType != null
+                        ? specificReturnType : method.returnType();
+                    method = inventMethod(false, returnType, methodName, params);
+                }
+            }
+
+            return method;
         }
 
         if (candidates.isEmpty()) {
+            // Check if a signature polymorphic method should be invented.
+            if (specificReturnType != null) {
+                Class clazz = clazz();
+                if (clazz == MethodHandle.class || clazz == VarHandle.class) {
+                    candidates = findMethods(methodName, params, -1, -1, null, null);
+                    if (candidates.size() == 1) {
+                        Method method = candidates.iterator().next();
+                        if (method != null && method.isVarargs()
+                            && verifyTypes(params, specificParamTypes))
+                        {
+                            return inventMethod(false, specificReturnType, methodName, params);
+                        }
+                    }
+                }
+            }
+
             throw new IllegalStateException
                 ("No matching methods found for: " + name() + '.' + methodName);
         }
@@ -554,6 +587,20 @@ abstract class Type {
         }
 
         throw new IllegalStateException(b.toString());
+    }
+
+    /**
+     * Verifies that the param types can be assigned by the specific types (if provided).
+     */
+    private static boolean verifyTypes(Type[] params, Type[] specificParamTypes) {
+        if (specificParamTypes != null && params.length == specificParamTypes.length) {
+            for (int i=0; i<specificParamTypes.length; i++) {
+                if (!specificParamTypes[i].isAssignableFrom(params[i])) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     /**
@@ -1489,11 +1536,11 @@ abstract class Type {
                 methods = bestSet;
             }
 
-            if (methods.size() > 1 && specificReturnType != null) {
+            if (specificReturnType != null && !methods.isEmpty()) {
                 methods.removeIf(m -> !specificReturnType.equals(m.returnType()));
             }
 
-            if (methods.size() > 1 && specificParamTypes != null) {
+            if (specificParamTypes != null && !methods.isEmpty()) {
                 methods.removeIf(m -> !Arrays.equals(specificParamTypes, m.paramTypes()));
             }
 

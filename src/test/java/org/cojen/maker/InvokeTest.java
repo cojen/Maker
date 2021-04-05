@@ -981,6 +981,16 @@ public class InvokeTest {
         }
 
         {
+            try {
+                mhVar.invoke(int.class, "invokeExact", new Object[] {short.class}, 10);
+                fail();
+            } catch (IllegalStateException e) {
+                // Param type of int cannot be converted to a short, although in this case it
+                // could work when downcast.
+            }
+        }
+
+        {
             var result = mhVar.invoke("invoke", 20);
             assertVar.invoke("assertEquals", 400, result);
         }
@@ -1133,7 +1143,7 @@ public class InvokeTest {
         MethodMaker mm = cm.addMethod(null, "run", int.class).public_().static_();
         var assertVar = mm.var(Assert.class);
 
-        var mhVar = mm.param(0).methodHandle(int.class, "toString");
+        var mhVar = mm.param(0).methodHandle(String.class, "toString");
         var bootstrap = mm.var(InvokeTest.class).indy("bootTest4", mhVar);
 
         var result = bootstrap.invoke(String.class, "xxx",
