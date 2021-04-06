@@ -28,6 +28,13 @@ import java.util.WeakHashMap;
  * @hidden
  */
 public class ConstantsRegistry {
+    private static final int ACCESS_MODE;
+
+    static {
+        ACCESS_MODE = Runtime.version().feature() >= 16
+            ? MethodHandles.Lookup.ORIGINAL : MethodHandles.Lookup.PRIVATE;
+    }
+
     private static WeakHashMap<Object, Object> cEntries;
 
     private ConstantsRegistry() {
@@ -81,7 +88,7 @@ public class ConstantsRegistry {
      * @param type unused
      */
     public static Object remove(MethodHandles.Lookup lookup, String name, Class<?> type, int slot) {
-        if ((lookup.lookupModes() & MethodHandles.Lookup.PRIVATE) == 0) {
+        if ((lookup.lookupModes() & ACCESS_MODE) == 0) {
             throw new IllegalStateException();
         }
 
