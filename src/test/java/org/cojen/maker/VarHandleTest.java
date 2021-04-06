@@ -281,6 +281,7 @@ public class VarHandleTest {
         // Must be a new instance each time and not a copy.
         assertTrue(mh1 != access.methodHandleGet());
         assertTrue(mh2 != access.methodHandleSet());
+        assertTrue(access.varHandle() != mh1);
 
         var value = mh1.invoke(String.class, "invokeExact", null);
         var concat = mm.concat(value, "world");
@@ -289,5 +290,39 @@ public class VarHandleTest {
         cm.finish().getMethod("run").invoke(null);
 
         assertEquals("helloworld", hiddenStr);
+    }
+
+    @Test
+    public void meta() throws Exception {
+        // Test layering of signature polymorphic methods.
+
+        ClassMaker cm = ClassMaker.begin().public_();
+        {
+            cm.addConstructor().public_();
+
+            cm.addField(int.class, "test");
+
+            MethodMaker mm = cm.addMethod(MethodHandle.class, "run").public_();
+
+            mm.field("test").set(100);
+
+            var vh = mm.field("test").varHandle();
+
+            // Obtain a MethodHandle instance with a specific signature.
+            var mh = vh.methodHandle(int.class, "get", cm);
+
+            var result = mh.invoke(int.class, "invoke", null, vh, mm.this_());
+
+            var assertVar = mm.var(Assert.class);
+            assertVar.invoke("assertEquals", 100, result);
+
+            mm.return_(mh);
+        }
+
+        var clazz = cm.finish();
+        var obj = clazz.getConstructor().newInstance();
+        var mh = (MethodHandle) clazz.getMethod("run").invoke(obj);
+
+        assertEquals(MethodType.methodType(int.class, VarHandle.class, clazz), mh.type());
     }
 }
