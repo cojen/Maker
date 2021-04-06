@@ -161,7 +161,7 @@ public class InvokeTest {
 
         Label start = mm.label().here();
         var bootstrap = mm.var(InvokeTest.class).indy("boot", handle, type);
-        var v0 = bootstrap.invoke(null, "throwIt", new Object[] {String.class}, "hello");
+        var v0 = bootstrap.invoke(null, "throwIt", null, "hello");
         assertNull(v0);
         mm.return_();
         Label end = mm.label().here();
@@ -303,8 +303,7 @@ public class InvokeTest {
             MethodMaker mm = cm.addMethod(int.class, "calc", int.class, int.class).protected_();
             Variable v1;
             if (qualified) {
-                v1 = mm.super_().invoke(int.class, "calc", new Object[] {int.class, int.class},
-                                        mm.param(0), mm.param(1));
+                v1 = mm.super_().invoke(int.class, "calc", null, mm.param(0), mm.param(1));
             } else {
                 v1 = mm.super_().invoke("calc", mm.param(0), mm.param(1));
             }

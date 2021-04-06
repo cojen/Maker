@@ -310,7 +310,8 @@ public interface MethodMaker {
      *
      * @param values variables or constants
      * @throws IllegalArgumentException if not given a variable or a constant
-     * @throws IllegalStateException if not defining a constructor or if constructor isn't found
+     * @throws IllegalStateException if not defining a constructor, or if a matching
+     * constructor isn't found
      */
     public void invokeSuperConstructor(Object... values);
 
@@ -320,7 +321,8 @@ public interface MethodMaker {
      *
      * @param values variables or constants
      * @throws IllegalArgumentException if not given a variable or a constant
-     * @throws IllegalStateException if not defining a constructor or if constructor isn't found
+     * @throws IllegalStateException if not defining a constructor, or if a matching
+     * constructor isn't found
      */
     public void invokeThisConstructor(Object... values);
 

@@ -444,7 +444,7 @@ public interface Variable {
      * @param name method name; can be {@code ".new"} to construct an instance of this variable
      * type
      * type
-     * @param types method parameter types (can be null if none)
+     * @param types method parameter types; can be null to infer from the values
      * @param values variables or constants
      * @return the result of the method, which is null if void
      * @throws IllegalArgumentException if not given a variable or a constant
@@ -460,7 +460,7 @@ public interface Variable {
      * @param returnType method return type
      * @param name method name; can be {@code ".new"} to construct an instance of this variable
      * type
-     * @param types method parameter types (can be null if none)
+     * @param types method parameter types; can be null if none
      * @throws IllegalArgumentException if not given a supported type object
      * @throws IllegalStateException if method isn't found
      */

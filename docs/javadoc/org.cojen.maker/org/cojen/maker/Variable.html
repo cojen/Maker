@@ -1069,7 +1069,7 @@ type</dd>
 <dd><code>name</code> - method name; can be <code>".new"</code> to construct an instance of this variable
  type
  type</dd>
-<dd><code>types</code> - method parameter types (can be null if none)</dd>
+<dd><code>types</code> - method parameter types; can be null to infer from the values</dd>
 <dd><code>values</code> - variables or constants</dd>
 <dt>Returns:</dt>
 <dd>the result of the method, which is null if void</dd>
@@ -1093,7 +1093,7 @@ type</dd>
 <dd><code>returnType</code> - method return type</dd>
 <dd><code>name</code> - method name; can be <code>".new"</code> to construct an instance of this variable
  type</dd>
-<dd><code>types</code> - method parameter types (can be null if none)</dd>
+<dd><code>types</code> - method parameter types; can be null if none</dd>
 <dt>Throws:</dt>
 <dd><code><a href="https://docs.oracle.com/en/java/javase/16/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if not given a supported type object</dd>
 <dd><code><a href="https://docs.oracle.com/en/java/javase/16/docs/api/java.base/java/lang/IllegalStateException.html" title="class or interface in java.lang" class="external-link">IllegalStateException</a></code> - if method isn't found</dd>

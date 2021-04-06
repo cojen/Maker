@@ -5225,14 +5225,14 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
                 var = new ConstantVar(returnType, dynamic);
             } else {
-                if ((types == null ? 0 : types.length) != length) {
+                if (types != null && types.length != length) {
                     throw new IllegalArgumentException("Mismatched parameter types and values");
                 }
 
                 Type[] paramTypes = new Type[length];
                 for (int i=0; i<paramTypes.length; i++) {
-                    paramTypes[i] = mClassMaker.typeFrom(types[i]);
-                    addPushOp(paramTypes[i], values[i]);
+                    Type type = types == null ? null : mClassMaker.typeFrom(types[i]);
+                    paramTypes[i] = addPushOp(type, values[i]);
                 }
 
                 Type returnType = retType == null ? Type.VOID : mClassMaker.typeFrom(retType);
