@@ -374,7 +374,7 @@ public class CondyTest {
             // Doesn't have private access.
         }
 
-        if (Runtime.getRuntime().version().feature() < 15) {
+        if (Runtime.version().feature() < 15) {
             // Hidden classes aren't really supported, and so private lookup isn't available.
             return;
         }
@@ -396,7 +396,7 @@ public class CondyTest {
     @Test
     public void classDesc() throws Exception {
         // ClassDesc added in Java 12.
-        Assume.assumeTrue(Runtime.getRuntime().version().feature() >= 12);
+        Assume.assumeTrue(Runtime.version().feature() >= 12);
 
         ClassDesc cd0 = ClassDesc.of("java.lang.String").arrayType();
         ClassDesc cd1 = ClassDesc.ofDescriptor("I");
@@ -426,7 +426,7 @@ public class CondyTest {
     @Test
     public void methodTypeDesc() throws Exception {
         // MethodTypeDesc added in Java 12.
-        Assume.assumeTrue(Runtime.getRuntime().version().feature() >= 12);
+        Assume.assumeTrue(Runtime.version().feature() >= 12);
 
         MethodTypeDesc mtd0 = MethodTypeDesc.ofDescriptor("(Ljava/lang/String;)I");
 
@@ -450,7 +450,7 @@ public class CondyTest {
     @SuppressWarnings("unchecked")
     public void methodHandleDesc() throws Throwable {
         // MethodHandleDesc added in Java 12.
-        Assume.assumeTrue(Runtime.getRuntime().version().feature() >= 12);
+        Assume.assumeTrue(Runtime.version().feature() >= 12);
 
         ClassDesc cd0 = ClassDesc.of(Vector.class.getName());
         ClassDesc cd1 = ClassDesc.ofDescriptor("I");
@@ -526,7 +526,7 @@ public class CondyTest {
     @Test
     public void dynamicConstantDesc() throws Exception {
         // DynamicConstantDesc added in Java 12.
-        Assume.assumeTrue(Runtime.getRuntime().version().feature() >= 12);
+        Assume.assumeTrue(Runtime.version().feature() >= 12);
 
         ClassDesc cd0 = ClassDesc.of(CondyTest.class.getName());
         ClassDesc cd1 = ClassDesc.of(MethodHandles.Lookup.class.getName());
@@ -565,7 +565,7 @@ public class CondyTest {
     @Test
     public void dynamicConstantAssign() throws Exception {
         // DynamicConstantDesc added in Java 12.
-        Assume.assumeTrue(Runtime.getRuntime().version().feature() >= 12);
+        Assume.assumeTrue(Runtime.version().feature() >= 12);
 
         ClassMaker cm = ClassMaker.begin().public_();
         MethodMaker mm = cm.addMethod(Object.class, "run").static_().public_();
@@ -633,7 +633,7 @@ public class CondyTest {
     @Test
     public void dynamicConstantAssignForBootstrap() throws Exception {
         // DynamicConstantDesc added in Java 12.
-        Assume.assumeTrue(Runtime.getRuntime().version().feature() >= 12);
+        Assume.assumeTrue(Runtime.version().feature() >= 12);
 
         // Pass a dynamic constant to a bootstrap method.
 
@@ -659,7 +659,7 @@ public class CondyTest {
     @Test
     public void constantVarHandle() throws Exception {
         // DynamicConstantDesc added in Java 12.
-        Assume.assumeTrue(Runtime.getRuntime().version().feature() >= 12);
+        Assume.assumeTrue(Runtime.version().feature() >= 12);
 
         // Set a VarHandle variable with a constant, which uses a DynamicConstantDesc.
 

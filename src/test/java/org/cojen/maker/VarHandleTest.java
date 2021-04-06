@@ -54,7 +54,7 @@ public class VarHandleTest {
     @Test
     public void accessExternal() throws Exception {
         // DynamicConstantDesc added in Java 12.
-        Assume.assumeTrue(Runtime.getRuntime().version().feature() >= 12);
+        Assume.assumeTrue(Runtime.version().feature() >= 12);
 
         VarHandle vh = MethodHandles.arrayElementVarHandle(int[].class);
 
