@@ -52,6 +52,22 @@ public class VarHandleTest {
     }
 
     @Test
+    public void wrongCoordinates() throws Exception {
+        VarHandle vh = MethodHandles.byteArrayViewVarHandle(int[].class, ByteOrder.BIG_ENDIAN);
+
+        ClassMaker cm = ClassMaker.begin().public_();
+        MethodMaker mm = cm.addMethod(null, "run").public_().static_();
+
+        var bytes = mm.new_(byte[].class, 10);
+        try {
+            mm.access(vh, bytes).get();
+            fail();
+        } catch (IllegalArgumentException e) {
+            assertTrue(e.getMessage().contains("coordinates"));
+        }
+    }
+
+    @Test
     public void accessExternal() throws Exception {
         // DynamicConstantDesc added in Java 12.
         Assume.assumeTrue(Runtime.version().feature() >= 12);

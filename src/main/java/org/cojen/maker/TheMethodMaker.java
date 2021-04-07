@@ -241,10 +241,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
             mStackMapTable.reset();
 
-            if (mFinished < -1) {
-                // Need to perform flow analysis again too to account for new labels.
-                new Flow(varList, varUsage).run(mFirstOp);
-            }
+            new Flow(varList, varUsage).run(mFirstOp);
         }
 
         mParams = null;
@@ -3054,8 +3051,6 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             byte op = op();
             if (op == GOTO) {
                 mCode = GOTO_W;
-                // Need to rebuild the code to obtain new addresses.
-                m.mFinished = -1;
             } else {
                 flip(op);
                 Op cont = mNext;
@@ -3064,9 +3059,9 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                 mTarget.used();
                 mNext.mNext = mTarget;
                 mTarget.mNext = cont;
-                // Need to perform flow analysis again because a new label was added.
-                m.mFinished = -2;
             }
+            // Need to perform flow analysis again.
+            m.mFinished = -1;
         }
 
         /**

@@ -74,6 +74,17 @@ public class UsageTest {
     }
 
     @Test
+    public void notStandalone() {
+        MethodMaker mm = mClassMaker.addMethod(int.class, "test");
+        try {
+            mm.finish();
+            fail();
+        } catch (IllegalStateException e) {
+            check(e, "Not a standalone");
+        }
+    }
+
+    @Test
     public void unpositioned() {
         MethodMaker mm = mClassMaker.addMethod(null, "test");
         Label a = mm.label();
@@ -290,12 +301,14 @@ public class UsageTest {
     @Test
     public void unmodifiable() {
         MethodMaker mm = mClassMaker.addMethod(null, "test");
+        var clazz = mm.class_();
         try {
-            mm.class_().set(null);
+            clazz.set(null);
             fail();
         } catch (IllegalStateException e) {
             check(e, "Unmodifiable");
         }
+        assertTrue(clazz == mm.class_());
     }
 
     @Test

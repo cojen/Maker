@@ -76,6 +76,38 @@ public class WideTest {
     }
 
     @Test
+    public void wideBackAndForwardJumps() throws Exception {
+        ClassMaker cm = ClassMaker.begin().public_();
+        MethodMaker mm = cm.addMethod(null, "run").static_().public_();
+
+        var v1 = mm.var(int.class).set(0);
+
+        Label L1 = mm.label();
+        mm.goto_(L1);
+        Label L2 = mm.label().here();
+
+        for (int i=0; i<10_000; i++) {
+            v1.inc(1000);
+        }
+
+        // Intentially fails.
+        mm.var(Assert.class).invoke("assertEquals", 0, v1);
+
+        L1.here();
+        mm.goto_(L2);
+
+        var clazz = cm.finish();
+
+        try {
+            clazz.getMethod("run").invoke(null);
+            fail();
+        } catch (java.lang.reflect.InvocationTargetException e) {
+            // Actually expected.
+            assertTrue(e.getCause() instanceof AssertionError);
+        }
+    }
+
+    @Test
     public void wideConstant() throws Exception {
         // Test the ldc_w opcode.
 

@@ -107,6 +107,23 @@ public class ExceptionTest {
     }
 
     @Test
+    public void empty() throws Exception {
+        // Labels are flipped compared to the tiny test, thus doing nothing.
+
+        ClassMaker cm = ClassMaker.begin().public_().implement(Runnable.class);
+        MethodMaker mm = cm.addMethod(void.class, "run").public_().static_();
+
+        Label L1 = mm.label().here();
+        mm.return_();
+        Label L2 = mm.label().here();
+        var ex = mm.catch_(L2, L1, Exception.class);
+        mm.return_();
+
+        var clazz = cm.finish();
+        clazz.getMethod("run").invoke(null);
+    }
+
+    @Test
     public void flowIntoHandler() throws Exception {
         // Detect direct flow into an exception handler.
 
