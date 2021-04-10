@@ -265,7 +265,7 @@ public class UsageTest {
         try {
             a.set(b);
             fail();
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalStateException e) {
             check(e, "Unknown variable");
         }
     }
@@ -276,7 +276,7 @@ public class UsageTest {
         try {
             mm.var(int.class).set(null);
             fail();
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalStateException e) {
             check(e, "Cannot store null");
         }
     }
@@ -365,13 +365,13 @@ public class UsageTest {
         try {
             mm2.goto_(a);
             fail();
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalStateException e) {
             check(e, "Unknown label");
         }
         try {
             mm2.goto_(new Label() { public Label here() {return this;} });
             fail();
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalStateException e) {
             check(e, "Unknown label");
         }
         try {
@@ -389,7 +389,7 @@ public class UsageTest {
         try {
             mm.var(int.class).ifEq(null, a);
             fail();
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalStateException e) {
             check(e, "Cannot compare");
         }
         try {

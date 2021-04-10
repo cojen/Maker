@@ -1841,14 +1841,14 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             if (owned.tryPushTo(this)) {
                 return addConversionOp(owned.type(), type);
             }
-            throw new IllegalArgumentException("Unknown variable");
+            throw new IllegalStateException("Unknown variable");
         }
 
         Type constantType;
 
         if (value == null) {
             if (type != null && type.isPrimitive()) {
-                throw new IllegalArgumentException("Cannot store null into primitive variable");
+                throw new IllegalStateException("Cannot store null into primitive variable");
             }
             constantType = Null.THE;
         } else if (value instanceof String) {
@@ -2443,7 +2443,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         if (label == null) {
             throw new IllegalArgumentException("Label is null");
         }
-        throw new IllegalArgumentException("Unknown label");
+        throw new IllegalStateException("Unknown label");
     }
 
     private static void sortSwitchCases(int[] cases, Label[] labels) {
@@ -3534,7 +3534,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
         private void nullCompareCheck() {
             if (type().isPrimitive()) {
-                throw new IllegalArgumentException("Cannot compare a primitive type to null");
+                throw new IllegalStateException("Cannot compare a primitive type to null");
             }
         }
 

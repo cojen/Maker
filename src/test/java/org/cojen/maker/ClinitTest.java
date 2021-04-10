@@ -89,7 +89,7 @@ public class ClinitTest {
             try {
                 mm.field("test2").set(v1);
                 fail();
-            } catch (IllegalArgumentException e) {                
+            } catch (IllegalStateException e) {                
             }
             v1 = mm.var(int.class).set(10);
             mm.field("test2").set(v1);
