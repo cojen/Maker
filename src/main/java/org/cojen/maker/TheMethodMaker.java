@@ -644,15 +644,15 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         Op savepoint = mLastOp;
-
-        // Push all arguments and obtain their actual types.
-        Type[] paramTypes = new Type[args.length];
-        for (int i=0; i<args.length; i++) {
-            paramTypes[i] = addPushOp(null, args[i]);
-        }
-
+        Type[] paramTypes;
         Type.Method method;
         try {
+            // Push all arguments and obtain their actual types.
+            paramTypes = new Type[args.length];
+            for (int i=0; i<args.length; i++) {
+                paramTypes[i] = addPushOp(null, args[i]);
+            }
+
             method = type.findMethod(methodName, paramTypes, inherit, staticAllowed,
                                      specificReturnType, specificParamTypes);
         } catch (Throwable e) {
@@ -1839,7 +1839,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         Op savepoint = mLastOp;
         try {
             return doAddPushOp(type, value);
-        } catch (Exception e) {
+        } catch (Throwable e) {
             rollback(savepoint);
             throw e;
         }
@@ -2383,16 +2383,22 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             break;
         }
 
-        addPushOp(primType, var);
+        Op savepoint = mLastOp;
+        try {
+            addPushOp(primType, var);
 
-        int stackPop = 0;
-        if (value != null) {
-            addPushOp(primType, value);
-            stackPop = 1;
+            int stackPop = 0;
+            if (value != null) {
+                addPushOp(primType, value);
+                stackPop = 1;
+            }
+
+            addBytecodeOp(op, stackPop);
+            addConversionOp(primType, varType);
+        } catch (Throwable e) {
+            rollback(savepoint);
+            throw e;
         }
-
-        addBytecodeOp(op, stackPop);
-        addConversionOp(primType, varType);
 
         return storeToNewVar(varType);
     }
@@ -2423,18 +2429,24 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             throw new IllegalStateException("Cannot " + name + " to a non-integer type");
         }
 
-        addPushOp(primType, var);
+        Op savepoint = mLastOp;
+        try {
+            addPushOp(primType, var);
 
-        if ((op & 0xff) < IAND) {
-            // Second argument to shift instruction is always an int.
-            // Note: Automatic downcast from long could be allowed, but it's not really necessary.
-            addPushOp(INT, value);
-        } else {
-            addPushOp(varType, value);
+            if ((op & 0xff) < IAND) {
+                // Second argument to shift instruction is always an int. Note: Automatic
+                // downcast from long could be allowed, but it's not really necessary.
+                addPushOp(INT, value);
+            } else {
+                addPushOp(varType, value);
+            }
+
+            addBytecodeOp(op, 1);
+            addConversionOp(primType, varType);
+        } catch (Throwable e) {
+            rollback(savepoint);
+            throw e;
         }
-
-        addBytecodeOp(op, 1);
-        addConversionOp(primType, varType);
 
         return storeToNewVar(varType);
     }
@@ -3471,8 +3483,14 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         abstract void push();
 
         void push(Type type) {
-            push();
-            addConversionOp(type(), type);
+            Op savepoint = mLastOp;
+            try {
+                push();
+                addConversionOp(type(), type);
+            } catch (Throwable e) {
+                rollback(savepoint);
+                throw e;
+            }
         }
 
         void pushObject() {
