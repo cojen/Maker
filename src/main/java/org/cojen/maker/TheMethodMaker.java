@@ -1836,6 +1836,16 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
      * @return actual type
      */
     private Type addPushOp(Type type, Object value) {
+        Op savepoint = mLastOp;
+        try {
+            return doAddPushOp(type, value);
+        } catch (Exception e) {
+            rollback(savepoint);
+            throw e;
+        }
+    }
+
+    private Type doAddPushOp(Type type, Object value) {
         if (value instanceof OwnedVar) {
             var owned = (OwnedVar) value;
             if (owned.tryPushTo(this)) {
