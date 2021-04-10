@@ -465,12 +465,12 @@ loadScripts(document, 'script');</script>
  resolved constant.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
-<dd><code>value</code> - a Variable or a constant</dd>
+<dd><code>value</code> - a <code>Variable</code> or a constant</dd>
 <dt>Returns:</dt>
 <dd>this variable</dd>
 <dt>Throws:</dt>
-<dd><code><a href="https://docs.oracle.com/en/java/javase/16/docs/api/java.base/java/lang/IllegalStateException.html" title="class or interface in java.lang" class="external-link">IllegalStateException</a></code> - if this variable cannot be modified</dd>
-<dd><code><a href="https://docs.oracle.com/en/java/javase/16/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if the value type is unsupported, or if it's not
+<dd><code><a href="https://docs.oracle.com/en/java/javase/16/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if not given a variable or a constant</dd>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/16/docs/api/java.base/java/lang/IllegalStateException.html" title="class or interface in java.lang" class="external-link">IllegalStateException</a></code> - if this variable cannot be modified, or if it's not
  compatible with the variable type</dd>
 </dl>
 </section>
@@ -528,7 +528,9 @@ loadScripts(document, 'script');</script>
  doesn't need to be positioned yet.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
-<dd><code>value</code> - other variable or a constant</dd>
+<dd><code>value</code> - other <code>Variable</code> or a constant</dd>
+<dt>Throws:</dt>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/16/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if not given a variable or a constant</dd>
 </dl>
 </section>
 </li>
@@ -541,7 +543,9 @@ loadScripts(document, 'script');</script>
  label doesn't need to be positioned yet.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
-<dd><code>value</code> - other variable or a constant</dd>
+<dd><code>value</code> - other <code>Variable</code> or a constant</dd>
+<dt>Throws:</dt>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/16/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if not given a variable or a constant</dd>
 </dl>
 </section>
 </li>
@@ -554,7 +558,9 @@ loadScripts(document, 'script');</script>
  doesn't need to be positioned yet.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
-<dd><code>value</code> - other variable or a constant</dd>
+<dd><code>value</code> - other <code>Variable</code> or a constant</dd>
+<dt>Throws:</dt>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/16/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if not given a variable or a constant</dd>
 </dl>
 </section>
 </li>
@@ -567,7 +573,9 @@ loadScripts(document, 'script');</script>
  constant. The label doesn't need to be positioned yet.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
-<dd><code>value</code> - other variable or a constant</dd>
+<dd><code>value</code> - other <code>Variable</code> or a constant</dd>
+<dt>Throws:</dt>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/16/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if not given a variable or a constant</dd>
 </dl>
 </section>
 </li>
@@ -580,7 +588,9 @@ loadScripts(document, 'script');</script>
  label doesn't need to be positioned yet.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
-<dd><code>value</code> - other variable or a constant</dd>
+<dd><code>value</code> - other <code>Variable</code> or a constant</dd>
+<dt>Throws:</dt>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/16/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if not given a variable or a constant</dd>
 </dl>
 </section>
 </li>
@@ -593,7 +603,9 @@ loadScripts(document, 'script');</script>
  constant. The label doesn't need to be positioned yet.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
-<dd><code>value</code> - other variable or a constant</dd>
+<dd><code>value</code> - other <code>Variable</code> or a constant</dd>
+<dt>Throws:</dt>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/16/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if not given a variable or a constant</dd>
 </dl>
 </section>
 </li>
@@ -623,10 +635,11 @@ loadScripts(document, 'script');</script>
  this variable.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
-<dd><code>value</code> - a Variable or a constant</dd>
+<dd><code>value</code> - a <code>Variable</code> or a constant</dd>
 <dt>Throws:</dt>
-<dd><code><a href="https://docs.oracle.com/en/java/javase/16/docs/api/java.base/java/lang/IllegalStateException.html" title="class or interface in java.lang" class="external-link">IllegalStateException</a></code> - if this variable doesn't support the operation</dd>
-<dd><code><a href="https://docs.oracle.com/en/java/javase/16/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if value is incompatible</dd>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/16/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if not given a variable or a constant</dd>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/16/docs/api/java.base/java/lang/IllegalStateException.html" title="class or interface in java.lang" class="external-link">IllegalStateException</a></code> - if this variable doesn't support the operation, or if
+ value is incompatible</dd>
 </dl>
 </section>
 </li>
@@ -638,12 +651,13 @@ loadScripts(document, 'script');</script>
  variable.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
-<dd><code>value</code> - a Variable or a constant</dd>
+<dd><code>value</code> - a <code>Variable</code> or a constant</dd>
 <dt>Returns:</dt>
 <dd>the result in a new variable, with the same type as this one</dd>
 <dt>Throws:</dt>
-<dd><code><a href="https://docs.oracle.com/en/java/javase/16/docs/api/java.base/java/lang/IllegalStateException.html" title="class or interface in java.lang" class="external-link">IllegalStateException</a></code> - if this variable doesn't support the operation</dd>
-<dd><code><a href="https://docs.oracle.com/en/java/javase/16/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if value is incompatible</dd>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/16/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if not given a variable or a constant</dd>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/16/docs/api/java.base/java/lang/IllegalStateException.html" title="class or interface in java.lang" class="external-link">IllegalStateException</a></code> - if this variable doesn't support the operation, or if
+ value is incompatible</dd>
 </dl>
 </section>
 </li>
@@ -655,12 +669,13 @@ loadScripts(document, 'script');</script>
  new variable.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
-<dd><code>value</code> - a Variable or a constant</dd>
+<dd><code>value</code> - a <code>Variable</code> or a constant</dd>
 <dt>Returns:</dt>
 <dd>the result in a new variable, with the same type as this one</dd>
 <dt>Throws:</dt>
-<dd><code><a href="https://docs.oracle.com/en/java/javase/16/docs/api/java.base/java/lang/IllegalStateException.html" title="class or interface in java.lang" class="external-link">IllegalStateException</a></code> - if this variable doesn't support the operation</dd>
-<dd><code><a href="https://docs.oracle.com/en/java/javase/16/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if value is incompatible</dd>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/16/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if not given a variable or a constant</dd>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/16/docs/api/java.base/java/lang/IllegalStateException.html" title="class or interface in java.lang" class="external-link">IllegalStateException</a></code> - if this variable doesn't support the operation, or if
+ value is incompatible</dd>
 </dl>
 </section>
 </li>
@@ -672,12 +687,13 @@ loadScripts(document, 'script');</script>
  new variable.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
-<dd><code>value</code> - a Variable or a constant</dd>
+<dd><code>value</code> - a <code>Variable</code> or a constant</dd>
 <dt>Returns:</dt>
 <dd>the result in a new variable, with the same type as this one</dd>
 <dt>Throws:</dt>
-<dd><code><a href="https://docs.oracle.com/en/java/javase/16/docs/api/java.base/java/lang/IllegalStateException.html" title="class or interface in java.lang" class="external-link">IllegalStateException</a></code> - if this variable doesn't support the operation</dd>
-<dd><code><a href="https://docs.oracle.com/en/java/javase/16/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if value is incompatible</dd>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/16/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if not given a variable or a constant</dd>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/16/docs/api/java.base/java/lang/IllegalStateException.html" title="class or interface in java.lang" class="external-link">IllegalStateException</a></code> - if this variable doesn't support the operation, or if
+ value is incompatible</dd>
 </dl>
 </section>
 </li>
@@ -689,12 +705,13 @@ loadScripts(document, 'script');</script>
  new variable.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
-<dd><code>value</code> - a Variable or a constant</dd>
+<dd><code>value</code> - a <code>Variable</code> or a constant</dd>
 <dt>Returns:</dt>
 <dd>the result in a new variable, with the same type as this one</dd>
 <dt>Throws:</dt>
-<dd><code><a href="https://docs.oracle.com/en/java/javase/16/docs/api/java.base/java/lang/IllegalStateException.html" title="class or interface in java.lang" class="external-link">IllegalStateException</a></code> - if this variable doesn't support the operation</dd>
-<dd><code><a href="https://docs.oracle.com/en/java/javase/16/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if value is incompatible</dd>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/16/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if not given a variable or a constant</dd>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/16/docs/api/java.base/java/lang/IllegalStateException.html" title="class or interface in java.lang" class="external-link">IllegalStateException</a></code> - if this variable doesn't support the operation, or if
+ value is incompatible</dd>
 </dl>
 </section>
 </li>
@@ -706,12 +723,13 @@ loadScripts(document, 'script');</script>
  and assign the result to a new variable.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
-<dd><code>value</code> - a Variable or a constant</dd>
+<dd><code>value</code> - a <code>Variable</code> or a constant</dd>
 <dt>Returns:</dt>
 <dd>the result in a new variable, with the same type as this one</dd>
 <dt>Throws:</dt>
-<dd><code><a href="https://docs.oracle.com/en/java/javase/16/docs/api/java.base/java/lang/IllegalStateException.html" title="class or interface in java.lang" class="external-link">IllegalStateException</a></code> - if this variable doesn't support the operation</dd>
-<dd><code><a href="https://docs.oracle.com/en/java/javase/16/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if value is incompatible</dd>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/16/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if not given a variable or a constant</dd>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/16/docs/api/java.base/java/lang/IllegalStateException.html" title="class or interface in java.lang" class="external-link">IllegalStateException</a></code> - if this variable doesn't support the operation, or if
+ value is incompatible</dd>
 </dl>
 </section>
 </li>
@@ -723,9 +741,11 @@ loadScripts(document, 'script');</script>
  the result to a new boolean variable.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
-<dd><code>value</code> - other variable or a constant</dd>
+<dd><code>value</code> - other <code>Variable</code> or a constant</dd>
 <dt>Returns:</dt>
 <dd>the result in a new boolean variable</dd>
+<dt>Throws:</dt>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/16/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if not given a variable or a constant</dd>
 <dt>See Also:</dt>
 <dd><a href="#ifEq(java.lang.Object,org.cojen.maker.Label)"><code>ifEq(java.lang.Object, org.cojen.maker.Label)</code></a></dd>
 </dl>
@@ -739,9 +759,11 @@ loadScripts(document, 'script');</script>
  result to a new boolean variable.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
-<dd><code>value</code> - other variable or a constant</dd>
+<dd><code>value</code> - other <code>Variable</code> or a constant</dd>
 <dt>Returns:</dt>
 <dd>the result in a new boolean variable</dd>
+<dt>Throws:</dt>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/16/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if not given a variable or a constant</dd>
 <dt>See Also:</dt>
 <dd><a href="#ifNe(java.lang.Object,org.cojen.maker.Label)"><code>ifNe(java.lang.Object, org.cojen.maker.Label)</code></a></dd>
 </dl>
@@ -755,9 +777,11 @@ loadScripts(document, 'script');</script>
  result to a new boolean variable.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
-<dd><code>value</code> - other variable or a constant</dd>
+<dd><code>value</code> - other <code>Variable</code> or a constant</dd>
 <dt>Returns:</dt>
 <dd>the result in a new boolean variable</dd>
+<dt>Throws:</dt>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/16/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if not given a variable or a constant</dd>
 <dt>See Also:</dt>
 <dd><a href="#ifLt(java.lang.Object,org.cojen.maker.Label)"><code>ifLt(java.lang.Object, org.cojen.maker.Label)</code></a></dd>
 </dl>
@@ -771,9 +795,11 @@ loadScripts(document, 'script');</script>
  assign the result to a new boolean variable.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
-<dd><code>value</code> - other variable or a constant</dd>
+<dd><code>value</code> - other <code>Variable</code> or a constant</dd>
 <dt>Returns:</dt>
 <dd>the result in a new boolean variable</dd>
+<dt>Throws:</dt>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/16/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if not given a variable or a constant</dd>
 <dt>See Also:</dt>
 <dd><a href="#ifGe(java.lang.Object,org.cojen.maker.Label)"><code>ifGe(java.lang.Object, org.cojen.maker.Label)</code></a></dd>
 </dl>
@@ -787,9 +813,11 @@ loadScripts(document, 'script');</script>
  the result to a new boolean variable.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
-<dd><code>value</code> - other variable or a constant</dd>
+<dd><code>value</code> - other <code>Variable</code> or a constant</dd>
 <dt>Returns:</dt>
 <dd>the result in a new boolean variable</dd>
+<dt>Throws:</dt>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/16/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if not given a variable or a constant</dd>
 <dt>See Also:</dt>
 <dd><a href="#ifGt(java.lang.Object,org.cojen.maker.Label)"><code>ifGt(java.lang.Object, org.cojen.maker.Label)</code></a></dd>
 </dl>
@@ -803,9 +831,11 @@ loadScripts(document, 'script');</script>
  assign the result to a new boolean variable.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
-<dd><code>value</code> - other variable or a constant</dd>
+<dd><code>value</code> - other <code>Variable</code> or a constant</dd>
 <dt>Returns:</dt>
 <dd>the result in a new boolean variable</dd>
+<dt>Throws:</dt>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/16/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if not given a variable or a constant</dd>
 <dt>See Also:</dt>
 <dd><a href="#ifLe(java.lang.Object,org.cojen.maker.Label)"><code>ifLe(java.lang.Object, org.cojen.maker.Label)</code></a></dd>
 </dl>
@@ -859,12 +889,13 @@ loadScripts(document, 'script');</script>
  the result to a new variable.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
-<dd><code>value</code> - a Variable or a constant</dd>
+<dd><code>value</code> - a <code>Variable</code> or a constant</dd>
 <dt>Returns:</dt>
 <dd>the result in a new variable, with the same type as this one</dd>
 <dt>Throws:</dt>
-<dd><code><a href="https://docs.oracle.com/en/java/javase/16/docs/api/java.base/java/lang/IllegalStateException.html" title="class or interface in java.lang" class="external-link">IllegalStateException</a></code> - if this variable doesn't support the operation</dd>
-<dd><code><a href="https://docs.oracle.com/en/java/javase/16/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if value is incompatible</dd>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/16/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if not given a variable or a constant</dd>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/16/docs/api/java.base/java/lang/IllegalStateException.html" title="class or interface in java.lang" class="external-link">IllegalStateException</a></code> - if this variable doesn't support the operation, or if
+ value is incompatible</dd>
 </dl>
 </section>
 </li>
@@ -876,12 +907,13 @@ loadScripts(document, 'script');</script>
  the result to a new variable.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
-<dd><code>value</code> - a Variable or a constant</dd>
+<dd><code>value</code> - a <code>Variable</code> or a constant</dd>
 <dt>Returns:</dt>
 <dd>the result in a new variable, with the same type as this one</dd>
 <dt>Throws:</dt>
-<dd><code><a href="https://docs.oracle.com/en/java/javase/16/docs/api/java.base/java/lang/IllegalStateException.html" title="class or interface in java.lang" class="external-link">IllegalStateException</a></code> - if this variable doesn't support the operation</dd>
-<dd><code><a href="https://docs.oracle.com/en/java/javase/16/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if value is incompatible</dd>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/16/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if not given a variable or a constant</dd>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/16/docs/api/java.base/java/lang/IllegalStateException.html" title="class or interface in java.lang" class="external-link">IllegalStateException</a></code> - if this variable doesn't support the operation, or if
+ value is incompatible</dd>
 </dl>
 </section>
 </li>
@@ -893,12 +925,13 @@ loadScripts(document, 'script');</script>
  the result to a new variable.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
-<dd><code>value</code> - a Variable or a constant</dd>
+<dd><code>value</code> - a <code>Variable</code> or a constant</dd>
 <dt>Returns:</dt>
 <dd>the result in a new variable, with the same type as this one</dd>
 <dt>Throws:</dt>
-<dd><code><a href="https://docs.oracle.com/en/java/javase/16/docs/api/java.base/java/lang/IllegalStateException.html" title="class or interface in java.lang" class="external-link">IllegalStateException</a></code> - if this variable doesn't support the operation</dd>
-<dd><code><a href="https://docs.oracle.com/en/java/javase/16/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if value is incompatible</dd>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/16/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if not given a variable or a constant</dd>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/16/docs/api/java.base/java/lang/IllegalStateException.html" title="class or interface in java.lang" class="external-link">IllegalStateException</a></code> - if this variable doesn't support the operation, or if
+ value is incompatible</dd>
 </dl>
 </section>
 </li>
@@ -910,12 +943,13 @@ loadScripts(document, 'script');</script>
  assign the result to a new variable.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
-<dd><code>value</code> - a Variable or a constant</dd>
+<dd><code>value</code> - a <code>Variable</code> or a constant</dd>
 <dt>Returns:</dt>
 <dd>the result in a new variable, with the same type as this one</dd>
 <dt>Throws:</dt>
-<dd><code><a href="https://docs.oracle.com/en/java/javase/16/docs/api/java.base/java/lang/IllegalStateException.html" title="class or interface in java.lang" class="external-link">IllegalStateException</a></code> - if this variable doesn't support the operation</dd>
-<dd><code><a href="https://docs.oracle.com/en/java/javase/16/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if value is incompatible</dd>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/16/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if not given a variable or a constant</dd>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/16/docs/api/java.base/java/lang/IllegalStateException.html" title="class or interface in java.lang" class="external-link">IllegalStateException</a></code> - if this variable doesn't support the operation, or if
+ value is incompatible</dd>
 </dl>
 </section>
 </li>
@@ -927,12 +961,13 @@ loadScripts(document, 'script');</script>
  and assign the result to a new variable.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
-<dd><code>value</code> - a Variable or a constant</dd>
+<dd><code>value</code> - a <code>Variable</code> or a constant</dd>
 <dt>Returns:</dt>
 <dd>the result in a new variable, with the same type as this one</dd>
 <dt>Throws:</dt>
-<dd><code><a href="https://docs.oracle.com/en/java/javase/16/docs/api/java.base/java/lang/IllegalStateException.html" title="class or interface in java.lang" class="external-link">IllegalStateException</a></code> - if this variable doesn't support the operation</dd>
-<dd><code><a href="https://docs.oracle.com/en/java/javase/16/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if value is incompatible</dd>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/16/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if not given a variable or a constant</dd>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/16/docs/api/java.base/java/lang/IllegalStateException.html" title="class or interface in java.lang" class="external-link">IllegalStateException</a></code> - if this variable doesn't support the operation, or if
+ value is incompatible</dd>
 </dl>
 </section>
 </li>
@@ -944,12 +979,13 @@ loadScripts(document, 'script');</script>
  constant, and assign the result to a new variable.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
-<dd><code>value</code> - a Variable or a constant</dd>
+<dd><code>value</code> - a <code>Variable</code> or a constant</dd>
 <dt>Returns:</dt>
 <dd>the result in a new variable, with the same type as this one</dd>
 <dt>Throws:</dt>
-<dd><code><a href="https://docs.oracle.com/en/java/javase/16/docs/api/java.base/java/lang/IllegalStateException.html" title="class or interface in java.lang" class="external-link">IllegalStateException</a></code> - if this variable doesn't support the operation</dd>
-<dd><code><a href="https://docs.oracle.com/en/java/javase/16/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if value is incompatible</dd>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/16/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if not given a variable or a constant</dd>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/16/docs/api/java.base/java/lang/IllegalStateException.html" title="class or interface in java.lang" class="external-link">IllegalStateException</a></code> - if this variable doesn't support the operation, or if
+ value is incompatible</dd>
 </dl>
 </section>
 </li>
@@ -999,7 +1035,7 @@ loadScripts(document, 'script');</script>
 <div class="block">Access an element from this array.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
-<dd><code>index</code> - variable or constant</dd>
+<dd><code>index</code> - <code>Variable</code> or constant</dd>
 <dt>Returns:</dt>
 <dd>the result in a new variable</dd>
 <dt>Throws:</dt>
@@ -1015,11 +1051,11 @@ loadScripts(document, 'script');</script>
 <div class="block">Set an element into this array.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
-<dd><code>index</code> - variable or constant</dd>
-<dd><code>value</code> - variable or constant to assign</dd>
+<dd><code>index</code> - <code>Variable</code> or constant</dd>
+<dd><code>value</code> - <code>Variable</code> or constant to assign</dd>
 <dt>Throws:</dt>
-<dd><code><a href="https://docs.oracle.com/en/java/javase/16/docs/api/java.base/java/lang/IllegalStateException.html" title="class or interface in java.lang" class="external-link">IllegalStateException</a></code> - if not an array type</dd>
-<dd><code><a href="https://docs.oracle.com/en/java/javase/16/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if type doesn't match</dd>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/16/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if not given a variable or a constant</dd>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/16/docs/api/java.base/java/lang/IllegalStateException.html" title="class or interface in java.lang" class="external-link">IllegalStateException</a></code> - if not an array type, or if type doesn't match</dd>
 </dl>
 </section>
 </li>
@@ -1032,7 +1068,7 @@ loadScripts(document, 'script');</script>
 <dt>Parameters:</dt>
 <dd><code>name</code> - field name</dd>
 <dt>Throws:</dt>
-<dd><code><a href="https://docs.oracle.com/en/java/javase/16/docs/api/java.base/java/lang/IllegalStateException.html" title="class or interface in java.lang" class="external-link">IllegalStateException</a></code> - if this variable isn't an object type</dd>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/16/docs/api/java.base/java/lang/IllegalStateException.html" title="class or interface in java.lang" class="external-link">IllegalStateException</a></code> - if field isn't found</dd>
 </dl>
 </section>
 </li>
@@ -1046,7 +1082,7 @@ loadScripts(document, 'script');</script>
 <dt>Parameters:</dt>
 <dd><code>name</code> - method name
 type</dd>
-<dd><code>values</code> - variables or constants</dd>
+<dd><code>values</code> - <code>Variables</code> or constants</dd>
 <dt>Returns:</dt>
 <dd>the result of the method, which is null if void</dd>
 <dt>Throws:</dt>
@@ -1070,7 +1106,7 @@ type</dd>
  type
  type</dd>
 <dd><code>types</code> - method parameter types; can be null to infer from the values</dd>
-<dd><code>values</code> - variables or constants</dd>
+<dd><code>values</code> - <code>Variables</code> or constants</dd>
 <dt>Returns:</dt>
 <dd>the result of the method, which is null if void</dd>
 <dt>Throws:</dt>

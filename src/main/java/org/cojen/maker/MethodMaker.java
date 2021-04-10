@@ -277,7 +277,7 @@ public interface MethodMaker {
     /**
      * Generates a statement which returns a variable or a constant.
      *
-     * @param value variable or constant
+     * @param value {@code Variable} or constant
      * @throws IllegalArgumentException if not given a variable or a constant
      * @throws IllegalStateException if method must return void
      */
@@ -296,7 +296,7 @@ public interface MethodMaker {
      *
      * @param name the method name
      * enclosing class
-     * @param values variables or constants
+     * @param values {@code Variables} or constants
      * @return the result of the method, which is null if void
      * @throws IllegalArgumentException if not given a variable or a constant
      * @throws IllegalStateException if method isn't found
@@ -308,7 +308,7 @@ public interface MethodMaker {
      * Invoke a super class constructor method on the enclosing object of this method, from
      * within a constructor.
      *
-     * @param values variables or constants
+     * @param values {@code Variables} or constants
      * @throws IllegalArgumentException if not given a variable or a constant
      * @throws IllegalStateException if not defining a constructor, or if a matching
      * constructor isn't found
@@ -319,7 +319,7 @@ public interface MethodMaker {
      * Invoke a this constructor method on the enclosing object of this method, from within a
      * constructor.
      *
-     * @param values variables or constants
+     * @param values {@code Variables} or constants
      * @throws IllegalArgumentException if not given a variable or a constant
      * @throws IllegalStateException if not defining a constructor, or if a matching
      * constructor isn't found
@@ -331,7 +331,7 @@ public interface MethodMaker {
      * ClassMaker#beginExternal externally}, the handle must be truly {@code Constable}.
      *
      * @param handle runtime method handle
-     * @param values variables or constants
+     * @param values {@code Variables} or constants
      * @return the result of the method, which is null if void
      * @throws IllegalArgumentException if not given a variable or a constant
      * @throws IllegalStateException if defining an external class and the handle isn't truly
@@ -345,7 +345,7 @@ public interface MethodMaker {
      * array dimension sizes.
      *
      * @param type class name or {@code Class} instance
-     * @param values variables or constants
+     * @param values {@code Variables} or constants
      * @return the new object
      * @throws IllegalArgumentException if the type is unsupported
      * @throws IllegalStateException if constructor isn't found
@@ -375,7 +375,7 @@ public interface MethodMaker {
      * matter as the Java concatenation operator. If no values are given, the returned variable
      * will refer to the empty string.
      *
-     * @param values variables or constants
+     * @param values {@code Variables} or constants
      * @return the result in a new {@code String} variable
      * @throws IllegalArgumentException if not given a variable or a constant
      */
@@ -396,7 +396,7 @@ public interface MethodMaker {
      * invoke} method.
      *
      * @param handle runtime variable handle
-     * @param values variables or constants for each coordinate
+     * @param values {@code Variables} or constants for each coordinate
      * @return a pseudo field which accesses the variable
      * @throws IllegalArgumentException if not given a variable or a constant, or if the number
      * of values doesn't match the number of coordinates

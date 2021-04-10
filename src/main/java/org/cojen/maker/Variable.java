@@ -60,10 +60,10 @@ public interface Variable {
      * Constable} is also treated specially &mdash; the actual type is determined by the
      * resolved constant.
      *
-     * @param value a Variable or a constant
+     * @param value a {@code Variable} or a constant
      * @return this variable
-     * @throws IllegalStateException if this variable cannot be modified
-     * @throws IllegalArgumentException if the value type is unsupported, or if it's not
+     * @throws IllegalArgumentException if not given a variable or a constant
+     * @throws IllegalStateException if this variable cannot be modified, or if it's not
      * compatible with the variable type
      */
     public Variable set(Object value);
@@ -102,7 +102,8 @@ public interface Variable {
      * Conditional goto if this variable is equal to another variable or constant. The label
      * doesn't need to be positioned yet.
      *
-     * @param value other variable or a constant
+     * @param value other {@code Variable} or a constant
+     * @throws IllegalArgumentException if not given a variable or a constant
      */
     public void ifEq(Object value, Label label);
 
@@ -110,7 +111,8 @@ public interface Variable {
      * Conditional goto if this variable is not equal to another variable or constant. The
      * label doesn't need to be positioned yet.
      *
-     * @param value other variable or a constant
+     * @param value other {@code Variable} or a constant
+     * @throws IllegalArgumentException if not given a variable or a constant
      */
     public void ifNe(Object value, Label label);
 
@@ -118,7 +120,8 @@ public interface Variable {
      * Conditional goto if this variable is less than another variable or constant. The label
      * doesn't need to be positioned yet.
      *
-     * @param value other variable or a constant
+     * @param value other {@code Variable} or a constant
+     * @throws IllegalArgumentException if not given a variable or a constant
      */
     public void ifLt(Object value, Label label);
 
@@ -126,7 +129,8 @@ public interface Variable {
      * Conditional goto if this variable is greater than or equal to another variable or
      * constant. The label doesn't need to be positioned yet.
      *
-     * @param value other variable or a constant
+     * @param value other {@code Variable} or a constant
+     * @throws IllegalArgumentException if not given a variable or a constant
      */
     public void ifGe(Object value, Label label);
 
@@ -134,7 +138,8 @@ public interface Variable {
      * Conditional goto if this variable is greater than another variable or constant. The
      * label doesn't need to be positioned yet.
      *
-     * @param value other variable or a constant
+     * @param value other {@code Variable} or a constant
+     * @throws IllegalArgumentException if not given a variable or a constant
      */
     public void ifGt(Object value, Label label);
 
@@ -142,7 +147,8 @@ public interface Variable {
      * Conditional goto if this variable is less than or equal to another variable or
      * constant. The label doesn't need to be positioned yet.
      *
-     * @param value other variable or a constant
+     * @param value other {@code Variable} or a constant
+     * @throws IllegalArgumentException if not given a variable or a constant
      */
     public void ifLe(Object value, Label label);
 
@@ -161,9 +167,10 @@ public interface Variable {
      * Add this variable with another variable or a constant, and assign the result back to
      * this variable.
      *
-     * @param value a Variable or a constant
-     * @throws IllegalStateException if this variable doesn't support the operation
-     * @throws IllegalArgumentException if value is incompatible
+     * @param value a {@code Variable} or a constant
+     * @throws IllegalArgumentException if not given a variable or a constant
+     * @throws IllegalStateException if this variable doesn't support the operation, or if
+     * value is incompatible
      */
     public void inc(Object value);
 
@@ -171,10 +178,11 @@ public interface Variable {
      * Add this variable with another variable or a constant, and assign the result to a new
      * variable.
      *
-     * @param value a Variable or a constant
+     * @param value a {@code Variable} or a constant
      * @return the result in a new variable, with the same type as this one
-     * @throws IllegalStateException if this variable doesn't support the operation
-     * @throws IllegalArgumentException if value is incompatible
+     * @throws IllegalArgumentException if not given a variable or a constant
+     * @throws IllegalStateException if this variable doesn't support the operation, or if
+     * value is incompatible
      */
     public Variable add(Object value);
 
@@ -182,10 +190,11 @@ public interface Variable {
      * Subtract this variable with another variable or a constant, and assign the result to a
      * new variable.
      *
-     * @param value a Variable or a constant
+     * @param value a {@code Variable} or a constant
      * @return the result in a new variable, with the same type as this one
-     * @throws IllegalStateException if this variable doesn't support the operation
-     * @throws IllegalArgumentException if value is incompatible
+     * @throws IllegalArgumentException if not given a variable or a constant
+     * @throws IllegalStateException if this variable doesn't support the operation, or if
+     * value is incompatible
      */
     public Variable sub(Object value);
 
@@ -193,10 +202,11 @@ public interface Variable {
      * Multiply this variable with another variable or a constant, and assign the result to a
      * new variable.
      *
-     * @param value a Variable or a constant
+     * @param value a {@code Variable} or a constant
      * @return the result in a new variable, with the same type as this one
-     * @throws IllegalStateException if this variable doesn't support the operation
-     * @throws IllegalArgumentException if value is incompatible
+     * @throws IllegalArgumentException if not given a variable or a constant
+     * @throws IllegalStateException if this variable doesn't support the operation, or if
+     * value is incompatible
      */
     public Variable mul(Object value);
 
@@ -204,10 +214,11 @@ public interface Variable {
      * Divide this variable with another variable or a constant, and assign the result to a
      * new variable.
      *
-     * @param value a Variable or a constant
+     * @param value a {@code Variable} or a constant
      * @return the result in a new variable, with the same type as this one
-     * @throws IllegalStateException if this variable doesn't support the operation
-     * @throws IllegalArgumentException if value is incompatible
+     * @throws IllegalArgumentException if not given a variable or a constant
+     * @throws IllegalStateException if this variable doesn't support the operation, or if
+     * value is incompatible
      */
     public Variable div(Object value);
 
@@ -215,10 +226,11 @@ public interface Variable {
      * Compute the division remainder of this variable with another variable or a constant,
      * and assign the result to a new variable.
      *
-     * @param value a Variable or a constant
+     * @param value a {@code Variable} or a constant
      * @return the result in a new variable, with the same type as this one
-     * @throws IllegalStateException if this variable doesn't support the operation
-     * @throws IllegalArgumentException if value is incompatible
+     * @throws IllegalArgumentException if not given a variable or a constant
+     * @throws IllegalStateException if this variable doesn't support the operation, or if
+     * value is incompatible
      */
     public Variable rem(Object value);
 
@@ -226,8 +238,9 @@ public interface Variable {
      * Determine if this variable is equal to another variable or constant, and assign
      * the result to a new boolean variable.
      *
-     * @param value other variable or a constant
+     * @param value other {@code Variable} or a constant
      * @return the result in a new boolean variable
+     * @throws IllegalArgumentException if not given a variable or a constant
      * @see #ifEq
      */
     public Variable eq(Object value);
@@ -236,8 +249,9 @@ public interface Variable {
      * Determine if this variable is not equal to another variable or constant, and assign the
      * result to a new boolean variable.
      *
-     * @param value other variable or a constant
+     * @param value other {@code Variable} or a constant
      * @return the result in a new boolean variable
+     * @throws IllegalArgumentException if not given a variable or a constant
      * @see #ifNe
      */
     public Variable ne(Object value);
@@ -246,8 +260,9 @@ public interface Variable {
      * Determine if this variable is less than to another variable or constant, and assign the
      * result to a new boolean variable.
      *
-     * @param value other variable or a constant
+     * @param value other {@code Variable} or a constant
      * @return the result in a new boolean variable
+     * @throws IllegalArgumentException if not given a variable or a constant
      * @see #ifLt
      */
     public Variable lt(Object value);
@@ -256,8 +271,9 @@ public interface Variable {
      * Determine if this variable is greater than or equal to another variable or constant, and
      * assign the result to a new boolean variable.
      *
-     * @param value other variable or a constant
+     * @param value other {@code Variable} or a constant
      * @return the result in a new boolean variable
+     * @throws IllegalArgumentException if not given a variable or a constant
      * @see #ifGe
      */
     public Variable ge(Object value);
@@ -266,8 +282,9 @@ public interface Variable {
      * Determine if this variable is greater than to another variable or constant, and assign
      * the result to a new boolean variable.
      *
-     * @param value other variable or a constant
+     * @param value other {@code Variable} or a constant
      * @return the result in a new boolean variable
+     * @throws IllegalArgumentException if not given a variable or a constant
      * @see #ifGt
      */
     public Variable gt(Object value);
@@ -276,8 +293,9 @@ public interface Variable {
      * Determine if this variable is less than or equal to another variable or constant, and
      * assign the result to a new boolean variable.
      *
-     * @param value other variable or a constant
+     * @param value other {@code Variable} or a constant
      * @return the result in a new boolean variable
+     * @throws IllegalArgumentException if not given a variable or a constant
      * @see #ifLe
      */
     public Variable le(Object value);
@@ -312,10 +330,11 @@ public interface Variable {
      * Compute the bitwise and of this variable with another variable or a constant, and assign
      * the result to a new variable.
      *
-     * @param value a Variable or a constant
+     * @param value a {@code Variable} or a constant
      * @return the result in a new variable, with the same type as this one
-     * @throws IllegalStateException if this variable doesn't support the operation
-     * @throws IllegalArgumentException if value is incompatible
+     * @throws IllegalArgumentException if not given a variable or a constant
+     * @throws IllegalStateException if this variable doesn't support the operation, or if
+     * value is incompatible
      */
     public Variable and(Object value);
 
@@ -323,10 +342,11 @@ public interface Variable {
      * Compute the bitwise or of this variable with another variable or a constant, and assign
      * the result to a new variable.
      *
-     * @param value a Variable or a constant
+     * @param value a {@code Variable} or a constant
      * @return the result in a new variable, with the same type as this one
-     * @throws IllegalStateException if this variable doesn't support the operation
-     * @throws IllegalArgumentException if value is incompatible
+     * @throws IllegalArgumentException if not given a variable or a constant
+     * @throws IllegalStateException if this variable doesn't support the operation, or if
+     * value is incompatible
      */
     public Variable or(Object value);
 
@@ -334,10 +354,11 @@ public interface Variable {
      * Compute the bitwise xor of this variable with another variable or a constant, and assign
      * the result to a new variable.
      *
-     * @param value a Variable or a constant
+     * @param value a {@code Variable} or a constant
      * @return the result in a new variable, with the same type as this one
-     * @throws IllegalStateException if this variable doesn't support the operation
-     * @throws IllegalArgumentException if value is incompatible
+     * @throws IllegalArgumentException if not given a variable or a constant
+     * @throws IllegalStateException if this variable doesn't support the operation, or if
+     * value is incompatible
      */
     public Variable xor(Object value);
 
@@ -345,10 +366,11 @@ public interface Variable {
      * Compute the bitwise left shift of this variable with another variable or a constant, and
      * assign the result to a new variable.
      *
-     * @param value a Variable or a constant
+     * @param value a {@code Variable} or a constant
      * @return the result in a new variable, with the same type as this one
-     * @throws IllegalStateException if this variable doesn't support the operation
-     * @throws IllegalArgumentException if value is incompatible
+     * @throws IllegalArgumentException if not given a variable or a constant
+     * @throws IllegalStateException if this variable doesn't support the operation, or if
+     * value is incompatible
      */
     public Variable shl(Object value);
 
@@ -356,10 +378,11 @@ public interface Variable {
      * Compute the bitwise right shift of this variable with another variable or a constant,
      * and assign the result to a new variable.
      *
-     * @param value a Variable or a constant
+     * @param value a {@code Variable} or a constant
      * @return the result in a new variable, with the same type as this one
-     * @throws IllegalStateException if this variable doesn't support the operation
-     * @throws IllegalArgumentException if value is incompatible
+     * @throws IllegalArgumentException if not given a variable or a constant
+     * @throws IllegalStateException if this variable doesn't support the operation, or if
+     * value is incompatible
      */
     public Variable shr(Object value);
 
@@ -367,10 +390,11 @@ public interface Variable {
      * Compute the bitwise unsigned right shift of this variable with another variable or a
      * constant, and assign the result to a new variable.
      *
-     * @param value a Variable or a constant
+     * @param value a {@code Variable} or a constant
      * @return the result in a new variable, with the same type as this one
-     * @throws IllegalStateException if this variable doesn't support the operation
-     * @throws IllegalArgumentException if value is incompatible
+     * @throws IllegalArgumentException if not given a variable or a constant
+     * @throws IllegalStateException if this variable doesn't support the operation, or if
+     * value is incompatible
      */
     public Variable ushr(Object value);
 
@@ -401,7 +425,7 @@ public interface Variable {
     /**
      * Access an element from this array.
      *
-     * @param index variable or constant
+     * @param index {@code Variable} or constant
      * @return the result in a new variable
      * @throws IllegalStateException if not an array type
      */
@@ -410,10 +434,10 @@ public interface Variable {
     /**
      * Set an element into this array.
      *
-     * @param index variable or constant
-     * @param value variable or constant to assign
-     * @throws IllegalStateException if not an array type
-     * @throws IllegalArgumentException if type doesn't match
+     * @param index {@code Variable} or constant
+     * @param value {@code Variable} or constant to assign
+     * @throws IllegalArgumentException if not given a variable or a constant
+     * @throws IllegalStateException if not an array type, or if type doesn't match
      */
     public void aset(Object index, Object value);
 
@@ -421,7 +445,7 @@ public interface Variable {
      * Access a static or instance field from the object referred to by this variable.
      *
      * @param name field name
-     * @throws IllegalStateException if this variable isn't an object type
+     * @throws IllegalStateException if field isn't found
      */
     public Field field(String name);
 
@@ -430,7 +454,7 @@ public interface Variable {
      *
      * @param name method name
      *type
-     * @param values variables or constants
+     * @param values {@code Variables} or constants
      * @return the result of the method, which is null if void
      * @throws IllegalArgumentException if not given a variable or a constant
      * @throws IllegalStateException if method isn't found
@@ -445,7 +469,7 @@ public interface Variable {
      * type
      * type
      * @param types method parameter types; can be null to infer from the values
-     * @param values variables or constants
+     * @param values {@code Variables} or constants
      * @return the result of the method, which is null if void
      * @throws IllegalArgumentException if not given a variable or a constant
      * @throws IllegalStateException if method isn't found
