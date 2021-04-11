@@ -16,8 +16,6 @@
 
 package org.cojen.maker;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
@@ -567,18 +565,7 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
         }
 
         if (DEBUG) {
-            File file = new File(name().replace('.', '/') + ".class");
-            try {
-                File tempDir = new File(System.getProperty("java.io.tmpdir"));
-                file = new File(tempDir, file.getPath());
-                file.getParentFile().mkdirs();
-                System.out.println("ClassMaker writing to " + file);
-                try (var out = new FileOutputStream(file)) {
-                    out.write(bytes);
-                }
-            } catch (Exception e) {
-                e.printStackTrace(System.out);
-            }
+            DebugWriter.write(name(), bytes);
         }
 
         return bytes;
