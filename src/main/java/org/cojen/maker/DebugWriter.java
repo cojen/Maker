@@ -32,7 +32,7 @@ class DebugWriter {
     }
 
     static void write(String className, byte[] bytes) {
-        File file = new File(className.replace('.', '/') + '(' + next() + ").class");
+        File file = new File("ClassMaker/" + className + '(' + next() + ").class");
         try {
             File tempDir = new File(System.getProperty("java.io.tmpdir"));
             file = new File(tempDir, file.getPath());
