@@ -1391,6 +1391,8 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                 pushConstant(((Byte) value).byteValue(), type);
             } else if (value instanceof Short) {
                 pushConstant(((Short) value).shortValue(), type);
+            } else {
+                throw new AssertionError();
             }
         } else if (value instanceof Boolean) {
             pushConstant(((Boolean) value) ? 1 : 0, type);
