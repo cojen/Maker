@@ -398,6 +398,11 @@ public class UsageTest {
         } catch (IllegalStateException e) {
             check(e, "Incomparable");
         }
+        try {
+            mm.var(String.class).gt(null);
+            fail();
+        } catch (NullPointerException e) {
+        }
     }
 
     @Test

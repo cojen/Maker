@@ -302,6 +302,14 @@ public class TypeTest {
         cm = ClassMaker.begin().public_();
         mm = cm.addMethod(v, "test").public_().static_();
         var v2 = mm.var(v);
+
+        try {
+            v2.cast(int.class);
+            fail();
+        } catch (IllegalStateException e) {
+            assertTrue(e.getMessage().startsWith("Unsupported"));
+        }
+
         mm.return_(v2);
 
         cm.finish().getMethod("test").invoke(null);

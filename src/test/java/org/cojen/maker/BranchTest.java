@@ -265,6 +265,16 @@ public class BranchTest {
             def.here();
         }
 
+        // illegal
+        try {
+            Label def = mm.label();
+            int[] cases = {0};
+            Label[] labels = {mm.label()};
+            mm.var(Object.class).switch_(def, cases, labels);
+        } catch (IllegalStateException e) {
+            assertTrue(e.getMessage().startsWith("Automatic conversion"));
+        }
+
         var clazz = cm.finish();
         clazz.getMethod("run").invoke(null);
     }
