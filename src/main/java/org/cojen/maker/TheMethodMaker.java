@@ -2362,8 +2362,8 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
      * @return new variable
      */
     private LocalVar addMathOp(String name, byte op, OwnedVar var, Object value) {
-        Type varType = var.type();
-        Type primType = varType.unbox();
+        final Type varType = var.type();
+        final Type primType = varType.unbox();
 
         if (primType == null) {
             throw new IllegalStateException("Cannot " + name + " to a non-numeric type");
@@ -2385,22 +2385,16 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             break;
         }
 
-        Op savepoint = mLastOp;
-        try {
-            addPushOp(primType, var);
+        addPushOp(primType, var);
 
-            int stackPop = 0;
-            if (value != null) {
-                addPushOp(primType, value);
-                stackPop = 1;
-            }
-
-            addBytecodeOp(op, stackPop);
-            addConversionOp(primType, varType);
-        } catch (Throwable e) {
-            rollback(savepoint);
-            throw e;
+        int stackPop = 0;
+        if (value != null) {
+            addPushOp(primType, value);
+            stackPop = 1;
         }
+
+        addBytecodeOp(op, stackPop);
+        addConversionOp(primType, varType);
 
         return storeToNewVar(varType);
     }
@@ -2412,8 +2406,8 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
      * @return new variable
      */
     private LocalVar addLogicalOp(String name, byte op, OwnedVar var, Object value) {
-        Type varType = var.type();
-        Type primType = varType.unbox();
+        final Type varType = var.type();
+        final Type primType = varType.unbox();
 
         if (primType == null) {
             throw new IllegalStateException("Cannot " + name + " to a non-numeric type");
@@ -2431,24 +2425,18 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             throw new IllegalStateException("Cannot " + name + " to a non-integer type");
         }
 
-        Op savepoint = mLastOp;
-        try {
-            addPushOp(primType, var);
+        addPushOp(primType, var);
 
-            if ((op & 0xff) < IAND) {
-                // Second argument to shift instruction is always an int. Note: Automatic
-                // downcast from long could be allowed, but it's not really necessary.
-                addPushOp(INT, value);
-            } else {
-                addPushOp(varType, value);
-            }
-
-            addBytecodeOp(op, 1);
-            addConversionOp(primType, varType);
-        } catch (Throwable e) {
-            rollback(savepoint);
-            throw e;
+        if ((op & 0xff) < IAND) {
+            // Second argument to shift instruction is always an int. Note: Automatic
+            // downcast from long could be allowed, but it's not really necessary.
+            addPushOp(INT, value);
+        } else {
+            addPushOp(varType, value);
         }
+
+        addBytecodeOp(op, 1);
+        addConversionOp(primType, varType);
 
         return storeToNewVar(varType);
     }
