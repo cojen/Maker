@@ -4107,6 +4107,23 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
+        public LocalVar box() {
+            Type type = type().box();
+            push(type);
+            return storeToNewVar(type);
+        }
+
+        @Override
+        public LocalVar unbox() {
+            Type type = type().unbox();
+            if (type == null) {
+                throw new IllegalStateException("Cannot be unboxed");
+            }
+            push(type);
+            return storeToNewVar(type);
+        }
+
+        @Override
         public LocalVar alength() {
             arrayCheck();
             push();

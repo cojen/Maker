@@ -415,6 +415,23 @@ public interface Variable {
     public Variable com();
 
     /**
+     * Box this primitive variable into its object peer. If not a primitive type, then this is
+     * equivalent to calling {@link #get get}.
+     *
+     * @return the result in a new variable
+     */
+    public Variable box();
+
+    /**
+     * Unbox this object variable into its primitive peer. If already a primitive type, then
+     * this is equivalent to calling {@link #get get}.
+     *
+     * @return the result in a new variable
+     * @throws IllegalStateException if cannot be unboxed
+     */
+    public Variable unbox();
+
+    /**
      * Access the length of this array.
      *
      * @return the result in a new int variable

@@ -901,4 +901,39 @@ public class ConvertTest {
         var clazz = cm.finish();
         clazz.getMethod("run").invoke(null);
     }
+
+    @Test
+    public void explicitBoxing() throws Exception {
+        var assertVar = mm.var(Assert.class);
+
+        var v1 = mm.var(int.class).set(10);
+        var v1b = v1.box();
+        assertEquals(Integer.class, v1b.classType());
+        assertVar.invoke("assertTrue", v1b.invoke("getClass").invoke("equals", Integer.class));
+        v1b = v1b.box();
+        assertVar.invoke("assertTrue", v1b.invoke("getClass").invoke("equals", Integer.class));
+
+        var v2 = mm.var(String.class).set("hello");
+        var v2b = v2.box();
+        assertEquals(String.class, v2b.classType());
+        assertVar.invoke("assertTrue", v2b.invoke("getClass").invoke("equals", String.class));
+
+        var v3 = mm.var(Long.class).set(123);
+        var v3u = v3.unbox();
+        assertEquals(long.class, v3u.classType());
+        assertVar.invoke("assertEquals", 123L, v3u);
+        v3u = v3u.unbox();
+        assertVar.invoke("assertEquals", 123L, v3u);
+
+        var v4 = mm.var(String.class).set("hello");
+        try {
+            v4.unbox();
+            fail();
+        } catch (IllegalStateException e) {
+            assertTrue(e.getMessage().contains("Cannot"));
+        }
+
+        var clazz = cm.finish();
+        clazz.getMethod("run").invoke(null);
+    }
 }
