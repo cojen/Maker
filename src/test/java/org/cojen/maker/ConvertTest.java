@@ -730,12 +730,14 @@ public class ConvertTest {
         verify(10f, mm.var(float.class).set(10));
         verify(10.0, mm.var(double.class).set(10));
         verify(10L, mm.var(long.class).set(10));
+        verify('\uaaaa', mm.var(char.class).set(0xaaaa));
  
         verify((byte) 100, mm.var(byte.class).set(100L));
         verify((short) 10_000, mm.var(short.class).set(10_000L));
         verify(10_000_000, mm.var(int.class).set(10_000_000L));
         verify(10f, mm.var(float.class).set(10L));
         verify(10.0d, mm.var(double.class).set(10L));
+        verify('\uaaaa', mm.var(char.class).set(0xaaaaL));
 
         verify((byte) 100, mm.var(byte.class).set(100.0f));
         verify((short) 10_000, mm.var(short.class).set(10_000.0f));
@@ -743,6 +745,7 @@ public class ConvertTest {
         verify(10.0d, mm.var(double.class).set(10.0f));
         verify(10L, mm.var(long.class).set(10.0f));
         verify(0.0d/0.0d, mm.var(float.class).set(0.0f/0.0f));
+        verify('\uaaaa', mm.var(char.class).set((float) 0xaaaa));
 
         verify((byte) 100, mm.var(byte.class).set(100.0d));
         verify((short) 10_000, mm.var(short.class).set(10_000.0d));
@@ -750,18 +753,28 @@ public class ConvertTest {
         verify(10L, mm.var(long.class).set(10.0d));
         verify(10.0f, mm.var(float.class).set(10.0d));
         verify(0.0f/0.0f, mm.var(float.class).set(0.0d/0.0d));
-        
+        verify('\uaaaa', mm.var(char.class).set((double) 0xaaaa));
+
         verify((short) -10, mm.var(short.class).set((byte) -10));
         verify(100, mm.var(int.class).set((byte) 100));
         verify(10f, mm.var(float.class).set((byte) 10));
         verify(10.0, mm.var(double.class).set((byte) 10));
         verify(10L, mm.var(long.class).set((byte) 10));
+        verify('A', mm.var(char.class).set((byte) 65));
 
         verify((byte) 100, mm.var(byte.class).set((short) 100));
         verify(10_000, mm.var(int.class).set((short) 10_000));
         verify(10f, mm.var(float.class).set((short) 10));
         verify(10.0, mm.var(double.class).set((short) 10));
         verify(10L, mm.var(long.class).set((short) 10));
+        verify('\u1111', mm.var(char.class).set((short) 0x1111));
+
+        verify((byte) 65, mm.var(byte.class).set('A'));
+        verify((short) 0x1111, mm.var(short.class).set('\u1111'));
+        verify(0xaaaa, mm.var(int.class).set('\uaaaa'));
+        verify(0xaaaaL, mm.var(long.class).set('\uaaaa'));
+        verify((float) 0xaaaa, mm.var(float.class).set('\uaaaa'));
+        verify((double) 0xaaaa, mm.var(double.class).set('\uaaaa'));
 
         var clazz = cm.finish();
         clazz.getMethod("run").invoke(null);
@@ -880,7 +893,79 @@ public class ConvertTest {
         }
 
         try {
+            mm.var(char.class).set((short) -1);
+            fail();
+        } catch (IllegalStateException e) {
+        }
+
+        try {
+            mm.var(char.class).set((double) -1);
+            fail();
+        } catch (IllegalStateException e) {
+        }
+
+        try {
+            mm.var(char.class).set((double) 65536);
+            fail();
+        } catch (IllegalStateException e) {
+        }
+
+        try {
+            mm.var(char.class).set((float) -1);
+            fail();
+        } catch (IllegalStateException e) {
+        }
+
+        try {
+            mm.var(char.class).set((float) 65536);
+            fail();
+        } catch (IllegalStateException e) {
+        }
+
+        try {
+            mm.var(char.class).set((long) -1);
+            fail();
+        } catch (IllegalStateException e) {
+        }
+
+        try {
+            mm.var(char.class).set((long) 65536);
+            fail();
+        } catch (IllegalStateException e) {
+        }
+
+        try {
+            mm.var(char.class).set(-1);
+            fail();
+        } catch (IllegalStateException e) {
+        }
+
+        try {
+            mm.var(char.class).set(65536);
+            fail();
+        } catch (IllegalStateException e) {
+        }
+
+        try {
+            mm.var(short.class).set('\uffff');
+            fail();
+        } catch (IllegalStateException e) {
+        }
+
+        try {
+            mm.var(byte.class).set('\u0080');
+            fail();
+        } catch (IllegalStateException e) {
+        }
+
+        try {
             mm.var(byte.class).set((short) 10_000);
+            fail();
+        } catch (IllegalStateException e) {
+        }
+
+        try {
+            mm.var(boolean.class).set((byte) 0);
             fail();
         } catch (IllegalStateException e) {
         }

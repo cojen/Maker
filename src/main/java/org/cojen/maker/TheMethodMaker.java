@@ -1905,6 +1905,13 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                         value = (long) v;
                         constantType = LONG;
                         break;
+                    case T_CHAR:
+                        char cv = (char) v;
+                        if ((int) cv == v) {
+                            value = cv;
+                            constantType = CHAR;
+                        }
+                        break;
                     }
                 }
             } else if (value instanceof Long) {
@@ -1947,6 +1954,13 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                             constantType = DOUBLE;
                         }
                         break;
+                    case T_CHAR:
+                        char cv = (char) v;
+                        if ((long) cv == v) {
+                            value = cv;
+                            constantType = CHAR;
+                        }
+                        break;
                     }
                 }
             } else if (value instanceof Float) {
@@ -1985,6 +1999,13 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                     case T_DOUBLE:
                         value = (double) v;
                         constantType = DOUBLE;
+                        break;
+                    case T_CHAR:
+                        char cv = (char) v;
+                        if ((float) cv == v) {
+                            value = cv;
+                            constantType = CHAR;
+                        }
                         break;
                     }
                 }
@@ -2028,6 +2049,13 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                             constantType = LONG;
                         }
                         break;
+                    case T_CHAR:
+                        char cv = (char) v;
+                        if ((double) cv == v) {
+                            value = cv;
+                            constantType = CHAR;
+                        }
+                        break;
                     }
                 }
             } else if (value instanceof Byte) {
@@ -2055,6 +2083,12 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                         value = (double) v;
                         constantType = DOUBLE;
                         break;
+                    case T_CHAR:
+                        if (v >= 0) {
+                            value = (char) v;
+                            constantType = CHAR;
+                        }
+                        break;
                     }
                 }
             } else if (value instanceof Short) {
@@ -2065,7 +2099,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                     case T_BYTE:
                         byte bv = (byte) v;
                         if ((short) bv == v) {
-                            value = (bv);
+                            value = bv;
                             constantType = BYTE;
                         }
                         break;
@@ -2085,6 +2119,12 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                         value = (double) v;
                         constantType = DOUBLE;
                         break;
+                    case T_CHAR:
+                        if (v >= 0) {
+                            value = (char) v;
+                            constantType = CHAR;
+                        }
+                        break;
                     }
                 }
             } else {
@@ -2094,6 +2134,39 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             constantType = BOOLEAN;
         } else if (value instanceof Character) {
             constantType = CHAR;
+            if (type != null) {
+                char v = (Character) value;
+                switch (type.unboxTypeCode()) {
+                case T_BYTE:
+                    if (v < 128) {
+                        value = (byte) v;
+                        constantType = BYTE;
+                    }
+                    break;
+                case T_SHORT:
+                    if (v < 32768) {
+                        value = (short) v;
+                        constantType = SHORT;
+                    }
+                    break;
+                case T_INT:
+                    value = (int) v;
+                    constantType = INT;
+                    break;
+                case T_FLOAT:
+                    value = (float) v;
+                    constantType = FLOAT;
+                    break;
+                case T_LONG:
+                    value = (long) v;
+                    constantType = LONG;
+                    break;
+                case T_DOUBLE:
+                    value = (double) v;
+                    constantType = DOUBLE;
+                    break;
+                }
+            }
         } else if (value instanceof Type) {
             constantType = Type.from(Class.class);
             Type actualType = (Type) value;
