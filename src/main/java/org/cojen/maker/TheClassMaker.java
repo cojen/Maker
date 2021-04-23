@@ -686,7 +686,7 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
 
     private void checkFinished() {
         if (mFinished < 0) {
-            throw new IllegalStateException("Class definition is finished");
+            throw new IllegalStateException("Class definition is already finished");
         }
     }
 
