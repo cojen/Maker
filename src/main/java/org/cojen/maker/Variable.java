@@ -470,7 +470,6 @@ public interface Variable {
      * Invoke a static or instance method on the object referenced by this variable.
      *
      * @param name method name
-     *type
      * @param values {@code Variables} or constants
      * @return the result of the method, which is null if void
      * @throws IllegalArgumentException if not given a variable or a constant
@@ -483,7 +482,6 @@ public interface Variable {
      *
      * @param returnType method return type
      * @param name method name; can be {@code ".new"} to construct an instance of this variable
-     * type
      * type
      * @param types method parameter types; can be null to infer from the values
      * @param values {@code Variables} or constants
