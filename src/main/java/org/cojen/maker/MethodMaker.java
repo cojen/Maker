@@ -22,8 +22,7 @@ import java.lang.invoke.MethodType;
 import java.lang.invoke.VarHandle;
 
 /**
- * Allows new methods to be defined within a class. {@code MethdodMaker} instances aren't
- * thread-safe.
+ * Allows new methods to be defined within a class.
  *
  * @author Brian S O'Neill
  * @see ClassMaker#addMethod

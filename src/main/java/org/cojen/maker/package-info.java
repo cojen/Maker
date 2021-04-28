@@ -30,10 +30,6 @@
  * clazz.getMethod("run").invoke(null);
  * }</pre></blockquote>
  *
- * <p>The classes which implement the interfaces in this package aren't designed to be
- * thread-safe. Only one thread at a time should be interacting with a {@code ClassMaker}
- * instance and any other objects that affect its state.
- *
  * <h2>Types and Values</h2>
  *
  * The API supports many different kinds of data types and values. To keep things simple, types
@@ -119,6 +115,26 @@
  * Automatic widening rules are stricter than what the Java language permits. In particular,
  * {@code int} cannot be automatically widened to {@code float}, and {@code long} cannot be
  * automatically widened to {@code double}. For these cases, an explicit cast is required.
+ * In addition, a calculation on a small primitive type doesn't automatically get converted to
+ * {@code int}:
+ * <blockquote><pre>{@code
+ *     // Make an unsigned conversion: int a = bytes[i] & 0xff;
+ *     // Without the cast, the 'and' operation only accepts a byte, and the result would be a byte.
+ *     var aVar = bytesVar.aget(iVar).cast(int.class).and(0xff);
+ * }</pre></blockquote>
+ *
+ * Narrowing of primitive constants is performed automatically if no information would be lost
+ * in the conversion. If the above example didn't have an explicit cast, passing the {@code
+ * 0xff} constant to an operation which accepts a {@code byte} would cause an exception to be
+ * thrown at code generation time.  This is because bytes are signed, and {@code 0xff} is out
+ * of bounds. A constant of {@code -1} would be accepted, although it wouldn't correctly
+ * perform an unsigned conversion.
+ *
+ * <h2>Thread safety</h2>
+ *
+ * <p>The classes which implement the interfaces in this package aren't designed to be
+ * thread-safe. Only one thread at a time should be interacting with a {@code ClassMaker}
+ * instance and any other objects that affect its state.
  *
  * @see ClassMaker#begin()
  */

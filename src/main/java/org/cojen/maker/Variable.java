@@ -17,8 +17,7 @@
 package org.cojen.maker;
 
 /**
- * Represents a variable bound to a body of a {@link MethodMaker method}. {@code Variable}
- * instances aren't thread-safe.
+ * Represents a variable bound to a body of a {@link MethodMaker method}.
  *
  * @author Brian S O'Neill
  * @see MethodMaker#var
