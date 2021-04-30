@@ -1764,7 +1764,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
     private void growSpace(int require) {
         int newLen = Math.max(mCode.length + require, mCode.length << 1);
-        newLen = Math.min(newLen, 65536);
+        newLen = Math.min(newLen, 65535);
         if (newLen <= mCode.length) {
             throw new IllegalStateException("Code limit reached");
         }
