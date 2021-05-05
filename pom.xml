@@ -5,7 +5,7 @@
   <artifactId>cojen-maker</artifactId>
   <packaging>jar</packaging>
   <name>Maker</name>
- <version>1.0.0</version>
+ <version>1.0.1</version>
   <description>
     Dynamic Java class file generator.
   </description>
@@ -21,8 +21,8 @@
 
   <properties>
     <!--  compiler settings -->
-    <maven.compiler.source>11</maven.compiler.source>
-    <maven.compiler.target>11</maven.compiler.target>
+    <maven.compiler.source>12</maven.compiler.source>
+    <maven.compiler.target>12</maven.compiler.target>
 
     <!-- encoding -->
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
