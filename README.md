@@ -15,6 +15,7 @@ Class<?> clazz = cm.finish();
 clazz.getMethod("run").invoke(null);
 ```
 
+- [Javadocs](https://cojen.github.io/Maker/javadoc/org.cojen.maker/org/cojen/maker/package-summary.html)
 - [Coding patterns](docs/CodingPatterns.md)
 - [Examples](example/main/java/org/cojen/example)
 
