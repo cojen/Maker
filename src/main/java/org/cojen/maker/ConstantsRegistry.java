@@ -32,7 +32,7 @@ public class ConstantsRegistry {
 
     static {
         ACCESS_MODE = Runtime.version().feature() >= 16
-            ? MethodHandles.Lookup.ORIGINAL : MethodHandles.Lookup.PRIVATE;
+            ? /*MethodHandles.Lookup.ORIGINAL*/ 64 : MethodHandles.Lookup.PRIVATE;
     }
 
     private static WeakHashMap<Object, Object> cEntries;
