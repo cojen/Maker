@@ -19,17 +19,6 @@
     <url>https://github.com/cojen</url>
   </organization>
 
-  <distributionManagement>
-    <snapshotRepository>
-      <id>ossrh</id>
-      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-    </snapshotRepository>
-    <repository>
-      <id>ossrh</id>
-      <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-    </repository>
-  </distributionManagement>
-
   <properties>
     <!--  compiler settings -->
     <maven.compiler.source>11</maven.compiler.source>
