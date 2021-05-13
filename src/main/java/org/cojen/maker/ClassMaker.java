@@ -24,8 +24,6 @@ import java.lang.invoke.MethodType;
 
 import java.security.ProtectionDomain;
 
-import java.util.Objects;
-
 /**
  * Allows new classes and interfaces to be defined dynamically.
  *
@@ -72,8 +70,11 @@ public interface ClassMaker {
      * @param lookup finish loading the class using this lookup object
      */
     public static ClassMaker begin(String className, MethodHandles.Lookup lookup) {
-        Objects.requireNonNull(lookup);
-        ClassLoader loader = lookup.lookupClass().getClassLoader();
+        Class<?> clazz = lookup.lookupClass();
+        if (className == null) {
+            className = clazz.getName();
+        }
+        ClassLoader loader = clazz.getClassLoader();
         return TheClassMaker.begin(false, className, false, loader, null, lookup);
     }
 
