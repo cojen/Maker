@@ -212,8 +212,12 @@ public interface ClassMaker {
      * Add a constructor to this class.
      *
      * @param type defines the parameter types
+     * @throws IllegalArgumentException if return type isn't void
      */
     public default MethodMaker addConstructor(MethodType type) {
+        if (type.returnType() != void.class) {
+            throw new IllegalArgumentException();
+        }
         return addConstructor((Object[]) type.parameterArray());
     }
 

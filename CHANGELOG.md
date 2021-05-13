@@ -4,6 +4,7 @@ Changelog
 v1.0.3
 ------
 * Default class name when given a lookup must be in the same package.
+* Strict check when adding constructor with a MethodType.
 
 v1.0.2 (2021-05-05)
 ------
