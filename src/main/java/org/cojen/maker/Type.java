@@ -572,18 +572,15 @@ abstract class Type {
 
         var b = new StringBuilder()
             .append("No best matching method found for: ")
-            .append(name()).append('.').append(methodName);
-
-        if (!candidates.isEmpty()) {
-            b.append(". Remaining candidates: ");
-            int amt = 0;
-            for (Type.Method m : candidates) {
-                if (amt > 0) {
-                    b.append(", ");
-                }
-                b.append(m);
-                amt++;
+            .append(name()).append('.').append(methodName)
+            .append(". Remaining candidates: ");
+        int amt = 0;
+        for (Type.Method m : candidates) {
+            if (amt > 0) {
+                b.append(", ");
             }
+            b.append(m);
+            amt++;
         }
 
         throw new IllegalStateException(b.toString());
