@@ -1292,7 +1292,13 @@ abstract class Type {
                 Class clazz = clazz();
                 if (clazz != null) {
                     clazz = clazz.getSuperclass();
-                    if (clazz != null) {
+                    assign: {
+                        if (clazz == null) {
+                            if (!isInterface()) {
+                                break assign;
+                            }
+                            clazz = Object.class;
+                        }
                         mSuperType = superType = from(clazz);
                     }
                 }

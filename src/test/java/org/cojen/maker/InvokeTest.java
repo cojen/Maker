@@ -1293,4 +1293,13 @@ public class InvokeTest {
 
         assertEquals(clazz.getSimpleName() + "[foo=10, bar=hello]", obj.toString());
     }
+
+    @Test
+    public void invokeInterfaceObjectMethod() throws Exception {
+        ClassMaker cm = ClassMaker.begin().public_();
+        MethodMaker mm = cm.addMethod(Object.class, "test", List.class).public_().static_();
+        mm.return_(mm.param(0).invoke("getClass"));
+        var result = cm.finish().getMethod("test", List.class).invoke(null, new ArrayList());
+        assertEquals(ArrayList.class, result);
+    }
 }
