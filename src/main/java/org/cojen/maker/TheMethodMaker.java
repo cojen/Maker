@@ -51,6 +51,8 @@ import static org.cojen.maker.BytesOut.*;
  * @author Brian S O'Neill
  */
 class TheMethodMaker extends ClassMember implements MethodMaker {
+    private static final int MAX_CODE_LENGTH = 65535;
+
     final TheClassMaker mClassMaker;
     final Type.Method mMethod;
 
@@ -205,7 +207,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             mStackMapTable = new StackMapTable(mConstants, initCodes);
         }
 
-        mCode = new byte[Math.min(65536, opCount * 2)];
+        mCode = new byte[Math.min(MAX_CODE_LENGTH, opCount * 2)];
         mStack = new LocalVar[8];
 
         while (true) {
@@ -1764,7 +1766,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
     private void growSpace(int require) {
         int newLen = Math.max(mCode.length + require, mCode.length << 1);
-        newLen = Math.min(newLen, 65535);
+        newLen = Math.min(newLen, MAX_CODE_LENGTH);
         if (newLen <= mCode.length) {
             throw new IllegalStateException("Code limit reached");
         }
