@@ -3797,6 +3797,12 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                 return;
             }
 
+            if (cases.length == 1 && type() == INT) {
+                ifEq(cases[0], labels[0]);
+                goto_(defaultLabel);
+                return;
+            }
+
             Lab defaultLab = target(defaultLabel);
             defaultLab.used();
 

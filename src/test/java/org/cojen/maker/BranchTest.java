@@ -265,6 +265,26 @@ public class BranchTest {
             def.here();
         }
 
+        // tiny
+        {
+            Label def = mm.label();
+            int[] cases = {5};
+            Label[] labels = new Label[cases.length];
+            for (int i=0; i<labels.length; i++) {
+                labels[i] = mm.label();
+            }
+            v1.switch_(def, cases, labels);
+            for (int i=0; i<labels.length; i++) {
+                labels[i].here();
+                if (i != 0) {
+                    assertVar.invoke("fail");
+                }
+                mm.goto_(def);
+            }
+
+            def.here();
+        }
+
         // illegal
         try {
             Label def = mm.label();
