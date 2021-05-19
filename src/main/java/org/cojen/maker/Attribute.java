@@ -92,6 +92,10 @@ abstract class Attribute extends Attributed {
             return mSize;
         }
 
+        protected E entry(int i) {
+            return mEntries[i];
+        }
+
         protected abstract int entryLength();
 
         protected abstract void writeEntryTo(BytesOut out, E e) throws IOException;
@@ -500,6 +504,35 @@ abstract class Attribute extends Attributed {
                 mInnerName = innerName;
                 mInnerMaker = innerMaker;
             }
+        }
+    }
+
+    static class Annotations extends ListAttribute<TheAnnotationMaker> {
+        Annotations(ConstantPool cp, boolean visible) {
+            super(cp, visible ? "RuntimeVisibleAnnotations" : "RuntimeInvisibleAnnotations");
+        }
+
+        void add(TheAnnotationMaker am) {
+            super.addEntry(am);
+        }
+
+        @Override
+        int length() {
+            int length = 2;
+            for (int i=numEntries(); --i>=0; ) {
+                length += entry(i).length();
+            }
+            return length;
+        }
+
+        @Override
+        protected int entryLength() {
+            throw new AssertionError();
+        }
+
+        @Override
+        protected void writeEntryTo(BytesOut out, TheAnnotationMaker am) throws IOException {
+            am.writeTo(out);
         }
     }
 }

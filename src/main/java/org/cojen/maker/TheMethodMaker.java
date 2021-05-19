@@ -1304,6 +1304,11 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     }
 
     @Override
+    public AnnotationMaker addAnnotation(Object annotationType, boolean visible) {
+        return addAnnotation(new TheAnnotationMaker(mClassMaker, annotationType), visible);
+    }
+
+    @Override
     public MethodHandle finish() {
         throw new IllegalStateException("Not a standalone method");
     }

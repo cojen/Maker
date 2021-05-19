@@ -456,6 +456,11 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
     }
 
     @Override
+    public AnnotationMaker addAnnotation(Object annotationType, boolean visible) {
+        return addAnnotation(new TheAnnotationMaker(this, annotationType), visible);
+    }
+
+    @Override
     public ClassMaker sourceFile(String fileName) {
         checkFinished();
         addAttribute(new Attribute.SourceFile(mConstants, fileName));

@@ -176,4 +176,9 @@ final class TheFieldMaker extends ClassMember implements FieldMaker {
         addAttribute(new Attribute.Constant(mConstants, constant));
         return this;
     }
+
+    @Override
+    public AnnotationMaker addAnnotation(Object annotationType, boolean visible) {
+        return addAnnotation(new TheAnnotationMaker(mClassMaker, annotationType), visible);
+    }
 }

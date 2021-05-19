@@ -31,6 +31,8 @@ abstract class Attributed {
 
     List<Attribute> mAttributes;
 
+    private Attribute.Annotations[] mAnnotationSets;
+
     Attributed(ConstantPool cp) {
         mConstants = cp;
     }
@@ -40,6 +42,21 @@ abstract class Attributed {
             mAttributes = new ArrayList<>(4);
         }
         mAttributes.add(attr);
+    }
+
+    TheAnnotationMaker addAnnotation(TheAnnotationMaker am, boolean visible) {
+        if (mAnnotationSets == null) {
+            mAnnotationSets = new Attribute.Annotations[2];
+        }
+        int which = visible ? 0 : 1;
+        Attribute.Annotations annotations = mAnnotationSets[which];
+        if (annotations == null) {
+            annotations = new Attribute.Annotations(mConstants, visible);
+            addAttribute(annotations);
+            mAnnotationSets[which] = annotations;
+        }
+        annotations.add(am);
+        return am;
     }
 
     void writeAttributesTo(BytesOut out) throws IOException {

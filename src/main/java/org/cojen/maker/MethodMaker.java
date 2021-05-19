@@ -424,6 +424,15 @@ public interface MethodMaker {
     public ClassMaker addInnerClass(String className);
 
     /**
+     * Add an annotation to this method.
+     *
+     * @param annotationType name or class which refers to an annotation interface
+     * @param visible true if annotation is visible at runtime
+     * @throws IllegalArgumentException if the annotation type is unsupported
+     */
+    public AnnotationMaker addAnnotation(Object annotationType, boolean visible);
+
+    /**
      * Finishes the definition of a standalone method.
      *
      * @throws IllegalStateException if already finished or if not a standalone method

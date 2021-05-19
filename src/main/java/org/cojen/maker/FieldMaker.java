@@ -95,4 +95,13 @@ public interface FieldMaker {
      * compatible with the field type
      */
     public FieldMaker init(Object value);
+
+    /**
+     * Add an annotation to this field.
+     *
+     * @param annotationType name or class which refers to an annotation interface
+     * @param visible true if annotation is visible at runtime
+     * @throws IllegalArgumentException if the annotation type is unsupported
+     */
+    public AnnotationMaker addAnnotation(Object annotationType, boolean visible);
 }
