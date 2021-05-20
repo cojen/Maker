@@ -3797,13 +3797,21 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                 return;
             }
 
-            if (cases.length == 1 && type() == INT) {
-                ifEq(cases[0], labels[0]);
-                goto_(defaultLabel);
+            Lab defaultLab = target(defaultLabel);
+
+            if (cases.length == 1) {
+                Lab lab = target(labels[0]);
+                push(INT);
+                if (cases[0] == 0) {
+                    addBranchOp(IFEQ, 1, lab);
+                } else {
+                    addOp(new BasicConstantOp(cases[0], INT));
+                    addBranchOp(IF_ICMPEQ, 2, lab);
+                }
+                goto_(defaultLab);
                 return;
             }
 
-            Lab defaultLab = target(defaultLabel);
             defaultLab.used();
 
             Lab[] labs = new Lab[labels.length];

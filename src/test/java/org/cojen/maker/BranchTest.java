@@ -268,20 +268,28 @@ public class BranchTest {
         // tiny
         {
             Label def = mm.label();
+            Label cont = mm.label();
+            var reached = mm.var(boolean.class).set(false);
             int[] cases = {5};
-            Label[] labels = new Label[cases.length];
-            for (int i=0; i<labels.length; i++) {
-                labels[i] = mm.label();
-            }
-            v1.switch_(def, cases, labels);
-            for (int i=0; i<labels.length; i++) {
-                labels[i].here();
-                if (i != 0) {
-                    assertVar.invoke("fail");
-                }
-                mm.goto_(def);
-            }
+            Label[] labels = {mm.label()};
+            v1.cast(Byte.class).switch_(def, cases, labels);
+            labels[0].here();
+            reached.set(true);
+            mm.goto_(cont);
+            def.here();
+            assertVar.invoke("fail");
+            cont.here();
+            assertVar.invoke("assertTrue", reached);
+        }
 
+        // tiny zero
+        {
+            Label def = mm.label();
+            int[] cases = {0};
+            Label[] labels = {mm.label()};
+            v1.cast(Byte.class).switch_(def, cases, labels);
+            labels[0].here();
+            assertVar.invoke("fail");
             def.here();
         }
 
