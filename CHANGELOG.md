@@ -7,6 +7,7 @@ v1.1.0
 * Strict check when adding constructor with a MethodType.
 * Allow methods defined in Object to be invoked on interface instances.
 * Support adding annotations.
+* Switch statements with one case are converted to if statements.
 
 v1.0.2 (2021-05-05)
 ------
