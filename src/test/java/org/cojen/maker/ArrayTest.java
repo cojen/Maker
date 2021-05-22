@@ -116,9 +116,7 @@ public class ArrayTest {
             Label l1 = mm.label().here();
             v1.aset(1, 123);
             assertVar.invoke("fail");
-            mm.return_();
-            Label l2 = mm.label().here();
-            var ex = mm.catch_(l1, l2, ArrayStoreException.class);
+            mm.catch_(l1, ArrayStoreException.class, ex -> {});
         }
 
         cm.finish().getMethod("run").invoke(null);

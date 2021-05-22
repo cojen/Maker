@@ -8,6 +8,7 @@ v1.1.0
 * Allow methods defined in Object to be invoked on interface instances.
 * Support adding annotations.
 * Switch statements with one case are converted to if statements.
+* Add a convenience exception catching method.
 
 v1.0.2 (2021-05-05)
 ------

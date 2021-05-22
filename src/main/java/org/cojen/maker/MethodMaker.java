@@ -21,6 +21,8 @@ import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.lang.invoke.VarHandle;
 
+import java.util.function.Consumer;
+
 /**
  * Allows new methods to be defined within a class.
  *
@@ -358,7 +360,26 @@ public interface MethodMaker {
      * @param type exception type to catch; pass null to catch anything
      * @return a variable which references the exception instance
      */
-    public Variable catch_(Label start, Label end, Object type);
+    public Variable catch_(Label tryStart, Label tryEnd, Object type);
+
+    /**
+     * Convenience method which defines an exception handler here. Code prior to the handler
+     * flows around it.
+     *
+     * @param type exception type to catch; pass null to catch anything
+     * @param handler receives a variable which references the exception instance
+     */
+    public default void catch_(Label tryStart, Object type, Consumer<Variable> handler) {
+        Label cont = label();
+        goto_(cont);
+        Label tryEnd = label().here();
+        Variable exVar = catch_(tryStart, tryEnd, type);
+        try {
+            handler.accept(exVar);
+        } finally {
+            cont.here();
+        }
+    }
 
     /**
      * Define a finally handler which is generated for every possible exit path between the

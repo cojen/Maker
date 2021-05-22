@@ -61,9 +61,9 @@ public class ExceptionTest {
         mm.var(Assert.class).invoke("assertEquals", "message", ex.invoke("getMessage"));
         mm.return_();
 
-        mm.catch_(L1, L2, null).throw_();
+        mm.catch_(L1, L2, (Object) null).throw_();
 
-        mm.catch_(L2, L3, null).throw_();
+        mm.catch_(L2, L3, (Object) null).throw_();
 
         var clazz = cm.finish();
         clazz.getMethod("run").invoke(null);
@@ -82,7 +82,7 @@ public class ExceptionTest {
         Label L2 = mm.label().here();
         mm.this_().monitorExit();
         mm.return_();
-        var ex = mm.catch_(L1, L2, null);
+        var ex = mm.catch_(L1, L2, (Object) null);
         mm.this_().monitorExit();
         ex.throw_();
 

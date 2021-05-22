@@ -1093,7 +1093,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
         // Add the "catch all" exception handler.
         {
-            var exVar = catch_(startLab, endLab, null);
+            var exVar = catch_(startLab, endLab, (Object) null);
             handler.run();
             exVar.throw_();
         }

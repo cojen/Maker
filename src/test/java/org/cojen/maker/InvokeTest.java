@@ -163,15 +163,14 @@ public class InvokeTest {
         var bootstrap = mm.var(InvokeTest.class).indy("boot", handle, type);
         var v0 = bootstrap.invoke(null, "throwIt", null, "hello");
         assertNull(v0);
-        mm.return_();
-        Label end = mm.label().here();
 
         String expect = "hello" + handle + type;
 
-        var ex = mm.catch_(start, end, Exception.class);
-        var msg = ex.invoke("getMessage");
-        mm.var(Assert.class).invoke("assertEquals", expect, msg);
-        mm.return_();
+        mm.catch_(start, Exception.class, ex -> {
+            var msg = ex.invoke("getMessage");
+            mm.var(Assert.class).invoke("assertEquals", expect, msg);
+            mm.return_();
+        });
 
         cm.finish().getMethod("run").invoke(null);
     }

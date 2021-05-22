@@ -41,7 +41,7 @@ public class HelloName {
             try {
                 System.out.print("Please enter your name> ");
                 name = in.readLine();
-            } catch(IOException e) {
+            } catch (IOException e) {
                 return;
             }
             System.out.println("Hello, " + name);
@@ -55,15 +55,10 @@ public class HelloName {
         MethodMaker mm = cm.addMethod(null, "main", String[].class).public_().static_();
         var sys = mm.var(System.class);
         var in = mm.new_(BufferedReader.class, mm.new_(InputStreamReader.class, sys.field("in")));
-        Label L1 = mm.label().here();
+        Label tryStart = mm.label().here();
         sys.field("out").invoke("println", "Please enter your name> ");
         var name = in.invoke("readLine");
-        Label L2 = mm.label().here();
-        Label L3 = mm.label();
-        mm.goto_(L3);
-        mm.catch_(L1, L2, IOException.class);
-        mm.return_();
-        L3.here();
+        mm.catch_(tryStart, IOException.class, ex -> mm.return_());
         sys.field("out").invoke("println", mm.concat("Hello, ", name));
         cm.finish().getMethod("main", String[].class).invoke(null, (Object) args);
     }
