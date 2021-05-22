@@ -388,7 +388,7 @@ public interface MethodMaker {
      * @param handler called for each exit path to generate handler code
      * @throws IllegalStateException if start is unpositioned
      */
-    public void finally_(Label start, Runnable handler);
+    public void finally_(Label tryStart, Runnable handler);
 
     /**
      * Concatenate variables and constants together into a new {@code String} in the same
