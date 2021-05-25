@@ -789,4 +789,26 @@ public class CondyTest {
         Object result = cm.finish().getMethod("run").invoke(null);
         assertEquals("hello-qwerty-999", result);
     }
+
+    @Test
+    public void conditional() throws Exception {
+        // Tests multiple constants reached conditionally.
+
+        Object a = new Object();
+        Object b = new Object();
+
+        ClassMaker cm = ClassMaker.begin().public_();
+        MethodMaker mm = cm.addMethod(Object.class, "test", int.class).public_().static_();
+
+        Label other = mm.label();
+        mm.param(0).ifNe(0, other);
+        mm.return_(mm.var(Object.class).setExact(a)); 
+        other.here();
+        mm.return_(mm.var(Object.class).setExact(b));
+
+        var method = cm.finish().getMethod("test", int.class);
+
+        assertEquals(a, method.invoke(null, 0));
+        assertEquals(b, method.invoke(null, 1));
+    }
 }

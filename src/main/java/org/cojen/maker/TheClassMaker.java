@@ -38,6 +38,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
+import java.util.concurrent.ThreadLocalRandom;
+
 import static java.util.Objects.*;
 
 /**
@@ -295,6 +297,27 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
         Type tType = typeFrom(type);
 
         var fm = new TheFieldMaker(this, type().defineField(false, tType, name));
+        mFields.put(name, fm);
+
+        return fm;
+    }
+
+    TheFieldMaker addSyntheticField(Type type, String prefix) {
+        checkFinished();
+
+        String name;
+        if (mFields == null) {
+            mFields = new LinkedHashMap<>();
+            name = prefix + '0';
+        } else {
+            name = prefix + mFields.size();
+            while (mFields.containsKey(name)) {
+                name = prefix + ThreadLocalRandom.current().nextInt(Integer.MAX_VALUE);
+            }
+        }
+
+        var fm = new TheFieldMaker(this, type().defineField(false, type, name));
+        fm.synthetic();
         mFields.put(name, fm);
 
         return fm;

@@ -91,6 +91,10 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
     private Attribute.Exceptions mExceptionsThrown;
 
+    // Detects when the code can no longer be described as a simple linear flow, used as a
+    // workaround for a HotSpot condy bug which disables code compilation.
+    private boolean mHasBranches;
+
     private int mFinished;
 
     TheMethodMaker(TheClassMaker classMaker, Type.Method method) {
@@ -891,6 +895,8 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         } else {
             catchType = mClassMaker.typeFrom(type);
         }
+
+        mHasBranches = true;
 
         ConstantPool.C_Class catchClass = mConstants.addClass(catchType);
         int smCatchCode = SM_OBJECT | catchClass.mIndex << 8;
@@ -2308,6 +2314,35 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         return mConstants.addDynamicConstant(bi, "_", type);
     }
 
+    private void addExplicitConstantOp(ConstantPool.Constant constant, Type type) {
+        addExplicitConstantOp(new ExplicitConstantOp(constant, type));
+    }
+
+    private void addExplicitConstantOp(ExplicitConstantOp op) {
+        if (op.mConstant instanceof ConstantPool.C_Dynamic && mHasBranches) {
+            /*
+              Workaround a HotSpot bug which prevents code compilation. When an instruction
+              against a dynamic constant isn't reached, this happens:
+            
+                compilation bailout: could not resolve a constant
+
+              If there's a possibility of this happening, then the constant is eagerly resolved
+              and stored in a static final field. The field is then used instead of the
+              original direct reference. Sadly, this entirely defeats the point of having
+              dynamic constants, which are expected to be resolved lazily.
+            */
+            TheFieldMaker fm = mClassMaker.addSyntheticField(op.mType, "$condy-");
+            fm.private_().static_().final_();
+            String name = fm.mName.mValue;
+            TheMethodMaker mm = mClassMaker.addClinit();
+            mm.addOp(op);
+            mm.addOp(new FieldOp(PUTSTATIC, 1, mm.field(name).mFieldRef));
+            addOp(new FieldOp(GETSTATIC, 0, field(name).mFieldRef));
+        } else {
+            addOp(op);
+        }
+    }
+
     /**
      * Intended for loading bootstrap constants, although it works in other cases too.
      *
@@ -2880,6 +2915,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             mUsedCount++;
             if (mTrackOffsets == null) {
                 mTrackOffsets = new int[4];
+                mOwner.mHasBranches = true;
             }
         }
 
@@ -4535,7 +4571,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
         @Override
         void addStoreConstantOp(ExplicitConstantOp op) {
-            addOp(op);
+            addExplicitConstantOp(op);
             addStoreOp(this);
         }
 
@@ -4609,7 +4645,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         void pushTo(TheMethodMaker mm) {
-            mm.addOp(new ExplicitConstantOp(mConstant, mType));
+            mm.addExplicitConstantOp(mConstant, mType);
         }
     }
 
@@ -4978,7 +5014,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         @Override
         void addStoreConstantOp(ExplicitConstantOp op) {
             addBeginStoreFieldOp();
-            addOp(op);
+            addExplicitConstantOp(op);
             addFinishStoreFieldOp();
         }
 
@@ -5106,7 +5142,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
         private Type pushVarHandle() {
             Type vhType = Type.from(VarHandle.class);
-            addOp(new ExplicitConstantOp(vh(vhType), vhType));
+            addExplicitConstantOp(vh(vhType), vhType);
             return vhType;
         }
 
@@ -5253,7 +5289,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
             if (value instanceof ExplicitConstantOp) {
                 allTypes[i] = mType;
-                addOp((ExplicitConstantOp) value);
+                addExplicitConstantOp((ExplicitConstantOp) value);
             } else {
                 allTypes[i] = addPushOp(mType, value);
             }
@@ -5345,7 +5381,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                 ConstantPool.C_Dynamic dynamic = mConstants
                     .addDynamicConstant(mBootstrapIndex, name, returnType);
 
-                addOp(new ExplicitConstantOp(dynamic, returnType));
+                addExplicitConstantOp(dynamic, returnType);
 
                 var = new ConstantVar(returnType, dynamic);
             } else {
