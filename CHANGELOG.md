@@ -9,6 +9,7 @@ v1.1.0
 * Support adding annotations.
 * Switch statements with one case are converted to if statements.
 * Add a convenience exception catching method.
+* Support referencing the class being made as an array.
 
 v1.0.2 (2021-05-05)
 ------

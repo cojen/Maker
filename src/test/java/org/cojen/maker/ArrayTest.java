@@ -176,4 +176,30 @@ public class ArrayTest {
 
         cm.finish().getMethod("run").invoke(null);
     }
+
+    @Test
+    public void selfArray() throws Exception {
+        try {
+            cm.arrayType(0);
+            fail();
+        } catch (IllegalArgumentException e) {
+        }
+
+        try {
+            cm.arrayType(256);
+            fail();
+        } catch (IllegalArgumentException e) {
+        }
+
+        var arrayType = cm.arrayType(2);
+
+        MethodMaker mm2 = cm.addMethod(null, "test", arrayType).static_();
+        var v1 = mm2.param(0).invoke("toString");
+        mm2.var(Assert.class).invoke("assertTrue", v1.invoke("startsWith", "[[L"));
+
+        var array = mm.new_(arrayType, 5, 10);
+        mm.invoke("test", array);
+
+        cm.finish().getMethod("run").invoke(null);
+    }
 }

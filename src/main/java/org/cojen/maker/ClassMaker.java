@@ -258,6 +258,14 @@ public interface ClassMaker {
     public ClassMaker sourceFile(String fileName);
 
     /**
+     * Returns an opaque type object which represents this class as an array.
+     *
+     * @param dimensions must be at least 1
+     * @throws IllegalArgumentException if dimensions is out of bounds
+     */
+    public Object arrayType(int dimensions);
+
+    /**
      * Finishes the definition of the new class.
      *
      * @throws IllegalStateException if already finished or if the definition is broken

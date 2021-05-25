@@ -284,6 +284,13 @@ abstract class Type {
     }
 
     /**
+     * Returns the type as an array or adds a dimension if already an array.
+     */
+    Type asArray() {
+        return new Array(this);
+    }
+
+    /**
      * Returns the type code used by the stack map table attribute.
      *
      * @return SM_*

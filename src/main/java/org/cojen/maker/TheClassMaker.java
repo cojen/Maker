@@ -490,6 +490,22 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
         return this;
     }
 
+    @Override
+    public Object arrayType(int dimensions) {
+        if (dimensions < 1 || dimensions > 255) {
+            throw new IllegalArgumentException();
+        }
+
+        Type type = type();
+        do {
+            type = type.asArray();
+        } while (--dimensions > 0);
+
+        final Type fType = type;
+
+        return (Typed) () -> fType;
+    }
+
     String name() {
         return type().name();
     }
