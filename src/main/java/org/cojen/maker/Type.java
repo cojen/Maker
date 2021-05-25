@@ -1263,9 +1263,12 @@ abstract class Type {
                 return true;
             }
 
-            for (Type iface : other.interfaces()) {
-                if (isAssignableFrom(iface)) {
-                    return true;
+            Set<Type> interfaces = other.interfaces();
+            if (interfaces != null) {
+                for (Type iface : interfaces) {
+                    if (isAssignableFrom(iface)) {
+                        return true;
+                    }
                 }
             }
 
