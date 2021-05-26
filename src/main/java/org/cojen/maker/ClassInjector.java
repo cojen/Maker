@@ -41,11 +41,13 @@ class ClassInjector extends ClassLoader {
     private static final Map<Object, ClassInjector> cInjectors = new ConcurrentHashMap<>();
 
     private final Map<String, Boolean> mReservedNames;
+    private final WeakCache<String, Group> mPackageGroups;
     private final ProtectionDomain mDomain;
 
     private ClassInjector(boolean explicit, ClassLoader parent, ProtectionDomain domain) {
         super(parent);
         mReservedNames = explicit ? null : new WeakHashMap<>();
+        mPackageGroups = new WeakCache<>();
         mDomain = prepareDomain(domain, this);
     }
 
@@ -81,19 +83,29 @@ class ClassInjector extends ClassLoader {
         return injector;
     }
 
+    @Override
+    public Class<?> loadClass(String name) throws ClassNotFoundException {
+        Group group = findPackageGroup(name, false);
+
+        if (group != null) {
+            try {
+                return group.doLoadClass(name);
+            } catch (ClassNotFoundException e) {
+            }
+        }
+
+        return super.loadClass(name);
+    }
+
     boolean isExplicit() {
         return mReservedNames == null;
     }
 
     Class<?> define(String name, byte[] b) {
-        Class<?> clazz;
+        Group group = findPackageGroup(name, true);
 
         try {
-            if (mDomain == null) {
-                clazz = defineClass(name, b, 0, b.length);
-            } else {
-                clazz = defineClass(name, b, 0, b.length, mDomain);
-            }
+            return group.define(name, b);
         } catch (LinkageError e) {
             // Replace duplicate name definition with a better exception.
             try {
@@ -105,8 +117,6 @@ class ClassInjector extends ClassLoader {
         } finally {
             unreserve(name);
         }
-
-        return clazz;
     }
 
     void unreserve(String name) {
@@ -163,7 +173,9 @@ class ClassInjector extends ClassLoader {
             }
         }
 
-        if (self.findLoadedClass(name) == null) {
+        Group group = self.findPackageGroup(name, true);
+
+        if (!group.isLoaded(name)) {
             if (!checkParent) {
                 return true;
             } else {
@@ -235,6 +247,60 @@ class ClassInjector extends ClassLoader {
                 return Arrays.deepEquals(mComposite, ((Key) obj).mComposite);
             }
             return false;
+        }
+    }
+
+    private Group findPackageGroup(String className, boolean create) {
+        String packageName;
+        {
+            int ix = className.lastIndexOf('.');
+            packageName = ix <= 0 ? "" : className.substring(0, ix);
+        }
+
+        Group group = mPackageGroups.get(packageName);
+        if (group == null) {
+            synchronized (mPackageGroups) {
+                group = mPackageGroups.get(packageName);
+                if (group == null && create) {
+                    group = new Group(mDomain);
+                    mPackageGroups.put(packageName, group);
+                }
+            }
+        }
+
+        return group;
+    }
+
+    /**
+     * A group is a loader for one package.
+     */
+    private class Group extends ClassLoader {
+        private final ProtectionDomain mDomain;
+
+        Group(ProtectionDomain domain) {
+            super(ClassInjector.this);
+            mDomain = prepareDomain(domain, this);
+        }
+
+        @Override
+        public Class<?> loadClass(String name) throws ClassNotFoundException {
+            return ClassInjector.this.loadClass(name);
+        }
+
+        Class<?> doLoadClass(String name) throws ClassNotFoundException {
+            return super.loadClass(name);
+        }
+
+        Class<?> define(String name, byte[] b) {
+            if (mDomain == null) {
+                return defineClass(name, b, 0, b.length);
+            } else {
+                return defineClass(name, b, 0, b.length, mDomain);
+            }
+        }
+
+        boolean isLoaded(String name) {
+            return findLoadedClass(name) != null;
         }
     }
 }

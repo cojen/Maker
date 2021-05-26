@@ -10,6 +10,8 @@ v1.1.0
 * Switch statements with one case are converted to if statements.
 * Add a convenience exception catching method.
 * Support referencing the class being made as an array.
+* Generated classes are loaded into separate ClassLoaders, keyed by package name, to facilitate
+  class unloading. To be unloaded, all classes generated in that package must be unreachable.
 
 v1.0.2 (2021-05-05)
 ------
