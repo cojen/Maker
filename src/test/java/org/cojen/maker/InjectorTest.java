@@ -60,6 +60,11 @@ public class InjectorTest {
                 clazz = cm.finish();
                 classes.put(clazz, true);
 
+                ClassLoader loader = clazz.getClassLoader();
+                do {
+                    assertFalse(loader instanceof ClassInjector);
+                } while ((loader = loader.getParent()) != null);
+
                 parent = clazz;
             }
 

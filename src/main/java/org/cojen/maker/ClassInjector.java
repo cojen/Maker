@@ -122,11 +122,11 @@ class ClassInjector extends ClassLoader {
         // decompiled classes.
         int range = 10;
 
-        for (int tryCount = 0; tryCount < 1000; tryCount++) {
+        while (true) {
             // Use '-' instead of '$' to prevent conflicts with inner class names.
             String mangled = className + '-' + rnd.nextInt(range);
 
-            if (tryReserve(this, mangled, checkParent)) {
+            if (tryReserve(mangled, checkParent)) {
                 return mangled;
             }
 
@@ -134,29 +134,23 @@ class ClassInjector extends ClassLoader {
                 range *= 10;
             }
         }
-
-        throw new InternalError("Unable to create unique class name");
     }
 
     /**
      * @return false if the name is already taken
      */
-    private static boolean tryReserve(ClassInjector self, String name, boolean checkParent) {
-        ClassLoader parent;
-        while ((parent = self.getParent()) instanceof ClassInjector) {
-            self = (ClassInjector) parent;
-        }
-
-        synchronized (self.mReservedNames) {
-            if (self.mReservedNames.put(name, Boolean.TRUE) != null) {
+    private boolean tryReserve(String name, boolean checkParent) {
+        synchronized (mReservedNames) {
+            if (mReservedNames.put(name, Boolean.TRUE) != null) {
                 return false;
             }
         }
 
-        Group group = self.findPackageGroup(name, true);
+        Group group = findPackageGroup(name, true);
 
         if (!group.isLoaded(name)) {
-            if (!checkParent) {
+            ClassLoader parent;
+            if (!checkParent || (parent = getParent()) == null) {
                 return true;
             } else {
                 try {
@@ -196,7 +190,10 @@ class ClassInjector extends ClassLoader {
      */
     private class Group extends ClassLoader {
         Group() {
-            super(ClassInjector.this);
+            // All group members are at the same level in the hierarchy as the ClassInjector
+            // itself, and so the parent for all should be the same. This also ensures that the
+            // ClassInjector instance isn't visible externally via the getParent method.
+            super(ClassInjector.this.getParent());
         }
 
         @Override
