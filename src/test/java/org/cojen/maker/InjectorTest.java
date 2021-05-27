@@ -135,4 +135,33 @@ public class InjectorTest {
         var obj = cm.finish().getDeclaredConstructor().newInstance();
         assertEquals(getClass().getClassLoader(), obj.getClass().getClassLoader());
     }
+
+    @Test
+    public void separateKeys() throws Exception {
+        // Same parent loader but distinct child loaders.
+
+        final var k1 = new Object();
+        final Class<?> c1;
+        {
+            ClassMaker cm = ClassMaker.begin(null, null, k1).public_();
+            cm.addConstructor().public_();
+            c1 = cm.finish();
+        }
+
+        final var k2 = new Object();
+        final Class<?> c2;
+        {
+            ClassMaker cm = ClassMaker.begin(null, null, k2).public_();
+            cm.addConstructor().public_();
+            c2 = cm.finish();
+        }
+
+        var o1 = c1.getConstructor().newInstance();
+        var o2 = c2.getConstructor().newInstance();
+
+        assertNotEquals(o1.getClass().getClassLoader(), o2.getClass().getClassLoader());
+
+        assertEquals(o1.getClass().getClassLoader().getParent(),
+                     o2.getClass().getClassLoader().getParent());
+    }
 }

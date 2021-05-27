@@ -33,7 +33,7 @@ public interface ClassMaker {
      * Begin defining a class with an automatically assigned name.
      */
     public static ClassMaker begin() {
-        return begin(null, (ClassLoader) null);
+        return begin(null, null, null);
     }
 
     /**
@@ -43,7 +43,7 @@ public interface ClassMaker {
      * @param className fully qualified class name; pass null to automatically assign a name
      */
     public static ClassMaker begin(String className) {
-        return begin(className, (ClassLoader) null);
+        return begin(className, null, null);
     }
 
     /**
@@ -54,7 +54,19 @@ public interface ClassMaker {
      * @param parentLoader parent class loader; pass null to use default
      */
     public static ClassMaker begin(String className, ClassLoader parentLoader) {
-        return TheClassMaker.begin(false, className, false, parentLoader, null);
+        return begin(className, parentLoader, null);
+    }
+
+    /**
+     * Begin defining a class with the given name. The actual name will have a suffix applied
+     * to ensure uniqueness.
+     *
+     * @param className fully qualified class name; pass null to automatically assign a name
+     * @param parentLoader parent class loader; pass null to use default
+     * @param key an opaque key used for creating distinct class loaders
+     */
+    public static ClassMaker begin(String className, ClassLoader parentLoader, Object key) {
+        return TheClassMaker.begin(false, className, false, parentLoader, key, null);
     }
 
     /**
@@ -70,7 +82,7 @@ public interface ClassMaker {
             className = clazz.getName();
         }
         ClassLoader loader = clazz.getClassLoader();
-        return TheClassMaker.begin(false, className, false, loader, lookup);
+        return TheClassMaker.begin(false, className, false, loader, null, lookup);
     }
 
     /**
@@ -81,7 +93,7 @@ public interface ClassMaker {
      * @param className fully qualified class name
      */
     public static ClassMaker beginExternal(String className) {
-        return TheClassMaker.begin(true, className, true, null, null);
+        return TheClassMaker.begin(true, className, true, null, null, null);
     }
 
     /**

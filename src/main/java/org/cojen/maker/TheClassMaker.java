@@ -122,13 +122,13 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
     private int mFinished;
 
     static TheClassMaker begin(boolean external, String className, boolean explicit,
-                               ClassLoader parentLoader, MethodHandles.Lookup lookup)
+                               ClassLoader parentLoader, Object key, MethodHandles.Lookup lookup)
     {
         if (parentLoader == null) {
             parentLoader = ClassLoader.getSystemClassLoader();
         }
 
-        ClassInjector injector = ClassInjector.lookup(explicit, parentLoader);
+        ClassInjector injector = ClassInjector.lookup(explicit, parentLoader, key);
 
         return new TheClassMaker(null, external, className, lookup, injector);
     }

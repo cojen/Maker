@@ -15,6 +15,7 @@ v1.1.0
 * Remove ProtectionDomain support. The SecurityManager is being deprecated, and the concept of
   a CodeSource makes little sense with dynamically generated code.
 * Provide access to the class loader before the class is finished.
+* Support distinct class loaders for generated classes which shared a common parent loader.
 
 v1.0.2 (2021-05-05)
 ------

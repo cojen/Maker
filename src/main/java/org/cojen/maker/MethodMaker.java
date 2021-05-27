@@ -69,7 +69,7 @@ public interface MethodMaker {
         String className = lookupClass.getName();
         className = className.substring(0, className.lastIndexOf('.') + 1) + mname;
         ClassLoader loader = lookupClass.getClassLoader();
-        TheClassMaker cm = TheClassMaker.begin(false, className, true, loader, lookup);
+        TheClassMaker cm = TheClassMaker.begin(false, className, true, loader, null, lookup);
 
         Type.Method method = cm.defineMethod(retType, mname, paramTypes);
 

@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.WeakHashMap;
 
@@ -44,12 +45,14 @@ class ClassInjector extends ClassLoader {
         mPackageGroups = new WeakCache<>();
     }
 
-    static ClassInjector lookup(boolean explicit, ClassLoader parentLoader) {
+    static ClassInjector lookup(boolean explicit, ClassLoader parentLoader, Object key) {
+        Objects.requireNonNull(parentLoader);
+
         if (explicit) {
             return new ClassInjector(true, parentLoader);
         }
 
-        final Object injectorKey = parentLoader;
+        final Object injectorKey = createInjectorKey(parentLoader, key);
 
         ClassInjector injector = cInjectors.get(injectorKey);
         if (injector == null) {
@@ -168,6 +171,36 @@ class ClassInjector extends ClassLoader {
         }
 
         return false;
+    }
+
+    private static Object createInjectorKey(ClassLoader parentLoader, Object key) {
+        return key == null ? parentLoader : new Key(parentLoader, key);
+    }
+
+    private static class Key {
+        private final Object a, b;
+
+        Key(Object a, Object b) {
+            this.a = a;
+            this.b = b;
+        }
+
+        @Override
+        public int hashCode() {
+            return a.hashCode() * 31 + b.hashCode();
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == this) {
+                return true;
+            }
+            if (obj instanceof Key) {
+                var other = (Key) obj;
+                return a.equals(other.a) && b.equals(other.b);
+            }
+            return false;
+        }
     }
 
     private Group findPackageGroup(String className, boolean create) {
