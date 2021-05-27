@@ -152,7 +152,7 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
         }
 
         // Maintain a strong reference to the group.
-        mInjectorGroup = injector.groupForClass(className);
+        mInjectorGroup = lookup != null ? null : injector.groupForClass(className);
 
         mThisClass = mConstants.addClass(Type.begin(injector, this, className));
     }
@@ -509,7 +509,7 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
 
     @Override
     public ClassLoader classLoader() {
-        return mInjectorGroup;
+        return mLookup != null ? mLookup.lookupClass().getClassLoader() : mInjectorGroup;
     }
 
     String name() {

@@ -16,6 +16,8 @@
 
 package org.cojen.maker;
 
+import java.lang.invoke.MethodHandles;
+
 import java.lang.ref.WeakReference;
 
 import java.util.WeakHashMap;
@@ -120,5 +122,17 @@ public class InjectorTest {
         }
 
         fail();
+    }
+
+    @Test
+    public void lookup() throws Exception {
+        // Verify the ClassLoader when using MethodHandles.Lookup.
+
+        var lookup = MethodHandles.lookup();
+        ClassMaker cm = ClassMaker.begin(null, lookup);
+        assertEquals(getClass().getClassLoader(), cm.classLoader());
+        cm.addConstructor();
+        var obj = cm.finish().getDeclaredConstructor().newInstance();
+        assertEquals(getClass().getClassLoader(), obj.getClass().getClassLoader());
     }
 }
