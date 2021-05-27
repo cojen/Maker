@@ -16,16 +16,10 @@
 
 package org.cojen.maker;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import java.util.WeakHashMap;
 
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
@@ -34,7 +28,7 @@ import java.util.concurrent.ThreadLocalRandom;
  * @author Brian S O'Neill
  */
 class ClassInjector extends ClassLoader {
-    private static final Map<Object, ClassInjector> cInjectors = new ConcurrentHashMap<>();
+    private static final WeakCache<Object, ClassInjector> cInjectors = new WeakCache<>();
 
     private final Map<String, Boolean> mReservedNames;
     private final WeakCache<String, Group> mPackageGroups;
@@ -55,11 +49,14 @@ class ClassInjector extends ClassLoader {
         final Object injectorKey = createInjectorKey(parentLoader, key);
 
         ClassInjector injector = cInjectors.get(injectorKey);
+
         if (injector == null) {
-            injector = new ClassInjector(false, parentLoader);
-            ClassInjector existing = cInjectors.putIfAbsent(injectorKey, injector);
-            if (existing != null) {
-                injector = existing;
+            synchronized (cInjectors) {
+                injector = cInjectors.get(injectorKey);
+                if (injector == null) {
+                    injector = new ClassInjector(false, parentLoader);
+                    cInjectors.put(injectorKey, injector);
+                }
             }
         }
 
