@@ -124,10 +124,7 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
                                ClassLoader parentLoader, MethodHandles.Lookup lookup)
     {
         if (parentLoader == null) {
-            parentLoader = TheClassMaker.class.getClassLoader();
-            if (parentLoader == null) {
-                parentLoader = ClassLoader.getSystemClassLoader();
-            }
+            parentLoader = ClassLoader.getSystemClassLoader();
         }
 
         ClassInjector injector = ClassInjector.lookup(explicit, parentLoader);
