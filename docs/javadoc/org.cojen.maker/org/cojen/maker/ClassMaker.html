@@ -150,7 +150,7 @@ loadScripts(document, 'script');</script>
 <div class="col-first odd-row-color method-summary-table-tab2 method-summary-table method-summary-table-tab3"><code><a href="ClassMaker.html" title="interface in org.cojen.maker">ClassMaker</a></code></div>
 <div class="col-second odd-row-color method-summary-table-tab2 method-summary-table method-summary-table-tab3"><code><span class="member-name-link"><a href="#another(java.lang.String)">another</a></span>&#8203;(<a href="https://docs.oracle.com/en/java/javase/16/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;className)</code></div>
 <div class="col-last odd-row-color method-summary-table-tab2 method-summary-table method-summary-table-tab3">
-<div class="block">Begin defining another class with the same loader, domain, and lookup as this one.</div>
+<div class="block">Begin defining another class with the same loader and lookup as this one.</div>
 </div>
 <div class="col-first even-row-color method-summary-table-tab2 method-summary-table method-summary-table-tab3"><code><a href="https://docs.oracle.com/en/java/javase/16/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a></code></div>
 <div class="col-second even-row-color method-summary-table-tab2 method-summary-table method-summary-table-tab3"><code><span class="member-name-link"><a href="#arrayType(int)">arrayType</a></span>&#8203;(int&nbsp;dimensions)</code></div>
@@ -168,9 +168,8 @@ loadScripts(document, 'script');</script>
 <div class="block">Begin defining a class with the given name.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table-tab1 method-summary-table"><code>static <a href="ClassMaker.html" title="interface in org.cojen.maker">ClassMaker</a></code></div>
-<div class="col-second odd-row-color method-summary-table-tab1 method-summary-table"><code><span class="member-name-link"><a href="#begin(java.lang.String,java.lang.ClassLoader,java.security.ProtectionDomain)">begin</a></span>&#8203;(<a href="https://docs.oracle.com/en/java/javase/16/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;className,
- <a href="https://docs.oracle.com/en/java/javase/16/docs/api/java.base/java/lang/ClassLoader.html" title="class or interface in java.lang" class="external-link">ClassLoader</a>&nbsp;parentLoader,
- <a href="https://docs.oracle.com/en/java/javase/16/docs/api/java.base/java/security/ProtectionDomain.html" title="class or interface in java.security" class="external-link">ProtectionDomain</a>&nbsp;domain)</code></div>
+<div class="col-second odd-row-color method-summary-table-tab1 method-summary-table"><code><span class="member-name-link"><a href="#begin(java.lang.String,java.lang.ClassLoader)">begin</a></span>&#8203;(<a href="https://docs.oracle.com/en/java/javase/16/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;className,
+ <a href="https://docs.oracle.com/en/java/javase/16/docs/api/java.base/java/lang/ClassLoader.html" title="class or interface in java.lang" class="external-link">ClassLoader</a>&nbsp;parentLoader)</code></div>
 <div class="col-last odd-row-color method-summary-table-tab1 method-summary-table">
 <div class="block">Begin defining a class with the given name.</div>
 </div>
@@ -290,18 +289,16 @@ loadScripts(document, 'script');</script>
 </section>
 </li>
 <li>
-<section class="detail" id="begin(java.lang.String,java.lang.ClassLoader,java.security.ProtectionDomain)">
+<section class="detail" id="begin(java.lang.String,java.lang.ClassLoader)">
 <h3>begin</h3>
 <div class="member-signature"><span class="modifiers">static</span>&nbsp;<span class="return-type"><a href="ClassMaker.html" title="interface in org.cojen.maker">ClassMaker</a></span>&nbsp;<span class="element-name">begin</span>&#8203;<span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/16/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;className,
- <a href="https://docs.oracle.com/en/java/javase/16/docs/api/java.base/java/lang/ClassLoader.html" title="class or interface in java.lang" class="external-link">ClassLoader</a>&nbsp;parentLoader,
- <a href="https://docs.oracle.com/en/java/javase/16/docs/api/java.base/java/security/ProtectionDomain.html" title="class or interface in java.security" class="external-link">ProtectionDomain</a>&nbsp;domain)</span></div>
+ <a href="https://docs.oracle.com/en/java/javase/16/docs/api/java.base/java/lang/ClassLoader.html" title="class or interface in java.lang" class="external-link">ClassLoader</a>&nbsp;parentLoader)</span></div>
 <div class="block">Begin defining a class with the given name. The actual name will have a suffix applied
  to ensure uniqueness.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>className</code> - fully qualified class name; pass null to automatically assign a name</dd>
 <dd><code>parentLoader</code> - parent class loader; pass null to use default</dd>
-<dd><code>domain</code> - domain to define the class in; pass null to use default</dd>
 </dl>
 </section>
 </li>
@@ -336,9 +333,9 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="another(java.lang.String)">
 <h3>another</h3>
 <div class="member-signature"><span class="return-type"><a href="ClassMaker.html" title="interface in org.cojen.maker">ClassMaker</a></span>&nbsp;<span class="element-name">another</span>&#8203;<span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/16/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;className)</span></div>
-<div class="block">Begin defining another class with the same loader, domain, and lookup as this one. The
- actual class name will have a suffix applied to ensure uniqueness, unless this maker
- creates external classes.
+<div class="block">Begin defining another class with the same loader and lookup as this one. The actual
+ class name will have a suffix applied to ensure uniqueness, unless this maker creates
+ external classes.
 
  <p>The returned <code>ClassMaker</code> instance isn't attached to this maker, and so it can
  be acted upon by a different thread.</div>

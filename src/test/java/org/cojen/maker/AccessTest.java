@@ -20,10 +20,6 @@ import java.lang.invoke.MethodHandles;
 
 import java.lang.reflect.InvocationTargetException;
 
-import java.security.Permissions;
-import java.security.Principal;
-import java.security.ProtectionDomain;
-
 import java.util.Collections;
 
 import org.junit.*;
@@ -66,53 +62,6 @@ public class AccessTest {
     // Must be package-private.
     static int foo(int a) {
         return a + 1;
-    }
-
-    @Test
-    public void protectionDomain() throws Exception {
-        ProtectionDomain domain = getClass().getProtectionDomain();
-
-        ClassMaker cm = ClassMaker.begin(null, null, domain).public_();
-        cm.addConstructor().public_();
-        Class<?> clazz = cm.finish();
-        clazz.getConstructor().newInstance();
-
-        ProtectionDomain domain2 = clazz.getProtectionDomain();
-        assertEquals(clazz.getClassLoader(), domain2.getClassLoader());
-        assertEquals(Collections.list(domain.getPermissions().elements()),
-                     Collections.list(domain2.getPermissions().elements()));
-    }
-
-    @Test
-    public void protectionDomainWithPrincipal() throws Exception {
-        var principals = new Principal[] {
-            new Principal() {
-                @Override
-                public String getName() {
-                    return toString();
-                }
-            }
-        };
-
-        var domain = new ProtectionDomain(null, new Permissions(), null, principals);
-
-        ClassMaker cm = ClassMaker.begin(null, null, domain).public_();
-        cm.addConstructor().public_();
-        Class<?> clazz = cm.finish();
-        clazz.getConstructor().newInstance();
-
-        ProtectionDomain domain2 = clazz.getProtectionDomain();
-        assertArrayEquals(principals, domain2.getPrincipals());
-        assertEquals(clazz.getClassLoader(), domain2.getClassLoader());
-        assertEquals(Collections.list(domain.getPermissions().elements()),
-                     Collections.list(domain2.getPermissions().elements()));
-
-        // Test using the domain again.
-        cm = ClassMaker.begin(null, null, domain).public_();
-        cm.addConstructor().public_();
-        Class<?> clazz2 = cm.finish();
-        clazz2.getConstructor().newInstance();
-        assertEquals(domain2, clazz2.getProtectionDomain());
     }
 
     @Test

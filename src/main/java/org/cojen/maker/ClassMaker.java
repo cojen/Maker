@@ -22,8 +22,6 @@ import java.io.IOException;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 
-import java.security.ProtectionDomain;
-
 /**
  * Allows new classes and interfaces to be defined dynamically.
  *
@@ -35,7 +33,7 @@ public interface ClassMaker {
      * Begin defining a class with an automatically assigned name.
      */
     public static ClassMaker begin() {
-        return begin(null, null, null);
+        return begin(null, (ClassLoader) null);
     }
 
     /**
@@ -45,7 +43,7 @@ public interface ClassMaker {
      * @param className fully qualified class name; pass null to automatically assign a name
      */
     public static ClassMaker begin(String className) {
-        return begin(className, null, null);
+        return begin(className, (ClassLoader) null);
     }
 
     /**
@@ -54,12 +52,9 @@ public interface ClassMaker {
      *
      * @param className fully qualified class name; pass null to automatically assign a name
      * @param parentLoader parent class loader; pass null to use default
-     * @param domain domain to define the class in; pass null to use default
      */
-    public static ClassMaker begin(String className,
-                                   ClassLoader parentLoader, ProtectionDomain domain)
-    {
-        return TheClassMaker.begin(false, className, false, parentLoader, domain, null);
+    public static ClassMaker begin(String className, ClassLoader parentLoader) {
+        return TheClassMaker.begin(false, className, false, parentLoader, null);
     }
 
     /**
@@ -75,7 +70,7 @@ public interface ClassMaker {
             className = clazz.getName();
         }
         ClassLoader loader = clazz.getClassLoader();
-        return TheClassMaker.begin(false, className, false, loader, null, lookup);
+        return TheClassMaker.begin(false, className, false, loader, lookup);
     }
 
     /**
@@ -86,13 +81,13 @@ public interface ClassMaker {
      * @param className fully qualified class name
      */
     public static ClassMaker beginExternal(String className) {
-        return TheClassMaker.begin(true, className, true, null, null, null);
+        return TheClassMaker.begin(true, className, true, null, null);
     }
 
     /**
-     * Begin defining another class with the same loader, domain, and lookup as this one. The
-     * actual class name will have a suffix applied to ensure uniqueness, unless this maker
-     * creates external classes.
+     * Begin defining another class with the same loader and lookup as this one. The actual
+     * class name will have a suffix applied to ensure uniqueness, unless this maker creates
+     * external classes.
      *
      * <p>The returned {@code ClassMaker} instance isn't attached to this maker, and so it can
      * be acted upon by a different thread.

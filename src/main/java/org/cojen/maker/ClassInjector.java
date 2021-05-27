@@ -27,11 +27,6 @@ import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
 
-import java.security.Permission;
-import java.security.PermissionCollection;
-import java.security.Principal;
-import java.security.ProtectionDomain;
-
 /**
  * 
  *
@@ -42,38 +37,23 @@ class ClassInjector extends ClassLoader {
 
     private final Map<String, Boolean> mReservedNames;
     private final WeakCache<String, Group> mPackageGroups;
-    private final ProtectionDomain mDomain;
 
-    private ClassInjector(boolean explicit, ClassLoader parent, ProtectionDomain domain) {
+    private ClassInjector(boolean explicit, ClassLoader parent) {
         super(parent);
         mReservedNames = explicit ? null : new WeakHashMap<>();
         mPackageGroups = new WeakCache<>();
-        mDomain = prepareDomain(domain, this);
     }
 
-    private static ProtectionDomain prepareDomain(ProtectionDomain domain, ClassLoader loader) {
-        if (domain == null) {
-            return null;
-        }
-
-        return new ProtectionDomain(domain.getCodeSource(),
-                                    domain.getPermissions(),
-                                    loader,
-                                    domain.getPrincipals());
-    }
-
-    static ClassInjector lookup(boolean explicit,
-                                ClassLoader parentLoader, ProtectionDomain domain)
-    {
+    static ClassInjector lookup(boolean explicit, ClassLoader parentLoader) {
         if (explicit) {
-            return new ClassInjector(true, parentLoader, domain);
+            return new ClassInjector(true, parentLoader);
         }
 
-        final Object injectorKey = createInjectorKey(parentLoader, domain);
+        final Object injectorKey = parentLoader;
 
         ClassInjector injector = cInjectors.get(injectorKey);
         if (injector == null) {
-            injector = new ClassInjector(false, parentLoader, domain);
+            injector = new ClassInjector(false, parentLoader);
             ClassInjector existing = cInjectors.putIfAbsent(injectorKey, injector);
             if (existing != null) {
                 injector = existing;
@@ -190,66 +170,6 @@ class ClassInjector extends ClassLoader {
         return false;
     }
 
-    private static Object createInjectorKey(ClassLoader parentLoader, ProtectionDomain domain) {
-        if (domain == null) {
-            return parentLoader;
-        }
-
-        // ProtectionDomain doesn't have an equals method, so break it apart and add the
-        // elements to a composite key.
-
-        Object csKey = domain.getCodeSource();
-        Object permsKey = null;
-        Object principalsKey = null;
-
-        PermissionCollection pc = domain.getPermissions();
-        if (pc != null) {
-            List<Permission> permList = Collections.list(pc.elements());
-            if (permList.size() == 1) {
-                permsKey = permList.get(0);
-            } else if (permList.size() > 1) {
-                permsKey = new HashSet<>(permList);
-            }
-        }
-
-        Principal[] principals = domain.getPrincipals();
-        if (principals != null && principals.length > 0) {
-            if (principals.length == 1) {
-                principalsKey = principals[0];
-            } else {
-                principalsKey = Set.of(principals);
-            }
-        }
-
-        return new Key(parentLoader, csKey, permsKey, principalsKey);
-    }
-
-    private static class Key {
-        private final Object[] mComposite;
-        private final int mHash;
-
-        Key(Object... composite) {
-            mComposite = composite;
-            mHash = Arrays.deepHashCode(composite);
-        }
-
-        @Override
-        public int hashCode() {
-            return mHash;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (obj == this) {
-                return true;
-            }
-            if (obj instanceof Key) {
-                return Arrays.deepEquals(mComposite, ((Key) obj).mComposite);
-            }
-            return false;
-        }
-    }
-
     private Group findPackageGroup(String className, boolean create) {
         String packageName;
         {
@@ -262,7 +182,7 @@ class ClassInjector extends ClassLoader {
             synchronized (mPackageGroups) {
                 group = mPackageGroups.get(packageName);
                 if (group == null && create) {
-                    group = new Group(mDomain);
+                    group = new Group();
                     mPackageGroups.put(packageName, group);
                 }
             }
@@ -275,11 +195,8 @@ class ClassInjector extends ClassLoader {
      * A group is a loader for one package.
      */
     private class Group extends ClassLoader {
-        private final ProtectionDomain mDomain;
-
-        Group(ProtectionDomain domain) {
+        Group() {
             super(ClassInjector.this);
-            mDomain = prepareDomain(domain, this);
         }
 
         @Override
@@ -292,11 +209,7 @@ class ClassInjector extends ClassLoader {
         }
 
         Class<?> define(String name, byte[] b) {
-            if (mDomain == null) {
-                return defineClass(name, b, 0, b.length);
-            } else {
-                return defineClass(name, b, 0, b.length, mDomain);
-            }
+            return defineClass(name, b, 0, b.length);
         }
 
         boolean isLoaded(String name) {

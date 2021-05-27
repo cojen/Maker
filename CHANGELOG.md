@@ -12,6 +12,8 @@ v1.1.0
 * Support referencing the class being made as an array.
 * Generated classes are loaded into separate ClassLoaders, keyed by package name, to facilitate
   class unloading. To be unloaded, all classes generated in that package must be unreachable.
+* Remove ProtectionDomain support. The SecurityManager is being deprecated, and the concept of
+  a CodeSource makes little sense with dynamically generated code.
 
 v1.0.2 (2021-05-05)
 ------

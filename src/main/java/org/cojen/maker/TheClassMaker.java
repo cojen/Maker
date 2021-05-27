@@ -26,8 +26,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
-import java.security.ProtectionDomain;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -120,8 +118,7 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
     private int mFinished;
 
     static TheClassMaker begin(boolean external, String className, boolean explicit,
-                               ClassLoader parentLoader, ProtectionDomain domain,
-                               MethodHandles.Lookup lookup)
+                               ClassLoader parentLoader, MethodHandles.Lookup lookup)
     {
         if (parentLoader == null) {
             parentLoader = TheClassMaker.class.getClassLoader();
@@ -130,7 +127,7 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
             }
         }
 
-        ClassInjector injector = ClassInjector.lookup(explicit, parentLoader, domain);
+        ClassInjector injector = ClassInjector.lookup(explicit, parentLoader);
 
         return new TheClassMaker(null, external, className, lookup, injector);
     }
