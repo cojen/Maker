@@ -261,6 +261,11 @@ public interface ClassMaker {
     public Object arrayType(int dimensions);
 
     /**
+     * Returns the class loader that the finished class will be loaded into.
+     */
+    public ClassLoader classLoader();
+
+    /**
      * Finishes the definition of the new class.
      *
      * @throws IllegalStateException if already finished or if the definition is broken

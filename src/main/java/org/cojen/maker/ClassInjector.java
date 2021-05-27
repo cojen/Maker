@@ -81,9 +81,15 @@ class ClassInjector extends ClassLoader {
         return mReservedNames == null;
     }
 
-    Class<?> define(String name, byte[] b) {
-        Group group = findPackageGroup(name, true);
+    /**
+     * Returns the package group to be used for defining a class by the given name. Is weakly
+     * referenced by the ClassInjector.
+     */
+    Group groupForClass(String name) {
+        return findPackageGroup(name, true);
+    }
 
+    Class<?> define(Group group, String name, byte[] b) {
         try {
             return group.define(name, b);
         } catch (LinkageError e) {
@@ -188,7 +194,7 @@ class ClassInjector extends ClassLoader {
     /**
      * A group is a loader for one package.
      */
-    private class Group extends ClassLoader {
+    class Group extends ClassLoader {
         Group() {
             // All group members are at the same level in the hierarchy as the ClassInjector
             // itself, and so the parent for all should be the same. This also ensures that the

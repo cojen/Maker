@@ -89,7 +89,8 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
     private final TheClassMaker mParent;
     private final boolean mExternal;
     private final MethodHandles.Lookup mLookup;
-    private final ClassInjector mClassInjector;
+    private final ClassInjector mInjector;
+    private final ClassInjector.Group mInjectorGroup;
 
     final ConstantPool.C_Class mThisClass;
 
@@ -140,7 +141,7 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
         mParent = parent;
         mExternal = external;
         mLookup = lookup;
-        mClassInjector = injector;
+        mInjector = injector;
 
         if (injector.isExplicit()) {
             Objects.requireNonNull(className);
@@ -150,11 +151,14 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
             className = injector.reserve(className, lookup != null);
         }
 
+        // Maintain a strong reference to the group.
+        mInjectorGroup = injector.groupForClass(className);
+
         mThisClass = mConstants.addClass(Type.begin(injector, this, className));
     }
 
     private TheClassMaker(TheClassMaker from, String className) {
-        this(from, from.mExternal, className, from.mLookup, from.mClassInjector);
+        this(from, from.mExternal, className, from.mLookup, from.mInjector);
     }
 
     @Override
@@ -503,6 +507,11 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
         return (Typed) () -> fType;
     }
 
+    @Override
+    public ClassLoader classLoader() {
+        return mInjectorGroup;
+    }
+
     String name() {
         return type().name();
     }
@@ -515,7 +524,7 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
         Class clazz;
         try {
             if (mLookup == null) {
-                clazz = mClassInjector.define(name, finishBytes(false));
+                clazz = mInjector.define(mInjectorGroup, name, finishBytes(false));
             } else {
                 try {
                     clazz = mLookup.defineClass(finishBytes(false));
@@ -572,7 +581,7 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
             throw new IllegalStateException(e);
         } finally {
             Type.uncache(mTypeCache, originalName);
-            mClassInjector.unreserve(originalName);
+            mInjector.unreserve(originalName);
         }
 
         if (hasExactConstants) {
@@ -590,7 +599,7 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
             return finishBytes(false);
         } finally {
             Type.uncache(mTypeCache, name);
-            mClassInjector.unreserve(name);
+            mInjector.unreserve(name);
         }
     }
 
@@ -622,7 +631,7 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
             bout.flush();
         } finally {
             Type.uncache(mTypeCache, name);
-            mClassInjector.unreserve(name);
+            mInjector.unreserve(name);
         }
     }
 
@@ -743,7 +752,7 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
     }
 
     Type typeFrom(Object type) {
-        return Type.from(mClassInjector, type);
+        return Type.from(mInjector, type);
     }
 
     /**

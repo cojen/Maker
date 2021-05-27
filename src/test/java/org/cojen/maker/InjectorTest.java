@@ -16,6 +16,8 @@
 
 package org.cojen.maker;
 
+import java.lang.ref.WeakReference;
+
 import java.util.WeakHashMap;
 
 import org.junit.*;
@@ -33,15 +35,17 @@ public class InjectorTest {
 
     @Test
     public void unloading() throws Exception {
-        // Test that classes get unloaded and that classes which need to be in the same package
-        // have access to package-private elements.
+        // Test that classes get unloaded, and that classes which need to be in the same
+        // package have access to package-private elements.
 
         var classes = new WeakHashMap<Class, Boolean>();
+
+        Class<?> parent;
 
         for (int q=0; q<100; q++) {
             String parentGroup = "foo" + q;
 
-            Class<?> parent = Object.class;
+            parent = Object.class;
             Class<?> clazz = null;
 
             for (int i=25; --i>=0; ) {
@@ -58,6 +62,7 @@ public class InjectorTest {
                 mm.invokeSuperConstructor();
 
                 clazz = cm.finish();
+                cm = null; // help GC
                 classes.put(clazz, true);
 
                 ClassLoader loader = clazz.getClassLoader();
@@ -69,10 +74,46 @@ public class InjectorTest {
             }
 
             Object obj = clazz.getConstructor().newInstance();
+            clazz = null; // help GC
+            obj = null; // help GC
         }
 
+        parent = null; // help GC
+
         for (int i=0; i<10; i++) {
-            if (classes.isEmpty()) {
+            // More reliable check than calling isEmpty due to apparent race conditions when
+            // cleared references are enqueued.
+            if (!classes.entrySet().iterator().hasNext()) {
+                return;
+            }
+            System.gc();
+        }
+
+        fail();
+    }
+
+    @Test
+    public void group() throws Exception {
+        // Verify that the ClassInjector.Group is strongly referenced.
+
+        ClassMaker cm = ClassMaker.begin("a.b.c.Dee").public_();
+
+        var ref = new WeakReference<>(cm.classLoader());
+
+        System.gc();
+
+        cm.addConstructor().public_();
+        var obj = cm.finish().getConstructor().newInstance();
+        cm = null; // help GC
+
+        System.gc();
+
+        assertEquals(ref.get(), obj.getClass().getClassLoader());
+
+        obj = null; // help GC
+
+        for (int i=0; i<10; i++) {
+            if (ref.get() == null) {
                 return;
             }
             System.gc();
