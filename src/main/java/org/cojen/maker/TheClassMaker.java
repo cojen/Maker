@@ -114,6 +114,9 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
 
     private Attribute.InnerClasses mInnerClasses;
 
+    // Maps constants to static final fields. Accessed by TheMethodMaker.
+    Map<ConstantPool.Constant, ConstantPool.C_Field> mResolvedConstants;
+
     // -1: finished, 0: not finished, 1: has exact constants
     private int mFinished;
 

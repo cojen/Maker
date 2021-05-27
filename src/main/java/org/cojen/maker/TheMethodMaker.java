@@ -30,6 +30,7 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -2331,16 +2332,28 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
               original direct reference. Sadly, this entirely defeats the point of having
               dynamic constants, which are expected to be resolved lazily.
             */
-            TheFieldMaker fm = mClassMaker.addSyntheticField(op.mType, "$condy-");
-            fm.private_().static_().final_();
-            String name = fm.mName.mValue;
-            TheMethodMaker mm = mClassMaker.addClinit();
-            mm.addOp(op);
-            mm.addOp(new FieldOp(PUTSTATIC, 1, mm.field(name).mFieldRef));
-            addOp(new FieldOp(GETSTATIC, 0, field(name).mFieldRef));
-        } else {
-            addOp(op);
+
+            if (mClassMaker.mResolvedConstants == null) {
+                mClassMaker.mResolvedConstants = new HashMap<>();
+            }
+
+            ConstantPool.C_Field field = mClassMaker.mResolvedConstants.get(op.mConstant);
+
+            if (field == null) {
+                TheFieldMaker fm = mClassMaker.addSyntheticField(op.mType, "$condy-");
+                fm.private_().static_().final_();
+                String name = fm.mName.mValue;
+                TheMethodMaker mm = mClassMaker.addClinit();
+                mm.addOp(new ExplicitConstantOp(op.mConstant, op.mType));
+                field =  mm.field(name).mFieldRef;
+                mm.addOp(new FieldOp(PUTSTATIC, 1, field));
+                mClassMaker.mResolvedConstants.put(op.mConstant, field);
+            }
+
+            op.mResolved = field;
         }
+
+        addOp(op);
     }
 
     /**
@@ -3369,6 +3382,8 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         final ConstantPool.Constant mConstant;
         final Type mType;
 
+        ConstantPool.C_Field mResolved;
+
         ExplicitConstantOp(ConstantPool.Constant constant, Type type) {
             mConstant = constant;
             mType = type;
@@ -3376,14 +3391,20 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
         @Override
         void appendTo(TheMethodMaker m) {
-            int typeCode = mType.typeCode();
-            if (typeCode == T_DOUBLE || typeCode == T_LONG) {
-                int index = mConstant.mIndex;
-                m.appendByte(LDC2_W);
-                m.appendShort(index);
-                m.stackPush(mType);
+            if (mResolved == null) {
+                int typeCode = mType.typeCode();
+                if (typeCode == T_DOUBLE || typeCode == T_LONG) {
+                    int index = mConstant.mIndex;
+                    m.appendByte(LDC2_W);
+                    m.appendShort(index);
+                    m.stackPush(mType);
+                } else {
+                    m.pushConstant(mConstant, mType);
+                }
             } else {
-                m.pushConstant(mConstant, mType);
+                m.appendByte(GETSTATIC);
+                m.appendShort(mResolved.mIndex);
+                m.stackPush(mResolved.mField.type());
             }
         }
     }
