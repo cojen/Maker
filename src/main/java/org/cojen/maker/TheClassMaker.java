@@ -22,7 +22,6 @@ import java.io.OutputStream;
 import java.lang.invoke.MethodHandles;
 
 import java.lang.reflect.Array;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
@@ -87,7 +86,7 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
     }
 
     private final TheClassMaker mParent;
-    private final boolean mExternal;
+    private boolean mExternal;
     private final MethodHandles.Lookup mLookup;
     private final ClassInjector mInjector;
     private final ClassInjector.Group mInjectorGroup;
@@ -528,7 +527,7 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
             } else {
                 try {
                     clazz = mLookup.defineClass(finishBytes(false));
-                } catch (IllegalAccessException e) {
+                } catch (Exception e) {
                     throw new IllegalStateException(e);
                 }
             }
@@ -541,6 +540,58 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
         }
 
         return clazz;
+    }
+
+    @Override
+    public MethodHandles.Lookup finishLookup() {
+        checkFinished();
+
+        var ref = new MethodHandles.Lookup[1];
+
+        // Allow exact constant to be set. Once the caller has decided to finish into a loaded
+        // class, they've already decided to not bother creating an external class anyhow.
+        boolean wasExternal = mExternal;
+        mExternal = false;
+        try {
+            {
+                MethodMaker mm = addClinit();
+                var lookupVar = mm.var(MethodHandles.class).invoke("lookup");
+                mm.var(ref.getClass()).setExact(ref).aset(0, lookupVar);
+            }
+
+            String initName;
+
+            for (int id=0;;) {
+                initName = "$init-" + id;
+                if (mMethods == null) {
+                    break;
+                }
+                for (TheMethodMaker method : mMethods) {
+                    if (initName.equals(method.getName())) {
+                        id = ThreadLocalRandom.current().nextInt(Integer.MAX_VALUE);
+                        continue;
+                    }
+                }
+                break;
+            }
+
+            addMethod(null, initName).public_().static_().synthetic();
+
+            try {
+                finish().getMethod(initName).invoke(null);
+            } catch (Exception e) {
+                throw toUnchecked(e);
+            }
+        } finally {
+            if (wasExternal) {
+                mExternal = true;
+            }
+        }
+
+        MethodHandles.Lookup lookup = ref[0];
+        ref[0] = null;
+
+        return lookup;
     }
 
     @Override
@@ -565,20 +616,8 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
             } else {
                 result = ((MethodHandles.Lookup) m.invoke(mLookup, bytes, false, options));
             }
-        } catch (InvocationTargetException e) {
-            Throwable cause = e.getCause();
-            if (cause instanceof RuntimeException) {
-                throw (RuntimeException) cause;
-            }
-            if (cause instanceof Error) {
-                throw (Error) cause;
-            }
-            if (cause == null) {
-                cause = e;
-            }
-            throw new IllegalStateException(cause);
-        } catch (IllegalAccessException e) {
-            throw new IllegalStateException(e);
+        } catch (Exception e) {
+            throw toUnchecked(e);
         } finally {
             Type.uncache(mTypeCache, originalName);
             mInjector.unreserve(originalName);
@@ -780,5 +819,24 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
         }
         mFinished = 1;
         return ConstantsRegistry.add(this, value);
+    }
+
+    /**
+     * Always throws an exception.
+     */
+    private static RuntimeException toUnchecked(Throwable e) {
+        while (true) {
+            if (e instanceof RuntimeException) {
+                throw (RuntimeException) e;
+            }
+            if (e instanceof Error) {
+                throw (Error) e;
+            }
+            Throwable cause = e.getCause();
+            if (cause == null) {
+                throw new IllegalStateException(e);
+            }
+            e = cause;
+        }
     }
 }

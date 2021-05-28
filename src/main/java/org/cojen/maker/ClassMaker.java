@@ -285,6 +285,16 @@ public interface ClassMaker {
     public Class<?> finish();
 
     /**
+     * Finishes the definition of the new class, returning a lookup which has full privilege
+     * access to the class. Calling this method has the side effect of forcing the new class to
+     * be initialized.
+     *
+     * @return the lookup for the class; call {@code lookupClass} to obtain the actual class
+     * @throws IllegalStateException if already finished or if the definition is broken
+     */
+    public MethodHandles.Lookup finishLookup();
+
+    /**
      * Finishes the definition of a new hidden class, using the lookup passed to the begin
      * method. Hidden classes are automatically unloaded when no longer referenced, even if the
      * class loader still is. The hidden class is defined in the same nest as the lookup class.

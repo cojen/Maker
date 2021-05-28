@@ -16,6 +16,7 @@ v1.1.0
   a CodeSource makes little sense with dynamically generated code.
 * Provide access to the class loader before the class is finished.
 * Support distinct class loaders for generated classes which shared a common parent loader.
+* Add a method to finish a class into a full privilege access lookup object.
 
 v1.0.2 (2021-05-05)
 ------
