@@ -201,6 +201,18 @@ var e = mm.catch_(tryStart, tryEnd, Exception.class);
 cont.here();
 ```
 
+An easier method can be used which uses a callback:
+
+```java
+MethodMaker mm = ...
+Label tryStart = mm.label().here();
+<code>
+mm.catch_(tryStart, Exception.class, e -> {
+    <handler code>
+});
+// non-exception case continues here
+```
+
 Try-finally
 -----------
 
