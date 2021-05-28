@@ -2320,7 +2320,9 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     }
 
     private void addExplicitConstantOp(ExplicitConstantOp op) {
-        if (op.mConstant instanceof ConstantPool.C_Dynamic && mHasBranches) {
+        if (op.mConstant instanceof ConstantPool.C_Dynamic
+            && mHasBranches && !"<clinit>".equals(getName()))
+        {
             /*
               Workaround a HotSpot bug which prevents code compilation. When an instruction
               against a dynamic constant isn't reached, this happens:
@@ -2331,6 +2333,9 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
               and stored in a static final field. The field is then used instead of the
               original direct reference. Sadly, this entirely defeats the point of having
               dynamic constants, which are expected to be resolved lazily.
+
+              Note that this workaround isn't applied to static initializers, because they
+              almost never get compiled.
             */
 
             if (mClassMaker.mResolvedConstants == null) {
@@ -2342,10 +2347,9 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             if (field == null) {
                 TheFieldMaker fm = mClassMaker.addSyntheticField(op.mType, "$condy-");
                 fm.private_().static_().final_();
-                String name = fm.mName.mValue;
                 TheMethodMaker mm = mClassMaker.addClinit();
                 mm.addOp(new ExplicitConstantOp(op.mConstant, op.mType));
-                field =  mm.field(name).mFieldRef;
+                field =  mm.field(fm.getName()).mFieldRef;
                 mm.addOp(new FieldOp(PUTSTATIC, 1, field));
                 mClassMaker.mResolvedConstants.put(op.mConstant, field);
             }
