@@ -114,8 +114,6 @@ public interface MethodMaker {
     /**
      * Returns the enclosing {@code ClassMaker} for this method, which can also be used as a
      * type specification.
-     *
-     * @throws IllegalStateException if this is a standalone method
      */
     public ClassMaker classMaker();
 
