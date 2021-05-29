@@ -16,6 +16,10 @@
 
 package org.cojen.maker;
 
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
+
 import java.util.Map;
 import java.util.Objects;
 import java.util.WeakHashMap;
@@ -225,11 +229,26 @@ class ClassInjector extends ClassLoader {
      * A group is a loader for one package.
      */
     class Group extends ClassLoader {
-        Group() {
+        private volatile MethodHandles.Lookup mLookup;
+
+        private Group() {
             // All group members are at the same level in the hierarchy as the ClassInjector
             // itself, and so the parent for all should be the same. This also ensures that the
             // ClassInjector instance isn't visible externally via the getParent method.
             super(ClassInjector.this.getParent());
+        }
+
+        /**
+         * Returns a lookup object in the group's package.
+         *
+         * @param className used to extract the package name
+         */
+        MethodHandles.Lookup lookup(String className) {
+            MethodHandles.Lookup lookup = mLookup;
+            if (lookup == null) {
+                lookup = makeLookup(className);
+            }
+            return lookup;
         }
 
         @Override
@@ -237,16 +256,52 @@ class ClassInjector extends ClassLoader {
             return ClassInjector.this.loadClass(name);
         }
 
-        Class<?> doLoadClass(String name) throws ClassNotFoundException {
+        private Class<?> doLoadClass(String name) throws ClassNotFoundException {
             return super.loadClass(name);
         }
 
-        Class<?> define(String name, byte[] b) {
+        private Class<?> define(String name, byte[] b) {
             return defineClass(name, b, 0, b.length);
         }
 
-        boolean isLoaded(String name) {
+        private boolean isLoaded(String name) {
             return findLoadedClass(name) != null;
+        }
+
+        private synchronized MethodHandles.Lookup makeLookup(String className) {
+            MethodHandles.Lookup lookup = mLookup;
+            if (lookup != null) {
+                return lookup;
+            }
+
+            className = className.substring(0, className.lastIndexOf('.') + 1) + "lookup";
+            var cm = new TheClassMaker(className, ClassInjector.this, this).public_();
+
+            cm.addField(boolean.class, "lookup").private_().static_().volatile_();
+
+            MethodMaker mm = cm.addMethod(MethodHandles.Lookup.class, "lookup").public_().static_();
+            var fieldVar = mm.field("lookup");
+            Label ok = mm.label();
+            fieldVar.ifFalse(ok);
+            mm.new_(IllegalAccessException.class).throw_();
+            ok.here();
+            fieldVar.set(true);
+            mm.return_(mm.var(MethodHandles.class).invoke("lookup"));
+
+            // Ideally, this should be a hidden class which can eventually be GC'd.
+            // Unfortunately, this requires that a package-level lookup already exists.
+            var clazz = cm.finish();
+
+            try {
+                var mh = MethodHandles.publicLookup().findStatic
+                    (clazz, "lookup", MethodType.methodType(MethodHandles.Lookup.class));
+                lookup = (MethodHandles.Lookup) mh.invokeExact();
+            } catch (Throwable e) {
+                throw TheClassMaker.toUnchecked(e);
+            }
+
+            mLookup = lookup;
+            return lookup;
         }
     }
 }

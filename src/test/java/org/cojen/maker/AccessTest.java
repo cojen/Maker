@@ -80,7 +80,7 @@ public class AccessTest {
     @Test
     public void lookup() throws Exception {
         // Can call a private method when calling finishLookup.
-        ClassMaker cm = ClassMaker.begin("a.b.c.Dee").public_();
+        ClassMaker cm = ClassMaker.begin("a.b.c.Dee");
         MethodMaker mm = cm.addMethod(null, "run").private_().static_();
         MethodHandles.Lookup lookup = cm.finishLookup();
         var clazz = lookup.lookupClass();

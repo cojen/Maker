@@ -160,6 +160,18 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
         this(from, from.mExternal, className, from.mLookup, from.mInjector);
     }
 
+    // Called by ClassInjector.Group.
+    TheClassMaker(String className, ClassInjector injector, ClassInjector.Group injectorGroup) {
+        super(new ConstantPool());
+        mParent = null;
+        mExternal = false;
+        mLookup = null;
+        mInjector = injector;
+        mInjectorGroup = injectorGroup;
+        className = injector.reserve(className, false);
+        mThisClass = mConstants.addClass(Type.begin(injector, this, className));
+    }
+
     @Override
     public ClassMaker another(String className) {
         return new TheClassMaker(this, className);
@@ -546,39 +558,25 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
     public MethodHandles.Lookup finishLookup() {
         checkFinished();
 
-        var ref = new MethodHandles.Lookup[1];
+        var lookupRef = new MethodHandles.Lookup[1];
+
+        MethodHandles.Lookup lookup = mLookup;
+
+        if (lookup == null) {
+            lookup = mInjectorGroup.lookup(name());
+        }
 
         // Allow exact constant to be set. Once the caller has decided to finish into a loaded
         // class, they've already decided to not bother creating an external class anyhow.
         boolean wasExternal = mExternal;
         mExternal = false;
         try {
-            {
-                MethodMaker mm = addClinit();
-                var lookupVar = mm.var(MethodHandles.class).invoke("lookup");
-                mm.var(ref.getClass()).setExact(ref).aset(0, lookupVar);
-            }
-
-            String initName;
-
-            for (int id=0;;) {
-                initName = "$init-" + id;
-                if (mMethods == null) {
-                    break;
-                }
-                for (TheMethodMaker method : mMethods) {
-                    if (initName.equals(method.getName())) {
-                        id = ThreadLocalRandom.current().nextInt(Integer.MAX_VALUE);
-                        continue;
-                    }
-                }
-                break;
-            }
-
-            addMethod(null, initName).public_().static_().synthetic();
+            MethodMaker mm = addClinit();
+            var lookupVar = mm.var(MethodHandles.class).invoke("lookup");
+            mm.var(lookupRef.getClass()).setExact(lookupRef).aset(0, lookupVar);
 
             try {
-                finish().getMethod(initName).invoke(null);
+                lookup.ensureInitialized(finish());
             } catch (Exception e) {
                 throw toUnchecked(e);
             }
@@ -588,8 +586,8 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
             }
         }
 
-        MethodHandles.Lookup lookup = ref[0];
-        ref[0] = null;
+        lookup = lookupRef[0];
+        lookupRef[0] = null;
 
         return lookup;
     }
@@ -824,7 +822,7 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
     /**
      * Always throws an exception.
      */
-    private static RuntimeException toUnchecked(Throwable e) {
+    static RuntimeException toUnchecked(Throwable e) {
         while (true) {
             if (e instanceof RuntimeException) {
                 throw (RuntimeException) e;
