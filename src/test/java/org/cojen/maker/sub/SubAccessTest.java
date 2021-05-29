@@ -21,6 +21,8 @@ import java.lang.invoke.MethodHandles;
 import org.cojen.maker.ClassMaker;
 import org.cojen.maker.MethodMaker;
 
+import org.cojen.maker.AccessTest;
+
 import org.junit.*;
 import static org.junit.Assert.*;
 
@@ -47,5 +49,17 @@ public class SubAccessTest {
     // Must be package-private.
     static int foo(int a) {
         return a + 1;
+    }
+
+    @Test
+    public void lookup2() throws Exception {
+        AccessTest.doLookup2(MethodHandles.lookup());
+        if (AccessTest.withoutEnsureInitialized()) {
+            try {
+                AccessTest.doLookup2(MethodHandles.lookup());
+            } finally {
+                AccessTest.restoreEnsureInitialized();
+            }
+        }
     }
 }

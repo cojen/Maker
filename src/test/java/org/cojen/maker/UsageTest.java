@@ -556,7 +556,9 @@ public class UsageTest {
 
     @Test
     public void noAccessHidden() throws Exception {
-        noAccess(true);
+        if (Runtime.version().feature() >= 15) {
+            noAccess(true);
+        }
     }
 
     private void noAccess(boolean hidden) throws Exception {
@@ -583,7 +585,11 @@ public class UsageTest {
             mClassMaker.finishHidden();
             fail();
         } catch (IllegalArgumentException e) {
-            check(e, "wrong.Place");
+            try {
+                check(e, "wrong.Place");
+            } catch (AssertionError e2) {
+                check(e, "wrong/Place");
+            }
         }
     }
 
@@ -615,6 +621,6 @@ public class UsageTest {
 
     private static void check(Exception e, String message) {
         String actual = e.getMessage();
-        assertTrue(message + "; " + actual, actual.startsWith(message));
+        assertTrue(message + "; " + actual, actual.contains(message));
     }
 }

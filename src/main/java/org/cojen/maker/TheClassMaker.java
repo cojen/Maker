@@ -19,7 +19,9 @@ package org.cojen.maker;
 import java.io.IOException;
 import java.io.OutputStream;
 
+import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
@@ -46,44 +48,6 @@ import static java.util.Objects.*;
  */
 final class TheClassMaker extends Attributed implements ClassMaker, Typed {
     static final boolean DEBUG = Boolean.getBoolean(ClassMaker.class.getName() + ".DEBUG");
-
-    private static volatile Method cDefineHidden;
-    private static Object cHiddenClassOptions;
-    private static Object cUnsafe;
-
-    private static Method defineHidden() {
-        Method m = cDefineHidden;
-
-        if (m != null) {
-            return m;
-        }
-
-        try {
-            var optionClass = Class.forName("java.lang.invoke.MethodHandles$Lookup$ClassOption");
-            Object options = Array.newInstance(optionClass, 1);
-            Array.set(options, 0, optionClass.getField("NESTMATE").get(null));
-            m = MethodHandles.Lookup.class.getMethod
-                ("defineHiddenClass", byte[].class, boolean.class, options.getClass());
-            cHiddenClassOptions = options;
-            cDefineHidden = m;
-            return m;
-        } catch (Throwable e) {
-        }
-
-        try {
-            var unsafeClass = Class.forName("sun.misc.Unsafe");
-            m = unsafeClass.getMethod
-                ("defineAnonymousClass", Class.class, byte[].class, Object[].class);
-            var field = unsafeClass.getDeclaredField("theUnsafe");
-            field.setAccessible(true);
-            cUnsafe = field.get(null);
-            cDefineHidden = m;
-            return m;
-        } catch (Throwable e) {
-        }
-
-        throw new UnsupportedOperationException("Cannot define hidden classes");
-    }
 
     private final TheClassMaker mParent;
     private boolean mExternal;
@@ -560,11 +524,8 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
 
         var lookupRef = new MethodHandles.Lookup[1];
 
-        MethodHandles.Lookup lookup = mLookup;
-
-        if (lookup == null) {
-            lookup = mInjectorGroup.lookup(name());
-        }
+        // Find the MethodHandles.Lookup.ensureInitialized method, available in Java 15.
+        Method m = ensureInitialized();
 
         // Allow exact constant to be set. Once the caller has decided to finish into a loaded
         // class, they've already decided to not bother creating an external class anyhow.
@@ -575,21 +536,81 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
             var lookupVar = mm.var(MethodHandles.class).invoke("lookup");
             mm.var(lookupRef.getClass()).setExact(lookupRef).aset(0, lookupVar);
 
-            try {
-                lookup.ensureInitialized(finish());
-            } catch (Exception e) {
-                throw toUnchecked(e);
+            if (m != null) {
+                MethodHandles.Lookup lookup = mLookup;
+
+                if (lookup == null) {
+                    lookup = mInjectorGroup.lookup(name(), false);
+                }
+
+                m.invoke(lookup, finish());
+            } else {
+                // Without the ensureInitialized method, do something much more complicated
+                // which involves defining a special "init" method.
+
+                String initName;
+
+                for (int id=0;;) {
+                    initName = "$init-" + id;
+                    if (mMethods == null) {
+                        break;
+                    }
+                    for (TheMethodMaker method : mMethods) {
+                        if (initName.equals(method.getName())) {
+                            id = ThreadLocalRandom.current().nextInt(Integer.MAX_VALUE);
+                            continue;
+                        }
+                    }
+                    break;
+                }
+
+                addMethod(null, initName).static_().synthetic();
+
+                var clazz = finish();
+
+                if (mLookup != null) {
+                    MethodHandle init = mLookup.findStatic
+                        (clazz, initName, MethodType.methodType(void.class));
+                    init.invokeExact();
+                } else {
+                    MethodHandles.Lookup lookup = mInjectorGroup.lookup(name(), true);
+                    MethodHandle hook = lookup.findStatic
+                        (lookup.lookupClass(), "hook",
+                         MethodType.methodType(void.class, Class.class, String.class));
+                    hook.invokeExact(clazz, initName);
+                }
             }
+        } catch (Throwable e) {
+            throw toUnchecked(e);
         } finally {
             if (wasExternal) {
                 mExternal = true;
             }
         }
 
-        lookup = lookupRef[0];
+        MethodHandles.Lookup lookup = lookupRef[0];
         lookupRef[0] = null;
 
         return lookup;
+    }
+
+    // These fields are modified by AccessTest.
+    static volatile Method cEnsureInitialized;
+    static boolean cNoEnsureInitialized;
+
+    private static Method ensureInitialized() {
+        Method m = cEnsureInitialized;
+
+        if (m == null && !cNoEnsureInitialized) {
+            try {
+                m = MethodHandles.Lookup.class.getMethod("ensureInitialized", Class.class);
+                cEnsureInitialized = m;
+            } catch (Throwable e) {
+                cNoEnsureInitialized = true;
+            }
+        }
+
+        return m;
     }
 
     @Override
@@ -626,6 +647,44 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
         }
 
         return result;
+    }
+
+    private static volatile Method cDefineHidden;
+    private static Object cHiddenClassOptions;
+    private static Object cUnsafe;
+
+    private static Method defineHidden() {
+        Method m = cDefineHidden;
+
+        if (m != null) {
+            return m;
+        }
+
+        try {
+            var optionClass = Class.forName("java.lang.invoke.MethodHandles$Lookup$ClassOption");
+            Object options = Array.newInstance(optionClass, 1);
+            Array.set(options, 0, optionClass.getField("NESTMATE").get(null));
+            m = MethodHandles.Lookup.class.getMethod
+                ("defineHiddenClass", byte[].class, boolean.class, options.getClass());
+            cHiddenClassOptions = options;
+            cDefineHidden = m;
+            return m;
+        } catch (Throwable e) {
+        }
+
+        try {
+            var unsafeClass = Class.forName("sun.misc.Unsafe");
+            m = unsafeClass.getMethod
+                ("defineAnonymousClass", Class.class, byte[].class, Object[].class);
+            var field = unsafeClass.getDeclaredField("theUnsafe");
+            field.setAccessible(true);
+            cUnsafe = field.get(null);
+            cDefineHidden = m;
+            return m;
+        } catch (Throwable e) {
+        }
+
+        throw new UnsupportedOperationException("Cannot define hidden classes");
     }
 
     @Override

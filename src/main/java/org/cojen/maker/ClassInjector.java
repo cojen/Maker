@@ -244,11 +244,12 @@ class ClassInjector extends ClassLoader {
          * Returns a lookup object in the group's package.
          *
          * @param className used to extract the package name
+         * @param hook when true, also define a "hook" method which invokes a named init method
          */
-        MethodHandles.Lookup lookup(String className) {
+        MethodHandles.Lookup lookup(String className, boolean hook) {
             MethodHandles.Lookup lookup = mLookup;
             if (lookup == null) {
-                lookup = makeLookup(className);
+                lookup = makeLookup(className, hook);
             }
             return lookup;
         }
@@ -270,7 +271,7 @@ class ClassInjector extends ClassLoader {
             return findLoadedClass(name) != null;
         }
 
-        private synchronized MethodHandles.Lookup makeLookup(String className) {
+        private synchronized MethodHandles.Lookup makeLookup(String className, boolean hook) {
             MethodHandles.Lookup lookup = mLookup;
             if (lookup != null) {
                 return lookup;
@@ -289,6 +290,12 @@ class ClassInjector extends ClassLoader {
             ok.here();
             fieldVar.set(true);
             mm.return_(mm.var(MethodHandles.class).invoke("lookup"));
+
+            if (hook) {
+                mm = cm.addMethod(null, "hook", Class.class, String.class).public_().static_();
+                var initMethodVar = mm.param(0).invoke("getDeclaredMethod", mm.param(1));
+                initMethodVar.invoke("invoke", (Object) null);
+            }
 
             // Ideally, this should be a hidden class which can eventually be GC'd.
             // Unfortunately, this requires that a package-level lookup already exists.
