@@ -80,10 +80,33 @@ public class AccessTest {
     @Test
     public void lookup() throws Exception {
         // Can call a private method when calling finishLookup.
-        ClassMaker cm = ClassMaker.begin("a.b.c.Dee");
+        for (int i=0; i<2; i++) {
+            ClassMaker cm = ClassMaker.begin("a.b.c.Dee");
+            MethodMaker mm = cm.addMethod(null, "run").private_().static_();
+            MethodHandles.Lookup lookup = cm.finishLookup();
+            var clazz = lookup.lookupClass();
+            lookup.findStatic(clazz, "run", MethodType.methodType(void.class));
+        }
+    }
+
+    @Test
+    public void lookup2() throws Exception {
+        // Can call a private method when calling finishLookup.
+        ClassMaker cm = ClassMaker.begin(null, MethodHandles.lookup());
         MethodMaker mm = cm.addMethod(null, "run").private_().static_();
         MethodHandles.Lookup lookup = cm.finishLookup();
         var clazz = lookup.lookupClass();
         lookup.findStatic(clazz, "run", MethodType.methodType(void.class));
     }
+
+    @Test
+    public void lookup3() throws Exception {
+        // Can call a private method when calling finishLookup.
+        ClassMaker cm = ClassMaker.beginExternal("a.b.c.Dee");
+        MethodMaker mm = cm.addMethod(null, "run").private_().static_();
+        MethodHandles.Lookup lookup = cm.finishLookup();
+        var clazz = lookup.lookupClass();
+        lookup.findStatic(clazz, "run", MethodType.methodType(void.class));
+    }
+
 }

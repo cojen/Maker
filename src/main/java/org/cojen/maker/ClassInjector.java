@@ -150,9 +150,11 @@ class ClassInjector extends ClassLoader {
      * @return false if the name is already taken
      */
     private boolean tryReserve(String name, boolean checkParent) {
-        synchronized (mReservedNames) {
-            if (mReservedNames.put(name, Boolean.TRUE) != null) {
-                return false;
+        if (mReservedNames != null) {
+            synchronized (mReservedNames) {
+                if (mReservedNames.put(name, Boolean.TRUE) != null) {
+                    return false;
+                }
             }
         }
 
