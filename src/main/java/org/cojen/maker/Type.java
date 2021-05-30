@@ -849,7 +849,7 @@ abstract class Type {
 
     private static final class Primitive extends Type {
         private final int mStackMapCode, mTypeCode;
-        private volatile Type mBox;
+        private volatile WeakReference<Type> mBoxRef;
 
         private Primitive(int stackMapCode, int typeCode) {
             mStackMapCode = stackMapCode;
@@ -918,22 +918,28 @@ abstract class Type {
 
         @Override
         Type box() {
-            Type box = mBox;
+            WeakReference<Type> boxRef = mBoxRef;
+            Type box;
 
-            if (box == null) {
-                switch (mTypeCode) {
-                default:        box = from(Void.class); break;
-                case T_BOOLEAN: box = from(Boolean.class); break;
-                case T_BYTE:    box = from(Byte.class); break;
-                case T_CHAR:    box = from(Character.class); break;
-                case T_SHORT:   box = from(Short.class); break;
-                case T_INT:     box = from(Integer.class); break;
-                case T_FLOAT:   box = from(Float.class); break;
-                case T_LONG:    box = from(Long.class); break;
-                case T_DOUBLE:  box = from(Double.class); break;
+            if (boxRef == null || (box = boxRef.get()) == null) {
+                synchronized (this) {
+                    boxRef = mBoxRef;
+                    if (boxRef == null || (box = boxRef.get()) == null) {
+                        switch (mTypeCode) {
+                        default:        box = from(Void.class); break;
+                        case T_BOOLEAN: box = from(Boolean.class); break;
+                        case T_BYTE:    box = from(Byte.class); break;
+                        case T_CHAR:    box = from(Character.class); break;
+                        case T_SHORT:   box = from(Short.class); break;
+                        case T_INT:     box = from(Integer.class); break;
+                        case T_FLOAT:   box = from(Float.class); break;
+                        case T_LONG:    box = from(Long.class); break;
+                        case T_DOUBLE:  box = from(Double.class); break;
+                        }
+
+                        mBoxRef = new WeakReference<>(box);
+                    }
                 }
-
-                mBox = box;
             }
 
             return box;
