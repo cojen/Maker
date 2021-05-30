@@ -108,7 +108,7 @@ abstract class Type {
         } else if (type == null) {
             return Null.THE;
         } else {
-            String desc = ConstableSupport.THE.toTypeDescriptor(type);
+            String desc = ConstableSupport.toTypeDescriptor(type);
             if (desc == null) {
                 throw new IllegalArgumentException("Unknown type: " + type);
             }

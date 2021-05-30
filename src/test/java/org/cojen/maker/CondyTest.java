@@ -149,9 +149,7 @@ public class CondyTest {
 
     @Test
     public void bootstrapWithPrimitiveValue() throws Exception {
-        // Test passing a special constant (a short) to a bootstrap method. As of Java 12, it
-        // will use Constable and DynamicConstantDesc. For Java 11, the ConstantsRegistry is
-        // used instead.
+        // Test passing a special constant (a short) to a bootstrap method.
 
         ClassMaker cm = ClassMaker.begin().public_();
         MethodMaker mm = cm.addMethod(null, "run").static_().public_();
@@ -395,9 +393,6 @@ public class CondyTest {
 
     @Test
     public void classDesc() throws Exception {
-        // ClassDesc added in Java 12.
-        Assume.assumeTrue(Runtime.version().feature() >= 12);
-
         ClassDesc cd0 = ClassDesc.of("java.lang.String").arrayType();
         ClassDesc cd1 = ClassDesc.ofDescriptor("I");
         ClassDesc cd2 = ClassDesc.ofDescriptor("I").arrayType();
@@ -425,9 +420,6 @@ public class CondyTest {
 
     @Test
     public void methodTypeDesc() throws Exception {
-        // MethodTypeDesc added in Java 12.
-        Assume.assumeTrue(Runtime.version().feature() >= 12);
-
         MethodTypeDesc mtd0 = MethodTypeDesc.ofDescriptor("(Ljava/lang/String;)I");
 
         ClassMaker cm = ClassMaker.begin().public_();
@@ -449,9 +441,6 @@ public class CondyTest {
     @Test
     @SuppressWarnings("unchecked")
     public void methodHandleDesc() throws Throwable {
-        // MethodHandleDesc added in Java 12.
-        Assume.assumeTrue(Runtime.version().feature() >= 12);
-
         ClassDesc cd0 = ClassDesc.of(Vector.class.getName());
         ClassDesc cd1 = ClassDesc.ofDescriptor("I");
         ClassDesc cd2 = ClassDesc.of(Object.class.getName());
@@ -525,9 +514,6 @@ public class CondyTest {
 
     @Test
     public void dynamicConstantDesc() throws Exception {
-        // DynamicConstantDesc added in Java 12.
-        Assume.assumeTrue(Runtime.version().feature() >= 12);
-
         ClassDesc cd0 = ClassDesc.of(CondyTest.class.getName());
         ClassDesc cd1 = ClassDesc.of(MethodHandles.Lookup.class.getName());
         ClassDesc cd2 = ClassDesc.of(String.class.getName());
@@ -564,9 +550,6 @@ public class CondyTest {
 
     @Test
     public void dynamicConstantAssign() throws Exception {
-        // DynamicConstantDesc added in Java 12.
-        Assume.assumeTrue(Runtime.version().feature() >= 12);
-
         ClassMaker cm = ClassMaker.begin().public_();
         MethodMaker mm = cm.addMethod(Object.class, "run").static_().public_();
 
@@ -589,14 +572,11 @@ public class CondyTest {
         assertEquals(100, ((MagicConstant) result).value);
     }
 
-    public static class MagicBooter {
-        // Hide inside another class to prevent linkage errors when running pre Java 12.
-        public static MagicConstant boot_magic(MethodHandles.Lookup lookup, String name, Class type,
-                                               int value)
-            throws Exception
-        {
-            return new MagicConstant(value);
-        }
+    public static MagicConstant boot_magic(MethodHandles.Lookup lookup, String name, Class type,
+                                           int value)
+        throws Exception
+    {
+        return new MagicConstant(value);
     }
 
     public static class MagicConstant implements Constable {
@@ -615,7 +595,7 @@ public class CondyTest {
             DynamicConstantDesc desc = DynamicConstantDesc
                 .of(MethodHandleDesc.of
                     (DirectMethodHandleDesc.Kind.STATIC,
-                     MagicBooter.class.describeConstable().get(),
+                     CondyTest.class.describeConstable().get(),
                      "boot_magic",
                      "(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;" +
                      "Ljava/lang/Class;I)Lorg/cojen/maker/CondyTest$MagicConstant;"),
@@ -632,9 +612,6 @@ public class CondyTest {
 
     @Test
     public void dynamicConstantAssignForBootstrap() throws Exception {
-        // DynamicConstantDesc added in Java 12.
-        Assume.assumeTrue(Runtime.version().feature() >= 12);
-
         // Pass a dynamic constant to a bootstrap method.
 
         ClassMaker cm = ClassMaker.begin().public_();
@@ -658,9 +635,6 @@ public class CondyTest {
 
     @Test
     public void constantVarHandle() throws Exception {
-        // DynamicConstantDesc added in Java 12.
-        Assume.assumeTrue(Runtime.version().feature() >= 12);
-
         // Set a VarHandle variable with a constant, which uses a DynamicConstantDesc.
 
         VarHandle vh = MethodHandles.arrayElementVarHandle(int[].class);

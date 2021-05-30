@@ -2201,7 +2201,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             new LocalVar(constantType).field(((Enum) value).name()).push();
             return addConversionOp(constantType, type);
         } else {
-            String actualTypeDesc = ConstableSupport.THE.toTypeDescriptor(value);
+            String actualTypeDesc = ConstableSupport.toTypeDescriptor(value);
             if (actualTypeDesc != null) {
                 Type actualType = mClassMaker.typeFrom(actualTypeDesc);
                 constantType = Type.from(Class.class);
@@ -2211,7 +2211,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                 }
                 value = actualType;
             } else {
-                ConstantVar cv = ConstableSupport.THE.toConstantVar(this, value);
+                ConstantVar cv = ConstableSupport.toConstantVar(this, value);
                 if (cv != null) {
                     cv.push();
                     return addConversionOp(cv.type(), type);
@@ -2448,8 +2448,8 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         // constant if allowed. If for some reason the "lossy" behavior is desired, the
         // application must provide a ConstantDesc instead of a Constable.
 
-        if (!mClassMaker.allowExactConstants() || ConstableSupport.THE.isConstantDesc(value)) {
-            ConstantVar cv = ConstableSupport.THE.toConstantVar(this, value);
+        if (!mClassMaker.allowExactConstants() || ConstableSupport.isConstantDesc(value)) {
+            ConstantVar cv = ConstableSupport.toConstantVar(this, value);
             if (cv != null) {
                 return cv.mConstant;
             }
@@ -4451,7 +4451,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                     // Conversion to MethodHandle is automatic.
                     type = Type.from(MethodHandle.class);
                 } else {
-                    type = ConstableSupport.THE.toConstantDescType(TheMethodMaker.this, arg);
+                    type = ConstableSupport.toConstantDescType(TheMethodMaker.this, arg);
                     if (type == null) {
                         type = mClassMaker.typeFrom(arg.getClass());
                     }

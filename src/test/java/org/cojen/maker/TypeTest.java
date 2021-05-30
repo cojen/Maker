@@ -261,9 +261,6 @@ public class TypeTest {
 
     @Test
     public void classDesc() throws Exception {
-        // ClassDesc added in Java 12.
-        Assume.assumeTrue(Runtime.version().feature() >= 12);
-
         ClassMaker cm = ClassMaker.begin().public_();
         MethodMaker mm = cm.addMethod(Object.class, "test").public_().static_();
 

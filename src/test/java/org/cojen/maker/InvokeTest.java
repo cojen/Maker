@@ -545,9 +545,6 @@ public class InvokeTest {
 
     @Test
     public void invokeHandleExternal() throws Exception {
-        // DynamicConstantDesc added in Java 12.
-        Assume.assumeTrue(Runtime.version().feature() >= 12);
-
         ClassMaker cm = ClassMaker.beginExternal(getClass().getName() + "Fake").public_();
         MethodMaker mm = cm.addMethod(int.class, "add").public_().static_();
 
