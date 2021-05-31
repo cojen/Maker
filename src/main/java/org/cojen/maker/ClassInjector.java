@@ -278,21 +278,20 @@ class ClassInjector extends ClassLoader {
             }
 
             className = className.substring(0, className.lastIndexOf('.') + 1) + "lookup";
-            var cm = new TheClassMaker(className, ClassInjector.this, this).public_();
+            var cm = new TheClassMaker(className, ClassInjector.this, this).public_().synthetic();
 
-            cm.addField(boolean.class, "lookup").private_().static_().volatile_();
+            var mt = MethodType.methodType(MethodHandles.Lookup.class, Object.class);
 
-            MethodMaker mm = cm.addMethod(MethodHandles.Lookup.class, "lookup").public_().static_();
-            var fieldVar = mm.field("lookup");
+            MethodMaker mm = cm.addMethod("lookup", mt).public_().static_().synthetic();
             Label ok = mm.label();
-            fieldVar.ifFalse(ok);
-            mm.new_(IllegalAccessException.class).throw_();
+            mm.var(Object.class).setExact(ClassInjector.this).ifEq(mm.param(0), ok);
+            mm.new_(IllegalAccessError.class).throw_();
             ok.here();
-            fieldVar.set(true);
             mm.return_(mm.var(MethodHandles.class).invoke("lookup"));
 
             if (hook) {
-                mm = cm.addMethod(null, "hook", Class.class, String.class).public_().static_();
+                mm = cm.addMethod(null, "hook", Class.class, String.class)
+                    .public_().static_().synthetic();
                 var initMethodVar = mm.param(0).invoke("getDeclaredMethod", mm.param(1));
                 initMethodVar.invoke("invoke", (Object) null);
             }
@@ -302,9 +301,8 @@ class ClassInjector extends ClassLoader {
             var clazz = cm.finish();
 
             try {
-                var mh = MethodHandles.publicLookup().findStatic
-                    (clazz, "lookup", MethodType.methodType(MethodHandles.Lookup.class));
-                lookup = (MethodHandles.Lookup) mh.invokeExact();
+                var mh = MethodHandles.publicLookup().findStatic(clazz, "lookup", mt);
+                lookup = (MethodHandles.Lookup) mh.invoke(ClassInjector.this);
             } catch (Throwable e) {
                 throw TheClassMaker.toUnchecked(e);
             }
