@@ -136,6 +136,36 @@ public class AccessTest {
         lookup.findStatic(clazz, "run", MethodType.methodType(void.class));
     }
 
+    @Test
+    public void denied() throws Exception {
+        // Detect access to the hidden lookup class.
+
+        ClassMaker cm = ClassMaker.begin();
+        MethodMaker mm = cm.addMethod(null, "run").private_().static_();
+        Class<?> clazz = cm.finishLookup().lookupClass();
+
+        String packageName = clazz.getPackageName();
+        ClassLoader loader = clazz.getClassLoader();
+        Class<?> lookupClass = null;
+
+        for (int i=0; i<10; i++) {
+            try {
+                lookupClass = loader.loadClass(packageName + ".lookup-" + i);
+                break;
+            } catch (ClassNotFoundException e) {
+            }
+        }
+
+        assertNotNull(lookupClass);
+
+        try {
+            lookupClass.getMethod("lookup", Object.class).invoke(null, loader);
+            fail();
+        } catch (Exception e) {
+            assertTrue(e.getCause() instanceof IllegalAccessError);
+        }
+    }
+
     // Called by SubAccessTest.
     public static boolean withoutEnsureInitialized() {
         if (TheClassMaker.cEnsureInitialized == null) {
