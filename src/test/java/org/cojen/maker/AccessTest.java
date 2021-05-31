@@ -158,11 +158,15 @@ public class AccessTest {
 
         assertNotNull(lookupClass);
 
-        try {
-            lookupClass.getMethod("lookup", Object.class).invoke(null, loader);
-            fail();
-        } catch (Exception e) {
-            assertTrue(e.getCause() instanceof IllegalAccessError);
+        Object[] attempts = {null, loader, loader.getParent()};
+
+        for (Object attempt : attempts) {
+            try {
+                lookupClass.getMethod("lookup", Object.class).invoke(null, attempt);
+                fail();
+            } catch (Exception e) {
+                assertTrue(e.getCause() instanceof IllegalAccessError);
+            }
         }
     }
 
