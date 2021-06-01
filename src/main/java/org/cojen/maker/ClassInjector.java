@@ -233,6 +233,9 @@ class ClassInjector extends ClassLoader {
     class Group extends ClassLoader {
         private volatile MethodHandles.Lookup mLookup;
 
+        // Accessed by ConstantsRegistry.
+        Map<Class, Object> mConstants;
+
         private Group() {
             // All group members are at the same level in the hierarchy as the ClassInjector
             // itself, and so the parent for all should be the same. This also ensures that the

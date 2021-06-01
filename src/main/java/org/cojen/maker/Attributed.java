@@ -27,7 +27,7 @@ import java.util.List;
  * @author Brian S O'Neill
  */
 abstract class Attributed {
-    final ConstantPool mConstants;
+    ConstantPool mConstants;
 
     List<Attribute> mAttributes;
 

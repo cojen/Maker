@@ -19,6 +19,8 @@ package org.cojen.maker;
 import java.lang.invoke.MethodHandles;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.WeakHashMap;
 
 /**
@@ -35,7 +37,7 @@ public class ConstantsRegistry {
             ? /*MethodHandles.Lookup.ORIGINAL*/ 64 : MethodHandles.Lookup.PRIVATE;
     }
 
-    private static WeakHashMap<Object, Object> cEntries;
+    private static Map<Class, Object> cConstants;
 
     private ConstantsRegistry() {
     }
@@ -43,40 +45,53 @@ public class ConstantsRegistry {
     /**
      * Add an entry and return the slot assigned to it.
      */
-    static int add(ClassMaker cm, Object value) {
-        Entries entries;
-        synchronized (ConstantsRegistry.class) {
-            if (cEntries == null) {
-                cEntries = new WeakHashMap<>();
-            }
-            Object obj = cEntries.get(cm);
-            if (obj == null) {
-                cEntries.put(cm, value);
-                return 0;
-            }
-            if (obj instanceof Entries) {
-                entries = (Entries) obj;
-            } else {
-                entries = new Entries(obj);
-                cEntries.put(cm, entries);
-            }
+    static int add(TheClassMaker cm, Object value) {
+        Object obj = cm.mExactConstants;
+        if (obj == null) {
+            cm.mExactConstants = value;
+            return 0;
         }
-
+        Entries entries;
+        if (obj instanceof Entries) {
+            entries = (Entries) obj;
+        } else {
+            entries = new Entries(obj);
+            cm.mExactConstants = entries;
+        }
         return entries.add(value);
     }
 
     /**
      * Called when the class definition is finished, to make the constants loadable.
      */
-    static void finish(ClassMaker cm, Class clazz) {
-        Object entries;
-        synchronized (ConstantsRegistry.class) {
-            entries = cEntries.remove(cm);
-            if (entries != null) {
-                if (entries instanceof Entries) {
-                    ((Entries) entries).prune();
+    static void finish(TheClassMaker cm, Class clazz) {
+        Object obj = cm.mExactConstants;
+        if (obj == null) {
+            return;
+        }
+
+        if (obj instanceof Entries) {
+            ((Entries) obj).prune();
+        }
+
+        ClassLoader loader = clazz.getClassLoader();
+
+        if (loader instanceof ClassInjector.Group) {
+            var group = (ClassInjector.Group) loader;            
+            synchronized (group) {
+                Map<Class, Object> constants = group.mConstants;
+                if (constants == null) {
+                    constants = new HashMap<>();
+                    group.mConstants = constants;
                 }
-                cEntries.put(clazz, entries);
+                constants.put(clazz, obj);
+            }
+        } else {
+            synchronized (ConstantsRegistry.class) {
+                if (cConstants == null) {
+                    cConstants = new WeakHashMap<>();
+                }
+                cConstants.put(clazz, obj);
             }
         }
     }
@@ -93,10 +108,18 @@ public class ConstantsRegistry {
         }
 
         Class<?> clazz = lookup.lookupClass();
+        ClassLoader loader = clazz.getClassLoader();
 
         Object value;
-        synchronized (ConstantsRegistry.class) {
-            value = cEntries == null ? null : cEntries.get(clazz);
+        if (loader instanceof ClassInjector.Group) {
+            var group = (ClassInjector.Group) loader;
+            synchronized (group) {
+                value = group.mConstants == null ? null : group.mConstants.get(clazz);
+            }
+        } else {
+            synchronized (ConstantsRegistry.class) {
+                value = cConstants == null ? null : cConstants.get(clazz);
+            }
         }
 
         if (value == null) {
@@ -116,10 +139,20 @@ public class ConstantsRegistry {
             }
         }
 
-        synchronized (ConstantsRegistry.class) {
-            cEntries.remove(clazz);
-            if (cEntries.isEmpty()) {
-                cEntries = null;
+        if (loader instanceof ClassInjector.Group) {
+            var group = (ClassInjector.Group) loader;
+            synchronized (group) {
+                group.mConstants.remove(clazz);
+                if (group.mConstants.isEmpty()) {
+                    group.mConstants = null;
+                }
+            }
+        } else {
+            synchronized (ConstantsRegistry.class) {
+                cConstants.remove(clazz);
+                if (cConstants.isEmpty()) {
+                    cConstants = null;
+                }
             }
         }
 

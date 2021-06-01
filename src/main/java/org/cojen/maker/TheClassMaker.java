@@ -78,11 +78,11 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
 
     private Attribute.InnerClasses mInnerClasses;
 
+    // Accessed by ConstantsRegistry.
+    Object mExactConstants;
+
     // Maps constants to static final fields. Accessed by TheMethodMaker.
     Map<ConstantPool.Constant, ConstantPool.C_Field> mResolvedConstants;
-
-    // -1: finished, 0: not finished, 1: has exact constants
-    private int mFinished;
 
     static TheClassMaker begin(boolean external, String className, boolean explicit,
                                ClassLoader parentLoader, Object key, MethodHandles.Lookup lookup)
@@ -493,7 +493,6 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
 
     @Override
     public Class<?> finish() {
-        boolean hasExactConstants = mFinished == 1;
         String name = name();
 
         Class clazz;
@@ -511,9 +510,7 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
             Type.uncache(mTypeCache, name);
         }
 
-        if (hasExactConstants) {
-            ConstantsRegistry.finish(this, clazz);
-        }
+        ConstantsRegistry.finish(this, clazz);
 
         return clazz;
     }
@@ -622,7 +619,6 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
         Method m = defineHidden();
         Object options = cHiddenClassOptions;
 
-        boolean hasExactConstants = mFinished == 1;
         String originalName = name();
 
         byte[] bytes = finishBytes(true);
@@ -642,9 +638,7 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
             mInjector.unreserve(originalName);
         }
 
-        if (hasExactConstants) {
-            ConstantsRegistry.finish(this, result.lookupClass());
-        }
+        ConstantsRegistry.finish(this, result.lookupClass());
 
         return result;
     }
@@ -740,8 +734,6 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
         // Ensure that mSuperClass has been assigned.
         superClass();
 
-        mFinished = -1;
-
         mBootstrapMethods = null;
 
         TheMethodMaker.doFinish(mClinitMethods);
@@ -815,6 +807,7 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
         writeAttributesTo(out);
 
         mAttributes = null;
+        mConstants = null;
     }
 
     static void checkSize(Map<?,?> c, int maxSize, String desc) {
@@ -831,13 +824,14 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
     }
 
     private void checkFinished() {
-        if (mFinished < 0) {
+        if (mConstants == null) {
             throw new IllegalStateException("Class definition is already finished");
         }
     }
 
     private void noExactConstants() {
-        if (mFinished == 1) {
+        checkFinished();
+        if (mExactConstants != null) {
             throw new IllegalStateException("Class has exact constants defined");
         }
     }
@@ -874,7 +868,6 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
         if (mExternal) {
             throw new IllegalStateException("Making an external class");
         }
-        mFinished = 1;
         return ConstantsRegistry.add(this, value);
     }
 
