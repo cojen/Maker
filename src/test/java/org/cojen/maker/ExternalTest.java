@@ -99,18 +99,12 @@ public class ExternalTest {
     @Test
     public void extraModifiers() throws Exception {
         ClassMaker cm = ClassMaker.beginExternal("org.cojen.maker.Fake").abstract_().synthetic();
-        cm.addMethod(void.class, "m1").strictfp_().abstract_().synthetic();
-        cm.addMethod(void.class, "m2").abstract_().synthetic().strictfp_();
+        cm.addMethod(void.class, "m2").abstract_().synthetic();
         cm.addMethod(void.class, "m3").native_();
-        cm.addMethod(void.class, "m4").strictfp_().bridge();
+        cm.addMethod(void.class, "m4").bridge();
         Class<?> clazz = cm.finish();
 
         int mods = clazz.getModifiers();
-        assertTrue(Modifier.isAbstract(mods));
-        assertTrue((mods & 0x1000) != 0);
-
-        mods = clazz.getDeclaredMethod("m1").getModifiers();
-        assertFalse(Modifier.isStrict(mods));
         assertTrue(Modifier.isAbstract(mods));
         assertTrue((mods & 0x1000) != 0);
 
@@ -123,7 +117,7 @@ public class ExternalTest {
         assertTrue(Modifier.isNative(mods));
 
         mods = clazz.getDeclaredMethod("m4").getModifiers();
-        assertTrue(Modifier.isStrict(mods));
+        assertFalse(Modifier.isStrict(mods));
         assertTrue((mods & 0x40) != 0);
     }
 

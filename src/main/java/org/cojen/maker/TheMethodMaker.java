@@ -354,12 +354,6 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     }
 
     @Override
-    public MethodMaker strictfp_() {
-        mModifiers = Modifiers.toStrict(mModifiers);
-        return this;
-    }
-
-    @Override
     public MethodMaker native_() {
         mModifiers = Modifiers.toNative(mModifiers);
         return this;

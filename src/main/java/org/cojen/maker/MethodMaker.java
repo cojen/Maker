@@ -167,13 +167,6 @@ public interface MethodMaker {
     public MethodMaker abstract_();
 
     /**
-     * Switch this method to strictfp mode. Methods are non-strict by default.
-     *
-     * @return this
-     */
-    public MethodMaker strictfp_();
-
-    /**
      * Switch this method to be native. Methods are non-native by default.
      *
      * @return this
