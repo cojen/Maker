@@ -20,6 +20,8 @@ import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 
+import java.lang.ref.WeakReference;
+
 import java.util.Map;
 import java.util.Objects;
 import java.util.WeakHashMap;
@@ -176,21 +178,27 @@ class ClassInjector extends ClassLoader {
         return false;
     }
 
-    private static Object createInjectorKey(ClassLoader parentLoader, Object key) {
-        return key == null ? parentLoader : new Key(parentLoader, key);
+    private static Object createInjectorKey(ClassLoader parentLoader, Object rest) {
+        return new Key(parentLoader, rest);
     }
 
-    private static class Key {
-        private final Object a, b;
+    private static class Key extends WeakReference<ClassLoader> {
+        private final Object mRest;
+        private final int mHash;
 
-        Key(Object a, Object b) {
-            this.a = a;
-            this.b = b;
+        Key(ClassLoader loader, Object rest) {
+            super(loader);
+            mRest = rest;
+            int hash = loader.hashCode() * 31;
+            if (rest != null) {
+                hash += rest.hashCode();
+            }
+            mHash = hash;
         }
 
         @Override
         public int hashCode() {
-            return a.hashCode() * 31 + b.hashCode();
+            return mHash;
         }
 
         @Override
@@ -200,7 +208,7 @@ class ClassInjector extends ClassLoader {
             }
             if (obj instanceof Key) {
                 var other = (Key) obj;
-                return a.equals(other.a) && b.equals(other.b);
+                return Objects.equals(get(), other.get()) && Objects.equals(mRest, other.mRest);
             }
             return false;
         }
