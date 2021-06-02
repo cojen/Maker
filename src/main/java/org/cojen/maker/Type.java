@@ -19,7 +19,7 @@ package org.cojen.maker;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.VarHandle;
 
-import java.lang.ref.WeakReference;
+import java.lang.ref.SoftReference;
 
 import java.lang.reflect.Executable;
 import java.lang.reflect.Modifier;
@@ -829,15 +829,15 @@ abstract class Type {
         }
     }
 
-    private static final WeakHashMap<ClassLoader, WeakReference<ConcurrentHashMap<Object, Type>>>
+    private static final WeakHashMap<ClassLoader, SoftReference<ConcurrentHashMap<Object, Type>>>
         cCacheMap = new WeakHashMap<>();
 
     private static synchronized ConcurrentHashMap<Object, Type> cache(ClassLoader loader) {
-        WeakReference<ConcurrentHashMap<Object, Type>> cacheRef = cCacheMap.get(loader);
+        SoftReference<ConcurrentHashMap<Object, Type>> cacheRef = cCacheMap.get(loader);
         ConcurrentHashMap<Object, Type> cache;
         if (cacheRef == null || (cache = cacheRef.get()) == null) {
             cache = new ConcurrentHashMap<>();
-            cCacheMap.put(loader, new WeakReference<>(cache));
+            cCacheMap.put(loader, new SoftReference<>(cache));
         }
         return cache;
     }
@@ -849,7 +849,7 @@ abstract class Type {
 
     private static final class Primitive extends Type {
         private final int mStackMapCode, mTypeCode;
-        private volatile WeakReference<Type> mBoxRef;
+        private volatile SoftReference<Type> mBoxRef;
 
         private Primitive(int stackMapCode, int typeCode) {
             mStackMapCode = stackMapCode;
@@ -918,7 +918,7 @@ abstract class Type {
 
         @Override
         Type box() {
-            WeakReference<Type> boxRef = mBoxRef;
+            SoftReference<Type> boxRef = mBoxRef;
             Type box;
 
             if (boxRef == null || (box = boxRef.get()) == null) {
@@ -937,7 +937,7 @@ abstract class Type {
                         case T_DOUBLE:  box = from(Double.class); break;
                         }
 
-                        mBoxRef = new WeakReference<>(box);
+                        mBoxRef = new SoftReference<>(box);
                     }
                 }
             }
