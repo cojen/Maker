@@ -81,7 +81,7 @@ public class ConstantsRegistry {
             synchronized (group) {
                 Map<Class, Object> constants = group.mConstants;
                 if (constants == null) {
-                    constants = new HashMap<>();
+                    constants = new HashMap<>(4);
                     group.mConstants = constants;
                 }
                 constants.put(clazz, obj);
@@ -89,7 +89,7 @@ public class ConstantsRegistry {
         } else {
             synchronized (ConstantsRegistry.class) {
                 if (cConstants == null) {
-                    cConstants = new WeakHashMap<>();
+                    cConstants = new WeakHashMap<>(4);
                 }
                 cConstants.put(clazz, obj);
             }
