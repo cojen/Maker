@@ -109,7 +109,6 @@ public class ExternalTest {
         assertTrue((mods & 0x1000) != 0);
 
         mods = clazz.getDeclaredMethod("m2").getModifiers();
-        assertFalse(Modifier.isStrict(mods));
         assertTrue(Modifier.isAbstract(mods));
         assertTrue((mods & 0x1000) != 0);
 
@@ -117,7 +116,6 @@ public class ExternalTest {
         assertTrue(Modifier.isNative(mods));
 
         mods = clazz.getDeclaredMethod("m4").getModifiers();
-        assertFalse(Modifier.isStrict(mods));
         assertTrue((mods & 0x40) != 0);
     }
 

@@ -66,7 +66,7 @@ class Modifiers {
     
     // For methods.
     static int toNative(int bitmask) {
-        return (bitmask | Modifier.NATIVE) & (~Modifier.ABSTRACT & ~Modifier.STRICT);
+        return (bitmask | Modifier.NATIVE) & ~Modifier.ABSTRACT;
     }
     
     // For classes.
@@ -77,15 +77,7 @@ class Modifiers {
     // For classes and methods.
     static int toAbstract(int bitmask) {
         return (bitmask | Modifier.ABSTRACT) &
-            (~Modifier.FINAL & ~Modifier.NATIVE & ~Modifier.SYNCHRONIZED & ~Modifier.STRICT);
-    }
-
-    // For methods.
-    static int toStrict(int bitmask) {
-        if ((bitmask & (Modifier.NATIVE | Modifier.ABSTRACT)) == 0) {
-            bitmask |= Modifier.STRICT;
-        }
-        return bitmask;
+            (~Modifier.FINAL & ~Modifier.NATIVE & ~Modifier.SYNCHRONIZED);
     }
 
     // For methods.
