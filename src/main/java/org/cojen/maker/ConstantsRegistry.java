@@ -17,6 +17,9 @@
 package org.cojen.maker;
 
 import java.lang.invoke.MethodHandles;
+import java.lang.invoke.VarHandle;
+
+import java.lang.ref.WeakReference;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -29,7 +32,7 @@ import java.util.WeakHashMap;
  * @author Brian S O'Neill
  * @hidden
  */
-public class ConstantsRegistry {
+public abstract class ConstantsRegistry {
     private static final int ACCESS_MODE;
 
     static {
@@ -37,9 +40,11 @@ public class ConstantsRegistry {
             ? /*MethodHandles.Lookup.ORIGINAL*/ 64 : MethodHandles.Lookup.PRIVATE;
     }
 
-    private static Map<Class, Object> cConstants;
+    private static WeakHashMap<ClassLoader, WeakReference<ConstantsRegistry>> cRegistries;
 
-    private ConstantsRegistry() {
+    private Map<Class, Object> mConstants;
+
+    protected ConstantsRegistry() {
     }
 
     /**
@@ -63,8 +68,10 @@ public class ConstantsRegistry {
 
     /**
      * Called when the class definition is finished, to make the constants loadable.
+     *
+     * @param lookup can be null if class loader is a ClassInjector.Group.
      */
-    static void finish(TheClassMaker cm, Class clazz) {
+    static void finish(TheClassMaker cm, MethodHandles.Lookup lookup, Class clazz) {
         Object obj = cm.mExactConstants;
         if (obj == null) {
             return;
@@ -81,17 +88,34 @@ public class ConstantsRegistry {
             synchronized (group) {
                 Map<Class, Object> constants = group.mConstants;
                 if (constants == null) {
+                    // No need to be a WeakHashMap because ordinary classes cannot be unloaded
+                    // until the class loader and all of its classes are unreferenced.
                     constants = new HashMap<>(4);
                     group.mConstants = constants;
                 }
                 constants.put(clazz, obj);
             }
         } else {
+            ConstantsRegistry registry;
             synchronized (ConstantsRegistry.class) {
-                if (cConstants == null) {
-                    cConstants = new WeakHashMap<>(4);
+                if (cRegistries == null) {
+                    cRegistries = new WeakHashMap<>(4);
                 }
-                cConstants.put(clazz, obj);
+                WeakReference<ConstantsRegistry> registryRef = cRegistries.get(loader);
+                if (registryRef == null || (registry = registryRef.get()) == null) {
+                    registry = defineRegistry(lookup);
+                    cRegistries.put(loader, new WeakReference<>(registry));
+                }
+            }
+            synchronized (registry) {
+                Map<Class, Object> constants = registry.mConstants;
+                if (constants == null) {
+                    // Use a WeakHashMap because some classes might be hidden and can be
+                    // unloaded. A strong reference would prevent this.
+                    constants = new WeakHashMap<>(4);
+                    registry.mConstants = constants;
+                }
+                constants.put(clazz, obj);
             }
         }
     }
@@ -110,6 +134,8 @@ public class ConstantsRegistry {
         Class<?> clazz = lookup.lookupClass();
         ClassLoader loader = clazz.getClassLoader();
 
+        ConstantsRegistry registry = null;
+
         Object value;
         if (loader instanceof ClassInjector.Group) {
             var group = (ClassInjector.Group) loader;
@@ -117,8 +143,16 @@ public class ConstantsRegistry {
                 value = group.mConstants == null ? null : group.mConstants.get(clazz);
             }
         } else {
+            WeakReference<ConstantsRegistry> registryRef;
             synchronized (ConstantsRegistry.class) {
-                value = cConstants == null ? null : cConstants.get(clazz);
+                registryRef = cRegistries.get(loader);
+            }
+            if (registryRef == null || (registry = registryRef.get()) == null) {
+                value = null;
+            } else {
+                synchronized (registry) {
+                    value = registry.mConstants == null ? null : registry.mConstants.get(clazz);
+                }
             }
         }
 
@@ -148,15 +182,53 @@ public class ConstantsRegistry {
                 }
             }
         } else {
-            synchronized (ConstantsRegistry.class) {
-                cConstants.remove(clazz);
-                if (cConstants.isEmpty()) {
-                    cConstants = null;
+            synchronized (registry) {
+                registry.mConstants.remove(clazz);
+                if (registry.mConstants.isEmpty()) {
+                    registry.mConstants = null;
                 }
             }
         }
 
         return value;
+    }
+
+    /**
+     * Defines a ConstantsRegistry subclass in the class loader of the given lookup. The
+     * returned instance is a singleton, strongly referenced to prevent premature GC.
+     */
+    private static ConstantsRegistry defineRegistry(MethodHandles.Lookup lookup) {
+        String className = "registry";
+
+        String pn = lookup.lookupClass().getPackageName();
+        if (!pn.isEmpty()) {
+            className = pn + '.' + className;
+        }
+
+        var cm = (TheClassMaker) ClassMaker.begin(className, lookup).synthetic();
+        cm.extend(ConstantsRegistry.class);
+        cm.addField(ConstantsRegistry.class, "_").static_().final_().synthetic();
+        cm.addConstructor().private_().synthetic();
+        MethodMaker mm = cm.addClinit();
+        mm.field("_").set(mm.new_(cm));
+
+        Class<?> clazz;
+        if (cm.supportsHiddenClasses()) {
+            // The hidden class must also be strongly referenced by the class loader.
+            clazz = cm.finishHidden(true).lookupClass();
+        } else {
+            // Ordinary classes are always strongly referenced by the class loader.
+            clazz = cm.finish();
+        }
+
+        VarHandle vh;
+        try {
+            vh = lookup.findStaticVarHandle(clazz, "_", ConstantsRegistry.class);
+        } catch (Exception e) {
+            throw TheClassMaker.toUnchecked(e);
+        }
+
+        return (ConstantsRegistry) vh.get();
     }
 
     private static final class Entries {

@@ -510,7 +510,7 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
             Type.uncache(mTypeCache, name);
         }
 
-        ConstantsRegistry.finish(this, clazz);
+        ConstantsRegistry.finish(this, mLookup, clazz);
 
         return clazz;
     }
@@ -610,14 +610,35 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
         return m;
     }
 
+    boolean supportsHiddenClasses() {
+        defineHidden();
+        return cHiddenClassOptions != null;
+    }
+
     @Override
     public MethodHandles.Lookup finishHidden() {
+        return finishHidden(false);
+    }
+
+    /**
+     * @param strong pass true to maintain a strong reference to the class
+     * @throws an exception if strong and hidden classes aren't truly supported
+     */
+    MethodHandles.Lookup finishHidden(boolean strong) {
         if (mLookup == null) {
             throw new IllegalStateException("No lookup was provided to the begin method");
         }
 
         Method m = defineHidden();
         Object options = cHiddenClassOptions;
+
+        if (strong && (options = cHiddenClassStrongOptions) == null) {
+            try {
+                cHiddenClassStrongOptions = options = hiddenOptions("STRONG");
+            } catch (Throwable e) {
+                throw toUnchecked(e);
+            }
+        }
 
         String originalName = name();
 
@@ -638,13 +659,14 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
             mInjector.unreserve(originalName);
         }
 
-        ConstantsRegistry.finish(this, result.lookupClass());
+        ConstantsRegistry.finish(this, mLookup, result.lookupClass());
 
         return result;
     }
 
     private static volatile Method cDefineHidden;
     private static Object cHiddenClassOptions;
+    private static Object cHiddenClassStrongOptions;
     private static Object cUnsafe;
 
     private static Method defineHidden() {
@@ -655,9 +677,7 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
         }
 
         try {
-            var optionClass = Class.forName("java.lang.invoke.MethodHandles$Lookup$ClassOption");
-            Object options = Array.newInstance(optionClass, 1);
-            Array.set(options, 0, optionClass.getField("NESTMATE").get(null));
+            Object options = hiddenOptions("NESTMATE");
             m = MethodHandles.Lookup.class.getMethod
                 ("defineHiddenClass", byte[].class, boolean.class, options.getClass());
             cHiddenClassOptions = options;
@@ -679,6 +699,13 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
         }
 
         throw new UnsupportedOperationException("Cannot define hidden classes");
+    }
+
+    private static Object hiddenOptions(String optionName) throws Throwable {
+        var optionClass = Class.forName("java.lang.invoke.MethodHandles$Lookup$ClassOption");
+        Object options = Array.newInstance(optionClass, 1);
+        Array.set(options, 0, optionClass.getField(optionName).get(null));
+        return options;
     }
 
     @Override
