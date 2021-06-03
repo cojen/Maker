@@ -4488,8 +4488,13 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
         @Override
         public void throw_() {
-            if (type().isPrimitive()) {
-                throw new IllegalStateException("Cannot throw primitive type");
+            Type type = type();
+            Class clazz = type.clazz();
+            if (clazz == null) {
+                clazz = (((TheClassMaker) type.maker()).superType()).clazz();
+            }
+            if (!Throwable.class.isAssignableFrom(clazz)) {
+                throw new IllegalStateException("Non-throwable type: " + type.name());
             }
             push();
             addBytecodeOp(ATHROW, 1);

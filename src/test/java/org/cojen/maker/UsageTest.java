@@ -459,7 +459,21 @@ public class UsageTest {
             mm.var(int.class).throw_();
             fail();
         } catch (IllegalStateException e) {
-            check(e, "Cannot throw");
+            check(e, "Non-throwable");
+        }
+
+        try {
+            mm.var(String.class).throw_();
+            fail();
+        } catch (IllegalStateException e) {
+            check(e, "Non-throwable");
+        }
+
+        try {
+            mm.this_().throw_();
+            fail();
+        } catch (IllegalStateException e) {
+            check(e, "Non-throwable");
         }
     }
 

@@ -165,4 +165,18 @@ public class ExceptionTest {
             fail();
         }
     }
+
+    @Test
+    public void throwSelf() throws Exception {
+        ClassMaker cm = ClassMaker.begin().public_().extend(InterruptedException.class);
+        cm.addConstructor();
+        MethodMaker mm = cm.addMethod(int.class, "run").public_().static_();
+        mm.new_(cm).throw_();
+        var clazz = cm.finish();
+        try {
+            clazz.getMethod("run").invoke(null);
+        } catch (Exception e) {
+            assertEquals(clazz, e.getCause().getClass());
+        }
+    }
 }
