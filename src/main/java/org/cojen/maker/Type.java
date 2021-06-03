@@ -847,6 +847,12 @@ abstract class Type {
         return existing == null ? type : existing;
     }
 
+    // Called by InjectorTest to ensure that classes get unloaded. Soft references aren't
+    // typically cleared right away.
+    static void clearCaches() {
+        cCacheMap.clear();
+    }
+
     private static final class Primitive extends Type {
         private final int mStackMapCode, mTypeCode;
         private volatile SoftReference<Type> mBoxRef;
