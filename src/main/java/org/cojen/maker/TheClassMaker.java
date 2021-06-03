@@ -547,7 +547,7 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
 
                 String initName;
 
-                for (int id=0;;) {
+                selectName: for (int id=0;;) {
                     initName = "$init-" + id;
                     if (mMethods == null) {
                         break;
@@ -555,7 +555,7 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
                     for (TheMethodMaker method : mMethods) {
                         if (initName.equals(method.getName())) {
                             id = ThreadLocalRandom.current().nextInt(Integer.MAX_VALUE);
-                            continue;
+                            continue selectName;
                         }
                     }
                     break;
@@ -622,7 +622,7 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
 
     /**
      * @param strong pass true to maintain a strong reference to the class
-     * @throws an exception if strong and hidden classes aren't truly supported
+     * @throws RuntimeException if strong and hidden classes aren't truly supported
      */
     MethodHandles.Lookup finishHidden(boolean strong) {
         if (mLookup == null) {

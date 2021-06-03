@@ -27,7 +27,7 @@ public interface Variable {
      * Returns the type of this variable, if bound to an existing class. Null is returned if
      * bound to a class which is being made.
      */
-    public Class classType();
+    public Class<?> classType();
 
     /**
      * Returns the type of this variable, if bound to a class which is being made. Null is

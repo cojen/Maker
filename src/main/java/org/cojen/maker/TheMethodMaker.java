@@ -3588,7 +3588,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
     abstract class OwnedVar implements Variable, Typed {
         @Override
-        public Class classType() {
+        public Class<?> classType() {
             return type().clazz();
         }
 
