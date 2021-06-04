@@ -1256,8 +1256,6 @@ abstract class Type {
 
         @Override
         boolean isAssignableFrom(Type other) {
-            // TODO: Cache the result?
-
             if (other == Null.THE || this.equals(other)) {
                 return true;
             }
