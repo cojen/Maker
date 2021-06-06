@@ -1,6 +1,10 @@
 Changelog
 =========
 
+v1.1.1
+------
+* Fixed bug when performing a logical operation against a boxed type which caused a VerifyError.
+
 v1.1.0 (2021-06-04)
 ------
 * Default class name when given a lookup must be in the same package.

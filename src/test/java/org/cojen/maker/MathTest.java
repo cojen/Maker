@@ -434,4 +434,14 @@ public class MathTest {
             assertTrue(e.getMessage().startsWith("Too many"));
         }
     }
+
+    @Test
+    public void boxedLogical() throws Exception {
+        // Test case for a bug which caused a VerifyError.
+        ClassMaker cm = ClassMaker.begin().public_();
+        MethodMaker mm = cm.addMethod(Object.class, "run", Integer.class).static_().public_();
+        mm.return_(mm.param(0).xor(-1));
+        Object result = cm.finish().getMethod("run", Integer.class).invoke(null, 100);
+        assertEquals(100 ^ -1, ((Integer) result).intValue());
+    }
 }

@@ -2558,7 +2558,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             // downcast from long could be allowed, but it's not really necessary.
             addPushOp(INT, value);
         } else {
-            addPushOp(varType, value);
+            addPushOp(primType, value);
         }
 
         addBytecodeOp(op, 1);
