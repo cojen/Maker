@@ -3,7 +3,7 @@ Changelog
 
 v1.1.1
 ------
-* Fixed bug when performing a logical operation against a boxed type which caused a VerifyError.
+* Fixed VerifyError when performing a logical operation against a boxed type.
 
 v1.1.0 (2021-06-04)
 ------
