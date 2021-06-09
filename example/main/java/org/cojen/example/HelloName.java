@@ -56,7 +56,7 @@ public class HelloName {
         var sys = mm.var(System.class);
         var in = mm.new_(BufferedReader.class, mm.new_(InputStreamReader.class, sys.field("in")));
         Label tryStart = mm.label().here();
-        sys.field("out").invoke("println", "Please enter your name> ");
+        sys.field("out").invoke("print", "Please enter your name> ");
         var name = in.invoke("readLine");
         mm.catch_(tryStart, IOException.class, ex -> mm.return_());
         sys.field("out").invoke("println", mm.concat("Hello, ", name));
