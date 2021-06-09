@@ -18,6 +18,7 @@ clazz.getMethod("run").invoke(null);
 ```
 
 - [Javadocs](https://cojen.github.io/Maker/javadoc/org.cojen.maker/org/cojen/maker/package-summary.html)
+- [Ease of use](https://github.com/cojen/Maker/wiki/Ease-of-use)
 - [Coding patterns](docs/CodingPatterns.md)
 - [Examples](example/main/java/org/cojen/example)
 
