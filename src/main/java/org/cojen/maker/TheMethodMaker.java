@@ -3476,9 +3476,11 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
         @Override
         void appendTo(TheMethodMaker m) {
-            if (unusedVar()) {
+            if (unusedVar() && mVar.mSlot < 0) {
                 m.stackPop();
             } else {
+                // If unused but a slot is defined, then need to ensure that the variable is
+                // definitely assigned to keep the verifier happy.
                 m.storeVar(mVar);
             }
         }

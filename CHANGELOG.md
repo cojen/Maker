@@ -4,6 +4,7 @@ Changelog
 v1.1.1
 ------
 * Fixed VerifyError when performing a logical operation against a boxed type.
+* Fixed VerifyError where a local variable store was erroneously replaced with a pop instruction.
 
 v1.1.0 (2021-06-04)
 ------

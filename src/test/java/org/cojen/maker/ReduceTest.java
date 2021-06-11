@@ -45,4 +45,25 @@ public class ReduceTest {
 
         cm.finish().getMethod("test").invoke(null);
     }
+
+    @Test
+    public void definiteAssignment() throws Exception {
+        // A store to a variable can be reduced until it's replaced with a pop instruction.
+        // This is a problem when a variable slot has been defined, because then it must be
+        // definitely assigned. Otherwise, verification can fail.
+        
+        ClassMaker cm = ClassMaker.begin(null).public_();
+        MethodMaker mm = cm.addMethod(int.class, "test", int.class).public_().static_();
+
+        var a = mm.var(int.class).set(0);
+        a.get();
+        a.get();
+        Label end = mm.label();
+        mm.param(0).ifEq(0, end);
+        mm.param(0).inc(1);
+        end.here();
+        mm.return_(mm.param(0));
+
+        cm.finish().getMethod("test", int.class).invoke(null, 10);
+    }
 }
