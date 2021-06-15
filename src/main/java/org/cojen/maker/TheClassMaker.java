@@ -791,12 +791,7 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
 
         mConstants.writeTo(out);
 
-        int flags = mModifiers;
-        if (!Modifier.isInterface(flags)) {
-            // Set the ACC_SUPER flag for classes only.
-            flags |= Modifier.SYNCHRONIZED;
-        }
-        out.writeShort(flags);
+        out.writeShort(mModifiers);
 
         out.writeShort(mThisClass.mIndex);
         out.writeShort(mSuperClass.mIndex);
