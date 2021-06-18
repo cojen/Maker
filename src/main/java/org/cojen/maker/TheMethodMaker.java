@@ -3982,7 +3982,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             // Indicate that the arguments will be used at some point, preventing premature
             // elimination of local variables.
             adjustPushCount(1);
-            TheMethodMaker.this.adjustPushCount(value, 1);
+            TheMethodMaker.adjustPushCount(value, 1);
 
             // Add a temporary operation which gets replaced during flow analysis.
 
@@ -4001,7 +4001,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                     // This correction isn't strictly necessary, but it might help with future
                     // optimizations which reduce variable usage.
                     adjustPushCount(-1);
-                    TheMethodMaker.this.adjustPushCount(value, -1);
+                    TheMethodMaker.adjustPushCount(value, -1);
 
                     Op next = mNext;
                     final Op last = flow.lastOp();
