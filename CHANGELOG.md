@@ -1,11 +1,14 @@
 Changelog
 =========
 
+v1.1.2
+------
+* Fixed VerifyError when converting a boxed primitive type and storing to an instance field.
+
 v1.1.1 (2021-06-12)
 ------
 * Fixed VerifyError when performing a logical operation against a boxed type.
 * Fixed VerifyError where a local variable store was erroneously replaced with a pop instruction.
-* Fixed VerifyError when converting a boxed primitive type and storing to an instance field.
 
 v1.1.0 (2021-06-04)
 ------
