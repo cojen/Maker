@@ -1021,4 +1021,40 @@ public class ConvertTest {
         var clazz = cm.finish();
         clazz.getMethod("run").invoke(null);
     }
+
+    @Test
+    public void convertField() throws Exception {
+        // Storing to an instance field pushes an instance to the stack. If a conversion is
+        // applied for an object which could be null, then this creates StackMapTable entries
+        // which must account for the item on the stack.
+
+        cm.addField(Double.class, "value");
+        cm.addConstructor();
+
+        var ivalue = mm.var(Integer.class).set(10);
+        var instance = mm.new_(cm);
+        instance.field("value").set(ivalue);
+        var assertVar = mm.var(Assert.class);
+        assertVar.invoke("assertEquals", 10.0, instance.field("value").unbox(), 0.0);
+
+        var clazz = cm.finish();
+        clazz.getMethod("run").invoke(null);
+    }
+
+    @Test
+    public void convertField2() throws Exception {
+        // Different variant of the convertField test.
+
+        cm.addField(Double.class, "value");
+        cm.addConstructor();
+
+        var ivalue = mm.var(int.class).set(10); // is unboxed this time
+        var instance = mm.new_(cm);
+        instance.field("value").set(ivalue);
+        var assertVar = mm.var(Assert.class);
+        assertVar.invoke("assertTrue", instance.field("value").eq(10.0)); // special boolean eq
+
+        var clazz = cm.finish();
+        clazz.getMethod("run").invoke(null);
+    }
 }

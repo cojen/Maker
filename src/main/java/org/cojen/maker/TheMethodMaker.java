@@ -945,8 +945,8 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     }
 
     private static void adjustPushCount(Object value, int amt) {
-        if (value instanceof LocalVar) {
-            ((LocalVar) value).mPushCount += amt;
+        if (value instanceof OwnedVar) {
+            ((OwnedVar) value).adjustPushCount(amt);
         }
     }
 
@@ -2863,7 +2863,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                     }
                 }
 
-                int[] stackCodes = stackCodes();
+                int[] stackCodes = stackCodes(m);
 
                 m.mStackMapTable.add(mAddress, localCodes, stackCodes);
             }
@@ -3021,37 +3021,48 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         /**
          * Return the StackMapTable codes at this label.
          */
-        int[] stackCodes() {
-            return null;
+        int[] stackCodes(TheMethodMaker m) {
+            if (m.mStackSize == 0) {
+                return null;
+            }
+            int[] codes = new int[m.mStackSize];
+            for (int i=0; i<codes.length; i++) {
+                codes[i] = m.mStack[i].smCode();
+            }
+            return codes;
         }
     }
 
     /**
-     * Label which has one item on the stack.
+     * Special label which decrements the tracked stack but doesn't actually emit a pop opcode.
      */
-    static class StackLab extends Lab {
-        private final int mSmCode;
-
-        StackLab(TheMethodMaker owner, int smCode) {
+    static class PopLab extends Lab {
+        PopLab(TheMethodMaker owner) {
             super(owner);
-            mSmCode = smCode;
         }
 
         @Override
-        int[] stackCodes() {
-            return new int[] {mSmCode};
+        void appendTo(TheMethodMaker m) {
+            int newSize = m.mStackSize - 1;
+            if (newSize < 0) {
+                throw new IllegalStateException("Stack is empty");
+            }
+            m.mStackSize = newSize;
+            super.appendTo(m);
         }
     }
 
     /**
      * Exception handler catch label.
      */
-    static class HandlerLab extends StackLab {
+    static class HandlerLab extends Lab {
         private final Type mCatchType;
+        private final int mSmCatchCode;
 
         HandlerLab(TheMethodMaker owner, Type catchType, int smCatchCode) {
-            super(owner, smCatchCode);
+            super(owner);
             mCatchType = catchType;
+            mSmCatchCode = smCatchCode;
         }
 
         @Override
@@ -3064,6 +3075,11 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         boolean isTarget() {
             // Won't be reached by a branch, but instead will only be reached by tryCatchFlow.
             return mVisited;
+        }
+
+        @Override
+        int[] stackCodes(TheMethodMaker m) {
+            return new int[] {mSmCatchCode};
         }
     }
 
@@ -3628,6 +3644,8 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             }
         }
 
+        abstract void adjustPushCount(int amt);
+
         @Override
         public Variable setExact(Object value) {
             if (value == null) {
@@ -3963,8 +3981,8 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
             // Indicate that the arguments will be used at some point, preventing premature
             // elimination of local variables.
-            adjustPushCount(this, 1);
-            adjustPushCount(value, 1);
+            adjustPushCount(1);
+            TheMethodMaker.this.adjustPushCount(value, 1);
 
             // Add a temporary operation which gets replaced during flow analysis.
 
@@ -3982,8 +4000,8 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                     // Fix the push counts. They'll get adjusted again by the new operations.
                     // This correction isn't strictly necessary, but it might help with future
                     // optimizations which reduce variable usage.
-                    adjustPushCount(OwnedVar.this, -1);
-                    adjustPushCount(value, -1);
+                    adjustPushCount(-1);
+                    TheMethodMaker.this.adjustPushCount(value, -1);
 
                     Op next = mNext;
                     final Op last = flow.lastOp();
@@ -4027,7 +4045,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                         // this point, but the trailing ones will be added back.
                         flow.removeOps(prev, this, null, 1);
 
-                        Label match = label();
+                        PopLab match = new PopLab(TheMethodMaker.this);
                         if (value == null) {
                             push();
                             addBranchOp((byte) (zeroOp + (IFNULL - IFEQ)), 1, match);
@@ -4035,8 +4053,10 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                             ifRelational(value, match, eq, op, zeroOp);
                         }
                         addOp(new BasicConstantOp(false, BOOLEAN));
-                        Label cont = new StackLab(TheMethodMaker.this, SM_INT);
+                        Label cont = label();
                         goto_(cont);
+                        // Uses a PopLab because the above goto is unconditional, and the
+                        // logic which tracks the stack during code generation is dumb.
                         match.here();
                         addOp(new BasicConstantOp(true, BOOLEAN));
                         cont.here();
@@ -4573,6 +4593,11 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
+        void adjustPushCount(int amt) {
+            mPushCount += amt;
+        }
+
+        @Override
         public String name() {
             return mName;
         }
@@ -4742,6 +4767,11 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         @Override
         void push() {
             this_().push();
+        }
+
+        @Override
+        void adjustPushCount(int amt) {
+            this_().adjustPushCount(amt);
         }
 
         @Override
@@ -5038,6 +5068,13 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
+        void adjustPushCount(int amt) {
+            if (!mFieldRef.mField.isStatic()) {
+                mInstance.adjustPushCount(amt);
+            }
+        }
+
+        @Override
         void addStoreConstantOp(ExplicitConstantOp op) {
             addBeginStoreFieldOp();
             addExplicitConstantOp(op);
@@ -5275,6 +5312,11 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         @Override
         void push() {
             vhPush("get");
+        }
+
+        @Override
+        void adjustPushCount(int amt) {
+            mHandleVar.adjustPushCount(amt);
         }
 
         @Override
