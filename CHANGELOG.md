@@ -1,7 +1,7 @@
 Changelog
 =========
 
-v1.1.2
+v1.1.2 (2021-06-19)
 ------
 * Fixed VerifyError when converting a boxed primitive type and storing to an instance field.
 
