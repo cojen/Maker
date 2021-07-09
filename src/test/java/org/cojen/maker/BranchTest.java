@@ -675,6 +675,55 @@ public class BranchTest {
     }
 
     @Test
+    public void booleanRelational() throws Exception {
+        // Test relational comparisons against booleans. The Boolean class is Comparable, and
+        // so an expression like "false < true" should be allowed.
+
+        ClassMaker cm = ClassMaker.begin().public_();
+        MethodMaker mm = cm.addMethod(null, "run").static_().public_();
+        var assertVar = mm.var(Assert.class);
+
+        var v1 = mm.var(boolean.class).set(false);
+        var v2 = mm.var(boolean.class).set(true);
+
+        {
+            Label L = mm.label();
+            v1.ifLt(v2, L);
+            assertVar.invoke("fail");
+            L.here();
+        }
+
+        {
+            Label L = mm.label();
+            v2.ifGe(v1, L);
+            assertVar.invoke("fail");
+            L.here();
+        }
+
+        {
+            Label L = mm.label();
+            v1.ifLe(true, L);
+            assertVar.invoke("fail");
+            L.here();
+        }
+
+        {
+            Label L = mm.label();
+            v2.ifGe(false, L);
+            assertVar.invoke("fail");
+            L.here();
+        }
+
+        mm.var(Assert.class).invoke("assertEquals", true, v1.lt(v2));
+        mm.var(Assert.class).invoke("assertEquals", true, v2.ge(v1));
+        mm.var(Assert.class).invoke("assertEquals", true, v1.le(true));
+        mm.var(Assert.class).invoke("assertEquals", true, v2.ge(false));
+
+        var clazz = cm.finish();
+        clazz.getMethod("run").invoke(null);
+    }
+
+    @Test
     public void rebranch() throws Exception {
         // Test conversion of a conditional store into a boolean variable back into a direct
         // branch operation.

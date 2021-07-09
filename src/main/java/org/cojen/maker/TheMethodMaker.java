@@ -3764,9 +3764,13 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                     }
                 } else if (value instanceof Boolean) {
                     Type unbox = type().unbox();
-                    if (unbox == BOOLEAN) {
+                    bool: if (unbox == BOOLEAN) {
                         // Simple boolean comparison.
                         if ((boolean) value) {
+                            if (!eq) {
+                                // Cannot flip and compare to zero, so break and compare to 1.
+                                break bool;
+                            }
                             zeroOp = flipIf(zeroOp);
                         }
                         push(unbox);
@@ -3840,9 +3844,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                     // Attempt a primitive comparison.
                     thisCmp = thisCmp.unbox();
                     otherCmp = otherCmp.unbox();
-                    if (thisCmp == null || otherCmp == null
-                        || (!eq && (thisCmp == BOOLEAN || otherCmp == BOOLEAN)))
-                    {
+                    if (thisCmp == null || otherCmp == null) {
                         // Incomparable.
                         break check;
                     }

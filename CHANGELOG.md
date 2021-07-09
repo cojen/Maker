@@ -1,6 +1,10 @@
 Changelog
 =========
 
+v1.1.3
+------
+* Allow relational comparisons against booleans, which are really just 0 and 1.
+
 v1.1.2 (2021-06-19)
 ------
 * Fixed VerifyError when converting a boxed primitive type and storing to an instance field.
