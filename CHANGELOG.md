@@ -1,7 +1,7 @@
 Changelog
 =========
 
-v1.1.3
+v1.1.3 (2021-07-10)
 ------
 * Allow relational comparisons against booleans, which are really just 0 and 1.
 
