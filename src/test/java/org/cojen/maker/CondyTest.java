@@ -350,12 +350,7 @@ public class CondyTest {
 
         // Class hasn't been initialized yet. Try to steal via the backdoor.
 
-        try {
-            ConstantsRegistry.remove(MethodHandles.lookup(), "_", null, 0);
-            fail();
-        } catch (IllegalStateException e) {
-            // Wrong lookup, so not found.
-        }
+        assertNull(ConstantsRegistry.remove(MethodHandles.lookup(), "_", null, 0));
 
         try {
             ConstantsRegistry.remove(MethodHandles.lookup().in(clazz), "_", null, 0);
@@ -381,15 +376,9 @@ public class CondyTest {
         Object const1 = ConstantsRegistry.remove(lookup, "_", null, 0);
         assertEquals(const0, const1);
 
-        try {
-            clazz.getField("test").get(null);
-            fail();
-        } catch (BootstrapMethodError e) {
-            // Stolen!
-            assertTrue(e.getCause() instanceof IllegalStateException);
-        }
+        // Stolen!
+        assertEquals(null, clazz.getField("test").get(null));
     }
-
 
     @Test
     public void classDesc() throws Exception {

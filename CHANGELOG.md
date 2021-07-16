@@ -1,6 +1,10 @@
 Changelog
 =========
 
+v1.1.4
+------
+* Fix race conditions when requesting constants defined by setExact.
+
 v1.1.3 (2021-07-10)
 ------
 * Allow relational comparisons against booleans, which are really just 0 and 1.

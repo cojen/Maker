@@ -24,6 +24,7 @@ import java.lang.ref.WeakReference;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.WeakHashMap;
 
 /**
@@ -51,6 +52,7 @@ public abstract class ConstantsRegistry {
      * Add an entry and return the slot assigned to it.
      */
     static int add(TheClassMaker cm, Object value) {
+        Objects.requireNonNull(value);
         Object obj = cm.mExactConstants;
         if (obj == null) {
             cm.mExactConstants = value;
@@ -157,13 +159,16 @@ public abstract class ConstantsRegistry {
         }
 
         if (value == null) {
-            throw new IllegalStateException();
+            return null;
         }
 
         if (value instanceof Entries) {
             var entries = (Entries) value;
             synchronized (entries) {
                 value = entries.mValues[slot];
+                if (value == null) {
+                    return null;
+                }
                 int size = entries.mSize;
                 if (size > 1) {
                     entries.mValues[slot] = null;
