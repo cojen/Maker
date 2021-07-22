@@ -2323,6 +2323,8 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             
                 compilation bailout: could not resolve a constant
 
+              See: https://bugs.openjdk.java.net/browse/JDK-8270928
+
               If there's a possibility of this happening, then the constant is eagerly resolved
               and stored in a static final field. The field is then used instead of the
               original direct reference. Sadly, this entirely defeats the point of having
