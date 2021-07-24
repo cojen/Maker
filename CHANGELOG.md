@@ -1,7 +1,7 @@
 Changelog
 =========
 
-v1.1.4
+v1.1.4 (2021-07-24)
 ------
 * Fix race conditions when requesting constants defined by setExact.
 
