@@ -198,6 +198,13 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
     }
 
     @Override
+    public ClassMaker enum_() {
+        checkFinished();
+        mModifiers = Modifiers.toEnum(mModifiers);
+        return this;
+    }
+
+    @Override
     public ClassMaker extend(Object superClass) {
         requireNonNull(superClass);
         if (mSuperClass != null) {

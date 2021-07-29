@@ -5,7 +5,7 @@
   <artifactId>cojen-maker</artifactId>
   <packaging>jar</packaging>
   <name>Maker</name>
- <version>1.1.4</version>
+ <version>1.2.0</version>
   <description>
     Dynamic Java class file generator.
   </description>

@@ -88,7 +88,7 @@ class Modifiers {
 
     // For classes and fields.
     static int toEnum(int bitmask) {
-        return (bitmask | 0x4000) & (~Modifier.INTERFACE & ~Modifier.ABSTRACT);
+        return bitmask | 0x4000;
     }
 
     // For methods.

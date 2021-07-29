@@ -85,6 +85,14 @@ public interface FieldMaker {
     public FieldMaker synthetic();
 
     /**
+     * Indicate that this field is an enum constant. No checks or modifications are performed
+     * to ensure that the enum field is defined correctly.
+     *
+     * @return this
+     */
+    public FieldMaker enum_();
+
+    /**
      * Set an initial constant value for this field. The allowed constants are the same as
      * those allowed by the {@link Variable#set Variable.set} method. Complex constants can be
      * assigned using a {@link ClassMaker#addClinit static initializer}.

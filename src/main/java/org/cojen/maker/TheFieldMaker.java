@@ -88,6 +88,12 @@ final class TheFieldMaker extends ClassMember implements FieldMaker {
     }
 
     @Override
+    public FieldMaker enum_() {
+        mModifiers = Modifiers.toEnum(mModifiers);
+        return this;
+    }
+
+    @Override
     public FieldMaker init(Object value) {
         if (!Modifier.isStatic(mModifiers)) {
             throw new IllegalStateException("Not static");

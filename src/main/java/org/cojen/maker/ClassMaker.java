@@ -167,6 +167,14 @@ public interface ClassMaker {
     public ClassMaker synthetic();
 
     /**
+     * Indicate that this class is defining an enum. No checks or modifications are performed
+     * to ensure that the enum class is defined correctly.
+     *
+     * @return this
+     */
+    public ClassMaker enum_();
+
+    /**
      * Set a class that this class extends.
      *
      * @param superClass non-null Class or String

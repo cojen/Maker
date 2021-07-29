@@ -1,6 +1,10 @@
 Changelog
 =========
 
+v1.2.0
+------
+* Add basic enum support.
+
 v1.1.4 (2021-07-24)
 ------
 * Fix race conditions when requesting constants defined by setExact.
