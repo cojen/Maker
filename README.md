@@ -1,6 +1,6 @@
 [![](https://jitpack.io/v/cojen/Maker.svg)](https://jitpack.io/#cojen/Maker)
 
-The Cojen/Maker framework is a lightweight, low-level dynamic Java class generator which is designed for [ease of use](https://github.com/cojen/Maker/wiki/Ease-of-use).
+The Cojen/Maker framework is a lightweight, full-featured, low-level dynamic Java class generator which is designed for [ease of use](https://github.com/cojen/Maker/wiki/Ease-of-use).
 
 Here's a simple "hello, world" example:
 
