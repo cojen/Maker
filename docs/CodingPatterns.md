@@ -1,4 +1,4 @@
-This page shows how some common coding patterns can be implemented using the Cojen/Maker module.
+This page shows how some common coding patterns can be implemented using the Cojen/Maker framework.
 
 If statements
 =============
