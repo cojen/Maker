@@ -53,7 +53,7 @@ Over time, JIT compilers like HotSpot came along, and this meant that optimizati
 
 When the `MethodHandle` class appeared in Java 7, it introduced a new way of generating bytecode dynamically. To some degree, it made existing bytecode generators obsolete, although the `MethodHandle` features are limited and it can be difficult to use. Take a look at the source code for `java.lang.runtime.ObjectMethods` and try to figure out how it works. I'm still not sure what's going on.
 
-Cojen/Maker is a complete rewrite of the original framework, catching it up to the latest JVM and providing a foundation for future enhancements. The API is designed to be low-level enough to expose all the JVM features, but also be high-level enough to hide the ugly details of how to code for the JVM. There's no reason for anyone using the API to ever read the JVM specification.
+Cojen/Maker is a complete rewrite of the original framework, catching it up to the latest JVM and providing a foundation for future enhancements. The API is designed to be low-level enough to expose all the JVM features, but also be high-level enough to hide the ugly details. There's no reason for anyone using the API to ever read the JVM specification.
 
 Limitations
 -----------
