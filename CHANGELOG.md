@@ -1,7 +1,7 @@
 Changelog
 =========
 
-v1.2.0
+v1.2.0 (2021-08-07)
 ------
 * Add basic enum support.
 
