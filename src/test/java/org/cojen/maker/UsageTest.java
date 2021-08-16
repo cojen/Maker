@@ -554,16 +554,6 @@ public class UsageTest {
     }
 
     @Test
-    public void noLookup() {
-        try {
-            mClassMaker.finishHidden();
-            fail();
-        } catch (IllegalStateException e) {
-            check(e, "No lookup");
-        }
-    }
-
-    @Test
     public void noAccess() throws Exception {
         noAccess(false);
     }

@@ -631,8 +631,10 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
      * @throws RuntimeException if strong and hidden classes aren't truly supported
      */
     MethodHandles.Lookup finishHidden(boolean strong) {
-        if (mLookup == null) {
-            throw new IllegalStateException("No lookup was provided to the begin method");
+        MethodHandles.Lookup lookup = mLookup;
+
+        if (lookup == null) {
+            lookup = mInjectorGroup.lookup(name(), ensureInitialized() == null);
         }
 
         Method m = defineHidden();
@@ -653,10 +655,10 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
         MethodHandles.Lookup result;
         try {
             if (options == null) {
-                var clazz = (Class<?>) m.invoke(cUnsafe, mLookup.lookupClass(), bytes, null);
-                result = mLookup.in(clazz);
+                var clazz = (Class<?>) m.invoke(cUnsafe, lookup.lookupClass(), bytes, null);
+                result = lookup.in(clazz);
             } else {
-                result = ((MethodHandles.Lookup) m.invoke(mLookup, bytes, false, options));
+                result = ((MethodHandles.Lookup) m.invoke(lookup, bytes, false, options));
             }
         } catch (Exception e) {
             throw toUnchecked(e);
@@ -665,7 +667,7 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
             mInjector.unreserve(originalName);
         }
 
-        ConstantsRegistry.finish(this, mLookup, result.lookupClass());
+        ConstantsRegistry.finish(this, lookup, result.lookupClass());
 
         return result;
     }

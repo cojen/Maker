@@ -188,4 +188,25 @@ public class AccessTest {
         // This forces the method to be looked up again.
         TheClassMaker.cNoEnsureInitialized = false;
     }
+
+    @Test
+    public void accessPackage() throws Throwable {
+        // Hidden class defined without a lookup can access the same package.
+
+        Class<?> c1;
+        {
+            ClassMaker cm = ClassMaker.begin("foo.First");
+            cm.addMethod(int.class, "test").static_().return_(123);
+            c1 = cm.finish();
+        }
+
+        ClassMaker cm = ClassMaker.begin("foo.Second");
+        MethodMaker mm = cm.addMethod(int.class, "test").static_().public_();
+        mm.return_(mm.var(c1).invoke("test"));
+        var lookup = cm.finishHidden();
+        Class<?> c2 = lookup.lookupClass();
+        var mh = lookup.findStatic(c2, "test", MethodType.methodType(int.class));
+
+        assertEquals(123, mh.invoke());
+    }
 }

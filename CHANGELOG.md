@@ -1,6 +1,10 @@
 Changelog
 =========
 
+v1.2.1
+------
+* Allow hidden class to made without an explicit lookup object provided.
+
 v1.2.0 (2021-08-07)
 ------
 * Add basic enum support.

@@ -303,16 +303,16 @@ public interface ClassMaker {
     public MethodHandles.Lookup finishLookup();
 
     /**
-     * Finishes the definition of a new hidden class, using the lookup passed to the begin
-     * method. Hidden classes are automatically unloaded when no longer referenced, even if the
-     * class loader still is. The hidden class is defined in the same nest as the lookup class.
+     * Finishes the definition of a new hidden class, returning a lookup which has full
+     * privilege access to the class. Hidden classes are automatically unloaded when no longer
+     * referenced, even if the class loader still is. If a lookup object was passed to the
+     * begin method, the hidden class is defined in the same nest as the lookup class.
      *
      * <p>This feature is fully supported only with Java 15 and above. Hidden classes created
      * with earlier versions don't support all the lookup features.
      *
      * @return the lookup for the class; call {@code lookupClass} to obtain the actual class
-     * @throws IllegalStateException if already finished, or if the definition is broken, or if
-     * no lookup object was passed to the begin method
+     * @throws IllegalStateException if already finished or if the definition is broken
      */
     public MethodHandles.Lookup finishHidden();
 
