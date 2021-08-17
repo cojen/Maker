@@ -4,6 +4,7 @@ Changelog
 v1.2.1
 ------
 * Allow hidden class to made without an explicit lookup object provided.
+* Preserve raw floating point constants (non-canonical NaNs).
 
 v1.2.0 (2021-08-07)
 ------

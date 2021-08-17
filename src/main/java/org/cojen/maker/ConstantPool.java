@@ -339,7 +339,7 @@ class ConstantPool {
             }
             if (obj instanceof C_Float) {
                 C_Float other = (C_Float) obj;
-                return Float.floatToIntBits(mValue) == Float.floatToIntBits(other.mValue);
+                return Float.floatToRawIntBits(mValue) == Float.floatToRawIntBits(other.mValue);
             }
             return false;
         }
@@ -403,7 +403,8 @@ class ConstantPool {
             }
             if (obj instanceof C_Double) {
                 C_Double other = (C_Double) obj;
-                return Double.doubleToLongBits(mValue) == Double.doubleToLongBits(other.mValue);
+                return Double.doubleToRawLongBits(mValue)
+                    == Double.doubleToRawLongBits(other.mValue);
             }
             return false;
         }

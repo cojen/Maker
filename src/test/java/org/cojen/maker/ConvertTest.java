@@ -1057,4 +1057,47 @@ public class ConvertTest {
         var clazz = cm.finish();
         clazz.getMethod("run").invoke(null);
     }
+
+    @Test
+    public void preserveRawFloat() throws Exception {
+        // Special NaN values are preserved (they aren't converted to the canonical NaN).
+
+        float f = Float.intBitsToFloat(Float.floatToRawIntBits(0.0f/0.0f) + 1);
+        double d = Double.longBitsToDouble(Double.doubleToRawLongBits(0.0d/0.0d) + 1);
+
+        assertNotEquals(Float.floatToRawIntBits(0.0f/0.0f), Float.floatToRawIntBits(f));
+        assertNotEquals(Double.doubleToRawLongBits(0.0d/0.0d), Double.doubleToRawLongBits(d));
+
+        cm.addMethod(float.class, "ftest0").public_().static_().return_(0.0f/0.0f);
+        cm.addMethod(float.class, "ftest1").public_().static_().return_(f);
+
+        cm.addMethod(double.class, "dtest0").public_().static_().return_(0.0d/0.0d);
+        cm.addMethod(double.class, "dtest1").public_().static_().return_(d);
+
+        {
+            MethodMaker mm = cm.addMethod(float.class, "ftestx").public_().static_();
+            try {
+                mm.return_(d);
+                fail();
+            } catch (IllegalStateException e) {
+                assertTrue(e.getMessage().startsWith("Automatic conversion"));
+            }
+            mm.return_(0.0d/0.0d);
+        }
+
+        var clazz = cm.finish();
+
+        float f0 = (float) clazz.getMethod("ftest0").invoke(null);
+        float f1 = (float) clazz.getMethod("ftest1").invoke(null);
+        double d0 = (double) clazz.getMethod("dtest0").invoke(null);
+        double d1 = (double) clazz.getMethod("dtest1").invoke(null);
+
+        assertEquals(Float.floatToRawIntBits(0.0f/0.0f), Float.floatToRawIntBits(f0));
+        assertEquals(Double.doubleToRawLongBits(0.0d/0.0d), Double.doubleToRawLongBits(d0));
+        assertEquals(Float.floatToRawIntBits(f), Float.floatToRawIntBits(f1));
+        assertEquals(Double.doubleToRawLongBits(d), Double.doubleToRawLongBits(d1));
+
+        float fx = (float) clazz.getMethod("ftestx").invoke(null);
+        assertEquals(Float.floatToRawIntBits(0.0f/0.0f), Float.floatToRawIntBits(fx));
+    }
 }

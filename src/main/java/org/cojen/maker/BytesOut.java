@@ -92,11 +92,11 @@ final class BytesOut {
     }
 
     public void writeFloat(float v) throws IOException {
-        writeInt(Float.floatToIntBits(v));
+        writeInt(Float.floatToRawIntBits(v));
     }
 
     public void writeDouble(double v) throws IOException {
-        writeLong(Double.doubleToLongBits(v));
+        writeLong(Double.doubleToRawLongBits(v));
     }
 
     public void write(byte[] b, int off, int len) throws IOException {

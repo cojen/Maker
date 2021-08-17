@@ -2045,7 +2045,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                         break;
                     case T_FLOAT:
                         float fv = (float) v;
-                        if (Double.doubleToLongBits(fv) == Double.doubleToLongBits(v)) {
+                        if (Double.doubleToRawLongBits(fv) == Double.doubleToRawLongBits(v)) {
                             value = fv;
                             constantType = FLOAT;
                         }
