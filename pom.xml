@@ -70,9 +70,9 @@
                     <element>BUNDLE</element>
                     <limits>
                       <limit>
-                        <counter>COMPLEXITY</counter>
+                        <counter>INSTRUCTION</counter>
                         <value>COVEREDRATIO</value>
-                        <minimum>0.85</minimum>
+                        <minimum>0.95</minimum>
                       </limit>
                     </limits>
                   </rule>
