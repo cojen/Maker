@@ -1,6 +1,10 @@
 Changelog
 =========
 
+v1.2.2
+------
+* Allow hidden classes to be unloaded when created without an explicit lookup object.
+
 v1.2.1 (2021-08-21)
 ------
 * Allow hidden class to made without an explicit lookup object provided.

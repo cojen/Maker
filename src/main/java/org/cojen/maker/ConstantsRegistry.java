@@ -90,9 +90,9 @@ public abstract class ConstantsRegistry {
             synchronized (group) {
                 Map<Class, Object> constants = group.mConstants;
                 if (constants == null) {
-                    // No need to be a WeakHashMap because ordinary classes cannot be unloaded
-                    // until the class loader and all of its classes are unreferenced.
-                    constants = new HashMap<>(4);
+                    // Use a WeakHashMap because some classes might be hidden and can be
+                    // unloaded. A strong reference would prevent this.
+                    constants = new WeakHashMap<>(4);
                     group.mConstants = constants;
                 }
                 constants.put(clazz, obj);
