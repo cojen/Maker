@@ -44,17 +44,6 @@ Another nice feature is the `setExact` method, which allows arbitrary object ins
 
 The implementation of the Cojen/Maker system is tiny, and it has no dependencies. The total size is about 7300 lines of code, where a line of code is defined as a non-comment line which contains more than one non-whitespace character. For comparison, ASM and Byte Buddy have about 25,000 and 130,000 lines of code respectively, although in fairness, these frameworks do have more features.
 
-Background and motivation
--------------------------
-
-I wrote the original Cojen "classfile" framework in 1997, and like other bytecode frameworks of this era, the design started out as a set of classes which mirrored the struct definitions outlined in the JVM specification. Because JIT compilers at this time weren't very good, direct control over bytecode instructions was necessary for achieving the best performance.
-
-Over time, JIT compilers like HotSpot came along, and this meant that optimization tricks at the bytecode level became unnecessary. Precise instruction selection mattered less, as did direct control over the operand stack. And as more JVM features were added, it became difficult for the Cojen API to keep up. In particular, the `StackMapTable` attribute introduced in Java 6 effectively killed all further development. This feature speeds up bytecode verification, but it created a heavy burden on the bytecode generator that didn't originally exist. Without a complete rewrite, the original framework was stuck on Java 5, and so it couldn't support newer features like `invokedynamic`.
-
-When the `MethodHandle` class appeared in Java 7, it introduced a new way of generating bytecode dynamically. To some degree, it made existing bytecode generators obsolete, although the `MethodHandle` features are limited and it can be difficult to use. Take a look at the source code for `java.lang.runtime.ObjectMethods` and try to figure out how it works. I'm still not sure what's going on.
-
-Cojen/Maker is a complete rewrite of the original framework, catching it up to the latest JVM and providing a foundation for future enhancements. The API is designed to be low-level enough to expose all the JVM features, but also be high-level enough to hide the ugly details. There's no reason for anyone using the API to ever read the JVM specification.
-
 Limitations
 -----------
 
