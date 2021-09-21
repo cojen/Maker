@@ -1,7 +1,7 @@
 Changelog
 =========
 
-v1.3.0
+v1.3.0 (2021-09-21)
 ------
 * Add a convenience method to clear a variable.
 
