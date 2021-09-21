@@ -1100,4 +1100,23 @@ public class ConvertTest {
         float fx = (float) clazz.getMethod("ftestx").invoke(null);
         assertEquals(Float.floatToRawIntBits(0.0f/0.0f), Float.floatToRawIntBits(fx));
     }
+
+    @Test
+    public void clear() throws Exception {
+        var v1 = mm.var(boolean.class).clear();
+        var v2 = mm.var(Boolean.class).clear();
+        var v3 = mm.var(String.class).clear();
+        var v4 = mm.var(int.class).clear();
+        var v5 = mm.var(double.class).clear();
+
+        var assertVar = mm.var(Assert.class);
+        assertVar.invoke("assertEquals", false, v1);
+        assertVar.invoke("assertEquals", null, v2);
+        assertVar.invoke("assertEquals", null, v3);
+        assertVar.invoke("assertEquals", 0, v4);
+        assertVar.invoke("assertEquals", 0.0, v5, 0.0);
+
+        var clazz = cm.finish();
+        clazz.getMethod("run").invoke(null);
+    }
 }

@@ -1,6 +1,10 @@
 Changelog
 =========
 
+v1.3.0
+------
+* Add a convenience method to clear a variable.
+
 v1.2.2 (2021-09-07)
 ------
 * Allow hidden classes to be unloaded when created without an explicit lookup object.

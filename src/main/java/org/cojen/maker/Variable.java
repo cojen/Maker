@@ -49,6 +49,14 @@ public interface Variable {
     public Variable name(String name);
 
     /**
+     * Assign a value of 0, false, or null to this variable, depending on its type.
+     *
+     * @return this variable
+     * @throws IllegalStateException if this variable cannot be modified
+     */
+    public Variable clear();
+
+    /**
      * Assign a value to this variable, either from another variable or from a constant. A
      * constant value can be a primitive type (boxed or unboxed), {@code null}, a {@code
      * String}, a {@code Class}, an {@code Enum}, a {@code MethodType}, a {@code

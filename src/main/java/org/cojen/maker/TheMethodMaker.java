@@ -3617,6 +3617,19 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             return type().maker();
         }
 
+        @Override
+        public Variable clear() {
+            Type type = type();
+            if (type.isObject()) {
+                set(null);
+            } else if (type != Type.BOOLEAN) {
+                set(0);
+            } else {
+                set(false);
+            }
+            return this;
+        }
+
         boolean tryPushTo(TheMethodMaker mm) {
             if (TheMethodMaker.this == mm) {
                 push();
