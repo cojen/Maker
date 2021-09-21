@@ -51,4 +51,4 @@ The Cojen/Maker framework is designed for implementing dynamic languages and for
 
 Although the framework can be used for writing a frontend compiler, it doesn't have any facilities for reading class symbols. For example, it's possible to write a Java compiler that uses Cojen for writing class files, but it would need another tool for extracting symbols from pre-compiled jar files and so forth. Such a feature could be added of course, but it's a lower priority.
 
-Because of it's somewhat low-level design, the framework doesn't prevent the creation of broken classes. For example, failing to definitely assign a value to a variable will cause a `VerifyError` to be thrown when loading the class. The [Coding errors](https://github.com/cojen/Maker/wiki/Coding-errors) page has more details.
+Because of its somewhat low-level design, the framework doesn't prevent the creation of broken classes. For example, failing to definitely assign a value to a variable will cause a `VerifyError` to be thrown when loading the class. The [Coding errors](https://github.com/cojen/Maker/wiki/Coding-errors) page has more details.
