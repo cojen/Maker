@@ -37,11 +37,25 @@ final class Candidate {
         int best = 0;
 
         for (int i=0; i<params.length; i++) {
+            if (i >= aParams.length || i >= bParams.length) {
+                // Assume varargs.
+                break;
+            }
             int cmp = compare(params[i], aParams[i], bParams[i]);
             if (best == 0) {
                 best = cmp;
             } else if (cmp != 0 && best != cmp) {
                 return 0;
+            }
+        }
+
+        if (best == 0) {
+            if (a.isVarargs()) {
+                if (!b.isVarargs()) {
+                    return 1;
+                }
+            } else if (b.isVarargs()) {
+                return -1;
             }
         }
 

@@ -821,6 +821,53 @@ public class InvokeTest {
     }
 
     @Test
+    public void invokeVarargsOverload2() throws Exception {
+        ClassMaker cm = ClassMaker.begin().public_();
+        MethodMaker mm = cm.addMethod(null, "run").public_().static_();
+
+        var result = mm.var(InvokeTest.class).invoke("combine2", "hello");
+        mm.var(Assert.class).invoke("assertEquals", "hello", result);
+
+        result = mm.var(InvokeTest.class).invoke("combine2", "hello", "world");
+        mm.var(Assert.class).invoke("assertEquals", "helloworld", result);
+
+        cm.finish().getMethod("run").invoke(null);
+    }
+
+    public static String combine2(String str) {
+        return str;
+    }
+
+    public static String combine2(String str1, String str2) {
+        return str1 + str2;
+    }
+
+    public static String combine2(String... strs) {
+        fail();
+        return "";
+    }
+
+    @Test
+    public void invokeVarargsNone() throws Exception {
+        ClassMaker cm = ClassMaker.begin().public_();
+        MethodMaker mm = cm.addMethod(null, "run").public_().static_();
+
+        var result = mm.var(InvokeTest.class).invoke("none");
+        mm.var(Assert.class).invoke("assertEquals", "", result);
+
+        cm.finish().getMethod("run").invoke(null);
+    }
+
+    public static String none() {
+        return "";
+    }
+
+    public static String none(Object... objects) {
+        fail();
+        return "";
+    }
+
+    @Test
     public void invokeSelfVarargs() throws Exception {
         ClassMaker cm = ClassMaker.begin().public_();
 

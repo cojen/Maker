@@ -1,6 +1,10 @@
 Changelog
 =========
 
+v1.3.1 (2021-10-03)
+------
+* Fix invocation of overloaded methods which accept varargs.
+
 v1.3.0 (2021-09-21)
 ------
 * Add a convenience method to clear a variable.
