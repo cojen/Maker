@@ -17,7 +17,7 @@
 package org.cojen.maker;
 
 /**
- * Represents a variable bound to a body of a {@link MethodMaker method}.
+ * Represents a variable bound to the body of a {@link MethodMaker method}.
  *
  * @author Brian S O'Neill
  * @see MethodMaker#var
