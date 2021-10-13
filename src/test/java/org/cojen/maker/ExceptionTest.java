@@ -179,4 +179,18 @@ public class ExceptionTest {
             assertEquals(clazz, e.getCause().getClass());
         }
     }
+
+    @Test
+    public void unpositioned() throws Exception {
+        ClassMaker cm = ClassMaker.begin();
+        MethodMaker mm = cm.addMethod(null, "run");
+        Label start = mm.label();
+        mm.var(System.class).field("out").invoke("println", "hello");
+        try {
+            mm.catch_(start, Exception.class, ex -> {});
+            fail();
+        } catch (IllegalStateException e) {
+            assertTrue(e.getMessage().contains("positioned"));
+        }
+    }
 }

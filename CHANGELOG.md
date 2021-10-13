@@ -1,6 +1,10 @@
 Changelog
 =========
 
+v1.3.2
+------
+* Detect if start label is unpositioned when calling the `catch_` method.
+
 v1.3.1 (2021-10-03)
 ------
 * Fix invocation of overloaded methods which accept varargs.

@@ -359,18 +359,9 @@ public interface MethodMaker {
      *
      * @param type exception type to catch; pass null to catch anything
      * @param handler receives a variable which references the exception instance
+     * @throws IllegalStateException if start is unpositioned
      */
-    public default void catch_(Label tryStart, Object type, Consumer<Variable> handler) {
-        Label cont = label();
-        goto_(cont);
-        Label tryEnd = label().here();
-        Variable exVar = catch_(tryStart, tryEnd, type);
-        try {
-            handler.accept(exVar);
-        } finally {
-            cont.here();
-        }
-    }
+    public void catch_(Label tryStart, Object type, Consumer<Variable> handler);
 
     /**
      * Define a finally handler which is generated for every possible exit path between the

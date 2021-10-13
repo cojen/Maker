@@ -38,6 +38,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
+import java.util.function.Consumer;
+
 import static java.lang.invoke.MethodHandleInfo.*;
 
 import static java.util.Objects.*;
@@ -881,9 +883,10 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
     @Override
     public Variable catch_(Label start, Label end, Object type) {
-        Lab startLab = target(start);
-        Lab endLab = target(end);
+        return catch_(target(start), target(end), type);
+    }
 
+    private Variable catch_(Lab startLab, Lab endLab, Object type) {
         Type catchType;
         if (type == null) {
             catchType = Type.from(Throwable.class);
@@ -942,6 +945,24 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         mExceptionHandlers.add(handler);
 
         return storeToNewVar(catchType);
+    }
+
+    @Override
+    public void catch_(Label start, Object type, Consumer<Variable> handler) {
+        Lab startLab = target(start);
+        if (!startLab.isPositioned()) {
+            throw new IllegalStateException("Start is unpositioned");
+        }
+        Label cont = label();
+        goto_(cont);
+        Lab endLab = new Lab(this);
+        endLab.here();
+        Variable exVar = catch_(startLab, endLab, type);
+        try {
+            handler.accept(exVar);
+        } finally {
+            cont.here();
+        }
     }
 
     private static void adjustPushCount(Object value, int amt) {
@@ -2809,11 +2830,15 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
         @Override
         public Label here() {
-            if (mNext != null || mOwner.mLastOp == this) {
+            if (isPositioned()) {
                 throw new IllegalStateException();
             }
             mOwner.addOp(this);
             return this;
+        }
+
+        boolean isPositioned() {
+            return mNext != null || mOwner.mLastOp == this;
         }
 
         @Override
