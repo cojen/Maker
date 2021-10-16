@@ -350,6 +350,7 @@ public interface MethodMaker {
      *
      * @param type exception type to catch; pass null to catch anything
      * @return a variable which references the exception instance
+     * @throws IllegalStateException if start is unpositioned
      */
     public Variable catch_(Label tryStart, Label tryEnd, Object type);
 

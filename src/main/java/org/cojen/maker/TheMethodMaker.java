@@ -32,6 +32,7 @@ import java.util.Arrays;
 import java.util.BitSet;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -192,7 +193,17 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
         // Remove unvisited exception handlers.
         if (mExceptionHandlers != null) {
-            mExceptionHandlers.removeIf(h -> !h.mHandlerLab.mVisited);
+            Iterator<Handler> it = mExceptionHandlers.iterator();
+            while (it.hasNext()) {
+                Handler h = it.next();
+                if (!h.mEndLab.isPositioned()) {
+                    throw new IllegalStateException
+                        ("Unpositioned exception handler end label in method: " + getName());
+                }
+                if (!h.mHandlerLab.mVisited) {
+                    it.remove();
+                }
+            }
         }
 
         mVars = varList.toArray(new LocalVar[varList.size()]);
@@ -883,7 +894,11 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
     @Override
     public Variable catch_(Label start, Label end, Object type) {
-        return catch_(target(start), target(end), type);
+        Lab startLab = target(start);
+        if (!startLab.isPositioned()) {
+            throw new IllegalStateException("Start is unpositioned");
+        }
+        return catch_(startLab, target(end), type);
     }
 
     private Variable catch_(Lab startLab, Lab endLab, Object type) {

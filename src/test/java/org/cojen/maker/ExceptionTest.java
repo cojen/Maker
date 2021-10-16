@@ -192,5 +192,29 @@ public class ExceptionTest {
         } catch (IllegalStateException e) {
             assertTrue(e.getMessage().contains("positioned"));
         }
+
+        try {
+            mm.catch_(start, mm.label().here(), Exception.class);
+            fail();
+        } catch (IllegalStateException e) {
+            assertTrue(e.getMessage().contains("positioned"));
+        }
+    }
+
+    @Test
+    public void unpositioned2() throws Exception {
+        ClassMaker cm = ClassMaker.begin();
+        MethodMaker mm = cm.addMethod(null, "run");
+        Label start = mm.label().here();
+        Label end = mm.label();
+        mm.var(System.class).field("out").invoke("println", "hello");
+        mm.return_();
+        mm.catch_(start, end, Exception.class);
+        try {
+            cm.finish();
+            fail();
+        } catch (IllegalStateException e) {
+            assertTrue(e.getMessage().contains("exception handler"));
+        }
     }
 }
