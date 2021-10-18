@@ -1,7 +1,7 @@
 Changelog
 =========
 
-v1.3.2
+v1.3.2 (2021-10-18)
 ------
 * Detect if start label is unpositioned when calling the `catch_` method.
 
