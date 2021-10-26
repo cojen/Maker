@@ -2537,16 +2537,30 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             throw new IllegalArgumentException("Cannot " + name + " by null");
         }
 
-        switch (primType.stackMapCode()) {
-        case SM_LONG:
+        byte castOp = 0;
+        switch (primType.typeCode()) {
+        case T_BYTE:
+            castOp = I2B;
+            break;
+        case T_CHAR:
+            castOp = I2C;
+            break;
+        case T_SHORT:
+            castOp = I2S;
+            break;
+        case T_INT:
+            break;
+        case T_LONG:
             op += 1;
             break;
-        case SM_FLOAT:
+        case T_FLOAT:
             op += 2;
             break;
-        case SM_DOUBLE:
+        case T_DOUBLE:
             op += 3;
             break;
+        default:
+            throw new IllegalStateException("Cannot " + name + " to a non-numeric type");
         }
 
         addPushOp(primType, var);
@@ -2558,6 +2572,11 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         addBytecodeOp(op, stackPop);
+
+        if (castOp != 0) {
+            addBytecodeOp(castOp, 0);
+        }
+
         addConversionOp(primType, varType);
 
         return storeToNewVar(varType);
@@ -2581,15 +2600,41 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             throw new IllegalArgumentException("Cannot " + name + " by null");
         }
 
-        switch (primType.stackMapCode()) {
-        case SM_LONG:
+        byte castOp = 0;
+        int mask = 0;
+        switch (primType.typeCode()) {
+        case T_BYTE:
+            castOp = I2B;
+            if (op == IUSHR) {
+                mask = 0xff;
+            }
+            break;
+        case T_CHAR:
+            castOp = I2C;
+            break;
+        case T_SHORT:
+            castOp = I2S;
+            if (op == IUSHR) {
+                mask = 0xffff;
+            }
+            break;
+        case T_INT:
+            break;
+        case T_LONG:
             op += 1;
             break;
-        case SM_FLOAT: case SM_DOUBLE:
+        case T_FLOAT: case T_DOUBLE:
             throw new IllegalStateException("Cannot " + name + " to a non-integer type");
+        default:
+            throw new IllegalStateException("Cannot " + name + " to a non-numeric type");
         }
 
         addPushOp(primType, var);
+
+        if (mask != 0) {
+            addPushOp(Type.INT, mask);
+            addBytecodeOp(IAND, 1);
+        }
 
         if ((op & 0xff) < IAND) {
             // Second argument to shift instruction is always an int. Note: Automatic
@@ -2600,6 +2645,11 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         addBytecodeOp(op, 1);
+
+        if (castOp != 0) {
+            addBytecodeOp(castOp, 0);
+        }
+
         addConversionOp(primType, varType);
 
         return storeToNewVar(varType);

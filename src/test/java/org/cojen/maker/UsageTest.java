@@ -349,6 +349,18 @@ public class UsageTest {
         } catch (IllegalStateException e) {
             check(e, "Cannot shift to a non-numeric");
         }
+        try {
+            mm.var(boolean.class).set(true).add(true);
+            fail();
+        } catch (IllegalStateException e) {
+            check(e, "Cannot add to a non-numeric");
+        }
+        try {
+            mm.var(boolean.class).set(true).and(true);
+            fail();
+        } catch (IllegalStateException e) {
+            check(e, "Cannot and to a non-numeric");
+        }
     }
 
     @Test

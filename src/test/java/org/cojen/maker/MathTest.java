@@ -444,4 +444,45 @@ public class MathTest {
         Object result = cm.finish().getMethod("run", Integer.class).invoke(null, 100);
         assertEquals(100 ^ -1, ((Integer) result).intValue());
     }
+
+    @Test
+    public void downcast() throws Exception {
+        // Math and logical operations against types smaller than an int must not expose
+        // precision than the type allows.
+
+        ClassMaker cm = ClassMaker.begin().public_();
+        MethodMaker mm = cm.addMethod(null, "run").static_().public_();
+
+        var v1 = mm.var(byte.class).set(100).add(100);
+        mm.var(Assert.class).invoke("assertEquals", (byte) (100 + 100), v1.get());
+
+        var v2 = mm.var(short.class).set(30000).add(30000);
+        mm.var(Assert.class).invoke("assertEquals", (short) (30000 + 30000), v2.get());
+
+        var v3 = mm.var(char.class).set(30000).add(30000);
+        mm.var(Assert.class).invoke("assertEquals", 60000, v3.get());
+
+        var v4 = mm.var(char.class).set(60000).add(60000);
+        mm.var(Assert.class).invoke("assertEquals", (char) (60000 + 60000), v4.get());
+
+        var v5 = mm.var(byte.class).set(-128).shl(1);
+        mm.var(Assert.class).invoke("assertEquals", 0, v5.get());
+
+        var v6 = mm.var(short.class).set(-32768).shl(1);
+        mm.var(Assert.class).invoke("assertEquals", 0, v6.get());
+
+        var v7 = mm.var(char.class).set(32768 + 1).shl(1);
+        mm.var(Assert.class).invoke("assertEquals", 2, v7.get());
+
+        var v8 = mm.var(byte.class).set((byte) 200).ushr(1);
+        mm.var(Assert.class).invoke("assertEquals", 100, v8.get());
+
+        var v9 = mm.var(short.class).set((short) 60000).ushr(1);
+        mm.var(Assert.class).invoke("assertEquals", 30000, v9.get());
+
+        var v10 = mm.var(char.class).set((char) 60000).ushr(1);
+        mm.var(Assert.class).invoke("assertEquals", 30000, v10.get());
+
+        cm.finish().getMethod("run").invoke(null);
+    }
 }

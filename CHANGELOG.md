@@ -1,6 +1,11 @@
 Changelog
 =========
 
+v1.3.3
+------
+* Math and logical operations against types smaller than an int must not expose precision than
+  the type allows. Math and logical operations against boolean is disallowed.
+
 v1.3.2 (2021-10-18)
 ------
 * Detect if start label is unpositioned when calling the `catch_` method.
