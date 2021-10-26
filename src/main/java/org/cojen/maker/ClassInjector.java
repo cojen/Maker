@@ -79,7 +79,9 @@ class ClassInjector extends ClassLoader {
             }
         }
 
-        return super.loadClass(name);
+        // Classes aren't defined directly in the ClassInjector itself, so go straight to the
+        // parent. Calling super.loadClass causes deadlocks.
+        return getParent().loadClass(name);
     }
 
     boolean isExplicit() {
