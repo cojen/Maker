@@ -1,11 +1,11 @@
 Changelog
 =========
 
-v1.3.3
+v1.3.3 (2021-11-01)
 ------
 * Fix ClassLoader deadlock.
-* Math and logical operations against types smaller than an int must not expose precision than
-  the type allows. Math and logical operations against boolean is disallowed.
+* Math and logical operations against types smaller than an int must not expose more precision
+  than the type allows. Also, math and logical operations against boolean is now disallowed.
 
 v1.3.2 (2021-10-18)
 ------
