@@ -103,7 +103,7 @@ public class TypeTest {
         {
             Type type = Type.from(loader, "null");
             assertEquals("*null*", type.name());
-            assertEquals("*null*", type.descriptor());
+            assertEquals("Ljava/lang/Object;", type.descriptor());
             assertFalse(type.isPrimitive());
             assertNull(type.unbox());
             assertEquals(type, type.box());

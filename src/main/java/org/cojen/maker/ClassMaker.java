@@ -198,7 +198,7 @@ public interface ClassMaker {
      * @throws IllegalStateException if field is already defined
      */
     public FieldMaker addField(Object type, String name);
- 
+
     /**
      * Add a method to this class.
      *

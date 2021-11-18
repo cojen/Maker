@@ -1,6 +1,10 @@
 Changelog
 =========
 
+v1.3.4
+------
+* Fix type inference for a null parameter passed to an indy method.
+
 v1.3.3 (2021-11-01)
 ------
 * Fix ClassLoader deadlock.

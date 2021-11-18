@@ -1030,7 +1030,7 @@ abstract class Type {
 
         @Override
         String descriptor() {
-            return name();
+            return Object.class.descriptorString();
         }
 
         @Override

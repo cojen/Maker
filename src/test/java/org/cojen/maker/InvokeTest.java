@@ -1345,4 +1345,25 @@ public class InvokeTest {
         var result = cm.finish().getMethod("test", List.class).invoke(null, new ArrayList());
         assertEquals(ArrayList.class, result);
     }
+
+    @Test
+    public void indyInferNull() throws Exception {
+        // The inferred type of a null value is Object.
+
+        ClassMaker cm = ClassMaker.begin().public_();
+        MethodMaker mm = cm.addMethod(Object.class, "run").public_().static_();
+
+        var bootVar = mm.var(InvokeTest.class).indy("bootx");
+        mm.return_(bootVar.invoke(Object.class, "name", null, (Object) null));
+
+        Object result = cm.finish().getMethod("run").invoke(null);
+
+        assertEquals(MethodType.methodType(Object.class, Object.class), result);
+    }
+
+    public static CallSite bootx(MethodHandles.Lookup caller, String name, MethodType type) {
+        MethodMaker mm = MethodMaker.begin(caller, name, type);
+        mm.return_(type);
+        return new ConstantCallSite(mm.finish());
+    }
 }
