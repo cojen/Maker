@@ -16,6 +16,8 @@
 
 package org.cojen.maker;
 
+import java.lang.constant.Constable;
+
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
@@ -205,8 +207,8 @@ public interface MethodMaker {
     public MethodMaker throws_(Object type);
 
     /**
-     * Returns a variable which represents the enclosing class of this method. The type of the
-     * variable is always {@code java.lang.Class}.
+     * Returns a variable of type {@link Class} which represents the enclosing class of this
+     * method.
      *
      * @see #classMaker()
      */
@@ -269,7 +271,7 @@ public interface MethodMaker {
     /**
      * Generates a statement which returns a variable or a constant.
      *
-     * @param value {@code Variable} or constant
+     * @param value {@link Variable} or constant
      * @throws IllegalArgumentException if not given a variable or a constant
      * @throws IllegalStateException if method must return void
      */
@@ -288,7 +290,7 @@ public interface MethodMaker {
      *
      * @param name the method name
      * enclosing class
-     * @param values {@code Variables} or constants
+     * @param values {@link Variable Variables} or constants
      * @return the result of the method, which is null if void
      * @throws IllegalArgumentException if not given a variable or a constant
      * @throws IllegalStateException if method isn't found
@@ -300,7 +302,7 @@ public interface MethodMaker {
      * Invoke a super class constructor method on the enclosing object of this method, from
      * within a constructor.
      *
-     * @param values {@code Variables} or constants
+     * @param values {@link Variable Variables} or constants
      * @throws IllegalArgumentException if not given a variable or a constant
      * @throws IllegalStateException if not defining a constructor, or if a matching
      * constructor isn't found
@@ -311,7 +313,7 @@ public interface MethodMaker {
      * Invoke a this constructor method on the enclosing object of this method, from within a
      * constructor.
      *
-     * @param values {@code Variables} or constants
+     * @param values {@link Variable Variables} or constants
      * @throws IllegalArgumentException if not given a variable or a constant
      * @throws IllegalStateException if not defining a constructor, or if a matching
      * constructor isn't found
@@ -319,11 +321,11 @@ public interface MethodMaker {
     public void invokeThisConstructor(Object... values);
 
     /**
-     * Invoke a method via a {@code MethodHandle}. If making a class to be loaded {@link
-     * ClassMaker#beginExternal externally}, the handle must be truly {@code Constable}.
+     * Invoke a method via a {@link MethodHandle}. If making a class to be loaded {@link
+     * ClassMaker#beginExternal externally}, the handle must be truly {@link Constable}.
      *
      * @param handle runtime method handle
-     * @param values {@code Variables} or constants
+     * @param values {@link Variable Variables} or constants
      * @return the result of the method, which is null if void
      * @throws IllegalArgumentException if not given a variable or a constant
      * @throws IllegalStateException if defining an external class and the handle isn't truly
@@ -336,8 +338,8 @@ public interface MethodMaker {
      * invoked. If type is an array, no constructor is invoked, and the given values represent
      * array dimension sizes.
      *
-     * @param type class name or {@code Class} instance
-     * @param values {@code Variables} or constants
+     * @param type class name or {@link Class} instance
+     * @param values {@link Variable Variables} or constants
      * @return the new object
      * @throws IllegalArgumentException if the type is unsupported
      * @throws IllegalStateException if constructor isn't found
@@ -374,19 +376,19 @@ public interface MethodMaker {
     public void finally_(Label tryStart, Runnable handler);
 
     /**
-     * Concatenate variables and constants together into a new {@code String} in the same
+     * Concatenate variables and constants together into a new {@link String} in the same
      * matter as the Java concatenation operator. If no values are given, the returned variable
      * will refer to the empty string.
      *
-     * @param values {@code Variables} or constants
+     * @param values {@link Variable Variables} or constants
      * @return the result in a new {@code String} variable
      * @throws IllegalArgumentException if not given a variable or a constant
      */
     public Variable concat(Object... values);
 
     /**
-     * Access a {@code VarHandle} via a pseudo field. If making a class to be loaded {@link
-     * ClassMaker#beginExternal externally}, the handle must be truly {@code Constable}.
+     * Access a {@link VarHandle} via a pseudo field. If making a class to be loaded {@link
+     * ClassMaker#beginExternal externally}, the handle must be truly {@link Constable}.
      *
      * <p>All of the coordinate values must be provided up front, which are then used each time
      * the {@code VarHandle} is accessed. Variable coordinates are read each time the access
@@ -399,7 +401,7 @@ public interface MethodMaker {
      * invoke} method.
      *
      * @param handle runtime variable handle
-     * @param values {@code Variables} or constants for each coordinate
+     * @param values {@link Variable Variables} or constants for each coordinate
      * @return a pseudo field which accesses the variable
      * @throws IllegalArgumentException if not given a variable or a constant, or if the number
      * of values doesn't match the number of coordinates

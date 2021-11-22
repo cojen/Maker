@@ -16,6 +16,7 @@
 
 package org.cojen.maker;
 
+import java.lang.invoke.MethodHandle;
 import java.lang.invoke.VarHandle;
 
 /**
@@ -27,7 +28,7 @@ import java.lang.invoke.VarHandle;
  */
 public interface Field extends Variable {
     /**
-     * Fields cannot be renamed, and so this method always throws an {@code
+     * Fields cannot be renamed, and so this method always throws an {@link
      * IllegalStateException}.
      */
     @Override
@@ -240,7 +241,7 @@ public interface Field extends Variable {
     public Variable getAndBitwiseXorRelease(Object value);
 
     /**
-     * Returns a {@code VarHandle} variable which accesses the field. If this is an ordinary
+     * Returns a {@link VarHandle} variable which accesses the field. If this is an ordinary
      * field, the variable is actually a constant, and so it can be supplied as an argument to
      * a {@link Bootstrap bootstrap} method. For non-static fields, the first {@code VarHandle}
      * coordinate is the object instance which owns the field. Static fields have no
@@ -249,7 +250,7 @@ public interface Field extends Variable {
     public Variable varHandle();
 
     /**
-     * Returns a {@code MethodHandle} variable for setting the field value. If this is an
+     * Returns a {@link MethodHandle} variable for setting the field value. If this is an
      * ordinary field, the variable is actually a constant, and so it can be supplied as an
      * argument to a {@link Bootstrap bootstrap} method. For non-static fields, the {@code
      * MethodHandle} accepts two arguments: the object instance which owns the field, and the
@@ -258,7 +259,7 @@ public interface Field extends Variable {
     public Variable methodHandleSet();
 
     /**
-     * Returns a {@code MethodHandle} variable for getting the field value. If this is an
+     * Returns a {@link MethodHandle} variable for getting the field value. If this is an
      * ordinary field, the variable is actually a constant, and so it can be supplied as an
      * argument to a {@link Bootstrap bootstrap} method. For non-static fields, the {@code
      * MethodHandle} accepts one argument: the object instance which owns the field. For static

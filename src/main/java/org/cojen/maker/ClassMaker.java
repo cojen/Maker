@@ -297,7 +297,8 @@ public interface ClassMaker {
      * access to the class. Calling this method has the side effect of forcing the new class to
      * be initialized.
      *
-     * @return the lookup for the class; call {@code lookupClass} to obtain the actual class
+     * @return the lookup for the class; call {@link MethodHandles.Lookup#lookupClass lookupClass}
+     * to obtain the actual class
      * @throws IllegalStateException if already finished or if the definition is broken
      */
     public MethodHandles.Lookup finishLookup();
@@ -311,7 +312,8 @@ public interface ClassMaker {
      * <p>This feature is fully supported only with Java 15 and above. Hidden classes created
      * with earlier versions don't support all the lookup features.
      *
-     * @return the lookup for the class; call {@code lookupClass} to obtain the actual class
+     * @return the lookup for the class; call {@link MethodHandles.Lookup#lookupClass lookupClass}
+     * to obtain the actual class
      * @throws IllegalStateException if already finished or if the definition is broken
      */
     public MethodHandles.Lookup finishHidden();

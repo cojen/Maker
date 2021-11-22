@@ -27,7 +27,7 @@ package org.cojen.maker;
 public interface AnnotationMaker {
     /**
      * Put a name-value pair into the annotation, where the value can be a primitive type, a
-     * {@code String}, an {@code Enum}, a {@code Class}, an {@code AnnotationMaker}, or an array.
+     * {@link String}, an {@link Enum}, a {@link Class}, an {@code AnnotationMaker}, or an array.
      *
      * @param name annotation element name
      * @param value annotation element value
