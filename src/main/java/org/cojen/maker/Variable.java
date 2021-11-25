@@ -78,7 +78,7 @@ public interface Variable {
      * @return this variable
      * @throws IllegalArgumentException if not given a variable or a constant
      * @throws IllegalStateException if this variable cannot be modified, or if it's not
-     * compatible with the variable type
+     * compatible with the value type
      */
     public Variable set(Object value);
 
@@ -91,7 +91,7 @@ public interface Variable {
      * @param value exact object instance to assign
      * @return this variable
      * @throws IllegalStateException if this variable cannot be modified, or if it's not
-     * compatible with the variable type
+     * compatible with the value type
      */
     public Variable setExact(Object value);
 
@@ -456,7 +456,7 @@ public interface Variable {
     /**
      * Access an element from this array.
      *
-     * @param index {@link Variable} or constant
+     * @param index a {@link Variable} or a constant
      * @return the result in a new variable
      * @throws IllegalStateException if not an array type
      */
@@ -465,10 +465,11 @@ public interface Variable {
     /**
      * Set an element into this array.
      *
-     * @param index {@link Variable} or constant
-     * @param value {@code Variable} or constant to assign
+     * @param index a {@link Variable} or a constant
+     * @param value a {@link Variable} or a constant
      * @throws IllegalArgumentException if not given a variable or a constant
      * @throws IllegalStateException if not an array type, or if type doesn't match
+     * @see #set
      */
     public void aset(Object index, Object value);
 

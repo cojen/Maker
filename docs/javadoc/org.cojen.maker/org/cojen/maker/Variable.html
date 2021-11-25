@@ -497,7 +497,7 @@ loadScripts(document, 'script');</script>
 <dt>Throws:</dt>
 <dd><code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if not given a variable or a constant</dd>
 <dd><code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/IllegalStateException.html" title="class or interface in java.lang" class="external-link">IllegalStateException</a></code> - if this variable cannot be modified, or if it's not
- compatible with the variable type</dd>
+ compatible with the value type</dd>
 </dl>
 </section>
 </li>
@@ -516,7 +516,7 @@ loadScripts(document, 'script');</script>
 <dd>this variable</dd>
 <dt>Throws:</dt>
 <dd><code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/IllegalStateException.html" title="class or interface in java.lang" class="external-link">IllegalStateException</a></code> - if this variable cannot be modified, or if it's not
- compatible with the variable type</dd>
+ compatible with the value type</dd>
 </dl>
 </section>
 </li>
@@ -1111,7 +1111,7 @@ loadScripts(document, 'script');</script>
 <div class="block">Access an element from this array.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
-<dd><code>index</code> - <a href="Variable.html" title="interface in org.cojen.maker"><code>Variable</code></a> or constant</dd>
+<dd><code>index</code> - a <a href="Variable.html" title="interface in org.cojen.maker"><code>Variable</code></a> or a constant</dd>
 <dt>Returns:</dt>
 <dd>the result in a new variable</dd>
 <dt>Throws:</dt>
@@ -1127,11 +1127,17 @@ loadScripts(document, 'script');</script>
 <div class="block">Set an element into this array.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
-<dd><code>index</code> - <a href="Variable.html" title="interface in org.cojen.maker"><code>Variable</code></a> or constant</dd>
-<dd><code>value</code> - <code>Variable</code> or constant to assign</dd>
+<dd><code>index</code> - a <a href="Variable.html" title="interface in org.cojen.maker"><code>Variable</code></a> or a constant</dd>
+<dd><code>value</code> - a <a href="Variable.html" title="interface in org.cojen.maker"><code>Variable</code></a> or a constant</dd>
 <dt>Throws:</dt>
 <dd><code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if not given a variable or a constant</dd>
 <dd><code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/IllegalStateException.html" title="class or interface in java.lang" class="external-link">IllegalStateException</a></code> - if not an array type, or if type doesn't match</dd>
+<dt>See Also:</dt>
+<dd>
+<ul class="see-list">
+<li><a href="#set(java.lang.Object)"><code>set(java.lang.Object)</code></a></li>
+</ul>
+</dd>
 </dl>
 </section>
 </li>
