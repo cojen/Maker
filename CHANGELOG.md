@@ -1,9 +1,10 @@
 Changelog
 =========
 
-v1.3.4 (2021-11-29)
+v2.0.1 (2021-11-29)
 ------
 * Fix type inference for a null parameter passed to an indy method.
+* Major version bump is required to fix an incorrect earlier tag (1.33 instead of 1.3.3).
 
 v1.3.3 (2021-11-01)
 ------
