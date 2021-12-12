@@ -1,7 +1,7 @@
 Changelog
 =========
 
-v2.0.2
+v2.0.2 (2021-12-12)
 ------
 * Fix interface method invocation when passing long or double arguments.
 
