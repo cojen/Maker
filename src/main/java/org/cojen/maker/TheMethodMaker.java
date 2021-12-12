@@ -689,9 +689,10 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             }
         }
 
+        Type[] actualTypes = method.paramTypes();
+
         // Convert the parameter types if necessary.
         convert: {
-            Type[] actualTypes = method.paramTypes();
             int len = actualTypes.length;
 
             if (!method.isVarargs() ||
@@ -735,25 +736,36 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             }
         }
 
-        int stackPop;
-        byte op;
-        if (method.isStatic()) {
-            stackPop = 0;
-            op = INVOKESTATIC;
-        } else {
-            stackPop = 1;
-            if (method.enclosingType().isInterface()) {
-                op = INVOKEINTERFACE;
-            } else if (inherit == 0) {
-                op = INVOKEVIRTUAL;
+        int stackPop = actualTypes.length;
+        ConstantPool.C_Method methodRef = mConstants.addMethod(method);
+
+        final BytecodeOp invokeOp;
+        makeOp: {
+            byte op;
+            if (method.isStatic()) {
+                op = INVOKESTATIC;
             } else {
-                op = INVOKESPECIAL;
+                stackPop++;
+
+                if (method.enclosingType().isInterface()) {
+                    int nargs = stackPop;
+                    for (int i=1; i<actualTypes.length; i++) {
+                        int tc = actualTypes[i].typeCode();
+                        if (tc == T_DOUBLE || tc == T_LONG) {
+                            nargs++;
+                        }
+                    }
+                    invokeOp = new InvokeInterfaceOp(stackPop, methodRef, nargs);
+                    break makeOp;
+                }
+
+                op = inherit == 0 ? INVOKEVIRTUAL : INVOKESPECIAL;
             }
+
+            invokeOp = new InvokeOp(op, stackPop, methodRef);
         }
 
-        stackPop += method.paramTypes().length;
-
-        addOp(new InvokeOp(op, stackPop, mConstants.addMethod(method)));
+        addOp(invokeOp);
 
         Type returnType = method.returnType();
         if (returnType == null || returnType == VOID) {
@@ -3414,10 +3426,29 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         void appendTo(TheMethodMaker m) {
             super.appendTo(m);
             m.appendShort(mMethodRef.mIndex);
-            if (op() == INVOKEINTERFACE) {
-                m.appendByte(stackPop()); // nargs
-                m.appendByte(0);
+            Type returnType = mMethodRef.mMethod.returnType();
+            if (returnType != VOID) {
+                m.stackPush(returnType);
             }
+        }
+    }
+
+    static final class InvokeInterfaceOp extends BytecodeOp {
+        final ConstantPool.C_Method mMethodRef;
+        final int mNargs;
+
+        InvokeInterfaceOp(int stackPop, ConstantPool.C_Method methodRef, int nargs) {
+            super(INVOKEINTERFACE, stackPop);
+            mMethodRef = methodRef;
+            mNargs = nargs;
+        }
+
+        @Override
+        void appendTo(TheMethodMaker m) {
+            super.appendTo(m);
+            m.appendShort(mMethodRef.mIndex);
+            m.appendByte(mNargs);
+            m.appendByte(0);
             Type returnType = mMethodRef.mMethod.returnType();
             if (returnType != VOID) {
                 m.stackPush(returnType);

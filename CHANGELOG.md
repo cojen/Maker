@@ -1,6 +1,10 @@
 Changelog
 =========
 
+v2.0.2
+------
+* Fix interface method invocation when passing long or double arguments.
+
 v2.0.1 (2021-11-29)
 ------
 * Fix type inference for a null parameter passed to an indy method.

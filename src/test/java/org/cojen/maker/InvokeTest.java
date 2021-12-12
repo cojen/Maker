@@ -104,6 +104,29 @@ public class InvokeTest {
     }
 
     @Test
+    public void interfaceWideArgs() throws Exception {
+        // Test the invocation of interface methods with long and double arguments.
+
+        ClassMaker cm = ClassMaker.begin().public_();
+        MethodMaker mm = cm.addMethod(String.class, "run", WideArgs.class).public_().static_();
+        mm.return_(mm.param(0).invoke("str", 10, Long.MAX_VALUE, Math.PI));
+
+        var method = cm.finish().getMethod("run", WideArgs.class);
+        WideArgs wideArgs = InvokeTest::wideArgs;
+        var result = (String) method.invoke(null, wideArgs);
+
+        assertEquals(result, wideArgs(10, Long.MAX_VALUE, Math.PI));
+    }
+
+    public static interface WideArgs {
+        String str(int a, long b, double c);
+    }
+
+    public static String wideArgs(int a, long b, double c) {
+        return a + ":" + b + ":" + c;
+    }
+
+    @Test
     public void invokeDynamic() throws Exception {
         // Dynamically generate a method which adds two numbers. In practice, this is overkill.
 
