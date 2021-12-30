@@ -1,6 +1,11 @@
 Changelog
 =========
 
+v2.0.3
+------
+* Keep references to complex bootstrap constants in order to support class redefinition, as
+  required by profilers and other instrumentation agents.
+
 v2.0.2 (2021-12-12)
 ------
 * Fix interface method invocation when passing long or double arguments.

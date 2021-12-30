@@ -126,6 +126,7 @@ public abstract class ConstantsRegistry {
      *
      * @param name unused
      * @param type unused
+     * @param slot if bit 31 is set, then don't actually remove the constant
      */
     public static Object remove(MethodHandles.Lookup lookup, String name, Class<?> type, int slot) {
         if ((lookup.lookupModes() & ACCESS_MODE) == 0) {
@@ -164,32 +165,36 @@ public abstract class ConstantsRegistry {
         if (value instanceof Entries) {
             var entries = (Entries) value;
             synchronized (entries) {
-                value = entries.mValues[slot];
+                value = entries.mValues[slot & ~(1 << 31)];
                 if (value == null) {
                     return null;
                 }
                 int size = entries.mSize;
                 if (size > 1) {
-                    entries.mValues[slot] = null;
-                    entries.mSize = size - 1;
+                    if (slot >= 0) {
+                        entries.mValues[slot] = null;
+                        entries.mSize = size - 1;
+                    }
                     return value;
                 }
             }
         }
 
-        if (loader instanceof ClassInjector.Group) {
-            var group = (ClassInjector.Group) loader;
-            synchronized (group) {
-                group.mConstants.remove(clazz);
-                if (group.mConstants.isEmpty()) {
-                    group.mConstants = null;
+        if (slot >= 0) {
+            if (loader instanceof ClassInjector.Group) {
+                var group = (ClassInjector.Group) loader;
+                synchronized (group) {
+                    group.mConstants.remove(clazz);
+                    if (group.mConstants.isEmpty()) {
+                        group.mConstants = null;
+                    }
                 }
-            }
-        } else {
-            synchronized (registry) {
-                registry.mConstants.remove(clazz);
-                if (registry.mConstants.isEmpty()) {
-                    registry.mConstants = null;
+            } else {
+                synchronized (registry) {
+                    registry.mConstants.remove(clazz);
+                    if (registry.mConstants.isEmpty()) {
+                        registry.mConstants = null;
+                    }
                 }
             }
         }

@@ -2331,7 +2331,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     /**
      * Adds a constant using the ConstantsRegistry.
      */
-    private ConstantPool.C_Dynamic addExactConstant(Type type, Object value) {
+    private ConstantPool.C_Dynamic addExactConstant(Type type, Object value, boolean keep) {
         Set<Type.Method> bootstraps = Type.from(ConstantsRegistry.class).findMethods
             ("remove",
              new Type[] {Type.from(MethodHandles.Lookup.class), Type.from(String.class),
@@ -2346,6 +2346,10 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         ConstantPool.C_MethodHandle bootHandle = mConstants.addMethodHandle(REF_invokeStatic, ref);
 
         int slot = mClassMaker.addExactConstant(value);
+
+        if (keep) {
+            slot |= (1 << 31);
+        }
 
         ConstantPool.Constant[] bootArgs = {
             addLoadableConstant(Type.INT, slot)
@@ -2506,7 +2510,8 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             type = Type.from(value.getClass());
         }
 
-        return addExactConstant(type, value);
+        // Must keep the constant around in case an agent decides to modify the method.
+        return addExactConstant(type, value, true);
     }
 
     private static IllegalArgumentException unsupportedConstant(Object value) {
@@ -3794,7 +3799,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                 throw new IllegalStateException("Mismatched type");
             }
 
-            addStoreConstantOp(new ExplicitConstantOp(addExactConstant(type, value), type));
+            addStoreConstantOp(new ExplicitConstantOp(addExactConstant(type, value, false), type));
 
             return this;
         }
