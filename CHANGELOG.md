@@ -1,7 +1,7 @@
 Changelog
 =========
 
-v2.0.3
+v2.0.3 (2022-01-02)
 ------
 * Keep references to complex bootstrap constants in order to support class redefinition, as
   required by profilers and other instrumentation agents.
