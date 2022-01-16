@@ -31,7 +31,7 @@ import java.util.function.Consumer;
  * @author Brian S O'Neill
  * @see ClassMaker#addMethod
  */
-public interface MethodMaker {
+public interface MethodMaker extends Attributed {
     /**
      * Begin defining a standalone method, defined in the same nest as the lookup class.
      *

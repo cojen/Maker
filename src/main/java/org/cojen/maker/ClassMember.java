@@ -23,7 +23,7 @@ import java.io.IOException;
  *
  * @author Brian S O'Neill
  */
-abstract class ClassMember extends Attributed {
+abstract class ClassMember extends TheAttributed {
     final ConstantPool.C_UTF8 mName;
     final ConstantPool.C_UTF8 mDescriptor;
 

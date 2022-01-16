@@ -28,7 +28,7 @@ import java.util.List;
  *
  * @author Brian S O'Neill
  */
-abstract class Attribute extends Attributed {
+abstract class Attribute extends TheAttributed {
     final ConstantPool.C_UTF8 mAttrName;
 
     Attribute(ConstantPool cp, String name) {
@@ -55,6 +55,59 @@ abstract class Attribute extends Attributed {
      * Write just the attribute specific data.
      */
     abstract void writeDataTo(BytesOut out) throws IOException;
+
+    static class Empty extends Attribute {
+        Empty(ConstantPool cp, String name) {
+            super(cp, name);
+        }
+
+        @Override
+        int length() {
+            return 0;
+        }
+
+        @Override
+        void writeDataTo(BytesOut out) throws IOException {
+        }
+    }
+
+    static class Bytes extends Attribute {
+        private final byte[] mBytes;
+
+        Bytes(ConstantPool cp, String name, byte[] bytes) {
+            super(cp, name);
+            mBytes = bytes;
+        }
+
+        @Override
+        int length() {
+            return mBytes.length;
+        }
+
+        @Override
+        void writeDataTo(BytesOut out) throws IOException {
+            out.write(mBytes, 0, mBytes.length);
+        }
+    }
+
+    static class Constant extends Attribute {
+        private final ConstantPool.Constant mConstant;
+
+        Constant(ConstantPool cp, String name, ConstantPool.Constant constant) {
+            super(cp, name);
+            mConstant = constant;
+        }
+
+        @Override
+        int length() {
+            return 2;
+        }
+
+        @Override
+        void writeDataTo(BytesOut out) throws IOException {
+            out.writeShort(mConstant.mIndex);
+        }
+    }
 
     /**
      * Helpful base class for attributes that contain a list of entries.
@@ -101,41 +154,23 @@ abstract class Attribute extends Attributed {
         protected abstract void writeEntryTo(BytesOut out, E e) throws IOException;
     }
 
-    static class Constant extends Attribute {
-        private final ConstantPool.Constant mConstant;
+    static class ConstantList extends ListAttribute<ConstantPool.Constant> {
+        ConstantList(ConstantPool cp, String name) {
+            super(cp, name);
+        }
 
-        Constant(ConstantPool cp, ConstantPool.Constant constant) {
-            super(cp, "ConstantValue");
-            mConstant = constant;
+        void add(ConstantPool.Constant member) {
+            addEntry(member);
         }
 
         @Override
-        int length() {
+        protected int entryLength() {
             return 2;
         }
 
         @Override
-        void writeDataTo(BytesOut out) throws IOException {
-            out.writeShort(mConstant.mIndex);
-        }
-    }
-
-    static class SourceFile extends Attribute {
-        private final ConstantPool.C_UTF8 mSourceFile;
-
-        SourceFile(ConstantPool cp, String fileName) {
-            super(cp, "SourceFile");
-            mSourceFile = cp.addUTF8(fileName);
-        }
-
-        @Override
-        int length() {
-            return 2;
-        }
-
-        @Override
-        void writeDataTo(BytesOut out) throws IOException {
-            out.writeShort(mSourceFile.mIndex);
+        protected void writeEntryTo(BytesOut out, ConstantPool.Constant c) throws IOException {
+            out.writeShort(c.mIndex);
         }
     }
 
@@ -366,57 +401,6 @@ abstract class Attribute extends Attributed {
                 }
                 return false;
             }
-        }
-    }
-
-    static class NestHost extends Attribute {
-        private final ConstantPool.C_Class mHostClass;
-
-        NestHost(ConstantPool cp, ConstantPool.C_Class hostClass) {
-            super(cp, "NestHost");
-            mHostClass = hostClass;
-        }
-
-        @Override
-        int length() {
-            return 2;
-        }
-
-        @Override
-        void writeDataTo(BytesOut out) throws IOException {
-            out.writeShort(mHostClass.mIndex);
-        }
-    }
-
-    abstract static class ClassList extends ListAttribute<ConstantPool.C_Class> {
-        ClassList(ConstantPool cp, String name) {
-            super(cp, name);
-        }
-
-        void add(ConstantPool.C_Class member) {
-            addEntry(member);
-        }
-
-        @Override
-        protected int entryLength() {
-            return 2;
-        }
-
-        @Override
-        protected void writeEntryTo(BytesOut out, ConstantPool.C_Class c) throws IOException {
-            out.writeShort(c.mIndex);
-        }
-    }
-
-    static class NestMembers extends ClassList {
-        NestMembers(ConstantPool cp) {
-            super(cp, "NestMembers");
-        }
-    }
-
-    static class Exceptions extends ClassList {
-        Exceptions(ConstantPool cp) {
-            super(cp, "Exceptions");
         }
     }
 

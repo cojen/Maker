@@ -28,7 +28,7 @@ import java.lang.invoke.MethodType;
  * @author Brian S O'Neill
  * @see #begin
  */
-public interface ClassMaker {
+public interface ClassMaker extends Attributed {
     /**
      * Begin defining a class with an automatically assigned name.
      */

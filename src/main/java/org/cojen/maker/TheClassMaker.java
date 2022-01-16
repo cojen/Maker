@@ -45,7 +45,7 @@ import static java.util.Objects.*;
  *
  * @author Brian S O'Neill
  */
-final class TheClassMaker extends Attributed implements ClassMaker, Typed {
+final class TheClassMaker extends TheAttributed implements ClassMaker, Typed {
     static final boolean DEBUG = Boolean.getBoolean(ClassMaker.class.getName() + ".DEBUG");
 
     private final TheClassMaker mParent;
@@ -73,7 +73,7 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
 
     private Attribute.BootstrapMethods mBootstrapMethods;
 
-    private Attribute.NestMembers mNestMembers;
+    private Attribute.ConstantList mNestMembers;
 
     private Attribute.InnerClasses mInnerClasses;
 
@@ -435,12 +435,13 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
     }
 
     private void setNestHost(Type nestHost) {
-        addAttribute(new Attribute.NestHost(mConstants, mConstants.addClass(nestHost)));
+        ConstantPool cp = mConstants;
+        addAttribute(new Attribute.Constant(cp, "NestHost", cp.addClass(nestHost)));
     }
 
     private synchronized void addNestMember(Type nestMember) {
         if (mNestMembers == null) {
-            mNestMembers = new Attribute.NestMembers(mConstants);
+            mNestMembers = new Attribute.ConstantList(mConstants, "NestMembers");
             addAttribute(mNestMembers);
         }
         mNestMembers.add(mConstants.addClass(nestMember));
@@ -468,7 +469,8 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
     @Override
     public ClassMaker sourceFile(String fileName) {
         checkFinished();
-        addAttribute(new Attribute.SourceFile(mConstants, fileName));
+        ConstantPool cp = mConstants;
+        addAttribute(new Attribute.Constant(cp, "SourceFile", cp.addUTF8(fileName)));
         return this;
     }
 

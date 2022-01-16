@@ -179,7 +179,7 @@ final class TheFieldMaker extends ClassMember implements FieldMaker {
             constant = mConstants.addInteger(ivalue);
         }
 
-        addAttribute(new Attribute.Constant(mConstants, constant));
+        addAttribute(new Attribute.Constant(mConstants, "ConstantValue", constant));
         return this;
     }
 

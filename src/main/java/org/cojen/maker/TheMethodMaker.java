@@ -93,7 +93,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
     private Attribute.LocalVariableTable mLocalVariableTable;
 
-    private Attribute.Exceptions mExceptionsThrown;
+    private Attribute.ConstantList mExceptionsThrown;
 
     // Detects when the code can no longer be described as a simple linear flow, used as a
     // workaround for a HotSpot condy bug which disables code compilation.
@@ -398,7 +398,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     @Override
     public MethodMaker throws_(Object type) {
         if (mExceptionsThrown == null) {
-            mExceptionsThrown = new Attribute.Exceptions(mConstants);
+            mExceptionsThrown = new Attribute.ConstantList(mConstants, "Exceptions");
             addAttribute(mExceptionsThrown);
         }
         mExceptionsThrown.add(mConstants.addClass(mClassMaker.typeFrom(type)));

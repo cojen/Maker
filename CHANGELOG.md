@@ -1,6 +1,10 @@
 Changelog
 =========
 
+v2.1.0
+------
+* Support adding simple generic JVM attributes.
+
 v2.0.3 (2022-01-02)
 ------
 * Keep references to complex bootstrap constants in order to support class redefinition, as
