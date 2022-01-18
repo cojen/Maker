@@ -17,7 +17,7 @@
 package org.cojen.maker;
 
 /**
- * Defines an entity which has a type that can be accessed by the Type.from method.
+ * Defines an item which has a type that can be accessed by the Type.from method.
  *
  * @author Brian S O'Neill
  */

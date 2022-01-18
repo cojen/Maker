@@ -24,18 +24,11 @@ import java.lang.reflect.Modifier;
  * @author Brian S O'Neill
  */
 final class TheFieldMaker extends ClassMember implements FieldMaker {
-    private final TheClassMaker mClassMaker;
     private final Type.Field mField;
 
     TheFieldMaker(TheClassMaker classMaker, Type.Field field) {
-        super(classMaker.mConstants, field.name(), field.type().descriptor());
-        mClassMaker = classMaker;
+        super(classMaker, field.name(), field.type().descriptor());
         mField = field;
-    }
-
-    @Override
-    public ClassMaker classMaker() {
-        return mClassMaker;
     }
 
     @Override
@@ -181,10 +174,5 @@ final class TheFieldMaker extends ClassMember implements FieldMaker {
 
         addAttribute(new Attribute.Constant(mConstants, "ConstantValue", constant));
         return this;
-    }
-
-    @Override
-    public AnnotationMaker addAnnotation(Object annotationType, boolean visible) {
-        return addAnnotation(new TheAnnotationMaker(mClassMaker, annotationType), visible);
     }
 }

@@ -22,12 +22,7 @@ package org.cojen.maker;
  * @author Brian S O'Neill
  * @see ClassMaker#addField
  */
-public interface FieldMaker extends Attributed {
-    /**
-     * Returns the enclosing {@code ClassMaker} for this field.
-     */
-    public ClassMaker classMaker();
-
+public interface FieldMaker extends Maker {
     /**
      * Switch this field to be public. Fields are package-private by default.
      *
@@ -103,13 +98,4 @@ public interface FieldMaker extends Attributed {
      * compatible with the field type
      */
     public FieldMaker init(Object value);
-
-    /**
-     * Add an annotation to this field.
-     *
-     * @param annotationType name or class which refers to an annotation interface
-     * @param visible true if annotation is visible at runtime
-     * @throws IllegalArgumentException if the annotation type is unsupported
-     */
-    public AnnotationMaker addAnnotation(Object annotationType, boolean visible);
 }

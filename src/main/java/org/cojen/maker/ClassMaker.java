@@ -28,7 +28,7 @@ import java.lang.invoke.MethodType;
  * @author Brian S O'Neill
  * @see #begin
  */
-public interface ClassMaker extends Attributed {
+public interface ClassMaker extends Maker {
     /**
      * Begin defining a class with an automatically assigned name.
      */
@@ -255,15 +255,6 @@ public interface ClassMaker extends Attributed {
      * @see #another
      */
     public ClassMaker addInnerClass(String className);
-
-    /**
-     * Add an annotation to this class.
-     *
-     * @param annotationType name or class which refers to an annotation interface
-     * @param visible true if annotation is visible at runtime
-     * @throws IllegalArgumentException if the annotation type is unsupported
-     */
-    public AnnotationMaker addAnnotation(Object annotationType, boolean visible);
 
     /**
      * Set the source file of this class file by adding a source file attribute.

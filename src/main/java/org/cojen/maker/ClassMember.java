@@ -23,20 +23,32 @@ import java.io.IOException;
  *
  * @author Brian S O'Neill
  */
-abstract class ClassMember extends TheAttributed {
+abstract class ClassMember extends Attributed implements Maker {
+    final TheClassMaker mClassMaker;
     final ConstantPool.C_UTF8 mName;
     final ConstantPool.C_UTF8 mDescriptor;
 
     int mModifiers;
 
-    ClassMember(ConstantPool cp, ConstantPool.C_UTF8 name, ConstantPool.C_UTF8 desc) {
-        super(cp);
+    ClassMember(TheClassMaker classMaker, ConstantPool.C_UTF8 name, ConstantPool.C_UTF8 desc) {
+        super(classMaker.mConstants);
+        mClassMaker = classMaker;
         mName = name;
         mDescriptor = desc;
     }
 
-    ClassMember(ConstantPool cp, String name, String desc) {
-        this(cp, cp.addUTF8(name), cp.addUTF8(desc));
+    ClassMember(TheClassMaker classMaker, String name, String desc) {
+        this(classMaker, classMaker.mConstants.addUTF8(name), classMaker.mConstants.addUTF8(desc));
+    }
+
+    @Override
+    public ClassMaker classMaker() {
+        return mClassMaker;
+    }
+
+    @Override
+    public AnnotationMaker addAnnotation(Object annotationType, boolean visible) {
+        return addAnnotation(new TheAnnotationMaker(mClassMaker, annotationType), visible);
     }
 
     final void writeTo(BytesOut out) throws IOException {

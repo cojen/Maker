@@ -57,7 +57,6 @@ import static org.cojen.maker.BytesOut.*;
 class TheMethodMaker extends ClassMember implements MethodMaker {
     private static final int MAX_CODE_LENGTH = 65535;
 
-    final TheClassMaker mClassMaker;
     final Type.Method mMethod;
 
     private LocalVar[] mParams;
@@ -102,8 +101,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     private int mFinished;
 
     TheMethodMaker(TheClassMaker classMaker, Type.Method method) {
-        super(classMaker.mConstants, method.name(), method.descriptor());
-        mClassMaker = classMaker;
+        super(classMaker, method.name(), method.descriptor());
         mMethod = method;
     }
 
@@ -111,8 +109,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
      * Append another maker, used for defining a clinit sub-method. Also call useReturnLabel.
      */
     TheMethodMaker(TheMethodMaker prev) {
-        super(prev.mClassMaker.mConstants, prev.mName, prev.mDescriptor);
-        mClassMaker = prev.mClassMaker;
+        super(prev.mClassMaker, prev.mName, prev.mDescriptor);
         mMethod = prev.mMethod;
     }
 
@@ -316,11 +313,6 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         first.doFinish();
-    }
-
-    @Override
-    public ClassMaker classMaker() {
-        return mClassMaker;
     }
 
     @Override
@@ -1350,11 +1342,6 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     @Override
     public ClassMaker addInnerClass(String className) {
         return mClassMaker.addInnerClass(className, mMethod);
-    }
-
-    @Override
-    public AnnotationMaker addAnnotation(Object annotationType, boolean visible) {
-        return addAnnotation(new TheAnnotationMaker(mClassMaker, annotationType), visible);
     }
 
     @Override

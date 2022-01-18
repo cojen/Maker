@@ -28,7 +28,7 @@ import java.util.List;
  *
  * @author Brian S O'Neill
  */
-abstract class Attribute extends TheAttributed {
+abstract class Attribute extends Attributed {
     final ConstantPool.C_UTF8 mAttrName;
 
     Attribute(ConstantPool cp, String name) {

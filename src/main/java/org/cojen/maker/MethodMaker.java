@@ -31,7 +31,7 @@ import java.util.function.Consumer;
  * @author Brian S O'Neill
  * @see ClassMaker#addMethod
  */
-public interface MethodMaker extends Attributed {
+public interface MethodMaker extends Maker {
     /**
      * Begin defining a standalone method, defined in the same nest as the lookup class.
      *
@@ -112,12 +112,6 @@ public interface MethodMaker extends Attributed {
         }
         return clazz;
     }
-
-    /**
-     * Returns the enclosing {@code ClassMaker} for this method, which can also be used as a
-     * type specification.
-     */
-    public ClassMaker classMaker();
 
     /**
      * Switch this method to be public. Methods are package-private by default.
@@ -428,15 +422,6 @@ public interface MethodMaker extends Attributed {
      * @throws IllegalStateException if enclosing class or method is finished
      */
     public ClassMaker addInnerClass(String className);
-
-    /**
-     * Add an annotation to this method.
-     *
-     * @param annotationType name or class which refers to an annotation interface
-     * @param visible true if annotation is visible at runtime
-     * @throws IllegalArgumentException if the annotation type is unsupported
-     */
-    public AnnotationMaker addAnnotation(Object annotationType, boolean visible);
 
     /**
      * Finishes the definition of a standalone method.

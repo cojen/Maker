@@ -20,9 +20,7 @@ package org.cojen.maker;
  * Defines the contents of an annotation.
  *
  * @author Brian S O'Neill
- * @see ClassMaker#addAnnotation ClassMaker.addAnnotation
- * @see FieldMaker#addAnnotation FieldMaker.addAnnotation
- * @see MethodMaker#addAnnotation MethodMaker.addAnnotation
+ * @see Maker#addAnnotation Maker.addAnnotation
  */
 public interface AnnotationMaker {
     /**

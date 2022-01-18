@@ -45,7 +45,7 @@ import static java.util.Objects.*;
  *
  * @author Brian S O'Neill
  */
-final class TheClassMaker extends TheAttributed implements ClassMaker, Typed {
+final class TheClassMaker extends Attributed implements ClassMaker, Typed {
     static final boolean DEBUG = Boolean.getBoolean(ClassMaker.class.getName() + ".DEBUG");
 
     private final TheClassMaker mParent;
@@ -138,6 +138,11 @@ final class TheClassMaker extends TheAttributed implements ClassMaker, Typed {
     @Override
     public ClassMaker another(String className) {
         return new TheClassMaker(this, className);
+    }
+
+    @Override
+    public ClassMaker classMaker() {
+        return this;
     }
 
     @Override
