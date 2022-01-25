@@ -22,6 +22,9 @@ package org.cojen.maker;
  * @author Brian S O'Neill
  */
 class Opcodes {
+    // Note: The commented out opcodes are generated programmatically, except for the extra
+    // dup/swap variants, which are never used by TheMethodMaker.
+
     static final byte
         NOP = (byte) 0,
         ACONST_NULL = (byte) 1,
