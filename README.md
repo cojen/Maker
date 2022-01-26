@@ -47,7 +47,7 @@ The implementation of the Cojen/Maker system is tiny, and it has no dependencies
 Limitations
 -----------
 
-The Cojen/Maker framework is designed for implementing dynamic languages and for utilities that achieve higher performance than is possible when using the reflection API. It isn't designed for modifying classes or for implementing instrumentation agents. That is, you cannot start with an existing class and make modifications to it &mdash; classes are only ever made "from scratch". A future version might support class modifications, but there's no plans at this time.
+The Cojen/Maker framework is designed for implementing dynamic languages, and for designing utilities that achieve higher performance than is possible when using the reflection API. It isn't designed for modifying classes or for implementing instrumentation agents. That is, you cannot start with an existing class and make modifications to it &mdash; classes are only ever made "from scratch". A future version might support class modifications, but there's no plans at this time.
 
 Although the framework can be used for writing a frontend compiler, it doesn't have any facilities for reading class symbols. For example, it's possible to write a Java compiler that uses Cojen for writing class files, but it would need another tool for extracting symbols from pre-compiled jar files and so forth. Such a feature could be added of course, but it's a lower priority.
 
