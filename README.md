@@ -42,7 +42,7 @@ The `java.lang.invoke` package provides powerful features for dynamically genera
 
 Another nice feature is the `setExact` method, which allows arbitrary object instances to be passed into dynamically generated classes. Ordinarily, only simple constants can be specified, or else the "condy" feature must be used to reconstruct the object upon demand. Underneath the covers, `setExact` uses the condy feature to extract the object instance from a special hash table, keyed by the class instance itself. This feature doesn't work for generated classes which are loaded from a file.
 
-The implementation of the Cojen/Maker system is tiny, and it has no dependencies. The total size is about 7300 lines of code, where a line of code is defined as a non-comment line which contains more than one non-whitespace character. For comparison, ASM and Byte Buddy have about 25,000 and 130,000 lines of code respectively, although in fairness, these frameworks do have more features.
+The implementation of the Cojen/Maker system is tiny, and it has no dependencies. The total size is about 7400 lines of code, where a line of code is defined as a non-comment line which contains more than one non-whitespace character. For comparison, ASM and Byte Buddy have about 25,000 and 130,000 lines of code respectively, although in fairness, these frameworks do have more features.
 
 Limitations
 -----------
