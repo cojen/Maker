@@ -105,7 +105,7 @@ class TheAnnotationMaker implements AnnotationMaker {
         } else if (value instanceof TheAnnotationMaker) {
             var am = (TheAnnotationMaker) value;
             if (am.mParent != this) {
-                throw new IllegalArgumentException();
+                throw new IllegalStateException();
             }
             am.mParent = null;
             return new AnnotationElement(am);

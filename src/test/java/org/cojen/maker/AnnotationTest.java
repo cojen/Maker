@@ -143,7 +143,7 @@ public class AnnotationTest {
         try {
             am2.put("sub", am2);
             fail();
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalStateException e) {
             // Cannot put self.
         }
 

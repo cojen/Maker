@@ -31,7 +31,7 @@ public interface AnnotationMaker {
      * @param value annotation element value
      * @throws IllegalArgumentException if value is unsupported
      * @throws IllegalStateException if name is already in this annotation
-     * @throws IllegalStateException if value is an incorrectly used AnnotationMaker
+     * @throws IllegalStateException if value is an incorrectly used {@code AnnotationMaker}
      */
     public void put(String name, Object value);
 
