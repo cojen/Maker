@@ -1,7 +1,7 @@
 Changelog
 =========
 
-v2.1.0
+v2.1.0 (2022-01-27)
 ------
 * Support adding simple generic JVM attributes.
 * Add a convenience goto_ method.
