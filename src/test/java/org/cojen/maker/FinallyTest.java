@@ -126,8 +126,7 @@ public class FinallyTest {
         Label start = mm.label().here();
 
         counter.inc(10);
-        Label cont = mm.label();
-        mm.goto_(cont);
+        Label cont = mm.label().goto_();
 
         mm.finally_(start, () -> {
             counter.inc(5);

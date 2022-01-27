@@ -60,8 +60,7 @@ public class MathTest {
         mm.return_();
         loopBody.here();
 
-        Label toSwitch = mm.label();
-        mm.goto_(toSwitch);
+        Label toSwitch = mm.label().goto_();
         Label contLabel = mm.label();
 
         {

@@ -82,8 +82,7 @@ public class WideTest {
 
         var v1 = mm.var(int.class).set(0);
 
-        Label L1 = mm.label();
-        mm.goto_(L1);
+        Label L1 = mm.label().goto_();
         Label L2 = mm.label().here();
 
         for (int i=0; i<10_000; i++) {

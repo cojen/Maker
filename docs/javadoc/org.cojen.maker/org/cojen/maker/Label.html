@@ -99,8 +99,14 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-second">Method</div>
 <div class="table-header col-last">Description</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="Label.html" title="interface in org.cojen.maker">Label</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#here()" class="member-name-link">here</a>()</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#goto_()" class="member-name-link">goto_</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="block">Generates an unconditional goto statement to this label, which doesn't need to be
+ positioned yet.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="Label.html" title="interface in org.cojen.maker">Label</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#here()" class="member-name-link">here</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Sets the position of the label at the location of the next code instruction.</div>
 </div>
 </div>
@@ -127,6 +133,24 @@ loadScripts(document, 'script');</script>
 <dd>this label</dd>
 <dt>Throws:</dt>
 <dd><code><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/IllegalStateException.html" title="class or interface in java.lang" class="external-link">IllegalStateException</a></code> - if label is already positioned</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="goto_()">
+<h3>goto_</h3>
+<div class="member-signature"><span class="return-type"><a href="Label.html" title="interface in org.cojen.maker">Label</a></span>&nbsp;<span class="element-name">goto_</span>()</div>
+<div class="block">Generates an unconditional goto statement to this label, which doesn't need to be
+ positioned yet.</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>this label</dd>
+<dt>See Also:</dt>
+<dd>
+<ul class="see-list-long">
+<li><a href="MethodMaker.html#goto_(org.cojen.maker.Label)"><code>MethodMaker.goto_(org.cojen.maker.Label)</code></a></li>
+</ul>
+</dd>
 </dl>
 </section>
 </li>

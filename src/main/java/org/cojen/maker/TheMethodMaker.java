@@ -2906,6 +2906,12 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             return this;
         }
 
+        @Override
+        public Label goto_() {
+            mOwner.goto_(this);
+            return this;
+        }
+
         boolean isPositioned() {
             return mNext != null || mOwner.mLastOp == this;
         }

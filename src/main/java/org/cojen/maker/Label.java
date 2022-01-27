@@ -30,4 +30,13 @@ public interface Label {
      * @throws IllegalStateException if label is already positioned
      */
     public Label here();
+
+    /**
+     * Generates an unconditional goto statement to this label, which doesn't need to be
+     * positioned yet.
+     *
+     * @return this label
+     * @see MethodMaker#goto_
+     */
+    public Label goto_();
 }

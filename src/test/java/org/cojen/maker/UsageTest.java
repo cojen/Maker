@@ -87,8 +87,7 @@ public class UsageTest {
     @Test
     public void unpositioned() {
         MethodMaker mm = mClassMaker.addMethod(null, "test");
-        Label a = mm.label();
-        mm.goto_(a);
+        Label a = mm.label().goto_();
         try {
             mClassMaker.finish();
             fail();
@@ -381,7 +380,10 @@ public class UsageTest {
             check(e, "Unknown label");
         }
         try {
-            mm2.goto_(new Label() { public Label here() {return this;} });
+            mm2.goto_(new Label() {
+                public Label here() {return this;}
+                public Label goto_() {return this;}
+            });
             fail();
         } catch (IllegalStateException e) {
             check(e, "Unknown label");

@@ -252,6 +252,8 @@ public interface MethodMaker extends Maker {
     /**
      * Generates an unconditional goto statement to the given label, which doesn't need to be
      * positioned yet.
+     *
+     * @see Label#goto_
      */
     public void goto_(Label label);
 

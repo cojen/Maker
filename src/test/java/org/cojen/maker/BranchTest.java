@@ -153,16 +153,14 @@ public class BranchTest {
 
             Label l5 = mm.label();
             v1.ifGt(v2, l5);
-            Label l6 = mm.label();
-            mm.goto_(l6);
+            Label l6 = mm.label().goto_();
             l5.here();
             assertVar.invoke("fail");
             l6.here();
 
             Label l7 = mm.label();
             v1.ifLe(v2, l7);
-            Label l8 = mm.label();
-            mm.goto_(l8);
+            Label l8 = mm.label().goto_();
             l7.here();
             assertVar.invoke("fail");
             l8.here();
@@ -191,16 +189,14 @@ public class BranchTest {
 
             Label l5 = mm.label();
             v1.ifGt(v2, l5);
-            Label l6 = mm.label();
-            mm.goto_(l6);
+            Label l6 = mm.label().goto_();
             l5.here();
             assertVar.invoke("fail");
             l6.here();
 
             Label l7 = mm.label();
             v1.ifLe(v2, l7);
-            Label l8 = mm.label();
-            mm.goto_(l8);
+            Label l8 = mm.label().goto_();
             l7.here();
             assertVar.invoke("fail");
             l8.here();
@@ -501,8 +497,7 @@ public class BranchTest {
         Label L1 = mm.label();
         mm.param(0).ifEq(1, L1);
         result.set(mm.param(0).sub(1));
-        Label L2 = mm.label();
-        mm.goto_(L2);
+        Label L2 = mm.label().goto_();
         L1.here();
         result.set(mm.param(0).add(1));
         L2.here();
@@ -532,8 +527,7 @@ public class BranchTest {
         Label L1 = mm.label();
         mm.var(System.class).field("err").ifEq(null, L1);
         result.set(1);
-        Label L2 = mm.label();
-        mm.goto_(L2);
+        Label L2 = mm.label().goto_();
         L1.here();
         result.set(2);
         L2.here();
@@ -648,8 +642,7 @@ public class BranchTest {
             l1.here();
             Label l2 = mm.label();
             v1.ifEq(true, l2);
-            Label cont = mm.label();
-            mm.goto_(cont);
+            Label cont = mm.label().goto_();
             l2.here();
             assertVar.invoke("fail");
             cont.here();
@@ -663,8 +656,7 @@ public class BranchTest {
             l1.here();
             Label l2 = mm.label();
             v1.ifEq(false, l2);
-            Label cont = mm.label();
-            mm.goto_(cont);
+            Label cont = mm.label().goto_();
             l2.here();
             assertVar.invoke("fail");
             cont.here();
