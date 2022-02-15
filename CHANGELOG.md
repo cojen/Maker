@@ -1,6 +1,10 @@
 Changelog
 =========
 
+v2.1.1
+------
+* Workaround for dynamic constant bug isn't required with Java 19.
+
 v2.1.0 (2022-01-27)
 ------
 * Support adding simple generic JVM attributes.

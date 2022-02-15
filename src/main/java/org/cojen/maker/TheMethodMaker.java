@@ -57,6 +57,12 @@ import static org.cojen.maker.BytesOut.*;
 class TheMethodMaker extends ClassMember implements MethodMaker {
     private static final int MAX_CODE_LENGTH = 65535;
 
+    private static final boolean CONDY_WORKAROUND;
+
+    static {
+        CONDY_WORKAROUND = Runtime.version().feature() < 19;
+    }
+
     final Type.Method mMethod;
 
     private LocalVar[] mParams;
@@ -2353,7 +2359,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     }
 
     private void addExplicitConstantOp(ExplicitConstantOp op) {
-        if (op.mConstant instanceof ConstantPool.C_Dynamic
+        if (CONDY_WORKAROUND && op.mConstant instanceof ConstantPool.C_Dynamic
             && mHasBranches && !"<clinit>".equals(getName()))
         {
             /*
