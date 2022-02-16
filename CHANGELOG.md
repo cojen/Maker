@@ -1,8 +1,9 @@
 Changelog
 =========
 
-v2.1.1
+v2.2.0
 ------
+* Add a convenience synchronized_ method.
 * Workaround for dynamic constant bug isn't required with Java 19.
 
 v2.1.0 (2022-01-27)

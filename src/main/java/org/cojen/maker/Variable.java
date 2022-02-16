@@ -564,4 +564,12 @@ public interface Variable {
      * @throws IllegalStateException if this variable isn't an object type
      */
     public void monitorExit();
+
+    /**
+     * Convenience method for defining a synchronized block on this variable.
+     *
+     * @param body called to generate the body of the synchronized block
+     * @throws IllegalStateException if this variable isn't an object type
+     */
+    public void synchronized_(Runnable body);
 }

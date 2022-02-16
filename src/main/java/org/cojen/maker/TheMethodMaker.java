@@ -4682,6 +4682,14 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             push();
             addBytecodeOp(op, 1);
         }
+
+        @Override
+        public void synchronized_(Runnable body) {
+            monitorEnter();
+            Label start = label().here();
+            body.run();
+            finally_(start, () -> monitorExit());
+        }
     }
 
     class LocalVar extends OwnedVar implements Variable, Comparable<LocalVar> {
@@ -4972,6 +4980,11 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         @Override
         public Field field(String name) {
             return get().field(name);
+        }
+
+        @Override
+        public void synchronized_(Runnable body) {
+            get().synchronized_(body);
         }
 
         @Override
