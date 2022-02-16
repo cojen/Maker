@@ -48,7 +48,7 @@ public class ConstantSharingTest {
         Object c1 = clazz.getMethod("getClass").invoke(null);
         Object c2 = clazz.getMethod("getClassAgain").invoke(null);
 
-        assertTrue(c1 == c2);
+        assertSame(c1, c2);
         assertEquals(clazz, c1);
     }
 

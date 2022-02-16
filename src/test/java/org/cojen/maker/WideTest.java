@@ -89,7 +89,7 @@ public class WideTest {
             v1.inc(1000);
         }
 
-        // Intentially fails.
+        // Intentionally fails.
         mm.var(Assert.class).invoke("assertEquals", 0, v1);
 
         L1.here();

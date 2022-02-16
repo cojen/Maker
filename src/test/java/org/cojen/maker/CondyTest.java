@@ -85,7 +85,7 @@ public class CondyTest {
             bootstrap.invoke(null, "_", null, (Object[]) null);
             fail();
         } catch (IllegalArgumentException e) {
-            assertTrue(e.getMessage().equals("Unsupported constant type: null"));
+            assertEquals("Unsupported constant type: null", e.getMessage());
         }
 
         var v5 = bootstrap.invoke(String.class, "dummy");
@@ -254,13 +254,13 @@ public class CondyTest {
         var instance = (ArrayList<Object>) clazz.getConstructor().newInstance();
         clazz.getMethod("run").invoke(instance);
 
-        assertTrue(const0 == instance.get(0));
-        assertTrue(const1 == instance.get(1));
-        assertTrue(const2 == instance.get(2));
-        assertTrue(const3 == instance.get(3));
-        assertTrue(const4 == instance.get(4));
-        assertEquals(null, instance.get(5));
-        assertTrue(const0 == instance.get(6));
+        assertSame(const0, instance.get(0));
+        assertSame(const1, instance.get(1));
+        assertSame(const2, instance.get(2));
+        assertSame(const3, instance.get(3));
+        assertSame(const4, instance.get(4));
+        assertNull(instance.get(5));
+        assertSame(const0, instance.get(6));
     }
 
     @Test
@@ -287,7 +287,7 @@ public class CondyTest {
 
         Class<?> clazz = hidden ? cm.finishHidden().lookupClass() : cm.finish();
 
-        assertTrue(const0 == clazz.getField("test").get(null));
+        assertSame(const0, clazz.getField("test").get(null));
     }
 
     @Test
@@ -377,7 +377,7 @@ public class CondyTest {
         assertEquals(const0, const1);
 
         // Stolen!
-        assertEquals(null, clazz.getField("test").get(null));
+        assertNull(clazz.getField("test").get(null));
     }
 
     @Test

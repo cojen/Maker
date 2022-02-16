@@ -69,8 +69,8 @@ public class TypeTest {
             var loader = new URLClassLoader(new URL[0]);
             Type type2 = Type.begin(loader, cm1, cm1.name());
 
-            assertFalse(type1 == type2);
-            assertTrue(type1.equals(type2));
+            assertNotSame(type1, type2);
+            assertEquals(type1, type2);
 
             assertTrue(type1.isAssignableFrom(type2));
             assertTrue(type2.isAssignableFrom(type1));

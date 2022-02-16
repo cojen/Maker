@@ -307,7 +307,7 @@ public class UsageTest {
         } catch (IllegalStateException e) {
             check(e, "Unmodifiable");
         }
-        assertTrue(clazz == mm.class_());
+        assertSame(clazz, mm.class_());
     }
 
     @Test

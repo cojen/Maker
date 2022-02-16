@@ -21,8 +21,6 @@ import java.lang.invoke.MethodType;
 
 import java.lang.reflect.InvocationTargetException;
 
-import java.util.Collections;
-
 import org.junit.*;
 import static org.junit.Assert.*;
 
