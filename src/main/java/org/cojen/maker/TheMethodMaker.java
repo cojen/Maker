@@ -126,7 +126,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         if (mReturnLabel != null) {
             throw new IllegalStateException();
         }
-        mReturnLabel = new Lab(this);
+        mReturnLabel = new Lab();
     }
 
     private void positionReturnLabel() {
@@ -498,7 +498,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
     @Override
     public Label label() {
-        return new Lab(this);
+        return new Lab();
     }
 
     @Override
@@ -930,7 +930,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             catchClass = null;
         }
 
-        var handlerLab = new HandlerLab(this, catchType, smCatchCode);
+        var handlerLab = new HandlerLab(catchType, smCatchCode);
 
         // Insert an operation at the start of the handled block, to capture the set of defined
         // local variables during flow analysis.
@@ -980,7 +980,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
         Label cont = label();
         goto_(cont);
-        Lab endLab = new Lab(this);
+        Lab endLab = new Lab();
         endLab.here();
         Variable exVar = catch_(startLab, endLab, type);
         try {
@@ -1049,7 +1049,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     @Override
     public void finally_(Label start, Runnable handler) {
         Lab startLab = target(start);
-        Lab endLab = new Lab(this);
+        Lab endLab = new Lab();
         addOp(endLab);
 
         // Scan between the labels and gather all the labels which are in between. Any branch
@@ -1105,7 +1105,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                 var retOp = (ReturnOp) op;
 
                 if (retHandler == null) {
-                    retHandler = new Lab(this);
+                    retHandler = new Lab();
                     if (retOp.op() != RETURN) {
                         retVar = new LocalVar(mMethod.returnType());
                     }
@@ -1134,7 +1134,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         if (!lastTransformed) {
             // Add a finally handler here, and then go past everything else.
             handler.run();
-            veryEnd = new Lab(this);
+            veryEnd = new Lab();
             goto_(veryEnd);
         }
 
@@ -1179,7 +1179,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         if (inside == null || !inside.contains(target)) {
             Lab handlerLab = exits.get(target);
             if (handlerLab == null) {
-                handlerLab = new Lab(this);
+                handlerLab = new Lab();
                 exits.put(target, handlerLab);
             }
             target = handlerLab;
@@ -2305,11 +2305,11 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             fromVar.push();
         }
 
-        Lab nonNull = new Lab(this);
+        Lab nonNull = new Lab();
         addBranchOp(IFNONNULL, 1, nonNull);
         var toVar = new LocalVar(to);
         toVar.set(null);
-        Lab cont = new Lab(this);
+        Lab cont = new Lab();
         goto_(cont);
         nonNull.here();
         addOp(new PushVarOp(fromVar));
@@ -2672,7 +2672,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     private Lab target(Label label) {
         if (label instanceof Lab) {
             Lab lab = (Lab) label;
-            if (lab.mOwner == this) {
+            if (lab.methodMaker() == this) {
                 return lab;
             }
         }
@@ -2877,9 +2877,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
     }
 
-    static class Lab extends Op implements Label {
-        final TheMethodMaker mOwner;
-
+    class Lab extends Op implements Label {
         int mAddress = -1;
 
         private int mUsedCount;
@@ -2890,8 +2888,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         // Bits are set for variables known to be available at this label.
         private BitSet mVarUsage;
 
-        Lab(TheMethodMaker owner) {
-            mOwner = owner;
+        Lab() {
         }
 
         @Override
@@ -2908,18 +2905,23 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             if (isPositioned()) {
                 throw new IllegalStateException();
             }
-            mOwner.addOp(this);
+            TheMethodMaker.this.addOp(this);
             return this;
         }
 
         @Override
         public Label goto_() {
-            mOwner.goto_(this);
+            TheMethodMaker.this.goto_(this);
             return this;
         }
 
+        @Override
+        public MethodMaker methodMaker() {
+            return TheMethodMaker.this;
+        }
+
         boolean isPositioned() {
-            return mNext != null || mOwner.mLastOp == this;
+            return mNext != null || TheMethodMaker.this.mLastOp == this;
         }
 
         @Override
@@ -3034,7 +3036,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             mUsedCount++;
             if (mTrackOffsets == null) {
                 mTrackOffsets = new int[4];
-                mOwner.mHasBranches = true;
+                TheMethodMaker.this.mHasBranches = true;
             }
         }
 
@@ -3144,9 +3146,8 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     /**
      * Special label which decrements the tracked stack but doesn't actually emit a pop opcode.
      */
-    static class PopLab extends Lab {
-        PopLab(TheMethodMaker owner) {
-            super(owner);
+    class PopLab extends Lab {
+        PopLab() {
         }
 
         @Override
@@ -3163,12 +3164,11 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     /**
      * Exception handler catch label.
      */
-    static class HandlerLab extends Lab {
+    class HandlerLab extends Lab {
         private final Type mCatchType;
         private final int mSmCatchCode;
 
-        HandlerLab(TheMethodMaker owner, Type catchType, int smCatchCode) {
-            super(owner);
+        HandlerLab(Type catchType, int smCatchCode) {
             mCatchType = catchType;
             mSmCatchCode = smCatchCode;
         }
@@ -3318,7 +3318,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                 flip(op);
                 Op cont = mNext;
                 mNext = new BranchOp(GOTO_W, 0, mTarget);
-                mTarget = new Lab(m);
+                mTarget = m.new Lab();
                 mTarget.used();
                 mNext.mNext = mTarget;
                 mTarget.mNext = cont;
@@ -4187,7 +4187,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                         // this point, but the trailing ones will be added back.
                         flow.removeOps(prev, this, null, 1);
 
-                        PopLab match = new PopLab(TheMethodMaker.this);
+                        PopLab match = new PopLab();
                         if (value == null) {
                             push();
                             addBranchOp((byte) (zeroOp + (IFNULL - IFEQ)), 1, match);
@@ -4689,6 +4689,11 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             Label start = label().here();
             body.run();
             finally_(start, () -> monitorExit());
+        }
+
+        @Override
+        public MethodMaker methodMaker() {
+            return TheMethodMaker.this;
         }
     }
 

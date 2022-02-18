@@ -61,6 +61,7 @@ public class FieldTest {
         assertEquals(cm, mm.classMaker());
 
         var strVar = mm.field("str");
+        assertEquals(mm, strVar.methodMaker());
         var num1Var = mm.field("num1");
         var num2Var = mm.field("num2");
 

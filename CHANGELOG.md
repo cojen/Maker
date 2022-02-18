@@ -4,6 +4,7 @@ Changelog
 v2.2.0
 ------
 * Add a convenience synchronized_ method.
+* Add methods to Variable and Label to obtain the MethodMaker they belong to.
 * Workaround for dynamic constant bug isn't required with Java 19.
 
 v2.1.0 (2022-01-27)

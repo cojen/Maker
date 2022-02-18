@@ -88,6 +88,7 @@ public class UsageTest {
     public void unpositioned() {
         MethodMaker mm = mClassMaker.addMethod(null, "test");
         Label a = mm.label().goto_();
+        assertEquals(mm, a.methodMaker());
         try {
             mClassMaker.finish();
             fail();
@@ -383,6 +384,7 @@ public class UsageTest {
             mm2.goto_(new Label() {
                 public Label here() {return this;}
                 public Label goto_() {return this;}
+                public MethodMaker methodMaker() {return null;}
             });
             fail();
         } catch (IllegalStateException e) {

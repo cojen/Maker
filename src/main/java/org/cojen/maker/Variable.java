@@ -572,4 +572,9 @@ public interface Variable {
      * @throws IllegalStateException if this variable isn't an object type
      */
     public void synchronized_(Runnable body);
+
+    /**
+     * Returns the {@code MethodMaker} that this variable belongs to.
+     */
+    public MethodMaker methodMaker();
 }

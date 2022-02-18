@@ -39,4 +39,9 @@ public interface Label {
      * @see MethodMaker#goto_
      */
     public Label goto_();
+
+    /**
+     * Returns the {@code MethodMaker} that this label belongs to.
+     */
+    public MethodMaker methodMaker();
 }
