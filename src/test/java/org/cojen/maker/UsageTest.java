@@ -673,6 +673,17 @@ public class UsageTest {
         }
     }
 
+    @Test
+    public void bigClassName() throws Exception {
+        ClassMaker cm = ClassMaker.beginExternal(makeString(100_000, 'a'));
+        try {
+            cm.finishBytes();
+            fail();
+        } catch (IllegalStateException e) {
+            check(e, "100000");
+        }
+    }
+
     private static String makeString(int length, char c) {
         var b = new StringBuilder(length);
         for (int i=0; i<length; i++) {

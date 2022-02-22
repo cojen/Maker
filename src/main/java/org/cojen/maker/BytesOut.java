@@ -147,7 +147,13 @@ final class BytesOut {
             }
         }
 
-        cShortArrayHandle.set(mBuffer, start, (short) (mSize - start - 2));
+        int utflen = mSize - start - 2;
+
+        if (utflen > 65535) {
+            throw new IllegalStateException("String constant is too large: " + utflen + " bytes");
+        }
+
+        cShortArrayHandle.set(mBuffer, start, (short) utflen);
     }
 
     /**
