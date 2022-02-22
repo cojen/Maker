@@ -639,6 +639,48 @@ public class UsageTest {
         }
     }
 
+    @Test
+    public void bigStringConstant() throws Exception {
+        ClassMaker cm = ClassMaker.begin().public_();
+        MethodMaker mm = cm.addMethod(String.class, "get").public_().static_();
+
+        try {
+            mm.return_(makeString(65536, 'a'));
+            fail();
+        } catch (IllegalArgumentException e) {
+            check(e, "65536");
+        }
+
+        try {
+            mm.return_(makeString(40000, '\0'));
+            fail();
+        } catch (IllegalArgumentException e) {
+            check(e, "80000");
+        }
+
+        try {
+            mm.return_(makeString(40000, '\u0100'));
+            fail();
+        } catch (IllegalArgumentException e) {
+            check(e, "80000");
+        }
+
+        try {
+            mm.return_(makeString(40000, '\u1000'));
+            fail();
+        } catch (IllegalArgumentException e) {
+            check(e, "120000");
+        }
+    }
+
+    private static String makeString(int length, char c) {
+        var b = new StringBuilder(length);
+        for (int i=0; i<length; i++) {
+            b.append(c);
+        }
+        return b.toString();
+    }
+
     private static void check(Exception e, String message) {
         String actual = e.getMessage();
         assertTrue(message + "; " + actual, actual.contains(message));

@@ -1913,6 +1913,11 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             }
             constantType = Null.THE;
         } else if (value instanceof String) {
+            int utflen = BytesOut.checkUTF((String) value);
+            if (utflen > 0) {
+                throw new IllegalArgumentException
+                    ("String constant is too large: " + utflen + " bytes");
+            }
             constantType = Type.from(String.class);
         } else if (value instanceof Class) {
             constantType = Type.from(Class.class);

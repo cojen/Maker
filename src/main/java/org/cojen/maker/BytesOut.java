@@ -150,6 +150,32 @@ final class BytesOut {
         cShortArrayHandle.set(mBuffer, start, (short) (mSize - start - 2));
     }
 
+    /**
+     * @return 0 if not too large, or else the number of bytes required
+     */
+    public static int checkUTF(String str) {
+        return str.length() <= (65535 / 3) ? 0 : fullCheckUTF(str);
+    }
+
+    private static int fullCheckUTF(String str) {
+        final int length = str.length();
+
+        int utflen = 0;
+
+        for (int i=0; i<length; i++) {
+            int c = str.charAt(i);
+            if (c < 0x80 && c != 0) {
+                utflen++;
+            } else if (c < 0x800) {
+                utflen += 2;
+            } else {
+                utflen += 3;
+            }
+        }
+
+        return utflen <= 65535 ? 0 : utflen;
+    }
+
     public void write(BytesOut out) throws IOException {
         write(out.mBuffer, 0, out.mSize);
     }
