@@ -4693,7 +4693,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             monitorEnter();
             Label start = label().here();
             body.run();
-            finally_(start, () -> monitorExit());
+            finally_(start, this::monitorExit);
         }
 
         @Override
