@@ -1,12 +1,12 @@
 Changelog
 =========
 
-v2.2.0
+v2.2.0 (2022-03-01)
 ------
 * Add a convenience synchronized_ method.
 * Add methods to Variable and Label to obtain the MethodMaker they belong to.
 * Check for string constants which are too large for the modified UTF-8 form.
-* Remove a workaround for a dynamic constant bug when using Java 19.
+* Disable a workaround for a dynamic constant bug when using Java 19.
 
 v2.1.0 (2022-01-27)
 ------
