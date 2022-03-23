@@ -1,4 +1,4 @@
-[![](https://jitpack.io/v/cojen/Maker.svg)](https://jitpack.io/#cojen/Maker)
+[![Maven Central](https://img.shields.io/maven-central/v/org.cojen/cojen-maker.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22org.cojen%22%20AND%20a:%22cojen-maker%22)
 
 The Cojen/Maker framework is a lightweight, full-featured, low-level dynamic Java class generator which is designed for [ease of use](https://github.com/cojen/Maker/wiki/Ease-of-use).
 
