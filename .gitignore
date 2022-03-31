@@ -1,5 +1,6 @@
 /build
 /target
+/javadoc
 *~
 /.gitignore~
 .DS_Store
