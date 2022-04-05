@@ -341,6 +341,10 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
     @Override
     public MethodMaker static_() {
+        if (mParams != null) {
+            throw new IllegalStateException
+                ("Cannot become static after parameters have been accessed");
+        }
         mModifiers = Modifiers.toStatic(mModifiers);
         mMethod.toStatic();
         return this;

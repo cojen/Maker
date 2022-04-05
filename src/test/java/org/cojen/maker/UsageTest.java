@@ -63,6 +63,18 @@ public class UsageTest {
     }
 
     @Test
+    public void changeStatic() {
+        MethodMaker mm = mClassMaker.addMethod(null, "test", int.class);
+        mm.param(0);
+        try {
+            mm.static_();
+            fail();
+        } catch (IllegalStateException e) {
+            check(e, "parameters have been accessed");
+        } 
+    }
+
+    @Test
     public void endReached() {
         MethodMaker mm = mClassMaker.addMethod(int.class, "test");
         try {

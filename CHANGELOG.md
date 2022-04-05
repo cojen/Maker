@@ -1,6 +1,11 @@
 Changelog
 =========
 
+v2.2.1
+------
+* Throw an exception when attempting to make a method be static after the parameters have been
+  accessed, preventing a confusing VerifyError later.
+
 v2.2.0 (2022-03-01)
 ------
 * Add a convenience synchronized_ method.
