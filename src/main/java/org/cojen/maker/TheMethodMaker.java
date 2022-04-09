@@ -751,8 +751,8 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
                 if (method.enclosingType().isInterface()) {
                     int nargs = stackPop;
-                    for (int i=1; i<actualTypes.length; i++) {
-                        int tc = actualTypes[i].typeCode();
+                    for (Type actualType : actualTypes) {
+                        int tc = actualType.typeCode();
                         if (tc == T_DOUBLE || tc == T_LONG) {
                             nargs++;
                         }

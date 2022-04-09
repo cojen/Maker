@@ -3,6 +3,7 @@ Changelog
 
 v2.2.1
 ------
+* Fix calculation of invokeinterface nargs operand when passing long or double arguments.
 * Throw an exception when attempting to make a method be static after the parameters have been
   accessed, preventing a confusing VerifyError later.
 

@@ -21,6 +21,7 @@ import java.io.Serializable;
 import java.lang.invoke.*;
 
 import java.util.*;
+import java.util.function.DoubleBinaryOperator;
 import java.util.function.IntSupplier;
 
 import org.junit.*;
@@ -124,6 +125,26 @@ public class InvokeTest {
 
     public static String wideArgs(int a, long b, double c) {
         return a + ":" + b + ":" + c;
+    }
+
+
+    @Test
+    public void invokeInterfaceWideArgs2() throws Exception {
+        // Another test for the invocation of interface methods with long and double arguments.
+        // This time, make sure to test what happens when the first argument is also wide.
+
+        // From https://github.com/cojen/Maker/issues/3
+
+        var cm = ClassMaker.begin().implement(Compute.class).public_();
+        cm.addConstructor().public_();
+        var mm = cm.addMethod(double.class, "compute", DoubleBinaryOperator.class).public_();
+        mm.return_(mm.param(0).invoke("applyAsDouble", 2.0, 4.5));
+        var instance = (Compute) cm.finish().getConstructor().newInstance();
+        assertTrue(instance.compute(Double::sum) == 6.5);
+    }
+
+    public static interface Compute {
+        double compute(DoubleBinaryOperator op);
     }
 
     @Test
