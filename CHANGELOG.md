@@ -1,7 +1,7 @@
 Changelog
 =========
 
-v2.2.1
+v2.2.1 (2022-04-10)
 ------
 * Fix calculation of invokeinterface nargs operand when passing long or double arguments.
 * Throw an exception when attempting to make a method be static after the parameters have been
