@@ -1,6 +1,9 @@
 Changelog
 =========
 
+v2.2.2
+------
+
 v2.2.1 (2022-04-10)
 ------
 * Fix calculation of invokeinterface nargs operand when passing long or double arguments.

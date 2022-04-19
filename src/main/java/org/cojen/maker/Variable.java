@@ -509,7 +509,8 @@ public interface Variable {
     /**
      * Returns a {@link MethodHandle} variable which can invoke a static or instance method on
      * the object referenced by this variable. The returned variable is actually a constant,
-     * and so it can be supplied as an argument to a {@link Bootstrap bootstrap} method.
+     * and so it can be supplied as an argument to a {@link Bootstrap bootstrap} method or be
+     * used by another method in the same class.
      *
      * @param returnType method return type
      * @param name method name; can be {@code ".new"} to construct an instance of this variable
@@ -535,7 +536,7 @@ public interface Variable {
      * Specify a static bootstrap method for dynamically generating constants, as found in the
      * class type of this variable. The variable returned by the bootstrap method cannot be
      * modified. Since it is a constant, it can be supplied as an argument to another bootstrap
-     * method.
+     * method or be used by another method in the same class.
      *
      * @param name bootstrap method name
      * @param args constants which are passed to the bootstrap method, not including the
