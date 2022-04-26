@@ -2549,11 +2549,11 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         final Type primType = varType.unbox();
 
         if (primType == null) {
-            throw new IllegalStateException("Cannot " + name + " to a non-numeric type");
+            throw new IllegalStateException("Cannot '" + name + "' to a non-numeric type");
         }
 
         if (op != INEG && value == null) {
-            throw new IllegalArgumentException("Cannot " + name + " by null");
+            throw new IllegalArgumentException("Cannot '" + name + "' by null");
         }
 
         byte castOp = 0;
@@ -2579,7 +2579,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             op += 3;
             break;
         default:
-            throw new IllegalStateException("Cannot " + name + " to a non-numeric type");
+            throw new IllegalStateException("Cannot '" + name + "' to a non-numeric type");
         }
 
         addPushOp(primType, var);
@@ -2612,16 +2612,16 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         final Type primType = varType.unbox();
 
         if (primType == null) {
-            throw new IllegalStateException("Cannot " + name + " to a non-numeric type");
+            throw new IllegalStateException("Cannot '" + name + "' to a non-numeric type");
         }
 
         if (value == null) {
-            throw new IllegalArgumentException("Cannot " + name + " by null");
+            throw new IllegalArgumentException("Cannot '" + name + "' by null");
         }
 
         byte castOp = 0;
         int mask = 0;
-        switch (primType.typeCode()) {
+        check: switch (primType.typeCode()) {
         case T_BYTE:
             castOp = I2B;
             if (op == IUSHR) {
@@ -2643,9 +2643,16 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             op += 1;
             break;
         case T_FLOAT: case T_DOUBLE:
-            throw new IllegalStateException("Cannot " + name + " to a non-integer type");
+            throw new IllegalStateException("Cannot '" + name + "' to a non-integer type");
+        case T_BOOLEAN: {
+            switch (op) {
+            case IAND: case IOR: case IXOR:
+                break check;
+            }
+            // fallthrough
+        }
         default:
-            throw new IllegalStateException("Cannot " + name + " to a non-numeric type");
+            throw new IllegalStateException("Cannot '" + name + "' to a non-numeric type");
         }
 
         addPushOp(primType, var);

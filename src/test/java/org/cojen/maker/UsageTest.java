@@ -330,13 +330,13 @@ public class UsageTest {
             mm.var(int.class).set(1).add(null);
             fail();
         } catch (IllegalArgumentException e) {
-            check(e, "Cannot add by null");
+            check(e, "Cannot 'add' by null");
         }
         try {
             mm.var(int.class).set(1).shr(null);
             fail();
         } catch (IllegalArgumentException e) {
-            check(e, "Cannot shift by null");
+            check(e, "Cannot 'shift' by null");
         }
     }
 
@@ -347,31 +347,31 @@ public class UsageTest {
             mm.var(double.class).set(1).shr(1);
             fail();
         } catch (IllegalStateException e) {
-            check(e, "Cannot shift to a non-integer");
+            check(e, "Cannot 'shift' to a non-integer");
         }
         try {
             mm.var(String.class).set("hello").add(1);
             fail();
         } catch (IllegalStateException e) {
-            check(e, "Cannot add to a non-numeric");
+            check(e, "Cannot 'add' to a non-numeric");
         }
         try {
             mm.var(String.class).set("hello").ushr(1);
             fail();
         } catch (IllegalStateException e) {
-            check(e, "Cannot shift to a non-numeric");
+            check(e, "Cannot 'shift' to a non-numeric");
         }
         try {
             mm.var(boolean.class).set(true).add(true);
             fail();
         } catch (IllegalStateException e) {
-            check(e, "Cannot add to a non-numeric");
+            check(e, "Cannot 'add' to a non-numeric");
         }
         try {
-            mm.var(boolean.class).set(true).and(true);
+            mm.var(boolean.class).set(true).shl(true);
             fail();
         } catch (IllegalStateException e) {
-            check(e, "Cannot and to a non-numeric");
+            check(e, "Cannot 'shift' to a non-numeric");
         }
     }
 

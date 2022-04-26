@@ -484,4 +484,23 @@ public class MathTest {
 
         cm.finish().getMethod("run").invoke(null);
     }
+
+    @Test
+    public void booleanOps() throws Exception {
+        // A few logical operations against booleans should be supported
+
+        ClassMaker cm = ClassMaker.begin().public_();
+        MethodMaker mm = cm.addMethod(null, "run").static_().public_();
+
+        var v1 = mm.var(boolean.class).set(false).or(true);
+        mm.var(Assert.class).invoke("assertEquals", true, v1.get());
+
+        var v2 = mm.var(boolean.class).set(true).and(false);
+        mm.var(Assert.class).invoke("assertEquals", false, v2.get());
+
+        var v3 = mm.var(boolean.class).set(true).xor(true);
+        mm.var(Assert.class).invoke("assertEquals", false, v3.get());
+
+        cm.finish().getMethod("run").invoke(null);
+    }
 }
