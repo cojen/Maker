@@ -847,7 +847,7 @@ extends <a href="Maker.html" title="interface in org.cojen.maker">Maker</a></spa
  <p>All of the coordinate values must be provided up front, which are then used each time
  the <code>VarHandle</code> is accessed. Variable coordinates are read each time the access
  field is used &mdash; they aren't fixed to the initial value. In addition, the array of
- coordinates values isn't cloned, permitting changes without needing to obtain a new
+ coordinate values isn't cloned, permitting changes without needing to obtain a new
  access field.
 
  <p>A <code>VarHandle</code> can also be accessed by calling <a href="https://docs.oracle.com/en/java/javase/18/docs/api/java.base/java/lang/invoke/VarHandle.html#toMethodHandle(java.lang.invoke.VarHandle.AccessMode)" title="class or interface in java.lang.invoke" class="external-link"><code>toMethodHandle</code></a>, which is then passed to the <a href="#invoke(java.lang.invoke.MethodHandle,java.lang.Object...)"><code>invoke</code></a> method.</div>

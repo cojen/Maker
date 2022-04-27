@@ -389,7 +389,7 @@ public interface MethodMaker extends Maker {
      * <p>All of the coordinate values must be provided up front, which are then used each time
      * the {@code VarHandle} is accessed. Variable coordinates are read each time the access
      * field is used &mdash; they aren't fixed to the initial value. In addition, the array of
-     * coordinates values isn't cloned, permitting changes without needing to obtain a new
+     * coordinate values isn't cloned, permitting changes without needing to obtain a new
      * access field.
      *
      * <p>A {@code VarHandle} can also be accessed by calling {@link VarHandle#toMethodHandle
