@@ -587,6 +587,10 @@ public class InvokeTest {
         return a * a;
     }
 
+    private static String secret(String a) {
+        return String.valueOf(a) + '!';
+    }
+
     @Test
     public void invokeHandleExternal() throws Exception {
         ClassMaker cm = ClassMaker.beginExternal(getClass().getName() + "Fake").public_();
@@ -1085,6 +1089,24 @@ public class InvokeTest {
             var result = mhVar.invoke(int.class, "invokeExact", null, 30);
             assertVar.invoke("assertEquals", 900, result);
         }
+
+        cm.finish().getMethod("run").invoke(null);
+    }
+
+    @Test
+    public void signaturePolymorphic2() throws Exception {
+        MethodHandle mh = MethodHandles.lookup()
+            .findStatic(InvokeTest.class, "secret",
+                        MethodType.methodType(String.class, String.class));
+
+        ClassMaker cm = ClassMaker.begin().public_();
+        MethodMaker mm = cm.addMethod(null, "run").public_().static_();
+        var mhVar = mm.var(MethodHandle.class).setExact(mh);
+        var assertVar = mm.var(Assert.class);
+
+        Class<?>[] paramTypes = {String.class};
+        var result = mhVar.invoke(String.class, "invokeExact", paramTypes, (Object) null);
+        assertVar.invoke("assertEquals", "null!", result);
 
         cm.finish().getMethod("run").invoke(null);
     }

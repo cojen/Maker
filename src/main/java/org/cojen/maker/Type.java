@@ -544,12 +544,13 @@ abstract class Type {
             // Check if a signature polymorphic method should be invented.
             if (!method.isStatic() && method.isVarargs()) {
                 Class clazz = clazz();
+                Type[] paramTypes;
                 if ((clazz == MethodHandle.class || clazz == VarHandle.class)
-                    && verifyTypes(params, specificParamTypes))
+                    && (paramTypes = verifyTypes(params, specificParamTypes)) != null)
                 {
                     Type returnType = specificReturnType != null
                         ? specificReturnType : method.returnType();
-                    method = inventMethod(false, returnType, methodName, params);
+                    method = inventMethod(false, returnType, methodName, paramTypes);
                 }
             }
 
@@ -564,10 +565,11 @@ abstract class Type {
                     candidates = findMethods(methodName, params, -1, -1, null, null);
                     if (candidates.size() == 1) {
                         Method method = candidates.iterator().next();
+                        Type[] paramTypes;
                         if (method != null && method.isVarargs()
-                            && verifyTypes(params, specificParamTypes))
+                            && (paramTypes = verifyTypes(params, specificParamTypes)) != null)
                         {
-                            return inventMethod(false, specificReturnType, methodName, params);
+                            return inventMethod(false, specificReturnType, methodName, paramTypes);
                         }
                     }
                 }
@@ -595,16 +597,18 @@ abstract class Type {
 
     /**
      * Verifies that the param types can be assigned by the specific types (if provided).
+     * Returns null if assignment isn't allowed, or else return the actual param types to use.
      */
-    private static boolean verifyTypes(Type[] params, Type[] specificParamTypes) {
+    private static Type[] verifyTypes(Type[] params, Type[] specificParamTypes) {
         if (specificParamTypes != null && params.length == specificParamTypes.length) {
             for (int i=0; i<specificParamTypes.length; i++) {
                 if (!specificParamTypes[i].isAssignableFrom(params[i])) {
-                    return false;
+                    return null;
                 }
             }
+            return specificParamTypes;
         }
-        return true;
+        return params;
     }
 
     /**
