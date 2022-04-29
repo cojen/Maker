@@ -6,6 +6,7 @@ v2.2.2
 * Fix support for 'and', 'or' and 'xor' operations against booleans, which were needlessly
   disallowed by version 1.3.3.
 * Fix signature polymorphic invocation when a null parameter is provided.
+* Don't use signature polymorphic invocation for the MethodHandle.invokeWithArguments method.
 
 v2.2.1 (2022-04-10)
 ------

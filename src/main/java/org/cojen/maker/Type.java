@@ -543,9 +543,8 @@ abstract class Type {
 
             // Check if a signature polymorphic method should be invented.
             if (!method.isStatic() && method.isVarargs()) {
-                Class clazz = clazz();
                 Type[] paramTypes;
-                if ((clazz == MethodHandle.class || clazz == VarHandle.class)
+                if (possiblySignaturePolymorphic(methodName)
                     && (paramTypes = verifyTypes(params, specificParamTypes)) != null)
                 {
                     Type returnType = specificReturnType != null
@@ -559,18 +558,15 @@ abstract class Type {
 
         if (candidates.isEmpty()) {
             // Check if a signature polymorphic method should be invented.
-            if (specificReturnType != null) {
-                Class clazz = clazz();
-                if (clazz == MethodHandle.class || clazz == VarHandle.class) {
-                    candidates = findMethods(methodName, params, -1, -1, null, null);
-                    if (candidates.size() == 1) {
-                        Method method = candidates.iterator().next();
-                        Type[] paramTypes;
-                        if (method != null && method.isVarargs()
-                            && (paramTypes = verifyTypes(params, specificParamTypes)) != null)
-                        {
-                            return inventMethod(false, specificReturnType, methodName, paramTypes);
-                        }
+            if (specificReturnType != null && possiblySignaturePolymorphic(methodName)) {
+                candidates = findMethods(methodName, params, -1, -1, null, null);
+                if (candidates.size() == 1) {
+                    Method method = candidates.iterator().next();
+                    Type[] paramTypes;
+                    if (method != null && method.isVarargs()
+                        && (paramTypes = verifyTypes(params, specificParamTypes)) != null)
+                    {
+                        return inventMethod(false, specificReturnType, methodName, paramTypes);
                     }
                 }
             }
@@ -593,6 +589,12 @@ abstract class Type {
         }
 
         throw new IllegalStateException(b.toString());
+    }
+
+    private boolean possiblySignaturePolymorphic(String methodName) {
+        Class clazz = clazz();
+        return (clazz == MethodHandle.class && !methodName.equals("invokeWithArguments"))
+            || clazz == VarHandle.class;
     }
 
     /**

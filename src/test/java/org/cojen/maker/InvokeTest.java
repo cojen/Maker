@@ -1070,14 +1070,12 @@ public class InvokeTest {
             assertVar.invoke("assertEquals", 100, result);
         }
 
-        {
-            try {
-                mhVar.invoke(int.class, "invokeExact", new Object[] {short.class}, 10);
-                fail();
-            } catch (IllegalStateException e) {
-                // Param type of int cannot be converted to a short, although in this case it
-                // could work when downcast.
-            }
+        try {
+            mhVar.invoke(int.class, "invokeExact", new Object[] {short.class}, 10);
+            fail();
+        } catch (IllegalStateException e) {
+            // Param type of int cannot be converted to a short, although in this case it
+            // could work when downcast.
         }
 
         {
@@ -1107,6 +1105,49 @@ public class InvokeTest {
         Class<?>[] paramTypes = {String.class};
         var result = mhVar.invoke(String.class, "invokeExact", paramTypes, (Object) null);
         assertVar.invoke("assertEquals", "null!", result);
+
+        cm.finish().getMethod("run").invoke(null);
+    }
+
+    @Test
+    public void signatureNotPolymorphic() throws Exception {
+        MethodHandle mh = MethodHandles.lookup()
+            .findStatic(InvokeTest.class, "secret",
+                        MethodType.methodType(int.class, int.class));
+
+        ClassMaker cm = ClassMaker.begin().public_();
+        MethodMaker mm = cm.addMethod(null, "run").public_().static_();
+        var mhVar = mm.var(MethodHandle.class).setExact(mh);
+        var assertVar = mm.var(Assert.class);
+
+        try {
+            Class<?>[] paramTypes = {int.class};
+            mhVar.invoke(String.class, "invokeWithArguments", paramTypes, 9);
+            fail();
+        } catch (IllegalStateException e) {
+            // Not calling a signature polymorphic method.
+        }
+
+        // Invoke as varargs.
+        {
+            var result = mhVar.invoke("invokeWithArguments", 9);
+            assertVar.invoke("assertEquals", 81, result);
+        }
+
+        // Invoke as varargs with explicit types.
+        {
+            Class<?>[] paramTypes = {Object[].class};
+            var result = mhVar.invoke(Object.class, "invokeWithArguments", paramTypes, 9);
+            assertVar.invoke("assertEquals", 81, result);
+        }
+
+        // Invoke with an object array.
+        {
+            Class<?>[] paramTypes = {Object[].class};
+            Object[] params = {9};
+            var result = mhVar.invoke(Object.class, "invokeWithArguments", paramTypes, params);
+            assertVar.invoke("assertEquals", 81, result);
+        }
 
         cm.finish().getMethod("run").invoke(null);
     }
