@@ -1,7 +1,7 @@
 Changelog
 =========
 
-v2.2.2
+v2.2.2 (2022-05-01)
 ------
 * Fix support for 'and', 'or' and 'xor' operations against booleans, which were needlessly
   disallowed by version 1.3.3.
