@@ -267,6 +267,12 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             new Flow(varList, varUsage).run(mFirstOp);
         }
 
+        if (mThisVar instanceof InitThisVar) {
+            if (((InitThisVar) mThisVar).smCode() == SM_UNINIT_THIS) {
+                throw new IllegalStateException("Super or this constructor never invoked");
+            }
+        }
+
         mParams = null;
         mFirstOp = null;
         mLastOp = null;
@@ -4925,6 +4931,9 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         void ready() {
+            if (mSmCode != SM_UNINIT_THIS) {
+                throw new IllegalStateException("Super or this constructor invoked multiple times");
+            }
             mSmCode = super.smCode();
         }
     }

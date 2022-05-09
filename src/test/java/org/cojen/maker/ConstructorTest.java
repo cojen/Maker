@@ -54,4 +54,107 @@ public class ConstructorTest {
         clazz.getConstructor().newInstance();
         clazz.getConstructor(int.class, String.class).newInstance(10, "hello");
     }
+
+    @Test
+    public void broken() throws Exception {
+        try {
+            ClassMaker cm = ClassMaker.begin();
+            MethodMaker mm = cm.addConstructor();
+            mm.nop();
+            cm.finish();
+            fail();
+        } catch (IllegalStateException e) {
+            assertTrue(e.getMessage().contains("never invoked"));
+        }
+
+        try {
+            ClassMaker cm = ClassMaker.begin();
+            MethodMaker mm = cm.addConstructor();
+            mm.return_();
+            mm.invokeSuperConstructor();
+            cm.finish();
+            fail();
+        } catch (IllegalStateException e) {
+            assertTrue(e.getMessage().contains("never invoked"));
+        }
+
+        try {
+            ClassMaker cm = ClassMaker.begin();
+            MethodMaker mm = cm.addConstructor();
+            mm.invokeSuperConstructor();
+            mm.invokeSuperConstructor();
+            cm.finish();
+            fail();
+        } catch (IllegalStateException e) {
+            assertTrue(e.getMessage().contains("invoked multiple"));
+        }
+
+        try {
+            ClassMaker cm = ClassMaker.begin();
+            MethodMaker mm = cm.addConstructor();
+            mm.invokeThisConstructor();
+            mm.invokeSuperConstructor();
+            cm.finish();
+            fail();
+        } catch (IllegalStateException e) {
+            assertTrue(e.getMessage().contains("invoked multiple"));
+        }
+
+        {
+            ClassMaker cm = ClassMaker.begin();
+            MethodMaker mm = cm.addConstructor(boolean.class);
+            Label a = mm.label();
+            mm.param(0).ifTrue(a);
+            Label b = mm.label().goto_();
+            mm.invokeSuperConstructor(); // dead code
+            a.here();
+            mm.invokeSuperConstructor();
+            b.here();
+            cm.finish();
+        }
+
+        try {
+            ClassMaker cm = ClassMaker.begin();
+            MethodMaker mm = cm.addConstructor(boolean.class);
+            Label a = mm.label();
+            mm.param(0).ifTrue(a);
+            mm.invokeSuperConstructor();
+            Label b = mm.label().goto_();
+            a.here();
+            mm.invokeSuperConstructor();
+            b.here();
+            cm.finish();
+            fail();
+        } catch (IllegalStateException e) {
+            assertTrue(e.getMessage().contains("invoked multiple"));
+        }
+
+        // The remaining cases aren't detected, and instead a VerifyError is thrown. This isn't
+        // a feature, it's a limitation.
+
+        try {
+            ClassMaker cm = ClassMaker.begin();
+            MethodMaker mm = cm.addConstructor();
+            Label a = mm.label().here();
+            mm.invokeThisConstructor();
+            a.goto_();
+            var clazz = cm.finish();
+            clazz.getConstructor().newInstance();
+            fail();
+        } catch (VerifyError e) {
+        }
+
+        try {
+            ClassMaker cm = ClassMaker.begin();
+            MethodMaker mm = cm.addConstructor(boolean.class);
+            Label a = mm.label();
+            mm.param(0).ifTrue(a);
+            mm.invokeSuperConstructor();
+            a.here();
+            var clazz = cm.finish();
+            clazz.getConstructor().newInstance();
+            fail();
+        } catch (VerifyError e) {
+        }
+    }
 }

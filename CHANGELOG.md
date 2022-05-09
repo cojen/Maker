@@ -1,6 +1,10 @@
 Changelog
 =========
 
+v2.2.3
+------
+* Detect simple cases in which the super or this constructor isn't invoked properly.
+
 v2.2.2 (2022-05-01)
 ------
 * Fix support for 'and', 'or' and 'xor' operations against booleans, which were needlessly
