@@ -780,6 +780,8 @@ public class CondyTest {
         // A relational comparison against a dynamic constant must not cause a
         // ConcurrentModificationException when the CONDY_WORKAROUND is used.
 
+        // From https://github.com/cojen/Maker/issues/4
+
         ClassMaker cm = ClassMaker.begin().public_();
 
         Variable v1 = null;
