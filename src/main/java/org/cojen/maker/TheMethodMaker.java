@@ -4139,14 +4139,19 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                 if (!eq) {
                     requireNonNull(val);
                 }
-            } else if (CONDY_WORKAROUND && val instanceof ConstantVar) {
-                var constant = ((ConstantVar) val).mConstant;
-                if (constant instanceof ConstantPool.C_Dynamic) {
-                    // Must eagerly capture the dynamic constant into a local variable to avoid
-                    // attempting to add code to the static initializer when the temporary
-                    // operation (below) gets replaced.
-                    val = var(val).set(val);
+            } else if (CONDY_WORKAROUND) capture: {
+                if (val instanceof ConstantVar) {
+                    var constant = ((ConstantVar) val).mConstant;
+                    if (!(constant instanceof ConstantPool.C_Dynamic)) {
+                        break capture;
+                    }
+                } else if (!ConstableSupport.isDynamicConstant(val)) {
+                    break capture;
                 }
+                // Must eagerly capture the dynamic constant into a local variable to
+                // avoid attempting to add code to the static initializer when the
+                // temporary operation (below) gets replaced.
+                val = storeToNewVar(addPushOp(null, val));
             }
 
             final Object value = val;

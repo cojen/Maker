@@ -172,4 +172,15 @@ abstract class ConstableSupport {
             
         return null;
     }
+
+    static boolean isDynamicConstant(Object value) {
+        if (value instanceof DynamicConstantDesc) {
+            return true;
+        } else if (value instanceof Constable) {
+            var opt = ((Constable) value).describeConstable();
+            return !opt.isEmpty() && opt.get() instanceof DynamicConstantDesc;
+        } else {
+            return false;
+        }
+    }
 }

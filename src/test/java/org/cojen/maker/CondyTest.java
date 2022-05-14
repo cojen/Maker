@@ -803,5 +803,17 @@ public class CondyTest {
         var clazz = cm.finish();
         assertEquals(false, clazz.getMethod("m1", Object.class).invoke(null, "xxx"));
         assertEquals(false, clazz.getMethod("m2", Object.class).invoke(null, "xxx"));
+
+        cm = ClassMaker.begin().public_();
+        MethodMaker mm = cm.addMethod(boolean.class, "m2", Object.class).static_().public_();
+        var v2 = mm.param(0).eq(new MagicConstant(1));
+        Label isNull = mm.label();
+        mm.param(0).ifEq(null, isNull);
+        mm.return_(v2);
+        isNull.here();
+        mm.return_(true);
+
+        clazz = cm.finish();
+        assertEquals(false, clazz.getMethod("m2", Object.class).invoke(null, "xxx"));
     }
 }
