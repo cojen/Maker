@@ -4133,15 +4133,24 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
          * @param op normal op to use for ints
          * @param zeroOp op to use when comparing against a constant zero int
          */
-        private LocalVar relational(Object value, boolean eq, byte op, byte zeroOp) {
-            if (value == null) {
+        private LocalVar relational(Object val, boolean eq, byte op, byte zeroOp) {
+            if (val == null) {
                 nullCompareCheck();
                 if (!eq) {
-                    requireNonNull(value);
+                    requireNonNull(val);
+                }
+            } else if (CONDY_WORKAROUND && val instanceof ConstantVar) {
+                var constant = ((ConstantVar) val).mConstant;
+                if (constant instanceof ConstantPool.C_Dynamic) {
+                    // Must eagerly capture the dynamic constant into a local variable to avoid
+                    // attempting to add code to the static initializer when the temporary
+                    // operation (below) gets replaced.
+                    val = var(val).set(val);
                 }
             }
 
-            LocalVar result = new LocalVar(BOOLEAN);
+            final Object value = val;
+            final LocalVar result = new LocalVar(BOOLEAN);
 
             // Indicate that the arguments will be used at some point, preventing premature
             // elimination of local variables.
@@ -5618,8 +5627,6 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         public LocalVar invoke(Object retType, String name, Object[] types, Object... values) {
             int length = values == null ? 0 : values.length;
 
-            LocalVar var;
-
             if (mCondy) {
                 if ((types != null && types.length != 0) || length != 0) {
                     throw new IllegalStateException("Dynamic constant has no parameters");
@@ -5634,9 +5641,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                 ConstantPool.C_Dynamic dynamic = mConstants
                     .addDynamicConstant(mBootstrapIndex, name, returnType);
 
-                addExplicitConstantOp(dynamic, returnType);
-
-                var = new ConstantVar(returnType, dynamic);
+                return new ConstantVar(returnType, dynamic);
             } else {
                 if (types != null && types.length != length) {
                     throw new IllegalArgumentException("Mismatched parameter types and values");
@@ -5656,15 +5661,8 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
                 addOp(new InvokeDynamicOp(length, dynamic, returnType));
 
-                if (returnType == VOID) {
-                    return null;
-                }
-
-                var = new LocalVar(returnType);
+                return returnType == VOID ? null : storeToNewVar(returnType);
             }
-
-            addStoreOp(var);
-            return var;
         }
     }
 }

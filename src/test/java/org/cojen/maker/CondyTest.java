@@ -774,4 +774,32 @@ public class CondyTest {
         assertEquals(a, method.invoke(null, 0));
         assertEquals(b, method.invoke(null, 1));
     }
+
+    @Test
+    public void relational() throws Exception {
+        // A relational comparison against a dynamic constant must not cause a
+        // ConcurrentModificationException when the CONDY_WORKAROUND is used.
+
+        ClassMaker cm = ClassMaker.begin().public_();
+
+        Variable v1 = null;
+
+        for (int i=1; i<=2; i++) {
+            MethodMaker mm = cm.addMethod(boolean.class, "m" + i, Object.class).static_().public_();
+            if (v1 == null) {
+                // First method generates the constant, which is shared with the second method.
+                v1 = mm.var(CondyTest.class).condy("boot").invoke(Object.class, "_");
+            }
+            var v2 = mm.param(0).eq(v1);
+            Label isNull = mm.label();
+            mm.param(0).ifEq(null, isNull);
+            mm.return_(v2);
+            isNull.here();
+            mm.return_(true);
+        }
+
+        var clazz = cm.finish();
+        assertEquals(false, clazz.getMethod("m1", Object.class).invoke(null, "xxx"));
+        assertEquals(false, clazz.getMethod("m2", Object.class).invoke(null, "xxx"));
+    }
 }
