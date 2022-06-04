@@ -22,5 +22,5 @@ package org.cojen.maker;
  * @author Brian S O'Neill
  */
 interface Typed {
-    public Type type();
+    Type type();
 }

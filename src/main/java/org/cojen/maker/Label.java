@@ -29,7 +29,7 @@ public interface Label {
      * @return this label
      * @throws IllegalStateException if label is already positioned
      */
-    public Label here();
+    Label here();
 
     /**
      * Generates an unconditional goto statement to this label, which doesn't need to be
@@ -38,10 +38,10 @@ public interface Label {
      * @return this label
      * @see MethodMaker#goto_
      */
-    public Label goto_();
+    Label goto_();
 
     /**
      * Returns the {@code MethodMaker} that this label belongs to.
      */
-    public MethodMaker methodMaker();
+    MethodMaker methodMaker();
 }

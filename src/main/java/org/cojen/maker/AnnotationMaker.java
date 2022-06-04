@@ -33,7 +33,7 @@ public interface AnnotationMaker {
      * @throws IllegalStateException if name is already in this annotation
      * @throws IllegalStateException if value is an incorrectly used {@code AnnotationMaker}
      */
-    public void put(String name, Object value);
+    void put(String name, Object value);
 
     /**
      * Define a new annotation, which can be put into this annotation at most once.
@@ -41,5 +41,5 @@ public interface AnnotationMaker {
      * @param annotationType name or class which refers to an annotation interface
      * @throws IllegalArgumentException if the annotation type is unsupported
      */
-    public AnnotationMaker newAnnotation(Object annotationType);
+    AnnotationMaker newAnnotation(Object annotationType);
 }

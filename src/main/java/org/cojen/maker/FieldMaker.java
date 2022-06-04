@@ -28,56 +28,56 @@ public interface FieldMaker extends Maker {
      *
      * @return this
      */
-    public FieldMaker public_();
+    FieldMaker public_();
 
     /**
      * Switch this field to be private. Fields are package-private by default.
      *
      * @return this
      */
-    public FieldMaker private_();
+    FieldMaker private_();
 
     /**
      * Switch this field to be protected. Fields are package-private by default.
      *
      * @return this
      */
-    public FieldMaker protected_();
+    FieldMaker protected_();
 
     /**
      * Switch this field to be static. Fields are non-static by default.
      *
      * @return this
      */
-    public FieldMaker static_();
+    FieldMaker static_();
 
     /**
      * Switch this field to be final. Fields are non-final by default.
      *
      * @return this
      */
-    public FieldMaker final_();
+    FieldMaker final_();
 
     /**
      * Switch this field to be volatile. Fields are non-volatile by default.
      *
      * @return this
      */
-    public FieldMaker volatile_();
+    FieldMaker volatile_();
 
     /**
      * Switch this field to be transient. Fields are non-transient by default.
      *
      * @return this
      */
-    public FieldMaker transient_();
+    FieldMaker transient_();
 
     /**
      * Indicate that this field is synthetic. Fields are non-synthetic by default.
      *
      * @return this
      */
-    public FieldMaker synthetic();
+    FieldMaker synthetic();
 
     /**
      * Indicate that this field is an enum constant. No checks or modifications are performed
@@ -85,7 +85,7 @@ public interface FieldMaker extends Maker {
      *
      * @return this
      */
-    public FieldMaker enum_();
+    FieldMaker enum_();
 
     /**
      * Set an initial constant value for this field. The allowed constants are the same as
@@ -97,5 +97,5 @@ public interface FieldMaker extends Maker {
      * @throws IllegalArgumentException if the value type is unsupported, or if it's not
      * compatible with the field type
      */
-    public FieldMaker init(Object value);
+    FieldMaker init(Object value);
 }

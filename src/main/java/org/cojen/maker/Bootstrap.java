@@ -34,7 +34,7 @@ public interface Bootstrap {
      * @return the constant value, or the result of the method, which is null if void
      * @throws IllegalArgumentException if not given a variable or a constant
      */
-    public default Variable invoke(Object type, String name) {
+    default Variable invoke(Object type, String name) {
         return invoke(type, name, null);
     }
 
@@ -49,5 +49,5 @@ public interface Bootstrap {
      * @throws IllegalArgumentException if not given a variable or a constant
      * @throws IllegalStateException if this is a condy bootstrap
      */
-    public Variable invoke(Object returnType, String name, Object[] types, Object... values);
+    Variable invoke(Object returnType, String name, Object[] types, Object... values);
 }

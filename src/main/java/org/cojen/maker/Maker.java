@@ -27,48 +27,48 @@ public interface Maker {
      *
      * @return this
      */
-    public Maker public_();
+    Maker public_();
 
     /**
      * Switch this item to be private.
      *
      * @return this
      */
-    public Maker private_();
+    Maker private_();
 
     /**
      * Switch this item to be protected.
      *
      * @return this
      */
-    public Maker protected_();
+    Maker protected_();
 
     /**
      * Switch this item to be static.
      *
      * @return this
      */
-    public Maker static_();
+    Maker static_();
 
     /**
      * Switch this item to be final.
      *
      * @return this
      */
-    public Maker final_();
+    Maker final_();
 
     /**
      * Indicate that this item is synthetic.
      *
      * @return this
      */
-    public Maker synthetic();
+    Maker synthetic();
 
     /**
      * Returns the {@code ClassMaker} for this item, which can also be used as a type
      * specification.
      */
-    public ClassMaker classMaker();
+    ClassMaker classMaker();
 
     /**
      * Add an annotation to this item.
@@ -77,12 +77,12 @@ public interface Maker {
      * @param visible true if annotation is visible at runtime
      * @throws IllegalArgumentException if the annotation type is unsupported
      */
-    public AnnotationMaker addAnnotation(Object annotationType, boolean visible);
+    AnnotationMaker addAnnotation(Object annotationType, boolean visible);
 
     /**
      * Add a generic JVM attribute with an optional constant value. This is an advanced feature
      * and not typically used. Supported value types are: int, float, long, double, String,
      * Class, byte[], or an array of non-array values.
      */
-    public void addAttribute(String name, Object value);
+    void addAttribute(String name, Object value);
 }

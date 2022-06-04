@@ -34,18 +34,18 @@ public interface Variable {
      * Returns the type of this variable, if bound to an existing class. Null is returned if
      * bound to a class which is being made.
      */
-    public Class<?> classType();
+    Class<?> classType();
 
     /**
      * Returns the type of this variable, if bound to a class which is being made. Null is
      * returned if bound to an existing class.
      */
-    public ClassMaker makerType();
+    ClassMaker makerType();
 
     /**
      * Returns the name of this variable, which is null if unnamed.
      */
-    public String name();
+    String name();
 
     /**
      * Optionally assign a variable name.
@@ -53,7 +53,7 @@ public interface Variable {
      * @return this variable
      * @throws IllegalStateException if already named
      */
-    public Variable name(String name);
+    Variable name(String name);
 
     /**
      * Assign a value of 0, false, or null to this variable, depending on its type.
@@ -61,7 +61,7 @@ public interface Variable {
      * @return this variable
      * @throws IllegalStateException if this variable cannot be modified
      */
-    public Variable clear();
+    Variable clear();
 
     /**
      * Assign a value to this variable, either from another variable or from a constant. A
@@ -80,7 +80,7 @@ public interface Variable {
      * @throws IllegalStateException if this variable cannot be modified, or if it's not
      * compatible with the value type
      */
-    public Variable set(Object value);
+    Variable set(Object value);
 
     /**
      * Assign an exact object instance this variable, supported only when the class is built
@@ -93,24 +93,24 @@ public interface Variable {
      * @throws IllegalStateException if this variable cannot be modified, or if it's not
      * compatible with the value type
      */
-    public Variable setExact(Object value);
+    Variable setExact(Object value);
 
     /**
      * Return a new variable with the same type and value as this one.
      *
      * @return the result in a new variable, with the same type as this one
      */
-    public Variable get();
+    Variable get();
 
     /**
      * Conditional goto if this variable is true. The label doesn't need to be positioned yet.
      */
-    public void ifTrue(Label label);
+    void ifTrue(Label label);
 
     /**
      * Conditional goto if this variable is false. The label doesn't need to be positioned yet.
      */
-    public void ifFalse(Label label);
+    void ifFalse(Label label);
 
     /**
      * Conditional goto if this variable is equal to another variable or constant. The label
@@ -119,7 +119,7 @@ public interface Variable {
      * @param value a {@link Variable} or a constant
      * @throws IllegalArgumentException if not given a variable or a constant
      */
-    public void ifEq(Object value, Label label);
+    void ifEq(Object value, Label label);
 
     /**
      * Conditional goto if this variable is not equal to another variable or constant. The
@@ -128,7 +128,7 @@ public interface Variable {
      * @param value a {@link Variable} or a constant
      * @throws IllegalArgumentException if not given a variable or a constant
      */
-    public void ifNe(Object value, Label label);
+    void ifNe(Object value, Label label);
 
     /**
      * Conditional goto if this variable is less than another variable or constant. The label
@@ -137,7 +137,7 @@ public interface Variable {
      * @param value a {@link Variable} or a constant
      * @throws IllegalArgumentException if not given a variable or a constant
      */
-    public void ifLt(Object value, Label label);
+    void ifLt(Object value, Label label);
 
     /**
      * Conditional goto if this variable is greater than or equal to another variable or
@@ -146,7 +146,7 @@ public interface Variable {
      * @param value a {@link Variable} or a constant
      * @throws IllegalArgumentException if not given a variable or a constant
      */
-    public void ifGe(Object value, Label label);
+    void ifGe(Object value, Label label);
 
     /**
      * Conditional goto if this variable is greater than another variable or constant. The
@@ -155,7 +155,7 @@ public interface Variable {
      * @param value a {@link Variable} or a constant
      * @throws IllegalArgumentException if not given a variable or a constant
      */
-    public void ifGt(Object value, Label label);
+    void ifGt(Object value, Label label);
 
     /**
      * Conditional goto if this variable is less than or equal to another variable or
@@ -164,7 +164,7 @@ public interface Variable {
      * @param value a {@link Variable} or a constant
      * @throws IllegalArgumentException if not given a variable or a constant
      */
-    public void ifLe(Object value, Label label);
+    void ifLe(Object value, Label label);
 
     /**
      * Generates a switch statement against this {@code int} or {@code Integer} variable. None
@@ -175,7 +175,7 @@ public interface Variable {
      * @throws IllegalStateException if this type cannot be automatically cast to an int
      * or if the number of cases and labels don't match
      */
-    public void switch_(Label defaultLabel, int[] cases, Label... labels);
+    void switch_(Label defaultLabel, int[] cases, Label... labels);
 
     /**
      * Add this variable with another variable or a constant, and assign the result back to
@@ -186,7 +186,7 @@ public interface Variable {
      * @throws IllegalStateException if this variable doesn't support the operation, or if
      * value is incompatible
      */
-    public void inc(Object value);
+    void inc(Object value);
 
     /**
      * Add this variable with another variable or a constant, and assign the result to a new
@@ -198,7 +198,7 @@ public interface Variable {
      * @throws IllegalStateException if this variable doesn't support the operation, or if
      * value is incompatible
      */
-    public Variable add(Object value);
+    Variable add(Object value);
 
     /**
      * Subtract this variable with another variable or a constant, and assign the result to a
@@ -210,7 +210,7 @@ public interface Variable {
      * @throws IllegalStateException if this variable doesn't support the operation, or if
      * value is incompatible
      */
-    public Variable sub(Object value);
+    Variable sub(Object value);
 
     /**
      * Multiply this variable with another variable or a constant, and assign the result to a
@@ -222,7 +222,7 @@ public interface Variable {
      * @throws IllegalStateException if this variable doesn't support the operation, or if
      * value is incompatible
      */
-    public Variable mul(Object value);
+    Variable mul(Object value);
 
     /**
      * Divide this variable with another variable or a constant, and assign the result to a
@@ -234,7 +234,7 @@ public interface Variable {
      * @throws IllegalStateException if this variable doesn't support the operation, or if
      * value is incompatible
      */
-    public Variable div(Object value);
+    Variable div(Object value);
 
     /**
      * Compute the division remainder of this variable with another variable or a constant,
@@ -246,7 +246,7 @@ public interface Variable {
      * @throws IllegalStateException if this variable doesn't support the operation, or if
      * value is incompatible
      */
-    public Variable rem(Object value);
+    Variable rem(Object value);
 
     /**
      * Determine if this variable is equal to another variable or constant, and assign
@@ -257,7 +257,7 @@ public interface Variable {
      * @throws IllegalArgumentException if not given a variable or a constant
      * @see #ifEq
      */
-    public Variable eq(Object value);
+    Variable eq(Object value);
 
     /**
      * Determine if this variable is not equal to another variable or constant, and assign the
@@ -268,7 +268,7 @@ public interface Variable {
      * @throws IllegalArgumentException if not given a variable or a constant
      * @see #ifNe
      */
-    public Variable ne(Object value);
+    Variable ne(Object value);
 
     /**
      * Determine if this variable is less than to another variable or constant, and assign the
@@ -279,7 +279,7 @@ public interface Variable {
      * @throws IllegalArgumentException if not given a variable or a constant
      * @see #ifLt
      */
-    public Variable lt(Object value);
+    Variable lt(Object value);
 
     /**
      * Determine if this variable is greater than or equal to another variable or constant, and
@@ -290,7 +290,7 @@ public interface Variable {
      * @throws IllegalArgumentException if not given a variable or a constant
      * @see #ifGe
      */
-    public Variable ge(Object value);
+    Variable ge(Object value);
 
     /**
      * Determine if this variable is greater than to another variable or constant, and assign
@@ -301,7 +301,7 @@ public interface Variable {
      * @throws IllegalArgumentException if not given a variable or a constant
      * @see #ifGt
      */
-    public Variable gt(Object value);
+    Variable gt(Object value);
 
     /**
      * Determine if this variable is less than or equal to another variable or constant, and
@@ -312,7 +312,7 @@ public interface Variable {
      * @throws IllegalArgumentException if not given a variable or a constant
      * @see #ifLe
      */
-    public Variable le(Object value);
+    Variable le(Object value);
 
     /**
      * Determine if this variable is an instance of the given class or interface, and assign
@@ -321,7 +321,7 @@ public interface Variable {
      * @param type class or interface
      * @return the result in a new boolean variable
      */
-    public Variable instanceOf(Object type);
+    Variable instanceOf(Object type);
 
     /**
      * Cast this variable to another type, and assign the result to a new variable. If the
@@ -330,7 +330,7 @@ public interface Variable {
      * @param type class or interface
      * @return the result in a new variable
      */
-    public Variable cast(Object type);
+    Variable cast(Object type);
 
     /**
      * Compute the logical negation of this boolean variable, and assign the result to a new
@@ -338,7 +338,7 @@ public interface Variable {
      *
      * @return the result in a new variable, with the same type as this one
      */
-    public Variable not();
+    Variable not();
 
     /**
      * Compute the bitwise and of this variable with another variable or a constant, and assign
@@ -350,7 +350,7 @@ public interface Variable {
      * @throws IllegalStateException if this variable doesn't support the operation, or if
      * value is incompatible
      */
-    public Variable and(Object value);
+    Variable and(Object value);
 
     /**
      * Compute the bitwise or of this variable with another variable or a constant, and assign
@@ -362,7 +362,7 @@ public interface Variable {
      * @throws IllegalStateException if this variable doesn't support the operation, or if
      * value is incompatible
      */
-    public Variable or(Object value);
+    Variable or(Object value);
 
     /**
      * Compute the bitwise xor of this variable with another variable or a constant, and assign
@@ -374,7 +374,7 @@ public interface Variable {
      * @throws IllegalStateException if this variable doesn't support the operation, or if
      * value is incompatible
      */
-    public Variable xor(Object value);
+    Variable xor(Object value);
 
     /**
      * Compute the bitwise left shift of this variable with another variable or a constant, and
@@ -386,7 +386,7 @@ public interface Variable {
      * @throws IllegalStateException if this variable doesn't support the operation, or if
      * value is incompatible
      */
-    public Variable shl(Object value);
+    Variable shl(Object value);
 
     /**
      * Compute the bitwise right shift of this variable with another variable or a constant,
@@ -398,7 +398,7 @@ public interface Variable {
      * @throws IllegalStateException if this variable doesn't support the operation, or if
      * value is incompatible
      */
-    public Variable shr(Object value);
+    Variable shr(Object value);
 
     /**
      * Compute the bitwise unsigned right shift of this variable with another variable or a
@@ -410,7 +410,7 @@ public interface Variable {
      * @throws IllegalStateException if this variable doesn't support the operation, or if
      * value is incompatible
      */
-    public Variable ushr(Object value);
+    Variable ushr(Object value);
 
     /**
      * Negate the value of this variable and assign the result to a new variable.
@@ -418,7 +418,7 @@ public interface Variable {
      * @return the result in a new variable, with the same type as this one
      * @throws IllegalStateException if this variable doesn't support the operation
      */
-    public Variable neg();
+    Variable neg();
 
     /**
      * Compute the bitwise complement of this variable and assign the result to a new variable.
@@ -426,7 +426,7 @@ public interface Variable {
      * @return the result in a new variable, with the same type as this one
      * @throws IllegalStateException if this variable doesn't support the operation
      */
-    public Variable com();
+    Variable com();
 
     /**
      * Box this primitive variable into its object peer. If not a primitive type, then this is
@@ -434,7 +434,7 @@ public interface Variable {
      *
      * @return the result in a new variable
      */
-    public Variable box();
+    Variable box();
 
     /**
      * Unbox this object variable into its primitive peer. If already a primitive type, then
@@ -443,7 +443,7 @@ public interface Variable {
      * @return the result in a new variable
      * @throws IllegalStateException if cannot be unboxed
      */
-    public Variable unbox();
+    Variable unbox();
 
     /**
      * Access the length of this array.
@@ -451,7 +451,7 @@ public interface Variable {
      * @return the result in a new int variable
      * @throws IllegalStateException if not an array type
      */
-    public Variable alength();
+    Variable alength();
 
     /**
      * Access an element from this array.
@@ -460,7 +460,7 @@ public interface Variable {
      * @return the result in a new variable
      * @throws IllegalStateException if not an array type
      */
-    public Variable aget(Object index);
+    Variable aget(Object index);
 
     /**
      * Set an element into this array.
@@ -471,7 +471,7 @@ public interface Variable {
      * @throws IllegalStateException if not an array type, or if type doesn't match
      * @see #set
      */
-    public void aset(Object index, Object value);
+    void aset(Object index, Object value);
 
     /**
      * Access a static or instance field from the object referred to by this variable.
@@ -479,7 +479,7 @@ public interface Variable {
      * @param name field name
      * @throws IllegalStateException if field isn't found
      */
-    public Field field(String name);
+    Field field(String name);
 
     /**
      * Invoke a static or instance method on the object referenced by this variable.
@@ -490,7 +490,7 @@ public interface Variable {
      * @throws IllegalArgumentException if not given a variable or a constant
      * @throws IllegalStateException if method isn't found
      */
-    public Variable invoke(String name, Object... values);
+    Variable invoke(String name, Object... values);
 
     /**
      * Invoke a static or instance method on the object referenced by this variable.
@@ -504,7 +504,7 @@ public interface Variable {
      * @throws IllegalArgumentException if not given a variable or a constant
      * @throws IllegalStateException if method isn't found
      */
-    public Variable invoke(Object returnType, String name, Object[] types, Object... values);
+    Variable invoke(Object returnType, String name, Object[] types, Object... values);
 
     /**
      * Returns a {@link MethodHandle} variable which can invoke a static or instance method on
@@ -519,7 +519,7 @@ public interface Variable {
      * @throws IllegalArgumentException if not given a supported type object
      * @throws IllegalStateException if method isn't found
      */
-    public Variable methodHandle(Object returnType, String name, Object... types);
+    Variable methodHandle(Object returnType, String name, Object... types);
 
     /**
      * Specify a static bootstrap method for dynamically generating methods, as found in the
@@ -530,7 +530,7 @@ public interface Variable {
      * first three standard arguments: {@code (Lookup caller, String name, MethodType type)}
      * @see java.lang.invoke
      */
-    public Bootstrap indy(String name, Object... args);
+    Bootstrap indy(String name, Object... args);
 
     /**
      * Specify a static bootstrap method for dynamically generating constants, as found in the
@@ -543,28 +543,28 @@ public interface Variable {
      * first three standard arguments: {@code (Lookup caller, String name, Class type)}
      * @see java.lang.invoke
      */
-    public Bootstrap condy(String name, Object... args);
+    Bootstrap condy(String name, Object... args);
 
     /**
      * Throw the exception object referred to by this variable.
      *
      * @throws IllegalStateException if not an exception type
      */
-    public void throw_();
+    void throw_();
 
     /**
      * Enter a synchronized block on this variable.
      *
      * @throws IllegalStateException if this variable isn't an object type
      */
-    public void monitorEnter();
+    void monitorEnter();
 
     /**
      * Exit a synchronized block on this variable.
      *
      * @throws IllegalStateException if this variable isn't an object type
      */
-    public void monitorExit();
+    void monitorExit();
 
     /**
      * Convenience method for defining a synchronized block on this variable.
@@ -572,10 +572,10 @@ public interface Variable {
      * @param body called to generate the body of the synchronized block
      * @throws IllegalStateException if this variable isn't an object type
      */
-    public void synchronized_(Runnable body);
+    void synchronized_(Runnable body);
 
     /**
      * Returns the {@code MethodMaker} that this variable belongs to.
      */
-    public MethodMaker methodMaker();
+    MethodMaker methodMaker();
 }

@@ -67,7 +67,7 @@ abstract class Attribute extends Attributed {
         }
 
         @Override
-        void writeDataTo(BytesOut out) throws IOException {
+        void writeDataTo(BytesOut out) {
         }
     }
 

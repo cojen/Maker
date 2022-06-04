@@ -178,7 +178,7 @@ abstract class ConstableSupport {
             return true;
         } else if (value instanceof Constable) {
             var opt = ((Constable) value).describeConstable();
-            return !opt.isEmpty() && opt.get() instanceof DynamicConstantDesc;
+            return opt.isPresent() && opt.get() instanceof DynamicConstantDesc;
         } else {
             return false;
         }

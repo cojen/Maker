@@ -32,7 +32,7 @@ public interface ClassMaker extends Maker {
     /**
      * Begin defining a class with an automatically assigned name.
      */
-    public static ClassMaker begin() {
+    static ClassMaker begin() {
         return begin(null, null, null);
     }
 
@@ -42,7 +42,7 @@ public interface ClassMaker extends Maker {
      *
      * @param className fully qualified class name; pass null to automatically assign a name
      */
-    public static ClassMaker begin(String className) {
+    static ClassMaker begin(String className) {
         return begin(className, null, null);
     }
 
@@ -53,7 +53,7 @@ public interface ClassMaker extends Maker {
      * @param className fully qualified class name; pass null to automatically assign a name
      * @param parentLoader parent class loader; pass null to use default
      */
-    public static ClassMaker begin(String className, ClassLoader parentLoader) {
+    static ClassMaker begin(String className, ClassLoader parentLoader) {
         return begin(className, parentLoader, null);
     }
 
@@ -65,7 +65,7 @@ public interface ClassMaker extends Maker {
      * @param parentLoader parent class loader; pass null to use default
      * @param key an opaque key used for creating distinct class loaders
      */
-    public static ClassMaker begin(String className, ClassLoader parentLoader, Object key) {
+    static ClassMaker begin(String className, ClassLoader parentLoader, Object key) {
         return TheClassMaker.begin(false, className, false, parentLoader, key, null);
     }
 
@@ -76,7 +76,7 @@ public interface ClassMaker extends Maker {
      * @param className fully qualified class name; pass null to automatically assign a name
      * @param lookup finish loading the class using this lookup object
      */
-    public static ClassMaker begin(String className, MethodHandles.Lookup lookup) {
+    static ClassMaker begin(String className, MethodHandles.Lookup lookup) {
         Class<?> clazz = lookup.lookupClass();
         if (className == null) {
             className = clazz.getName();
@@ -92,7 +92,7 @@ public interface ClassMaker extends Maker {
      *
      * @param className fully qualified class name
      */
-    public static ClassMaker beginExternal(String className) {
+    static ClassMaker beginExternal(String className) {
         return TheClassMaker.begin(true, className, true, null, null, null);
     }
 
@@ -108,63 +108,63 @@ public interface ClassMaker extends Maker {
      * (unless external)
      * @see #addInnerClass
      */
-    public ClassMaker another(String className);
+    ClassMaker another(String className);
 
     /**
      * Switch this class to be public. Classes are package-private by default.
      *
      * @return this
      */
-    public ClassMaker public_();
+    ClassMaker public_();
 
     /**
      * Switch this class to be private. Classes are package-private by default.
      *
      * @return this
      */
-    public ClassMaker private_();
+    ClassMaker private_();
 
     /**
      * Switch this class to be protected. Classes are package-private by default.
      *
      * @return this
      */
-    public ClassMaker protected_();
+    ClassMaker protected_();
 
     /**
      * Switch this class to be static. Classes are non-static by default.
      *
      * @return this
      */
-    public ClassMaker static_();
+    ClassMaker static_();
 
     /**
      * Switch this class to be final. Classes are non-final by default.
      *
      * @return this
      */
-    public ClassMaker final_();
+    ClassMaker final_();
 
     /**
      * Switch this class to be an interface. Classes are classes by default.
      *
      * @return this
      */
-    public ClassMaker interface_();
+    ClassMaker interface_();
 
     /**
      * Switch this class to be abstract. Classes are non-abstract by default.
      *
      * @return this
      */
-    public ClassMaker abstract_();
+    ClassMaker abstract_();
 
     /**
      * Indicate that this class is synthetic. Classes are non-synthetic by default.
      *
      * @return this
      */
-    public ClassMaker synthetic();
+    ClassMaker synthetic();
 
     /**
      * Indicate that this class is defining an enum. No checks or modifications are performed
@@ -172,7 +172,7 @@ public interface ClassMaker extends Maker {
      *
      * @return this
      */
-    public ClassMaker enum_();
+    ClassMaker enum_();
 
     /**
      * Set a class that this class extends.
@@ -181,7 +181,7 @@ public interface ClassMaker extends Maker {
      * @return this
      * @throws IllegalStateException if already assigned
      */
-    public ClassMaker extend(Object superClass);
+    ClassMaker extend(Object superClass);
 
     /**
      * Add an interface that this class or interface implements.
@@ -189,7 +189,7 @@ public interface ClassMaker extends Maker {
      * @param iface Class or String
      * @return this
      */
-    public ClassMaker implement(Object iface);
+    ClassMaker implement(Object iface);
 
     /**
      * Add a field to the class.
@@ -197,7 +197,7 @@ public interface ClassMaker extends Maker {
      * @param type a class or name
      * @throws IllegalStateException if field is already defined
      */
-    public FieldMaker addField(Object type, String name);
+    FieldMaker addField(Object type, String name);
 
     /**
      * Add a method to this class.
@@ -205,14 +205,14 @@ public interface ClassMaker extends Maker {
      * @param retType a class or name; can be null if method returns void
      * @param paramTypes classes or names; can be null if method accepts no parameters
      */
-    public MethodMaker addMethod(Object retType, String name, Object... paramTypes);
+    MethodMaker addMethod(Object retType, String name, Object... paramTypes);
 
     /**
      * Add a method to this class.
      *
      * @param type defines the return type and parameter types
      */
-    public default MethodMaker addMethod(String name, MethodType type) {
+    default MethodMaker addMethod(String name, MethodType type) {
         return addMethod(type.returnType(), name, (Object[]) type.parameterArray());
     }
 
@@ -221,7 +221,7 @@ public interface ClassMaker extends Maker {
      *
      * @param paramTypes classes or names; can be null if constructor accepts no parameters
      */
-    public MethodMaker addConstructor(Object... paramTypes);
+    MethodMaker addConstructor(Object... paramTypes);
 
     /**
      * Add a constructor to this class.
@@ -229,7 +229,7 @@ public interface ClassMaker extends Maker {
      * @param type defines the parameter types
      * @throws IllegalArgumentException if return type isn't void
      */
-    public default MethodMaker addConstructor(MethodType type) {
+    default MethodMaker addConstructor(MethodType type) {
         if (type.returnType() != void.class) {
             throw new IllegalArgumentException();
         }
@@ -241,7 +241,7 @@ public interface ClassMaker extends Maker {
      * and they're all stitched together when the class definition is finished. Returning from
      * one initializer only breaks out of the local scope.
      */
-    public MethodMaker addClinit();
+    MethodMaker addClinit();
 
     /**
      * Add an inner class to this class. The actual class name will have a suitable suffix
@@ -254,14 +254,14 @@ public interface ClassMaker extends Maker {
      * @throws IllegalArgumentException if not given a simple class name
      * @see #another
      */
-    public ClassMaker addInnerClass(String className);
+    ClassMaker addInnerClass(String className);
 
     /**
      * Set the source file of this class file by adding a source file attribute.
      *
      * @return this
      */
-    public ClassMaker sourceFile(String fileName);
+    ClassMaker sourceFile(String fileName);
 
     /**
      * Returns an opaque type object which represents this class as an array.
@@ -269,19 +269,19 @@ public interface ClassMaker extends Maker {
      * @param dimensions must be at least 1
      * @throws IllegalArgumentException if dimensions is out of bounds
      */
-    public Object arrayType(int dimensions);
+    Object arrayType(int dimensions);
 
     /**
      * Returns the class loader that the finished class will be loaded into.
      */
-    public ClassLoader classLoader();
+    ClassLoader classLoader();
 
     /**
      * Finishes the definition of the new class.
      *
      * @throws IllegalStateException if already finished or if the definition is broken
      */
-    public Class<?> finish();
+    Class<?> finish();
 
     /**
      * Finishes the definition of the new class, returning a lookup which has full privilege
@@ -292,7 +292,7 @@ public interface ClassMaker extends Maker {
      * to obtain the actual class
      * @throws IllegalStateException if already finished or if the definition is broken
      */
-    public MethodHandles.Lookup finishLookup();
+    MethodHandles.Lookup finishLookup();
 
     /**
      * Finishes the definition of a new hidden class, returning a lookup which has full
@@ -307,19 +307,19 @@ public interface ClassMaker extends Maker {
      * to obtain the actual class
      * @throws IllegalStateException if already finished or if the definition is broken
      */
-    public MethodHandles.Lookup finishHidden();
+    MethodHandles.Lookup finishHidden();
 
     /**
      * Finishes the definition of the new class into a byte array.
      *
      * @throws IllegalStateException if already finished or if the definition is broken
      */
-    public byte[] finishBytes();
+    byte[] finishBytes();
 
     /**
      * Finishes the definition of the new class and writes it to a stream.
      *
      * @throws IllegalStateException if already finished or if the definition is broken
      */
-    public void finishTo(OutputStream out) throws IOException;
+    void finishTo(OutputStream out) throws IOException;
 }
