@@ -78,6 +78,9 @@ abstract class Type {
         DOUBLE = new Primitive(SM_DOUBLE, T_DOUBLE),
         VOID = new Primitive(SM_TOP, T_VOID);
 
+    static final int FLAG_PRIVATE = 1, FLAG_STATIC = 2, FLAG_FINAL = 4,
+        FLAG_BRIDGE = 8, FLAG_VARARGS = 16;
+
     /**
      * Called when making a new class.
      */
@@ -495,11 +498,11 @@ abstract class Type {
     /**
      * @throws IllegalStateException if type cannot have fields or if a conflict exists
      */
-    Field defineField(boolean isStatic, Type type, String name) {
+    Field defineField(int flags, Type type, String name) {
         throw new IllegalStateException();
     }
 
-    Field inventField(boolean isStatic, Type type, String name) {
+    Field inventField(int flags, Type type, String name) {
         throw new IllegalStateException();
     }
 
@@ -549,7 +552,7 @@ abstract class Type {
                 {
                     Type returnType = specificReturnType != null
                         ? specificReturnType : method.returnType();
-                    method = inventMethod(false, returnType, methodName, paramTypes);
+                    method = inventMethod(0, returnType, methodName, paramTypes);
                 }
             }
 
@@ -566,7 +569,7 @@ abstract class Type {
                     if (method != null && method.isVarargs()
                         && (paramTypes = verifyTypes(params, specificParamTypes)) != null)
                     {
-                        return inventMethod(false, specificReturnType, methodName, paramTypes);
+                        return inventMethod(0, specificReturnType, methodName, paramTypes);
                     }
                 }
             }
@@ -616,11 +619,11 @@ abstract class Type {
     /**
      * @throws IllegalStateException if type cannot have methods or if a conflict exists
      */
-    Method defineMethod(boolean isStatic, Type returnType, String name, Type... paramTypes) {
+    Method defineMethod(int flags, Type returnType, String name, Type... paramTypes) {
         throw new IllegalStateException();
     }
 
-    Method inventMethod(boolean isStatic, Type returnType, String name, Type... paramTypes) {
+    Method inventMethod(int flags, Type returnType, String name, Type... paramTypes) {
         throw new IllegalStateException();
     }
 
@@ -638,16 +641,27 @@ abstract class Type {
         return type == null ? null : type.name();
     }
 
+    private static int commonFlags(int modifiers) {
+        int flags = Modifier.isPrivate(modifiers) ? FLAG_PRIVATE : 0;
+        if (Modifier.isStatic(modifiers)) {
+            flags |= FLAG_STATIC;
+        }
+        if (Modifier.isFinal(modifiers)) {
+            flags |= FLAG_FINAL;
+        }
+        return flags;
+    }
+
     /**
      * Base class for Field and Method.
      */
     abstract class Member {
-        private boolean mIsStatic;
+        protected int mFlags;
         private final String mName;
 
-        Member(boolean isStatic, String name) {
+        Member(int flags, String name) {
             Objects.requireNonNull(name);
-            mIsStatic = isStatic;
+            mFlags = flags;
             mName = name;
         }
 
@@ -655,12 +669,28 @@ abstract class Type {
             return Type.this;
         }
 
+        final boolean isPrivate() {
+            return (mFlags & FLAG_PRIVATE) != 0;
+        }
+
+        final void toPrivate() {
+            mFlags |= FLAG_PRIVATE;
+        }
+
         final boolean isStatic() {
-            return mIsStatic;
+            return (mFlags & FLAG_STATIC) != 0;
         }
 
         final void toStatic() {
-            mIsStatic = true;
+            mFlags |= FLAG_STATIC;
+        }
+
+        final boolean isFinal() {
+            return (mFlags & FLAG_FINAL) != 0;
+        }
+
+        final void toFinal() {
+            mFlags |= FLAG_FINAL;
         }
 
         final String name() {
@@ -676,8 +706,8 @@ abstract class Type {
     final class Field extends Member {
         private final Type mType;
 
-        Field(boolean isStatic, Type type, String name) {
-            super(isStatic, name);
+        Field(int flags, Type type, String name) {
+            super(flags, name);
             Objects.requireNonNull(type);
             mType = type;
         }
@@ -703,34 +733,41 @@ abstract class Type {
         @Override
         public String toString() {
             return "Field {name=" + name() + ", type=" + type().name() +
-                ", isStatic=" + isStatic() + ", enclosingType=" + enclosingType().name() + '}';
+                ", isPrivate=" + isPrivate() + ", isStatic=" + isStatic() +
+                ", isFinal=" + isFinal() + ", enclosingType=" + enclosingType().name() + '}';
         }
     }
 
     final class Method extends Member {
-        private final boolean mIsBridge;
         private final Type mReturnType;
         private final Type[] mParamTypes;
-        private boolean mVarargs;
 
         private int mHash;
 
         private volatile String mDesc;
 
-        Method(boolean isStatic, boolean isBridge, boolean varargs,
-               Type returnType, String name, Type... paramTypes)
-        {
-            super(isStatic, name);
+        Method(int flags, Type returnType, String name, Type... paramTypes) {
+            super(flags, name);
             Objects.requireNonNull(returnType);
             Objects.requireNonNull(paramTypes);
-            mIsBridge = isBridge;
             mReturnType = returnType;
             mParamTypes = paramTypes;
-            mVarargs = varargs;
         }
 
         boolean isBridge() {
-            return mIsBridge;
+            return (mFlags & FLAG_BRIDGE) != 0;
+        }
+
+        void toBridge() {
+            mFlags |= FLAG_BRIDGE;
+        }
+
+        boolean isVarargs() {
+            return (mFlags & FLAG_VARARGS) != 0;
+        }
+
+        void toVarargs() {
+            mFlags |= FLAG_VARARGS;
         }
 
         Type returnType() {
@@ -739,14 +776,6 @@ abstract class Type {
 
         Type[] paramTypes() {
             return mParamTypes;
-        }
-
-        boolean isVarargs() {
-            return mVarargs;
-        }
-
-        void makeVarargs() {
-            mVarargs = true;
         }
 
         String descriptor() {
@@ -787,9 +816,9 @@ abstract class Type {
         @Override
         public String toString() {
             return "Method {name=" + name() + ", returnType=" + returnType().name() +
-                ", paramTypes=" + paramsToString() +
-                ", isStatic=" + isStatic() + ", isBridge=" + isBridge() +
-                ", enclosingType=" + enclosingType().name() + '}';
+                ", paramTypes=" + paramsToString() + ", isPrivate=" + isPrivate() +
+                ", isStatic=" + isStatic() + ", isFinal=" + isFinal() +
+                ", isBridge=" + isBridge() + ", enclosingType=" + enclosingType().name() + '}';
         }
 
         private String paramsToString() {
@@ -1389,17 +1418,17 @@ abstract class Type {
         }
 
         @Override
-        Field defineField(boolean isStatic, Type type, String name) {
-            return defineField(false, isStatic, type, name);
+        Field defineField(int flags, Type type, String name) {
+            return defineField(false, flags, type, name);
         }
 
         @Override
-        Field inventField(boolean isStatic, Type type, String name) {
-            return defineField(true, isStatic, type, name);
+        Field inventField(int flags, Type type, String name) {
+            return defineField(true, flags, type, name);
         }
 
-        private Field defineField(boolean invent, boolean isStatic, Type type, String name) {
-            var field = new Field(isStatic, type, name);
+        private Field defineField(boolean invent, int flags, Type type, String name) {
+            var field = new Field(flags, type, name);
 
             Field existing;
             synchronized (this) {
@@ -1432,10 +1461,10 @@ abstract class Type {
             Class clazz = clazz();
             if (clazz != null) {
                 for (var field : clazz.getDeclaredFields()) {
-                    boolean isStatic = Modifier.isStatic(field.getModifiers());
+                    int flags = commonFlags(field.getModifiers());
                     String name = field.getName();
                     Type type = from(field.getType());
-                    fields.put(name, new Field(isStatic, type, name));
+                    fields.put(name, new Field(flags, type, name));
                 }
             }
 
@@ -1649,20 +1678,20 @@ abstract class Type {
         }
 
         @Override
-        Method defineMethod(boolean isStatic, Type returnType, String name, Type... paramTypes) {
-            return defineMethod(false, isStatic, returnType, name, paramTypes);
+        Method defineMethod(int flags, Type returnType, String name, Type... paramTypes) {
+            return defineMethod(false, flags, returnType, name, paramTypes);
         }
 
         @Override
-        Method inventMethod(boolean isStatic, Type returnType, String name, Type... paramTypes) {
-            return defineMethod(true, isStatic, returnType, name, paramTypes);
+        Method inventMethod(int flags, Type returnType, String name, Type... paramTypes) {
+            return defineMethod(true, flags, returnType, name, paramTypes);
         }
 
-        private Method defineMethod(boolean invent, boolean isStatic,
+        private Method defineMethod(boolean invent, int flags,
                                     Type returnType, String name, Type... paramTypes)
         {
             var key = new MethodKey(returnType, name, paramTypes);
-            var method = new Method(isStatic, false, false, returnType, name, paramTypes);
+            var method = new Method(flags, returnType, name, paramTypes);
 
             Method existing;
             synchronized (this) {
@@ -1709,9 +1738,14 @@ abstract class Type {
         private void addMethod(Map<MethodKey, Method> methods,
                                String name, Executable method, Type returnType)
         {
-            boolean isBridge = Modifier.isVolatile(method.getModifiers());
-            boolean isStatic = Modifier.isStatic(method.getModifiers());
-            boolean varargs  = method.isVarArgs();
+            int modifiers = method.getModifiers();
+            int flags = commonFlags(modifiers);
+            if (Modifier.isVolatile(modifiers)) {
+                flags |= FLAG_BRIDGE;
+            }
+            if (method.isVarArgs()) {
+                flags |= FLAG_VARARGS;
+            }
 
             Class<?>[] params = method.getParameterTypes();
             var paramTypes = new Type[params.length];
@@ -1720,7 +1754,7 @@ abstract class Type {
             }
 
             var key = new MethodKey(returnType, name, paramTypes);
-            methods.put(key, new Method(isStatic, isBridge, varargs, returnType, name, paramTypes));
+            methods.put(key, new Method(flags, returnType, name, paramTypes));
         }
 
         @Override

@@ -283,7 +283,7 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
 
         Type tType = typeFrom(type);
 
-        var fm = new TheFieldMaker(this, type().defineField(false, tType, name));
+        var fm = new TheFieldMaker(this, type().defineField(0, tType, name));
         mFields.put(name, fm);
 
         return fm;
@@ -303,7 +303,7 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
             }
         }
 
-        var fm = new TheFieldMaker(this, type().defineField(false, type, name));
+        var fm = new TheFieldMaker(this, type().defineField(0, type, name));
         fm.synthetic();
         mFields.put(name, fm);
 
@@ -359,7 +359,7 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
             }
         }
 
-        return type().defineMethod(false, tRetType, name, tParamTypes);
+        return type().defineMethod(0, tRetType, name, tParamTypes);
     }
 
     @Override

@@ -188,23 +188,23 @@ public class TypeTest {
         assertTrue(type.methods().isEmpty());
 
         try {
-            type.defineField(false, type, "x");
+            type.defineField(0, type, "x");
             fail();
         } catch (IllegalStateException e) {
         }
         try {
-            type.inventField(false, type, "x");
+            type.inventField(0, type, "x");
             fail();
         } catch (IllegalStateException e) {
         }
 
         try {
-            type.defineMethod(false, type, "x");
+            type.defineMethod(0, type, "x");
             fail();
         } catch (IllegalStateException e) {
         }
         try {
-            type.inventMethod(false, type, "x");
+            type.inventMethod(0, type, "x");
             fail();
         } catch (IllegalStateException e) {
         }

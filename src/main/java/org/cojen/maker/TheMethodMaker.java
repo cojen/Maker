@@ -336,6 +336,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     @Override
     public MethodMaker private_() {
         mModifiers = Modifiers.toPrivate(mModifiers);
+        mMethod.toPrivate();
         return this;
     }
 
@@ -359,6 +360,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     @Override
     public MethodMaker final_() {
         mModifiers = Modifiers.toFinal(mModifiers);
+        mMethod.toFinal();
         return this;
     }
 
@@ -389,6 +391,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     @Override
     public MethodMaker bridge() {
         mModifiers = Modifiers.toBridge(mModifiers);
+        mMethod.toBridge();
         return this;
     }
 
@@ -399,7 +402,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             throw new IllegalStateException();
         }
         mModifiers = Modifiers.toVarArgs(mModifiers);
-        mMethod.makeVarargs();
+        mMethod.toVarargs();
         return this;
     }
 
@@ -812,7 +815,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         ConstantPool.C_Method ref = mConstants.addMethod
-            (handleType.inventMethod(false, returnType, "invokeExact", paramTypes));
+            (handleType.inventMethod(0, returnType, "invokeExact", paramTypes));
 
         addOp(new InvokeOp(INVOKEVIRTUAL, 1 + paramTypes.length, ref));
 
@@ -1306,7 +1309,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
         ConstantPool.C_Method ref = mConstants.addMethod
             (Type.from(StringConcatFactory.class).inventMethod
-             (true, Type.from(CallSite.class), bootName, bootParams));
+             (Type.FLAG_STATIC, Type.from(CallSite.class), bootName, bootParams));
 
         ConstantPool.C_MethodHandle bootstrapHandle =
             mConstants.addMethodHandle(REF_invokeStatic, ref);
@@ -1696,7 +1699,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
      */
     private void box(Type primType) {
         Type objType = primType.box();
-        Type.Method method = objType.defineMethod(true, objType, "valueOf", primType);
+        Type.Method method = objType.defineMethod(Type.FLAG_STATIC, objType, "valueOf", primType);
         appendOp(INVOKESTATIC, 1);
         appendShort(mConstants.addMethod(method).mIndex);
         stackPush(objType);
@@ -1708,7 +1711,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
      */
     private void unbox(Type objType) {
         Type primType = objType.unbox();
-        Type.Method method = objType.defineMethod(false, primType, primType.name() + "Value");
+        Type.Method method = objType.defineMethod(0, primType, primType.name() + "Value");
         appendOp(INVOKEVIRTUAL, 1);
         appendShort(mConstants.addMethod(method).mIndex);
         stackPush(primType);
@@ -2479,7 +2482,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
             ConstantPool.C_Method ref = mConstants.addMethod
                 (Type.from(ConstantBootstraps.class).inventMethod
-                 (true, retType, method, bootParams));
+                 (Type.FLAG_STATIC, retType, method, bootParams));
 
             ConstantPool.C_MethodHandle bootHandle =
                 mConstants.addMethodHandle(REF_invokeStatic, ref);
@@ -5312,11 +5315,11 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             Type.Method method;
             if (mInstance == null) {
                 stackPop = 1;
-                method = vhType.inventMethod(false, thisType, name);
+                method = vhType.inventMethod(0, thisType, name);
             } else {
                 stackPop = 2;
                 addOp(new PushVarOp(mInstance));
-                method = vhType.inventMethod(false, thisType, name, mInstance.type());
+                method = vhType.inventMethod(0, thisType, name, mInstance.type());
             }
 
             ConstantPool.C_Method ref = mConstants.addMethod(method);
@@ -5335,12 +5338,12 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             if (mInstance == null) {
                 stackPop = 2;
                 addPushOp(thisType, value);
-                method = vhType.inventMethod(false, Type.VOID, name, thisType);
+                method = vhType.inventMethod(0, Type.VOID, name, thisType);
             } else {
                 stackPop = 3;
                 addOp(new PushVarOp(mInstance));
                 addPushOp(thisType, value);
-                method = vhType.inventMethod(false, Type.VOID, name, mInstance.type(), thisType);
+                method = vhType.inventMethod(0, Type.VOID, name, mInstance.type(), thisType);
             }
 
             ConstantPool.C_Method ref = mConstants.addMethod(method);
@@ -5362,14 +5365,14 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                 stackPop = 3;
                 addPushOp(thisType, expectedValue);
                 addPushOp(thisType, newValue);
-                method = vhType.inventMethod(false, retType, name, thisType, thisType);
+                method = vhType.inventMethod(0, retType, name, thisType, thisType);
             } else {
                 stackPop = 4;
                 addOp(new PushVarOp(mInstance));
                 addPushOp(thisType, expectedValue);
                 addPushOp(thisType, newValue);
                 method = vhType.inventMethod
-                    (false, retType, name, mInstance.type(), thisType, thisType);
+                    (0, retType, name, mInstance.type(), thisType, thisType);
             }
 
             ConstantPool.C_Method ref = mConstants.addMethod(method);
@@ -5388,12 +5391,12 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             if (mInstance == null) {
                 stackPop = 2;
                 addPushOp(thisType, value);
-                method = vhType.inventMethod(false, thisType, name, thisType);
+                method = vhType.inventMethod(0, thisType, name, thisType);
             } else {
                 stackPop = 3;
                 addOp(new PushVarOp(mInstance));
                 addPushOp(thisType, value);
-                method = vhType.inventMethod(false, thisType, name, mInstance.type(), thisType);
+                method = vhType.inventMethod(0, thisType, name, mInstance.type(), thisType);
             }
 
             ConstantPool.C_Method ref = mConstants.addMethod(method);
@@ -5422,7 +5425,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
                 ConstantPool.C_Method ref = mConstants.addMethod
                     (Type.from(ConstantBootstraps.class).inventMethod
-                     (true, vhType, bootName, bootParams));
+                     (Type.FLAG_STATIC, vhType, bootName, bootParams));
 
                 ConstantPool.C_MethodHandle bootHandle =
                     mConstants.addMethodHandle(REF_invokeStatic, ref);
@@ -5537,7 +5540,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             }
 
             Type vhType = mHandleVar.type();
-            Type.Method method = vhType.inventMethod(false, mType, name, mCoordinateTypes);
+            Type.Method method = vhType.inventMethod(0, mType, name, mCoordinateTypes);
 
             ConstantPool.C_Method ref = mConstants.addMethod(method);
             addOp(new InvokeOp(INVOKEVIRTUAL, 1 + mCoordinates.length, ref));
@@ -5562,7 +5565,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             }
 
             Type vhType = mHandleVar.type();
-            Type.Method method = vhType.inventMethod(false, Type.VOID, name, allTypes);
+            Type.Method method = vhType.inventMethod(0, Type.VOID, name, allTypes);
 
             ConstantPool.C_Method ref = mConstants.addMethod(method);
             addOp(new InvokeOp(INVOKEVIRTUAL, 2 + mCoordinates.length, ref));
@@ -5588,7 +5591,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                 retType = mType;
             }
 
-            Type.Method method = vhType.inventMethod(false, retType, name, allTypes);
+            Type.Method method = vhType.inventMethod(0, retType, name, allTypes);
 
             ConstantPool.C_Method ref = mConstants.addMethod(method);
             addOp(new InvokeOp(INVOKEVIRTUAL, 3 + mCoordinates.length, ref));
@@ -5610,7 +5613,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             allTypes[i] = addPushOp(mType, value);
 
             Type vhType = mHandleVar.type();
-            Type.Method method = vhType.inventMethod(false, mType, name, allTypes);
+            Type.Method method = vhType.inventMethod(0, mType, name, allTypes);
 
             ConstantPool.C_Method ref = mConstants.addMethod(method);
             addOp(new InvokeOp(INVOKEVIRTUAL, 2 + mCoordinates.length, ref));

@@ -40,6 +40,7 @@ final class TheFieldMaker extends ClassMember implements FieldMaker {
     @Override
     public FieldMaker private_() {
         mModifiers = Modifiers.toPrivate(mModifiers);
+        mField.toPrivate();
         return this;
     }
 
@@ -59,6 +60,7 @@ final class TheFieldMaker extends ClassMember implements FieldMaker {
     @Override
     public FieldMaker final_() {
         mModifiers = Modifiers.toFinal(mModifiers);
+        mField.toFinal();
         return this;
     }
 

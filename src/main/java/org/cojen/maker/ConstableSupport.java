@@ -116,12 +116,14 @@ abstract class ConstableSupport {
 
         case REF_getField: case REF_getStatic:
             Type type = cm.typeFrom(mtype.returnType().descriptorString());
-            ref = cp.addField(owner.inventField(refKind == REF_getStatic, type, name));
+            ref = cp.addField(owner.inventField
+                              (refKind == REF_getStatic ? Type.FLAG_STATIC : 0, type, name));
             break;
 
         case REF_putField: case REF_putStatic:
             type = cm.typeFrom(mtype.parameterType(0).descriptorString());
-            ref = cp.addField(owner.inventField(refKind == REF_putStatic, type, name));
+            ref = cp.addField(owner.inventField
+                              (refKind == REF_putStatic ? Type.FLAG_STATIC : 0, type, name));
             break;
 
         case REF_invokeVirtual: case REF_newInvokeSpecial:
@@ -140,7 +142,8 @@ abstract class ConstableSupport {
                 params[i] = cm.typeFrom(mtype.parameterType(i + drop).descriptorString());
             }
             ref = cp.addMethod(owner.inventMethod
-                               (refKind == REF_invokeStatic, ret, name, params));
+                               (refKind == REF_invokeStatic ? Type.FLAG_STATIC : 0,
+                                ret, name, params));
             break;
         }
 
