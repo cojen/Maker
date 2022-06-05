@@ -417,6 +417,41 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     }
 
     @Override
+    public MethodMaker override() {
+        if (Modifier.isStatic(mModifiers) || Modifier.isPrivate(mModifiers)) {
+            throw new IllegalStateException("Not defining a virtual method");
+        }
+
+        Type thisType = mClassMaker.type();
+        var key = new Type.MethodKey(mMethod.returnType(), mMethod.name(), mMethod.paramTypes());
+
+        for (Type s = thisType.superType(); s != null; s = s.superType()) {
+            if (override(s.methods().get(key))) {
+                return this;
+            }
+        }
+
+        for (Type iface : thisType.interfaces()) {
+            if (override(iface.methods().get(key))) {
+                return this;
+            }
+        }
+
+        throw new IllegalStateException("Not overriding a virtual method");
+    }
+
+    private boolean override(Type.Method method) {
+        if (method != null && !method.isStatic() && !method.isPrivate()) {
+            if (method.isFinal()) {
+                throw new IllegalStateException("Cannot override a final method");
+            }
+            return true;
+        }
+
+        return false;
+    }
+
+    @Override
     public ClassVar class_() {
         if (mClassVar == null) {
             mClassVar = new ClassVar(Type.from(Class.class));

@@ -201,6 +201,15 @@ public interface MethodMaker extends Maker {
     MethodMaker throws_(Object type);
 
     /**
+     * Verifies that this method overrides an inherited virtual method.
+     *
+     * @return this
+     * @throws IllegalStateException if not overriding an inherited virtual method, or if the
+     * inherited method is final
+     */
+    MethodMaker override();
+
+    /**
      * Returns a variable of type {@link Class} which represents the enclosing class of this
      * method.
      *

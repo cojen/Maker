@@ -1,6 +1,10 @@
 Changelog
 =========
 
+v2.3.0
+------
+* Add a convenience method which checks if an added method overrides an inherited one.
+
 v2.2.3 (2022-05-15)
 ------
 * Fix a ConcurrentModificationException when comparing against a dynamic constant.
