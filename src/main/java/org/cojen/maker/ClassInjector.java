@@ -84,18 +84,6 @@ class ClassInjector extends ClassLoader {
         return getParent().loadClass(name);
     }
 
-    boolean isExplicit() {
-        return mReservedNames == null;
-    }
-
-    /**
-     * Returns the package group to be used for defining a class by the given name. Is weakly
-     * referenced by the ClassInjector.
-     */
-    Group groupForClass(String name) {
-        return findPackageGroup(name, true);
-    }
-
     Class<?> define(Group group, String name, byte[] b) {
         try {
             return group.define(name, b);
@@ -124,7 +112,16 @@ class ClassInjector extends ClassLoader {
      * @param className can be null
      * @return actual class name
      */
-    String reserve(String className, boolean checkParent) {
+    String reserve(TheClassMaker maker, String className, boolean requireGroup) {
+        if (mReservedNames == null) {
+            Objects.requireNonNull(className);
+            if (requireGroup && maker.mInjectorGroup == null) {
+                // Maintain a strong reference to the group.
+                maker.mInjectorGroup = findPackageGroup(className, true);
+            }
+            return className;
+        }
+
         if (className == null) {
             className = ClassMaker.class.getName();
         }
@@ -139,7 +136,7 @@ class ClassInjector extends ClassLoader {
             // Use '-' instead of '$' to prevent conflicts with inner class names.
             String mangled = className + '-' + rnd.nextInt(range);
 
-            if (tryReserve(mangled, checkParent)) {
+            if (tryReserve(maker, mangled, requireGroup)) {
                 return mangled;
             }
 
@@ -152,27 +149,37 @@ class ClassInjector extends ClassLoader {
     /**
      * @return false if the name is already taken
      */
-    private boolean tryReserve(String name, boolean checkParent) {
-        if (mReservedNames != null) {
-            synchronized (mReservedNames) {
-                if (mReservedNames.put(name, Boolean.TRUE) != null) {
-                    return false;
-                }
+    private boolean tryReserve(TheClassMaker maker, String name, boolean requireGroup) {
+        synchronized (mReservedNames) {
+            if (mReservedNames.put(name, Boolean.TRUE) != null) {
+                return false;
             }
         }
 
-        Group group = findPackageGroup(name, true);
+        Group group = maker.mInjectorGroup;
 
-        if (!group.isLoaded(name)) {
-            ClassLoader parent;
-            if (!checkParent || (parent = getParent()) == null) {
+        if (requireGroup) {
+            if (group == null) {
+                group = findPackageGroup(name, true);
+                // Maintain a strong reference to the group.
+                maker.mInjectorGroup = group;
+            }
+            if (!group.isLoaded(name)) {
+                // Only check the parent loader when it will be used directly. This avoids
+                // creating useless class loading lock objects that never get cleaned up.
                 return true;
-            } else {
-                try {
-                    parent.loadClass(name);
-                } catch (ClassNotFoundException e) {
-                    return true;
-                }
+            }
+        } else if (group == null) {
+            return true;
+        } else if (!group.isLoaded(name)) {
+            ClassLoader parent = getParent();
+            if (parent == null) {
+                return true;
+            }
+            try {
+                parent.loadClass(name);
+            } catch (ClassNotFoundException e) {
+                return true;
             }
         }
 

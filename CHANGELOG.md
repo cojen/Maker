@@ -3,6 +3,7 @@ Changelog
 
 v2.3.0
 ------
+* Fix potential race condition which can cause the ClassLoader to change.
 * Add a convenience method which checks if an added method overrides an inherited one.
 
 v2.2.3 (2022-05-15)

@@ -33,7 +33,6 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 
 import java.util.concurrent.ThreadLocalRandom;
@@ -52,7 +51,7 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
     private boolean mExternal;
     private final MethodHandles.Lookup mLookup;
     private final ClassInjector mInjector;
-    private final ClassInjector.Group mInjectorGroup;
+    ClassInjector.Group mInjectorGroup; // also accessed by ClassInjector
 
     final ConstantPool.C_Class mThisClass;
 
@@ -105,16 +104,7 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
         mLookup = lookup;
         mInjector = injector;
 
-        if (injector.isExplicit()) {
-            Objects.requireNonNull(className);
-        } else {
-            // Only check the parent loader when it will be used directly. This avoids creating
-            // useless class loading lock objects that never get cleaned up.
-            className = injector.reserve(className, lookup != null);
-        }
-
-        // Maintain a strong reference to the group.
-        mInjectorGroup = lookup != null ? null : injector.groupForClass(className);
+        className = injector.reserve(this, className, lookup == null);
 
         mThisClass = mConstants.addClass(Type.begin(injector, this, className));
     }
@@ -131,7 +121,7 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
         mLookup = null;
         mInjector = injector;
         mInjectorGroup = injectorGroup;
-        className = injector.reserve(className, false);
+        className = injector.reserve(this, className, false);
         mThisClass = mConstants.addClass(Type.begin(injector, this, className));
     }
 
