@@ -44,7 +44,7 @@ class ClassInjector extends ClassLoader {
         mPackageGroups = new WeakCache<>();
     }
 
-    static ClassInjector lookup(boolean explicit, ClassLoader parentLoader, Object key) {
+    static ClassInjector find(boolean explicit, ClassLoader parentLoader, Object key) {
         Objects.requireNonNull(parentLoader);
 
         if (explicit) {
@@ -110,12 +110,13 @@ class ClassInjector extends ClassLoader {
 
     /**
      * @param className can be null
+     * @param willUse is true when class will later be defined by this injector
      * @return actual class name
      */
-    String reserve(TheClassMaker maker, String className, boolean requireGroup) {
+    String reserve(TheClassMaker maker, String className, boolean willUse) {
         if (mReservedNames == null) {
             Objects.requireNonNull(className);
-            if (requireGroup && maker.mInjectorGroup == null) {
+            if (willUse && maker.mInjectorGroup == null) {
                 // Maintain a strong reference to the group.
                 maker.mInjectorGroup = findPackageGroup(className, true);
             }
@@ -136,7 +137,7 @@ class ClassInjector extends ClassLoader {
             // Use '-' instead of '$' to prevent conflicts with inner class names.
             String mangled = className + '-' + rnd.nextInt(range);
 
-            if (tryReserve(maker, mangled, requireGroup)) {
+            if (tryReserve(maker, mangled, willUse)) {
                 return mangled;
             }
 
@@ -149,7 +150,7 @@ class ClassInjector extends ClassLoader {
     /**
      * @return false if the name is already taken
      */
-    private boolean tryReserve(TheClassMaker maker, String name, boolean requireGroup) {
+    private boolean tryReserve(TheClassMaker maker, String name, boolean willUse) {
         synchronized (mReservedNames) {
             if (mReservedNames.put(name, Boolean.TRUE) != null) {
                 return false;
@@ -158,22 +159,17 @@ class ClassInjector extends ClassLoader {
 
         Group group = maker.mInjectorGroup;
 
-        if (requireGroup) {
-            if (group == null) {
-                group = findPackageGroup(name, true);
-                // Maintain a strong reference to the group.
-                maker.mInjectorGroup = group;
-            }
-            if (!group.isLoaded(name)) {
-                // Only check the parent loader when it will be used directly. This avoids
-                // creating useless class loading lock objects that never get cleaned up.
-                return true;
-            }
-        } else if (group == null) {
-            return true;
-        } else if (!group.isLoaded(name)) {
-            ClassLoader parent = getParent();
-            if (parent == null) {
+        if (group == null) {
+            group = findPackageGroup(name, true);
+            // Maintain a strong reference to the group.
+            maker.mInjectorGroup = group;
+        }
+
+        if (!group.isLoaded(name)) {
+            // Only check the parent loader when it will be used directly. This avoids
+            // creating useless class loading lock objects that never get cleaned up.
+            ClassLoader parent;
+            if (willUse || (parent = getParent()) == null) {
                 return true;
             }
             try {

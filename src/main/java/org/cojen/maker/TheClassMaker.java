@@ -89,7 +89,7 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
             parentLoader = ClassLoader.getSystemClassLoader();
         }
 
-        ClassInjector injector = ClassInjector.lookup(explicit, parentLoader, key);
+        ClassInjector injector = ClassInjector.find(explicit, parentLoader, key);
 
         return new TheClassMaker(null, external, className, lookup, injector);
     }
