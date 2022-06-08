@@ -4,6 +4,7 @@ Changelog
 v2.3.0
 ------
 * Fix potential race condition which can cause the ClassLoader to change.
+* Fix a bug which ignored clinit exception handlers for all but the first one.
 * Add a convenience method which checks if an added method overrides an inherited one.
 
 v2.2.3 (2022-05-15)

@@ -317,10 +317,20 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
         for (int i=1; i<size; i++) {
             TheMethodMaker next = list.get(i);
-            if (next.mFirstOp != null) {
-                next.positionReturnLabel();
-                first.mLastOp.mNext = next.mFirstOp;
-                first.mLastOp = next.mLastOp;
+            if (next.mFirstOp == null) {
+                continue;
+            }
+
+            next.positionReturnLabel();
+            first.mLastOp.mNext = next.mFirstOp;
+            first.mLastOp = next.mLastOp;
+
+            if (next.mExceptionHandlers != null) {
+                if (first.mExceptionHandlers == null) {
+                    first.mExceptionHandlers = next.mExceptionHandlers;
+                } else {
+                    first.mExceptionHandlers.addAll(next.mExceptionHandlers);
+                }
             }
         }
 

@@ -122,4 +122,45 @@ public class ClinitTest {
     }
 
     public static volatile int value;
+
+    @Test
+    public void exceptionHandlers() throws Exception {
+        exceptionHandlers(false);
+        exceptionHandlers(true);
+    }
+
+    private void exceptionHandlers(boolean multiple) throws Exception {
+        ClassMaker cm = ClassMaker.begin().public_();
+
+        cm.addConstructor().public_();
+
+        {
+            MethodMaker mm = cm.addClinit();
+            var start = mm.label().here();
+            mm.nop();
+            if (multiple) {
+                mm.catch_(start, Throwable.class, exVar -> {
+                    mm.new_(Exception.class, "a", exVar).throw_();
+                });
+            }
+        }
+
+        {
+            MethodMaker mm = cm.addClinit();
+            var start = mm.label().here();
+            mm.new_(Exception.class, "b").throw_();
+            mm.finally_(start, () -> {
+                mm.new_(Exception.class, "c").throw_();
+            });
+        }
+
+        var ctor = cm.finish().getConstructor();
+
+        try {
+            ctor.newInstance();
+            fail();
+        } catch (ExceptionInInitializerError e) {
+            assertEquals("c", e.getCause().getMessage());
+        }
+    }
 }
