@@ -2465,10 +2465,6 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             return c;
         }
 
-        if (value != null && value == mClassVar) {
-            return mClassMaker.mThisClass;
-        }
-
         // Pass as a dynamic constant. First, try to use the ConstantBootstraps class.
 
         final Type classType = Type.from(Class.class);
