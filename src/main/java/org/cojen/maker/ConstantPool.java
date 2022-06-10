@@ -115,18 +115,10 @@ class ConstantPool {
     }
 
     C_Method addMethod(Type.Method method) {
-        if (method.enclosingType().isInterface()) {
-            return addInterfaceMethod(method);
-        }
+        int tag = method.enclosingType().isInterface() ? 11 : 10;
         C_Class clazz = addClass(method.enclosingType());
         C_NameAndType nameAndType = addNameAndType(method.name(), method.descriptor());
-        return addConstant(new C_Method(clazz, nameAndType, method));
-    }
-
-    C_InterfaceMethod addInterfaceMethod(Type.Method method) {
-        C_Class clazz = addClass(method.enclosingType());
-        C_NameAndType nameAndType = addNameAndType(method.name(), method.descriptor());
-        return addConstant(new C_InterfaceMethod(clazz, nameAndType, method));
+        return addConstant(new C_Method(tag, clazz, nameAndType, method));
     }
 
     C_String addMethodType(MethodType type) {
@@ -560,22 +552,12 @@ class ConstantPool {
         }
     }
 
-    static class C_Method extends C_MemberRef {
+    static final class C_Method extends C_MemberRef {
         final Type.Method mMethod;
-
-        C_Method(C_Class clazz, C_NameAndType nameAndType, Type.Method method) {
-            this(10, clazz, nameAndType, method);
-        }
 
         C_Method(int tag, C_Class clazz, C_NameAndType nameAndType, Type.Method method) {
             super(tag, clazz, nameAndType);
             mMethod = method;
-        }
-    }
-
-    static final class C_InterfaceMethod extends C_Method {
-        C_InterfaceMethod(C_Class clazz, C_NameAndType nameAndType, Type.Method method) {
-            super(11, clazz, nameAndType, method);
         }
     }
 
