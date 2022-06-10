@@ -101,7 +101,11 @@ class ConstantPool {
     }
 
     C_String addString(String value) {
-        return addConstant(new C_String(addUTF8(value)));
+        return addString(8, value);
+    }
+
+    private C_String addString(int tag, String value) {
+        return addConstant(new C_String(tag, addUTF8(value)));
     }
 
     C_Field addField(Type.Field field) {
@@ -125,7 +129,7 @@ class ConstantPool {
         return addConstant(new C_InterfaceMethod(clazz, nameAndType, method));
     }
 
-    C_MethodType addMethodType(MethodType type) {
+    C_String addMethodType(MethodType type) {
         return addMethodType(type.toMethodDescriptorString());
     }
 
@@ -220,9 +224,21 @@ class ConstantPool {
         return null;
     }
 
-    C_MethodType addMethodType(String typeDesc) {
-        return addConstant(new C_MethodType(addUTF8(typeDesc)));
+    C_String addMethodType(String typeDesc) {
+        return addString(16, typeDesc);
     }
+
+    /*
+    C_String addModule(String name) {
+        return addString(19, name);
+    }
+    */
+
+    /*
+    C_String addPackage(String name) {
+        return addString(20, name);
+    }
+    */
 
     C_NameAndType addNameAndType(String name, String typeDesc) {
         return addNameAndType(addUTF8(name), addUTF8(typeDesc));
@@ -258,7 +274,7 @@ class ConstantPool {
         }
     }
 
-    static class C_UTF8 extends Constant {
+    static final class C_UTF8 extends Constant {
         final String mValue;
 
         C_UTF8(String value) {
@@ -290,7 +306,7 @@ class ConstantPool {
         }
     }
 
-    static class C_Integer extends Constant {
+    static final class C_Integer extends Constant {
         final int mValue;
 
         C_Integer(int value) {
@@ -322,7 +338,7 @@ class ConstantPool {
         }
     }
 
-    static class C_Float extends Constant {
+    static final class C_Float extends Constant {
         final float mValue;
 
         C_Float(float value) {
@@ -354,7 +370,7 @@ class ConstantPool {
         }
     }
 
-    static class C_Long extends Constant {
+    static final class C_Long extends Constant {
         final long mValue;
 
         C_Long(long value) {
@@ -386,7 +402,7 @@ class ConstantPool {
         }
     }
 
-    static class C_Double extends Constant {
+    static final class C_Double extends Constant {
         final double mValue;
 
         C_Double(double value) {
@@ -419,10 +435,10 @@ class ConstantPool {
         }
     }
 
-    static abstract class C_StringRef extends Constant {
+    static class C_String extends Constant {
         C_UTF8 mValue;
 
-        C_StringRef(int tag, C_UTF8 value) {
+        C_String(int tag, C_UTF8 value) {
             super(tag);
             mValue = value;
         }
@@ -437,8 +453,8 @@ class ConstantPool {
             if (this == obj) {
                 return true;
             }
-            if (obj instanceof C_StringRef) {
-                C_StringRef other = (C_StringRef) obj;
+            if (obj instanceof C_String) {
+                C_String other = (C_String) obj;
                 return mTag == other.mTag && mValue.equals(other.mValue);
             }
             return false;
@@ -451,7 +467,7 @@ class ConstantPool {
         }
     }
 
-    static class C_Class extends C_StringRef {
+    static final class C_Class extends C_String {
         final Type mType;
 
         C_Class(C_UTF8 name, Type type) {
@@ -464,13 +480,7 @@ class ConstantPool {
         }
     }
 
-    static class C_String extends C_StringRef {
-        C_String(C_UTF8 value) {
-            super(8, value);
-        }
-    }
-
-    static class C_NameAndType extends Constant {
+    static final class C_NameAndType extends Constant {
         final C_UTF8 mName;
         final C_UTF8 mTypeDesc;
 
@@ -541,7 +551,7 @@ class ConstantPool {
         }
     }
 
-    static class C_Field extends C_MemberRef {
+    static final class C_Field extends C_MemberRef {
         final Type.Field mField;
 
         C_Field(C_Class clazz, C_NameAndType nameAndType, Type.Field field) {
@@ -563,45 +573,13 @@ class ConstantPool {
         }
     }
 
-    static class C_InterfaceMethod extends C_Method {
+    static final class C_InterfaceMethod extends C_Method {
         C_InterfaceMethod(C_Class clazz, C_NameAndType nameAndType, Type.Method method) {
             super(11, clazz, nameAndType, method);
         }
     }
 
-    static class C_MethodType extends Constant {
-        final C_UTF8 mTypeDesc;
-
-        C_MethodType(C_UTF8 typeDesc) {
-            super(16);
-            mTypeDesc = typeDesc;
-        }
-
-        @Override
-        public int hashCode() {
-            return mTypeDesc.hashCode();
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (this == obj) {
-                return true;
-            }
-            if (obj instanceof C_MethodType) {
-                C_MethodType other = (C_MethodType) obj;
-                return mTypeDesc.equals(other.mTypeDesc);
-            }
-            return false;
-        }
-
-        @Override
-        void writeTo(BytesOut out) throws IOException {
-            super.writeTo(out);
-            out.writeShort(mTypeDesc.mIndex);
-        }
-    }
-
-    static class C_MethodHandle extends Constant {
+    static final class C_MethodHandle extends Constant {
         final byte mKind;
         final Constant mRef;
 
@@ -636,7 +614,7 @@ class ConstantPool {
         }
     }
 
-    static class C_Dynamic extends Constant {
+    static final class C_Dynamic extends Constant {
         final int mBootstrapIndex;
         final C_NameAndType mNameAndType;
 
