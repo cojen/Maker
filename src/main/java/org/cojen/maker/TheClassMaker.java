@@ -57,9 +57,6 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
 
     private ConstantPool.C_Class mSuperClass;
 
-    // Stashed by Type.begin to prevent GC of this type being defined.
-    Map mTypeCache;
-
     int mModifiers;
 
     private Set<ConstantPool.C_Class> mInterfaces;
@@ -499,18 +496,14 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
         String name = name();
 
         Class clazz;
-        try {
-            if (mLookup == null) {
-                clazz = mInjector.define(mInjectorGroup, name, finishBytes(false));
-            } else {
-                try {
-                    clazz = mLookup.defineClass(finishBytes(false));
-                } catch (Exception e) {
-                    throw new IllegalStateException(e);
-                }
+        if (mLookup == null) {
+            clazz = mInjector.define(mInjectorGroup, name, finishBytes(false));
+        } else {
+            try {
+                clazz = mLookup.defineClass(finishBytes(false));
+            } catch (Exception e) {
+                throw new IllegalStateException(e);
             }
-        } finally {
-            Type.uncache(mTypeCache, name);
         }
 
         ConstantsRegistry.finish(this, mLookup, clazz);
@@ -660,7 +653,6 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
         } catch (Exception e) {
             throw toUnchecked(e);
         } finally {
-            Type.uncache(mTypeCache, originalName);
             mInjector.unreserve(originalName);
         }
 
@@ -720,7 +712,6 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
         try {
             return finishBytes(false);
         } finally {
-            Type.uncache(mTypeCache, name);
             mInjector.unreserve(name);
         }
     }
@@ -752,7 +743,6 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
             finishTo(bout, false);
             bout.flush();
         } finally {
-            Type.uncache(mTypeCache, name);
             mInjector.unreserve(name);
         }
     }

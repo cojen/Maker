@@ -438,6 +438,7 @@ public interface MethodMaker extends Maker {
      * Finishes the definition of a standalone method.
      *
      * @throws IllegalStateException if already finished or if not a standalone method
+     * @see #begin
      */
     MethodHandle finish();
 }

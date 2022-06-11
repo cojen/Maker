@@ -37,8 +37,8 @@ public interface ClassMaker extends Maker {
     }
 
     /**
-     * Begin defining a class with the given name. The actual name will have a suffix applied
-     * to ensure uniqueness.
+     * Begin defining a class with the given name, but the actual name will have a suffix
+     * applied to ensure uniqueness.
      *
      * @param className fully qualified class name; pass null to automatically assign a name
      */
@@ -47,8 +47,8 @@ public interface ClassMaker extends Maker {
     }
 
     /**
-     * Begin defining a class with the given name. The actual name will have a suffix applied
-     * to ensure uniqueness.
+     * Begin defining a class with the given name, but the actual name will have a suffix
+     * applied to ensure uniqueness.
      *
      * @param className fully qualified class name; pass null to automatically assign a name
      * @param parentLoader parent class loader; pass null to use default
@@ -58,20 +58,20 @@ public interface ClassMaker extends Maker {
     }
 
     /**
-     * Begin defining a class with the given name. The actual name will have a suffix applied
-     * to ensure uniqueness.
+     * Begin defining a class with the given name, but the actual name will have a suffix
+     * applied to ensure uniqueness.
      *
      * @param className fully qualified class name; pass null to automatically assign a name
      * @param parentLoader parent class loader; pass null to use default
-     * @param key an opaque key used for creating distinct class loaders
+     * @param key an opaque key used for creating distinct class loaders; can be null
      */
     static ClassMaker begin(String className, ClassLoader parentLoader, Object key) {
         return TheClassMaker.begin(false, className, false, parentLoader, key, null);
     }
 
     /**
-     * Begin defining a class with the given name. The actual name will have a suffix applied
-     * to ensure uniqueness.
+     * Begin defining a class with the given name, but the actual name will have a suffix
+     * applied to ensure uniqueness.
      *
      * @param className fully qualified class name; pass null to automatically assign a name
      * @param lookup finish loading the class using this lookup object
@@ -86,11 +86,24 @@ public interface ClassMaker extends Maker {
     }
 
     /**
+     * Begin defining a class with an explicitly specified name.
+     *
+     * @param className fully qualified class name
+     * @param parentLoader parent class loader; pass null to use default
+     * @param key an opaque key used for creating distinct class loaders; can be null
+     */
+    static ClassMaker beginExplicit(String className, ClassLoader parentLoader, Object key) {
+        return TheClassMaker.begin(false, className, true, parentLoader, key, null);
+    }
+
+    /**
      * Begin defining a class intended to be loaded from a file. The class name exactly matches
      * the one given, and {@link Variable#setExact setExact} is unsupported. All classes
      * defined from this maker will also be external.
      *
      * @param className fully qualified class name
+     * @see #finishBytes
+     * @see #finishTo
      */
     static ClassMaker beginExternal(String className) {
         return TheClassMaker.begin(true, className, true, null, null, null);
@@ -99,13 +112,13 @@ public interface ClassMaker extends Maker {
     /**
      * Begin defining another class with the same loader and lookup as this one. The actual
      * class name will have a suffix applied to ensure uniqueness, unless this maker creates
-     * external classes.
+     * explicit or external classes.
      *
      * <p>The returned {@code ClassMaker} instance isn't attached to this maker, and so it can
      * be acted upon by a different thread.
      *
      * @param className fully qualified class name; pass null to automatically assign a name
-     * (unless external)
+     * (unless explicit or external)
      * @see #addInnerClass
      */
     ClassMaker another(String className);

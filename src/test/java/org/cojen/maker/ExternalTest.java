@@ -48,13 +48,6 @@ public class ExternalTest {
             cm = cm.another(name);
         }
 
-        try {
-            cm.another(name);
-            fail();
-        } catch (IllegalStateException e) {
-            assertTrue(e.getMessage().startsWith("Already"));
-        }
-
         cm.public_().addConstructor().public_();
 
         MethodMaker mm = cm.addMethod(String.class, "test").public_();
@@ -89,9 +82,6 @@ public class ExternalTest {
 
         var instance = clazz.getConstructor().newInstance();
         assertEquals("hello", clazz.getMethod("test").invoke(instance));
-
-        // Name isn't reserved anymore.
-        cm.another(name);
 
         return cm;
     }

@@ -85,20 +85,7 @@ abstract class Type {
      * Called when making a new class.
      */
     static Type begin(ClassLoader loader, TheClassMaker maker, String name) {
-        ConcurrentHashMap<Object, Type> cache = cache(loader);
-        var type = new NewClazz(loader, maker, name);
-        if (cachePut(cache, name, type) != type) {
-            throw new IllegalStateException("Already being defined: " + name);
-        }
-        maker.mTypeCache = cache;
-        return type;
-    }
-
-    /**
-     * Should be called after the class has been defined, to eagerly remove the cache entry.
-     */
-    static void uncache(Map cache, String name) {
-        cache.remove(name);
+        return new NewClazz(loader, maker, name);
     }
 
     static Type from(ClassLoader loader, Object type) {

@@ -47,11 +47,7 @@ class ClassInjector extends ClassLoader {
     static ClassInjector find(boolean explicit, ClassLoader parentLoader, Object key) {
         Objects.requireNonNull(parentLoader);
 
-        if (explicit) {
-            return new ClassInjector(true, parentLoader);
-        }
-
-        final Object injectorKey = createInjectorKey(parentLoader, key);
+        final Object injectorKey = new Key(explicit, parentLoader, key);
 
         ClassInjector injector = cInjectors.get(injectorKey);
 
@@ -59,7 +55,7 @@ class ClassInjector extends ClassLoader {
             synchronized (cInjectors) {
                 injector = cInjectors.get(injectorKey);
                 if (injector == null) {
-                    injector = new ClassInjector(false, parentLoader);
+                    injector = new ClassInjector(explicit, parentLoader);
                     cInjectors.put(injectorKey, injector);
                 }
             }
@@ -182,20 +178,20 @@ class ClassInjector extends ClassLoader {
         return false;
     }
 
-    private static Object createInjectorKey(ClassLoader parentLoader, Object rest) {
-        return new Key(parentLoader, rest);
-    }
-
     private static class Key extends WeakReference<ClassLoader> {
         private final Object mRest;
         private final int mHash;
 
-        Key(ClassLoader loader, Object rest) {
+        Key(boolean explicit, ClassLoader loader, Object rest) {
             super(loader);
             mRest = rest;
             int hash = loader.hashCode() * 31;
             if (rest != null) {
                 hash += rest.hashCode();
+            }
+            hash &= ~(1 << 31);
+            if (explicit) {
+                hash |= 1 << 31;
             }
             mHash = hash;
         }
@@ -212,7 +208,8 @@ class ClassInjector extends ClassLoader {
             }
             if (obj instanceof Key) {
                 var other = (Key) obj;
-                return Objects.equals(get(), other.get()) && Objects.equals(mRest, other.mRest);
+                return mHash == other.mHash
+                    && Objects.equals(get(), other.get()) && Objects.equals(mRest, other.mRest);
             }
             return false;
         }
