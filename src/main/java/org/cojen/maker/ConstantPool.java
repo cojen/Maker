@@ -38,7 +38,7 @@ class ConstantPool {
     private int mSize;
 
     ConstantPool() {
-        mConstants = new LinkedHashMap<>();
+        mConstants = new LinkedHashMap<>(64);
         mSize = 1; // constant 0 is reserved
     }
 
