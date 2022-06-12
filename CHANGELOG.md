@@ -1,7 +1,7 @@
 Changelog
 =========
 
-v2.3.0
+v2.3.0 (2022-06-12)
 ------
 * Fix a potential race condition which can cause the ClassLoader to change.
 * Fix a bug which ignored clinit exception handlers for all but the first one.
