@@ -111,13 +111,34 @@ public class ExternalTest {
 
     @Test
     public void finishAndLoad() throws Exception {
+        if (finishAndLoadPassed) {
+            return;
+        }
+
         ClassMaker cm = ClassMaker.beginExternal("org.cojen.maker.Fake").public_();
         MethodMaker mm = cm.addMethod(String.class, "test", (Object[]) null).public_().static_();
         mm.return_("hello");
         byte[] bytes = cm.finishBytes();
-        var clazz = MethodHandles.lookup().defineClass(bytes);
-        assertEquals("org.cojen.maker.Fake", clazz.getName());
-        Object result = clazz.getMethod("test").invoke(null);
-        assertEquals("hello", result);
+
+        synchronized (ExternalTest.class) {
+            Class<?> clazz;
+            try {
+                clazz = MethodHandles.lookup().defineClass(bytes);
+            } catch (LinkageError e) {
+                if (finishAndLoadPassed) {
+                    // Was already defined earlier in the same ClassLoader.
+                    return;
+                }
+                throw e;
+            }
+
+            assertEquals("org.cojen.maker.Fake", clazz.getName());
+            Object result = clazz.getMethod("test").invoke(null);
+            assertEquals("hello", result);
+
+            finishAndLoadPassed = true;
+        }
     }
+
+    private static volatile boolean finishAndLoadPassed;
 }
