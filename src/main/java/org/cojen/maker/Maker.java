@@ -84,7 +84,7 @@ public interface Maker {
      * an advanced feature for defining attributes which aren't directly supported by the core
      * maker API. Allowed value types are: int, float, long, double, String, Class, raw byte[],
      * or an array of values. Arrays aren't encoded with any length prefix, but a raw byte[] as
-     * the first element can interpreted as such.
+     * the first element can be interpreted as such.
      */
     void addAttribute(String name, Object... values);
 }
