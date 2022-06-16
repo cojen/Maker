@@ -36,6 +36,9 @@ public class AnnotationTest {
     @Test
     public void basic() {
         ClassMaker cm = ClassMaker.begin().public_();
+
+        cm.addAnnotation(Ann0.class, true);
+
         AnnotationMaker am = cm.addAnnotation(Ann1.class, true);
 
         am.put("name", "MyName");
@@ -70,8 +73,9 @@ public class AnnotationTest {
         var clazz = cm.finish();
 
         Annotation[] anns = clazz.getAnnotations();
-        assertEquals(1, anns.length);
-        var ann = (Ann1) anns[0];
+        assertEquals(2, anns.length);
+        assertTrue(anns[0] instanceof Ann0);
+        var ann = (Ann1) anns[1];
 
         assertEquals("MyName", ann.name());
         assertEquals(false, ann.prim0());
@@ -88,6 +92,10 @@ public class AnnotationTest {
         assertEquals(java.util.List.class, ann.class1());
         assertEquals(clazz, ann.class2());
         assertEquals(RoundingMode.UP, ann.mode());
+    }
+
+    @Retention(RetentionPolicy.RUNTIME)
+    public static @interface Ann0 {
     }
 
     @Retention(RetentionPolicy.RUNTIME)
