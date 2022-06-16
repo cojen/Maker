@@ -1,6 +1,10 @@
 Changelog
 =========
 
+v2.4.0
+------
+* Change the format of the addAttribute method in order to support more kinds of JVM attributes.
+
 v2.3.0 (2022-06-12)
 ------
 * Fix a potential race condition which can cause the ClassLoader to change.

@@ -33,7 +33,7 @@ abstract class Attribute extends Attributed {
 
     Attribute(ConstantPool cp, String name) {
         super(cp);
-        mAttrName = cp.addUTF8(name);
+        mAttrName = name == null ? null : cp.addUTF8(name);
     }
 
     /**
@@ -68,6 +68,34 @@ abstract class Attribute extends Attributed {
 
         @Override
         void writeDataTo(BytesOut out) {
+        }
+    }
+
+    static class Composite extends Attribute {
+        private final Attribute[] mEntries;
+
+        /**
+         * @param entries each entry must be unnamed
+         */
+        Composite(ConstantPool cp, String name, Attribute[] entries) {
+            super(cp, name);
+            mEntries = entries;
+        }
+
+        @Override
+        int length() {
+            int length = 0;
+            for (Attribute entry : mEntries) {
+                length += entry.length();
+            }
+            return length;
+        }
+
+        @Override
+        void writeDataTo(BytesOut out) throws IOException {
+            for (Attribute entry : mEntries) {
+                entry.writeDataTo(out);
+            }
         }
     }
 

@@ -44,31 +44,36 @@ abstract class Attributed {
         mAttributes.add(attr);
     }
 
-    public void addAttribute(String name, Object value) {
-        Attribute attr;
+    public void addAttribute(String name, Object... values) {
+        addAttribute(defineAttributes(name, values));
+    }
 
+    private Attribute defineAttribute(String name, Object value) {
         if (value == null) {
-            attr = new Attribute.Empty(mConstants, name);
+            return new Attribute.Empty(mConstants, name);
         } else if (value instanceof byte[]) {
-            attr = new Attribute.Bytes(mConstants, name, (byte[]) value);
+            return new Attribute.Bytes(mConstants, name, (byte[]) value);
         } else if (!value.getClass().isArray()) {
-            attr = new Attribute.Constant(mConstants, name, defineConstant(value));
+            return new Attribute.Constant(mConstants, name, defineConstant(value));
         } else if (value instanceof Object[]) {
-            var values = (Object[]) value;
-            if (values.length > 65535) {
-                throw new IllegalArgumentException();
-            } else {
-                var list = new Attribute.ConstantList(mConstants, name);
-                for (Object v : values) {
-                    list.addEntry(defineConstant(v));
-                }
-                attr = list;
-            }
+            return defineAttributes(name, (Object[]) value);
         } else {
             throw new IllegalArgumentException();
         }
+    }
 
-        addAttribute(attr);
+    private Attribute defineAttributes(String name, Object... values) {
+        if (values == null || values.length == 0) {
+            return defineAttribute(name, null);
+        } else if (values.length == 1) {
+            return defineAttribute(name, values[0]);
+        } else {
+            var entries = new Attribute[values.length];
+            for (int i=0; i<values.length; i++) {
+                entries[i] = defineAttribute(null, values[i]);
+            }
+            return new Attribute.Composite(mConstants, name, entries);
+        }
     }
 
     private ConstantPool.Constant defineConstant(Object value) {
