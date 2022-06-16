@@ -34,7 +34,32 @@ public class AttributeTest {
     @Test
     public void basic() throws Exception {
         ClassMaker cm = ClassMaker.begin().public_();
-        cm.addAttribute("Synthetic");
+
+        try {
+            cm.addAttribute(null, null);
+            fail();
+        } catch (NullPointerException e) {
+        }
+
+        try {
+            cm.addAttribute("Junk", new StringBuilder());
+            fail();
+        } catch (IllegalArgumentException e) {
+        }
+
+        try {
+            cm.addAttribute("Junk", new int[10]);
+            fail();
+        } catch (IllegalArgumentException e) {
+        }
+
+        try {
+            cm.addAttribute("Junk", java.math.BigDecimal.ZERO);
+            fail();
+        } catch (IllegalArgumentException e) {
+        }
+
+        cm.addAttribute("Synthetic", null);
         cm.addAttribute("SourceFile", "basic");
 
         MethodMaker mm = cm.addMethod(null, "test").public_().static_();
@@ -63,25 +88,29 @@ public class AttributeTest {
         cm.addAttribute("Junk4", 10L);
         cm.addAttribute("Junk5", 10.1f);
         cm.addAttribute("Junk6", 10.1d);
-        cm.addAttribute("Junk7", (Object) new String[] {"hello"});
-        cm.addAttribute("Junk8", (Object) new Integer[] {1, 2, Integer.MAX_VALUE});
-        cm.addAttribute("Junk9", (Object) new Object[] {Integer.MAX_VALUE, "hello", cm});
-        cm.addAttribute("Junk10", (Object) null);
-        cm.addAttribute("Junk11", (Object[]) new Object[] {null});
+        cm.addAttribute("Junk7", new String[] {"hello"});
+        cm.addAttribute("Junk8", new Integer[] {1, 2, Integer.MAX_VALUE});
+        cm.addAttribute("Junk9", new Object[] {Integer.MAX_VALUE, "hello", cm});
+        cm.addAttribute("Junk10", new Object[] {});
+        cm.addAttribute("Junk11", new Object[] {null});
 
         // Encode an array of arrays, each with a one-byte array length prefix.
-        cm.addAttribute("Junk12", new byte[] {2}, new Object[][] {
-            {new byte[] {2}, "hello", 10}, {new byte[] {3}, 10L, 10.1d, cm}
+        cm.addAttribute("Junk12", new Object[] {
+            new byte[] {2}, new Object[][] {
+                {new byte[] {2}, "hello", 10}, {new byte[] {3}, 10L, 10.1d, cm}
+            }
         });
 
         cm.addAttribute("SourceDebugExtension", new byte[10]);
 
         // The first value encodes the short array length in big-endian format.
         // Note: This doesn't seal the class unless the major version is 61 or higher (Java 17).
-        cm.addAttribute("PermittedSubclasses", new byte[] {0, 1}, cm2);
+        cm.addAttribute("PermittedSubclasses", new Object[] {new byte[] {0, 1}, cm2});
 
         // Format for an enum default.
-        cm.addAttribute("AnnotationDefault", new byte[] {'e'}, "java.lang.Thread.State", "NEW");
+        cm.addAttribute("AnnotationDefault", new Object[] {
+            new byte[] {'e'}, "java.lang.Thread.State", "NEW"
+        });
 
         Class<?> clazz = cm.finish();
         Class<?> clazz2 = cm2.finish();

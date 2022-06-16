@@ -20,6 +20,7 @@ import java.io.IOException;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Defines an item which can have attributes.
@@ -44,8 +45,9 @@ abstract class Attributed {
         mAttributes.add(attr);
     }
 
-    public void addAttribute(String name, Object... values) {
-        addAttribute(defineAttributes(name, values));
+    public void addAttribute(String name, Object value) {
+        Objects.requireNonNull(name);
+        addAttribute(defineAttribute(name, value));
     }
 
     private Attribute defineAttribute(String name, Object value) {
@@ -56,14 +58,14 @@ abstract class Attributed {
         } else if (!value.getClass().isArray()) {
             return new Attribute.Constant(mConstants, name, defineConstant(value));
         } else if (value instanceof Object[]) {
-            return defineAttributes(name, (Object[]) value);
+            return defineCompositeAttribute(name, (Object[]) value);
         } else {
             throw new IllegalArgumentException();
         }
     }
 
-    private Attribute defineAttributes(String name, Object... values) {
-        if (values == null || values.length == 0) {
+    private Attribute defineCompositeAttribute(String name, Object[] values) {
+        if (values.length == 0) {
             return defineAttribute(name, null);
         } else if (values.length == 1) {
             return defineAttribute(name, values[0]);

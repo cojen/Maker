@@ -80,11 +80,11 @@ public interface Maker {
     AnnotationMaker addAnnotation(Object annotationType, boolean visible);
 
     /**
-     * Add a generic JVM attribute with which references a sequence of constant values. This is
-     * an advanced feature for defining attributes which aren't directly supported by the core
-     * maker API. Allowed value types are: int, float, long, double, String, Class, raw byte[],
-     * or an array of values. Arrays aren't encoded with any length prefix, but a raw byte[] as
-     * the first element can be interpreted as such.
+     * Add a generic JVM attribute which optionally references a value. This is an advanced
+     * feature for defining attributes which aren't directly supported by the core maker
+     * API. Allowed value types are: int, float, long, double, String, Class, raw byte[], or an
+     * array of values. Arrays aren't encoded with any length prefix, but a raw byte[] as the
+     * first element can be interpreted as such.
      */
-    void addAttribute(String name, Object... values);
+    void addAttribute(String name, Object value);
 }
