@@ -104,4 +104,45 @@ public class ConcatTest {
         var clazz = cm.finish();
         ((Runnable) clazz.getConstructor().newInstance()).run();
     }
+
+    @Test
+    public void huge2() throws Exception {
+        // Variables of type double and long require special attention when passed to the
+        // concat method.
+
+        ClassMaker cm = ClassMaker.begin().public_();
+
+        {
+            MethodMaker mm = cm.addMethod(String.class, "test0").public_().static_();
+            mm.return_(mm.concat(new Object[150]));
+        }
+
+        for (int n=1; n<=2; n++) {
+            MethodMaker mm = cm.addMethod(String.class, "test" + n).public_().static_();
+            var values = new Object[n == 1 ? 100 : 134];
+            for (int i=0; i<values.length; i++) {
+                switch (i % 4) {
+                case 0: values[i] = mm.var(long.class).set(0); break;
+                case 1: values[i] = mm.var(double.class).set(1); break;
+                case 2: values[i] = 2; break;
+                default:values[i] = mm.var(int.class).set(3); break;
+                }
+            }
+            mm.return_(mm.concat(values));
+        }
+
+        var clazz = cm.finish();
+
+        assertEquals("null".repeat(150), clazz.getMethod("test0").invoke(null));
+
+        for (int n=1; n<=2; n++) {
+            var expect = new StringBuilder();
+            int num = n == 1 ? 100 : 134;
+            for (int i=0; i<num; i++) {
+                expect.append(i % 4 == 1 ? "1.0" : String.valueOf(i % 4));
+            }
+            var result = (String) clazz.getMethod("test" + n).invoke(null);
+            assertEquals(expect.toString(), result);
+        }
+    }
 }

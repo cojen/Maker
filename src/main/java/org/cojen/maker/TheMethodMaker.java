@@ -1265,17 +1265,29 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             return var(String.class).set(strValue);
         }
 
-        // StringConcatFactory is limited to 200 values.
-        if (values.length > 200) {
-            long capacity = values.length * 8L;
-            while (capacity > Integer.MAX_VALUE) {
-                capacity >>= 1;
-            }
-            var sb = new_(StringBuilder.class, (int) capacity);
+        // StringConcatFactory is limited to 200 slots, and variables of type double and longs
+        // use two slots.
+        if (values.length > 100) {
+            int numSlots = values.length;
             for (Object value : values) {
-                sb = sb.invoke("append", value);
+                if (value instanceof LocalVar) {
+                    int tc = ((LocalVar) value).type().typeCode();
+                    if (tc == T_DOUBLE || tc == T_LONG) {
+                        numSlots++;
+                    }
+                }
             }
-            return sb.invoke("toString");
+            if (numSlots > 200) {
+                long capacity = values.length * 8L;
+                while (capacity > Integer.MAX_VALUE) {
+                    capacity >>= 1;
+                }
+                var sb = new_(StringBuilder.class, (int) capacity);
+                for (Object value : values) {
+                    sb = sb.invoke("append", value);
+                }
+                return sb.invoke("toString");
+            }
         }
 
         char[] recipe = null;

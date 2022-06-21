@@ -3,6 +3,8 @@ Changelog
 
 v2.4.0
 ------
+* Fix concat method when given more than 100 arguments, and some of them are double or long
+  variables.
 * Change the format of the addAttribute method in order to support more kinds of JVM attributes.
 
 v2.3.0 (2022-06-12)
