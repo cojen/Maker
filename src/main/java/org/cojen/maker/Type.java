@@ -871,7 +871,7 @@ abstract class Type {
 
     // Called by InjectorTest to ensure that classes get unloaded. Soft references aren't
     // typically cleared right away.
-    static void clearCaches() {
+    static synchronized void clearCaches() {
         cCacheMap.clear();
     }
 
