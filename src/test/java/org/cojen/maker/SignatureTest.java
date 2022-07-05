@@ -23,7 +23,9 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.List;
 
 import org.junit.*;
 import static org.junit.Assert.*;
@@ -128,5 +130,29 @@ public class SignatureTest {
             fail();
         } catch (GenericSignatureFormatError e) {
         }
+    }
+
+    @Test
+    public void locals() throws Exception {
+        // Note: Cannot verify that the local variable has a signature applied to it using
+        // reflection. Instead, the class must be manually disassembled and inspected.
+
+        ClassMaker cm = ClassMaker.begin().public_();
+
+        MethodMaker mm = cm.addMethod(List.class, "list", String.class).public_().static_()
+            .signature("(", String.class, ")", List.class, "<", String.class, ">");
+
+        var list = mm.var(ArrayList.class)
+            .signature(ArrayList.class, "<", String.class, ">").name("list");
+
+        list.set(mm.new_(ArrayList.class));
+        list.invoke("add", mm.param(0));
+        mm.return_(list);
+
+        Class<?> clazz = cm.finish();
+        var result = (ArrayList) clazz.getMethod("list", String.class).invoke(null, "hello");
+
+        assertEquals(1, result.size());
+        assertEquals("hello", result.get(0));
     }
 }

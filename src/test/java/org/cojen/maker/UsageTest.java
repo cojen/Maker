@@ -533,6 +533,27 @@ public class UsageTest {
     }
 
     @Test
+    public void signatureFail() {
+        MethodMaker mm = mClassMaker.addMethod(null, "test");
+
+        try {
+            mm.super_().signature("xxx");
+            fail();
+        } catch (IllegalStateException e) {
+            check(e, "Cannot define a signature");
+        }
+
+        mClassMaker.addField(int.class, "foo");
+        var field = mm.field("foo");
+        try {
+            field.signature("xxx");
+            fail();
+        } catch (IllegalStateException e) {
+            check(e, "Cannot define a signature");
+        }
+    }
+
+    @Test
     public void monitorFail() {
         MethodMaker mm = mClassMaker.addMethod(null, "test");
         try {

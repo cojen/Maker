@@ -310,8 +310,8 @@ abstract class Attribute extends Attributed {
     static class LocalVariableTable extends ListAttribute<LocalVariableTable.Entry> {
         private int mMaxOffset;
 
-        LocalVariableTable(ConstantPool cp) {
-            super(cp, "LocalVariableTable");
+        LocalVariableTable(ConstantPool cp, String name) {
+            super(cp, name);
         }
 
         void add(int startOffset, int endOffset,

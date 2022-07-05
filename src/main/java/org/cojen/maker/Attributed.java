@@ -125,35 +125,35 @@ abstract class Attributed {
     }
 
     public void addSignature(Object... components) {
+        ConstantPool.C_UTF8 sig = mConstants.addUTF8(fullSignature(components));
+        addAttribute(new Attribute.Constant(mConstants, "Signature", sig));
+    }
+
+    static String fullSignature(Object... components) {
         if (components.length == 0) {
             throw new IllegalArgumentException();
         }
 
-        String full;
-        {
-            String first = resolveComponent(components[0]);
-            if (components.length == 1) {
-                full = first;
+        String first = resolveComponent(components[0]);
+        if (components.length == 1) {
+            return first;
+        }
+
+        var b = new StringBuilder(first.length() + 16);
+
+        for (int i=0; i < components.length; i++) {
+            String component = i == 0 ? first : resolveComponent(components[i]);
+            if (component.startsWith("<")) {
+                i = appendTypeArgs(0, b, component, components, i);
             } else {
-                var b = new StringBuilder(first.length() + 16);
-
-                for (int i=0; i < components.length; i++) {
-                    String component = i == 0 ? first : resolveComponent(components[i]);
-                    if (component.startsWith("<")) {
-                        i = appendTypeArgs(0, b, component, components, i);
-                    } else {
-                        b.append(component);
-                    }
-                }
-
-                full = b.toString();
+                b.append(component);
             }
         }
 
-        addAttribute(new Attribute.Constant(mConstants, "Signature", mConstants.addUTF8(full)));
+        return b.toString();
     }
 
-    private String resolveComponent(Object component) {
+    private static String resolveComponent(Object component) {
         if (component instanceof String) {
             return (String) component;
         }
@@ -171,10 +171,12 @@ abstract class Attributed {
     }
 
     /**
-     * @param d call depth
      * @param first must start with a '<' character
+     * @return updated components array index
      */
-    private int appendTypeArgs(int d, StringBuilder b, String first, Object[] components, int i) {
+    private static int appendTypeArgs(int depth, StringBuilder b, String first,
+                                      Object[] components, int i)
+    {
         boolean semi = false;
         int end = b.length() - 1;
         if (end >= 0 && b.charAt(end) == ';') {
@@ -187,7 +189,7 @@ abstract class Attributed {
         for (++i; i < components.length; i++) {
             String component = resolveComponent(components[i]);
             if (component.startsWith("<")) {
-                i = appendTypeArgs(d + 1, b, component, components, i);
+                i = appendTypeArgs(depth + 1, b, component, components, i);
             } else {
                 b.append(component);
                 if (component.contains(">")) {
@@ -199,11 +201,11 @@ abstract class Attributed {
         if (semi) {
             for (int j = b.length(); --j >= end; ) {
                 if (b.charAt(j) == '>') {
-                    if (d <= 0) {
+                    if (depth <= 0) {
                         b.insert(j + 1, ';');
                         return i;
                     }
-                    d--;
+                    depth--;
                 }
             }
 

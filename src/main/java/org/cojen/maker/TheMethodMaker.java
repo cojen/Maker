@@ -97,6 +97,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     private Attribute.LineNumberTable mLineNumberTable;
 
     private Attribute.LocalVariableTable mLocalVariableTable;
+    private Attribute.LocalVariableTable mLocalVariableTypeTable;
 
     private Attribute.ConstantList mExceptionsThrown;
 
@@ -239,6 +240,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             mUnpositionedLabels = 0;
             mLineNumberTable = null;
             mLocalVariableTable = null;
+            mLocalVariableTypeTable = null;
             mFinished = 0;
 
             for (Op op = mFirstOp; op != null; op = op.mNext) {
@@ -296,6 +298,12 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
         if (mLocalVariableTable != null && mLocalVariableTable.finish(mCodeLen)) {
             codeAttr.addAttribute(mLocalVariableTable);
+            mLocalVariableTable = null;
+        }
+
+        if (mLocalVariableTypeTable != null && mLocalVariableTypeTable.finish(mCodeLen)) {
+            codeAttr.addAttribute(mLocalVariableTypeTable);
+            mLocalVariableTypeTable = null;
         }
 
         addAttribute(codeAttr);
@@ -3790,28 +3798,54 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
     static final class NameLocalVarOp extends Op {
         final LocalVar mVar;
-        final String mName;
 
-        NameLocalVarOp(LocalVar var, String name) {
+        NameLocalVarOp(LocalVar var) {
             mVar = var;
-            mName = name;
         }
 
         @Override
         void appendTo(TheMethodMaker m) {
+            int slot = mVar.mSlot;
+            if (slot < 0) {
+                return;
+            }
             ConstantPool constants = m.mConstants;
             Attribute.LocalVariableTable table = m.mLocalVariableTable;
             if (table == null) {
-                m.mLocalVariableTable = table = new Attribute.LocalVariableTable(constants);
+                table = new Attribute.LocalVariableTable(constants, "LocalVariableTable");
+                m.mLocalVariableTable = table;
             }
+            // Without support for variable scopes, just cover the whole range.
+            table.add(0, Integer.MAX_VALUE, constants.addUTF8(mVar.name()),
+                      constants.addUTF8(mVar.mType.descriptor()), slot);
+        }
+    }
+
+    static final class SignatureLocalVarOp extends Op {
+        final LocalVar mVar;
+        final String mSignature;
+
+        SignatureLocalVarOp(LocalVar var, String signature) {
+            mVar = var;
+            mSignature = signature;
+        }
+
+        @Override
+        void appendTo(TheMethodMaker m) {
             int slot = mVar.mSlot;
-            if (slot >= 0) {
-                // Without support for variable scopes, just cover the whole range.
-                table.add(0, Integer.MAX_VALUE,
-                          constants.addUTF8(mName),
-                          constants.addUTF8(mVar.mType.descriptor()),
-                          slot);
+            String name;
+            if (slot < 0 || (name = mVar.name()) == null) {
+                return;
             }
+            ConstantPool constants = m.mConstants;
+            Attribute.LocalVariableTable table = m.mLocalVariableTypeTable;
+            if (table == null) {
+                table = new Attribute.LocalVariableTable(constants, "LocalVariableTypeTable");
+                m.mLocalVariableTypeTable = table;
+            }
+            // Without support for variable scopes, just cover the whole range.
+            table.add(0, Integer.MAX_VALUE, constants.addUTF8(mVar.name()),
+                      constants.addUTF8(mSignature), slot);
         }
     }
 
@@ -4861,8 +4895,14 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             if (mName != null) {
                 throw new IllegalStateException("Already named");
             }
-            addOp(new NameLocalVarOp(this, name));
+            addOp(new NameLocalVarOp(this));
             mName = name;
+            return this;
+        }
+
+        @Override
+        public Variable signature(Object... components) {
+            addOp(new SignatureLocalVarOp(this, Attributed.fullSignature(components)));
             return this;
         }
 
@@ -5038,6 +5078,11 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         @Override
         public LocalVar name(String name) {
             throw new IllegalStateException("Already named");
+        }
+
+        @Override
+        public Variable signature(Object... components) {
+            throw new IllegalStateException("Cannot define a signature");
         }
 
         @Override

@@ -56,6 +56,18 @@ public interface Variable {
     Variable name(String name);
 
     /**
+     * Define a signature for this named variable, which is a string for supporting generic
+     * types. The components can be strings or types (class, ClassMaker, etc), which are
+     * concatenated into a single string. Consult the JVM specification for the signature
+     * syntax.
+     *
+     * @throws IllegalArgumentException if given an unsupported component
+     * @throws IllegalStateException if this isn't a plain local variable
+     * @return this
+     */
+    Variable signature(Object... components);
+
+    /**
      * Assign a value of 0, false, or null to this variable, depending on its type.
      *
      * @return this variable

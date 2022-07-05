@@ -37,6 +37,15 @@ public interface Field extends Variable {
     }
 
     /**
+     * Fields cannot have a signature defined within the body of a method, and so this method
+     * always throws an {@link IllegalStateException}.
+     */
+    @Override
+    default Variable signature(Object... components) {
+        throw new IllegalStateException("Cannot define a signature");
+    }
+
+    /**
      * {@inheritDoc}
      */
     @Override

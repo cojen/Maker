@@ -89,7 +89,7 @@ public interface Maker {
     void addAttribute(String name, Object value);
 
     /**
-     * Defines a signature for this member, which is a string for supporting generic types.
+     * Define a signature for this member, which is a string for supporting generic types.
      * The components can be strings or types (class, ClassMaker, etc), which are concatenated
      * into a single string. Consult the JVM specification for the signature syntax.
      *
