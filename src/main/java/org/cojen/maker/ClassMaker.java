@@ -205,6 +205,11 @@ public interface ClassMaker extends Maker {
     ClassMaker implement(Object iface);
 
     /**
+     * {@inheritDoc}
+     */
+    ClassMaker signature(Object... components);
+
+    /**
      * Add a field to the class.
      *
      * @param type a class or name

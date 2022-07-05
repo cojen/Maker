@@ -88,6 +88,11 @@ public interface FieldMaker extends Maker {
     FieldMaker enum_();
 
     /**
+     * {@inheritDoc}
+     */
+    FieldMaker signature(Object... components);
+
+    /**
      * Set an initial constant value for this field. The allowed constants are the same as
      * those allowed by the {@link Variable#set Variable.set} method. Complex constants can be
      * assigned using a {@link ClassMaker#addClinit static initializer}.

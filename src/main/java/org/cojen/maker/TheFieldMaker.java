@@ -89,6 +89,12 @@ final class TheFieldMaker extends ClassMember implements FieldMaker {
     }
 
     @Override
+    public FieldMaker signature(Object... components) {
+        addSignature(components);
+        return this;
+    }
+
+    @Override
     public FieldMaker init(Object value) {
         if (!Modifier.isStatic(mModifiers)) {
             throw new IllegalStateException("Not static");

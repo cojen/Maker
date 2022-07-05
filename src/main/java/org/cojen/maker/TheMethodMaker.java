@@ -462,6 +462,12 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     }
 
     @Override
+    public MethodMaker signature(Object... components) {
+        addSignature(components);
+        return this;
+    }
+
+    @Override
     public ClassVar class_() {
         if (mClassVar == null) {
             mClassVar = new ClassVar(Type.from(Class.class));

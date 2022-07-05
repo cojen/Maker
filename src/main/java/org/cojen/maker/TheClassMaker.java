@@ -236,6 +236,12 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
         return this;
     }
 
+    @Override
+    public ClassMaker signature(Object... components) {
+        addSignature(components);
+        return this;
+    }
+
     /**
      * @return empty set if no interfaces
      */

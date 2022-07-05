@@ -210,6 +210,11 @@ public interface MethodMaker extends Maker {
     MethodMaker override();
 
     /**
+     * {@inheritDoc}
+     */
+    MethodMaker signature(Object... components);
+
+    /**
      * Returns a variable of type {@link Class} which represents the enclosing class of this
      * method.
      *

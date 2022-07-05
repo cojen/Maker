@@ -124,6 +124,96 @@ abstract class Attributed {
         return am;
     }
 
+    public void addSignature(Object... components) {
+        if (components.length == 0) {
+            throw new IllegalArgumentException();
+        }
+
+        String full;
+        {
+            String first = resolveComponent(components[0]);
+            if (components.length == 1) {
+                full = first;
+            } else {
+                var b = new StringBuilder(first.length() + 16);
+
+                for (int i=0; i < components.length; i++) {
+                    String component = i == 0 ? first : resolveComponent(components[i]);
+                    if (component.startsWith("<")) {
+                        i = appendTypeArgs(0, b, component, components, i);
+                    } else {
+                        b.append(component);
+                    }
+                }
+
+                full = b.toString();
+            }
+        }
+
+        addAttribute(new Attribute.Constant(mConstants, "Signature", mConstants.addUTF8(full)));
+    }
+
+    private String resolveComponent(Object component) {
+        if (component instanceof String) {
+            return (String) component;
+        }
+
+        Type type;
+        if (component instanceof Class) {
+            type = Type.from((Class) component);
+        } else if (component instanceof Typed) {
+            type = ((Typed) component).type();
+        } else {
+            throw new IllegalArgumentException("Unsupported component type");
+        }
+
+        return type.descriptor();
+    }
+
+    /**
+     * @param d call depth
+     * @param first must start with a '<' character
+     */
+    private int appendTypeArgs(int d, StringBuilder b, String first, Object[] components, int i) {
+        boolean semi = false;
+        int end = b.length() - 1;
+        if (end >= 0 && b.charAt(end) == ';') {
+            b.setLength(end);
+            semi = true;
+        }
+
+        b.append(first);
+ 
+        for (++i; i < components.length; i++) {
+            String component = resolveComponent(components[i]);
+            if (component.startsWith("<")) {
+                i = appendTypeArgs(d + 1, b, component, components, i);
+            } else {
+                b.append(component);
+                if (component.contains(">")) {
+                    break;
+                }
+            }
+        }
+
+        if (semi) {
+            for (int j = b.length(); --j >= end; ) {
+                if (b.charAt(j) == '>') {
+                    if (d <= 0) {
+                        b.insert(j + 1, ';');
+                        return i;
+                    }
+                    d--;
+                }
+            }
+
+            // Restore the semicolon if the angle bracket syntax is wrong.
+            b.insert(end, ';');
+        }
+
+        return i;
+    }
+
     void writeAttributesTo(BytesOut out) throws IOException {
         if (mAttributes == null) {
             out.writeShort(0);
