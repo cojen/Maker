@@ -7,6 +7,7 @@ v2.4.0
   variables.
 * Change the format of the addAttribute method in order to support more kinds of JVM attributes.
 * Support generic type signatures.
+* Support named method parameters.
 
 v2.3.0 (2022-06-12)
 ------

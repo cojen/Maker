@@ -547,4 +547,33 @@ abstract class Attribute extends Attributed {
             am.writeTo(out);
         }
     }
+
+    static class MethodParameters extends Attribute {
+        private final ConstantPool.C_UTF8[] mNames;
+
+        MethodParameters(ConstantPool cp, int numParams) {
+            super(cp, "MethodParameters");
+            mNames = new ConstantPool.C_UTF8[Math.min(numParams, 255)];
+        }
+
+        void setName(int index, ConstantPool.C_UTF8 name) {
+            if (index < mNames.length) {
+                mNames[index] = name;
+            }
+        }
+
+        @Override
+        int length() {
+            return 1 + mNames.length * 4;
+        }
+
+        @Override
+        void writeDataTo(BytesOut out) throws IOException {
+            out.writeByte(mNames.length);
+            for (ConstantPool.C_UTF8 name : mNames) {
+                out.writeShort(name == null ? 0 : name.mIndex);
+                out.writeShort(0); // access flags
+            }
+        }
+    }
 }

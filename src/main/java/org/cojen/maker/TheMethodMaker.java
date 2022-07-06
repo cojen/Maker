@@ -65,13 +65,13 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
     final Type.Method mMethod;
 
-    private LocalVar[] mParams;
+    private ParamVar[] mParams;
 
     private Op mFirstOp;
     private Op mLastOp;
 
     private ClassVar mClassVar;
-    private LocalVar mThisVar;
+    private ParamVar mThisVar;
     private SuperVar mSuperVar;
 
     private List<Handler> mExceptionHandlers;
@@ -98,6 +98,8 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
     private Attribute.LocalVariableTable mLocalVariableTable;
     private Attribute.LocalVariableTable mLocalVariableTypeTable;
+
+    private Attribute.MethodParameters mMethodParameters;
 
     private Attribute.ConstantList mExceptionsThrown;
 
@@ -536,21 +538,21 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
         if (!Modifier.isStatic(mModifiers)) {
             Type type = mClassMaker.type();
-            mThisVar = "<init>".equals(getName()) ? new InitThisVar(type) : new LocalVar(type);
+            mThisVar = "<init>".equals(getName()) ? new InitThisVar(type) : new ParamVar(type, 0);
             mThisVar.mSlot = 0;
             count++;
             slot = 1;
         }
 
         int i = 0;
-        mParams = new LocalVar[count];
+        mParams = new ParamVar[count];
 
         if (mThisVar != null) {
             mParams[i++] = mThisVar;
         }
 
         for (Type t : mMethod.paramTypes()) {
-            var param = new LocalVar(t);
+            var param = new ParamVar(t, i);
             param.mSlot = slot;
             slot += param.slotWidth();
             mParams[i++] = param;
@@ -4942,6 +4944,46 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     }
 
     /**
+     * Method parameter variable.
+     */
+    class ParamVar extends LocalVar {
+        private final int mIndex;
+
+        ParamVar(Type type, int index) {
+            super(type);
+            mIndex = index;
+        }
+
+        @Override
+        public LocalVar name(String name) {
+            super.name(name);
+
+            var thisVar = mThisVar;
+            if (this != thisVar) {
+                Attribute.MethodParameters mparams = mMethodParameters;
+                if (mparams == null) {
+                    int numParams = mParams.length;
+                    if (thisVar != null) {
+                        numParams--;
+                    }
+                    mparams = new Attribute.MethodParameters(mConstants, numParams);
+                    mMethodParameters = mparams;
+                    addAttribute(mparams);
+                }
+
+                int index = mIndex;
+                if (thisVar != null) {
+                    index--;
+                }
+
+                mparams.setName(index, mConstants.addUTF8(name));
+            }
+
+            return this;
+        }
+    }
+
+    /**
      * Unmodifiable variable which refers to a constant.
      */
     class ConstantVar extends LocalVar {
@@ -5033,11 +5075,11 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     /**
      * Special variable which represents "this" inside a constructor.
      */
-    final class InitThisVar extends LocalVar {
+    final class InitThisVar extends ParamVar {
         private int mSmCode;
 
         InitThisVar(Type type) {
-            super(type);
+            super(type, 0);
             mSmCode = SM_UNINIT_THIS;
         }
 
