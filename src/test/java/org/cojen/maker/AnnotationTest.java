@@ -18,6 +18,9 @@ package org.cojen.maker;
 
 import java.lang.annotation.*;
 
+import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
+
 import java.math.RoundingMode;
 
 import org.junit.*;
@@ -255,5 +258,62 @@ public class AnnotationTest {
 
     @Retention(RetentionPolicy.CLASS)
     public static @interface Ann5 {
+    }
+
+    @Test
+    public void parameterAnnotations() throws Exception {
+        ClassMaker cm = ClassMaker.begin().public_();
+
+        MethodMaker mm = cm.addMethod(null, "t1", String.class, long.class).public_();
+
+        try {
+            mm.this_().addAnnotation(Ann3.class, true);
+            fail();
+        } catch (IllegalStateException e) {
+        }
+
+        try {
+            mm.var(int.class).addAnnotation(Ann3.class, true);
+            fail();
+        } catch (IllegalStateException e) {
+        }
+
+        mm.param(0).addAnnotation(Ann3.class, true).put("name", "bob");
+        mm.param(0).addAnnotation(Ann5.class, false);
+        mm.param(1).addAnnotation(Ann0.class, true);
+        mm.param(1).addAnnotation(Ann3.class, true).put("name", "alice");
+
+        mm = cm.addMethod(null, "t2", String.class, long.class).public_().static_();
+        mm.param(1).addAnnotation(Ann3.class, true).put("name", "yo");
+
+        var clazz = cm.finish();
+
+        {
+            Method m = clazz.getMethod("t1", String.class, long.class);
+            Parameter[] params = m.getParameters();
+            assertEquals(2, params.length);
+
+            Annotation[] anns = params[0].getAnnotations();
+            assertEquals(1, anns.length);
+            assertEquals("bob", ((Ann3) anns[0]).name());
+
+            anns = params[1].getAnnotations();
+            assertEquals(2, anns.length);
+            assertTrue(anns[0] instanceof Ann0);
+            assertEquals("alice", ((Ann3) anns[1]).name());
+        }
+
+        {
+            Method m = clazz.getMethod("t2", String.class, long.class);
+            Parameter[] params = m.getParameters();
+            assertEquals(2, params.length);
+
+            Annotation[] anns = params[0].getAnnotations();
+            assertEquals(0, anns.length);
+
+            anns = params[1].getAnnotations();
+            assertEquals(1, anns.length);
+            assertEquals("yo", ((Ann3) anns[0]).name());
+        }
     }
 }

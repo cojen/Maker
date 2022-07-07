@@ -101,6 +101,8 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
     private Attribute.MethodParameters mMethodParameters;
 
+    private Attribute.ParameterAnnotations[] mParameterAnnotationsSet;
+
     private Attribute.ConstantList mExceptionsThrown;
 
     // Detects when the code can no longer be described as a simple linear flow, used as a
@@ -3863,6 +3865,11 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
+        public AnnotationMaker addAnnotation(Object annotationType, boolean visible) {
+            throw new IllegalStateException("Cannot add an annotation");
+        }
+
+        @Override
         public Variable clear() {
             Type type = type();
             if (type.isObject()) {
@@ -4980,6 +4987,43 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             }
 
             return this;
+        }
+
+        @Override
+        public AnnotationMaker addAnnotation(Object annotationType, boolean visible) {
+            var thisVar = mThisVar;
+            if (this == thisVar) {
+                return super.addAnnotation(annotationType, visible);
+            }
+
+            Attribute.ParameterAnnotations[] set = mParameterAnnotationsSet;
+
+            if (set == null) {
+                mParameterAnnotationsSet = set = new Attribute.ParameterAnnotations[2];
+            }
+
+            int which = visible ? 0 : 1;
+            Attribute.ParameterAnnotations annotations = set[which];
+
+            if (annotations == null) {
+                int numParams = mParams.length;
+                if (thisVar != null) {
+                    numParams--;
+                }
+                annotations = new Attribute.ParameterAnnotations(mConstants, visible, numParams);
+                set[which] = annotations;
+                addAttribute(annotations);
+            }
+
+            int index = mIndex;
+            if (thisVar != null) {
+                index--;
+            }
+
+            var maker = new TheAnnotationMaker(mClassMaker, annotationType);
+            annotations.forParam(index).add(maker);
+
+            return maker;
         }
     }
 

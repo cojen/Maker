@@ -21,6 +21,7 @@ package org.cojen.maker;
  *
  * @author Brian S O'Neill
  * @see Maker#addAnnotation Maker.addAnnotation
+ * @see Variable#addAnnotation Variable.addAnnotation
  */
 public interface AnnotationMaker {
     /**

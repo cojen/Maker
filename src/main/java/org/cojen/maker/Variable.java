@@ -68,6 +68,16 @@ public interface Variable {
     Variable signature(Object... components);
 
     /**
+     * Add an annotation to this variable.
+     *
+     * @param annotationType name or class which refers to an annotation interface
+     * @param visible true if annotation is visible at runtime
+     * @throws IllegalArgumentException if the annotation type is unsupported
+     * @throws IllegalStateException if this variable doesn't support annotations
+     */
+    AnnotationMaker addAnnotation(Object annotationType, boolean visible);
+
+    /**
      * Assign a value of 0, false, or null to this variable, depending on its type.
      *
      * @return this variable

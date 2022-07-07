@@ -18,6 +18,7 @@ package org.cojen.maker;
 
 import java.io.IOException;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -545,6 +546,68 @@ abstract class Attribute extends Attributed {
         @Override
         protected void writeEntryTo(BytesOut out, TheAnnotationMaker am) throws IOException {
             am.writeTo(out);
+        }
+    }
+
+    static class ParameterAnnotations extends Attribute {
+        private final Entry[] mEntries;
+
+        ParameterAnnotations(ConstantPool cp, boolean visible, int numParams) {
+            super(cp, visible ? "RuntimeVisibleParameterAnnotations"
+                  : "RuntimeInvisibleParameterAnnotations");
+            mEntries = new Entry[numParams];
+        }
+
+        Entry forParam(int index) {
+            Entry entry = mEntries[index];
+            if (entry == null) {
+                mEntries[index] = entry = new Entry();
+            }
+            return entry;
+        }
+
+        @Override
+        int length() {
+            int numParams = Math.min(mEntries.length, 255);
+            int length = 1;
+            for (int i=0; i<numParams; i++) {
+                Entry entry = mEntries[i];
+                length += (entry == null ? 2 : entry.length());
+            }
+            return length;
+        }
+
+        @Override
+        void writeDataTo(BytesOut out) throws IOException {
+            int numParams = Math.min(mEntries.length, 255);
+            out.writeByte(numParams);
+            for (int i=0; i<numParams; i++) {
+                Entry entry = mEntries[i];
+                if (entry == null) {
+                    out.writeShort(0);
+                } else {
+                    entry.writeTo(out);
+                }
+            }
+        }
+
+        static class Entry extends ArrayList<TheAnnotationMaker> {
+            int length() {
+                int length = 2;
+                int size = size();
+                for (int i=0; i<size; i++) {
+                    length += get(i).length();
+                }
+                return length;
+            }
+
+            void writeTo(BytesOut out) throws IOException {
+                int size = size();
+                out.writeShort(size);
+                for (int i=0; i<size; i++) {
+                    get(i).writeTo(out);
+                }
+            }
         }
     }
 
