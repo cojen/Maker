@@ -95,6 +95,13 @@ class ConstantPool {
         return doAddClass(type);
     }
 
+    /**
+     * Add a class by name, but without a type.
+     */
+    C_Class addClass(String name) {
+        return addConstant(new C_Class(addUTF8(name.replace('.', '/')), null));
+    }
+
     private C_Class doAddClass(Type type) {
         String name = type.isArray() ? type.descriptor() : type.name().replace('.', '/');
         return addConstant(new C_Class(addUTF8(name), type));
@@ -220,17 +227,13 @@ class ConstantPool {
         return addString(16, typeDesc);
     }
 
-    /*
     C_String addModule(String name) {
         return addString(19, name);
     }
-    */
 
-    /*
     C_String addPackage(String name) {
-        return addString(20, name);
+        return addString(20, name.replace('.', '/'));
     }
-    */
 
     C_NameAndType addNameAndType(String name, String typeDesc) {
         return addNameAndType(addUTF8(name), addUTF8(typeDesc));

@@ -16,6 +16,8 @@
 
 package org.cojen.maker;
 
+import java.lang.module.ModuleDescriptor;
+
 import java.io.IOException;
 
 import java.util.ArrayList;
@@ -51,17 +53,48 @@ abstract class Attributed {
     }
 
     private Attribute defineAttribute(String name, Object value) {
-        if (value == null) {
-            return new Attribute.Empty(mConstants, name);
-        } else if (value instanceof byte[]) {
-            return new Attribute.Bytes(mConstants, name, (byte[]) value);
-        } else if (!value.getClass().isArray()) {
-            return new Attribute.Constant(mConstants, name, defineConstant(value));
-        } else if (value instanceof Object[]) {
-            return defineCompositeAttribute(name, (Object[]) value);
-        } else {
-            throw new IllegalArgumentException();
+        define: {
+            if (value == null) {
+                return new Attribute.Empty(mConstants, name);
+            } else if (value instanceof byte[]) {
+                return new Attribute.Bytes(mConstants, name, (byte[]) value);
+            } else if (!value.getClass().isArray()) {
+                final ConstantPool.Constant constant;
+                if (value instanceof String) {
+                    constant = mConstants.addUTF8((String) value);
+                } else if (value instanceof Class) {
+                    constant = mConstants.addClass(Type.from((Class) value));
+                } else if (value instanceof Typed) {
+                    constant = mConstants.addClass(((Typed) value).type());
+                } else if (value instanceof Number) {
+                    if (value instanceof Integer) {
+                        constant = mConstants.addInteger((int) value);
+                    } else if (value instanceof Long) {
+                        constant = mConstants.addLong((long) value);
+                    } else if (value instanceof Float) {
+                        constant = mConstants.addFloat((float) value);
+                    } else if (value instanceof Double) {
+                        constant = mConstants.addDouble((double) value);
+                    } else {
+                        break define;
+                    }
+                } else if (value instanceof ModuleDescriptor) {
+                    Attribute attr = ModuleAttribute.tryMake(this, name, (ModuleDescriptor) value);
+                    if (attr != null) {
+                        return attr;
+                    }
+                    break define;
+                } else {
+                    break define;
+                }
+
+                return new Attribute.Constant(mConstants, name, constant);
+            } else if (value instanceof Object[]) {
+                return defineCompositeAttribute(name, (Object[]) value);
+            }
         }
+
+        throw new IllegalArgumentException();
     }
 
     private Attribute defineCompositeAttribute(String name, Object[] values) {
@@ -76,37 +109,6 @@ abstract class Attributed {
             }
             return new Attribute.Composite(mConstants, name, entries);
         }
-    }
-
-    private ConstantPool.Constant defineConstant(Object value) {
-        if (value instanceof String) {
-            return mConstants.addUTF8((String) value);
-        }
-
-        if (value instanceof Class) {
-            return mConstants.addClass(Type.from((Class) value));
-        }
-
-        if (value instanceof Typed) {
-            return mConstants.addClass(((Typed) value).type());
-        }
-
-        if (value instanceof Number) {
-            if (value instanceof Integer) {
-                return mConstants.addInteger((int) value);
-            }
-            if (value instanceof Long) {
-                return mConstants.addLong((long) value);
-            }
-            if (value instanceof Float) {
-                return mConstants.addFloat((float) value);
-            }
-            if (value instanceof Double) {
-                return mConstants.addDouble((double) value);
-            }
-        }
-
-        throw new IllegalArgumentException();
     }
 
     TheAnnotationMaker addAnnotation(TheAnnotationMaker am, boolean visible) {

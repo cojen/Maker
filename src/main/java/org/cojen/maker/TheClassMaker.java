@@ -497,6 +497,14 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
         return type().name();
     }
 
+    void toModule() {
+        if (mSuperClass != null) {
+            throw new IllegalStateException();
+        }
+        mSuperClass = new ConstantPool.C_Class(null, null);
+        mModifiers = Modifiers.toModule(mModifiers);
+    }
+
     @Override
     public Class<?> finish() {
         String name = name();

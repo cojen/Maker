@@ -9,6 +9,7 @@ v2.4.0
 * Support generic type signatures.
 * Support named method parameters.
 * Support parameter annotations.
+* Support defining a module-info class.
 
 v2.3.0 (2022-06-12)
 ------

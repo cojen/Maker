@@ -101,4 +101,9 @@ class Modifiers {
     static int toSynthetic(int bitmask) {
         return bitmask | 0x1000;
     }
+
+    // For module-info class only.
+    static int toModule(int bitmask) {
+        return bitmask | 0x8000;
+    }
 }

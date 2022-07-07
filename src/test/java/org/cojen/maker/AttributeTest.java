@@ -16,7 +16,14 @@
 
 package org.cojen.maker;
 
+import java.lang.module.ModuleDescriptor;
+
 import java.lang.reflect.InvocationTargetException;
+
+import java.io.ByteArrayInputStream;
+
+import java.util.List;
+import java.util.Set;
 
 import org.junit.*;
 import static org.junit.Assert.*;
@@ -114,5 +121,73 @@ public class AttributeTest {
 
         Class<?> clazz = cm.finish();
         Class<?> clazz2 = cm2.finish();
+    }
+
+    @Test
+    public void module() throws Exception {
+        var b = ModuleDescriptor.newModule
+            ("test", Set.of(//ModuleDescriptor.Modifier.OPEN,
+                            ModuleDescriptor.Modifier.SYNTHETIC,
+                            ModuleDescriptor.Modifier.MANDATED));
+
+        b.version("0.0.1");
+
+        b.requires(Set.of(ModuleDescriptor.Requires.Modifier.TRANSITIVE,
+                          ModuleDescriptor.Requires.Modifier.STATIC,
+                          ModuleDescriptor.Requires.Modifier.SYNTHETIC,
+                          ModuleDescriptor.Requires.Modifier.MANDATED),
+                   "a.m1", ModuleDescriptor.Version.parse("1.2.3"));
+
+        b.requires(Set.of(), "a.m2");
+
+        b.exports(Set.of(ModuleDescriptor.Exports.Modifier.SYNTHETIC,
+                         ModuleDescriptor.Exports.Modifier.MANDATED),
+                  "a.p1", Set.of("a.m3"));
+
+        b.opens(Set.of(ModuleDescriptor.Opens.Modifier.SYNTHETIC,
+                       ModuleDescriptor.Opens.Modifier.MANDATED),
+                "a.p2", Set.of("a.m4"));
+
+        b.uses("java.time.chrono.Chronology").uses("java.security.Provider");
+
+        b.provides(AttributeTest.class.getName(), List.of("a.c1"));
+
+        b.packages(Set.of("a.p1", "a.p2"));
+
+        var md = b.build();
+
+        try {
+            ClassMaker.beginExplicit("module-info", null, null).extend(Object.class)
+                .addAttribute("Module", md);
+            fail();
+        } catch (IllegalStateException e) {
+        }
+
+        try {
+            ClassMaker.beginExplicit("xxx", null, null).addAttribute("Module", md);
+            fail();
+        } catch (IllegalStateException e) {
+        }
+
+        try {
+            ClassMaker.beginExplicit("module-info", null, null).addAttribute("xxx", md);
+            fail();
+        } catch (IllegalArgumentException e) {
+        }
+
+        try {
+            ClassMaker.begin().addClinit().addAttribute("Module", md);
+            fail();
+        } catch (IllegalArgumentException e) {
+        }
+
+        ClassMaker cm = ClassMaker.beginExplicit("module-info", null, null);
+        cm.addAttribute("Module", md);
+
+        byte[] bytes = cm.finishBytes();
+
+        var actual = ModuleDescriptor.read(new ByteArrayInputStream(bytes));
+
+        assertEquals(md, actual);
     }
 }
