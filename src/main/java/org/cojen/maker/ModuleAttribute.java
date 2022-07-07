@@ -29,9 +29,9 @@ import java.util.Set;
  * @author Brian S O'Neill
  */
 class ModuleAttribute extends Attribute {
-    static ModuleAttribute tryMake(Attributed a, String name, ModuleDescriptor desc) {
+    static ModuleAttribute make(Attributed a, String name, ModuleDescriptor desc) {
         if (!(a instanceof TheClassMaker) || !"Module".equals(name)) {
-            return null;
+            throw new IllegalArgumentException();
         }
 
         var cm = (TheClassMaker) a;

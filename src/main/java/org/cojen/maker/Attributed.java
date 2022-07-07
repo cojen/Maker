@@ -79,11 +79,7 @@ abstract class Attributed {
                         break define;
                     }
                 } else if (value instanceof ModuleDescriptor) {
-                    Attribute attr = ModuleAttribute.tryMake(this, name, (ModuleDescriptor) value);
-                    if (attr != null) {
-                        return attr;
-                    }
-                    break define;
+                    return ModuleAttribute.make(this, name, (ModuleDescriptor) value);
                 } else {
                     break define;
                 }
