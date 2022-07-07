@@ -65,6 +65,16 @@ public interface Maker {
     Maker synthetic();
 
     /**
+     * Define a signature for this member, which is a string for supporting generic types.
+     * The components can be strings or types (class, ClassMaker, etc), which are concatenated
+     * into a single string. Consult the JVM specification for the signature syntax.
+     *
+     * @throws IllegalArgumentException if given an unsupported component
+     * @return this
+     */
+    Maker signature(Object... components);
+
+    /**
      * Returns the {@code ClassMaker} for this item, which can also be used as a type
      * specification.
      */
@@ -87,14 +97,4 @@ public interface Maker {
      * the first element can be interpreted as such.
      */
     void addAttribute(String name, Object value);
-
-    /**
-     * Define a signature for this member, which is a string for supporting generic types.
-     * The components can be strings or types (class, ClassMaker, etc), which are concatenated
-     * into a single string. Consult the JVM specification for the signature syntax.
-     *
-     * @throws IllegalArgumentException if given an unsupported component
-     * @return this
-     */
-    Maker signature(Object... components);
 }
