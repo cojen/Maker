@@ -56,6 +56,11 @@ class ModuleAttribute extends Attribute {
             cm.addAttribute(new Packages(cp, packages));
         }
 
+        String mainClass = desc.mainClass().orElse(null);
+        if (mainClass != null) {
+            cm.addAttribute(new Attribute.Constant(cp, "ModuleMainClass", cp.addClass(mainClass)));
+        }
+
         return attr;
     }
 

@@ -154,6 +154,8 @@ public class AttributeTest {
 
         b.packages(Set.of("a.p1", "a.p2"));
 
+        b.mainClass("a.p1.Foo");
+
         var md = b.build();
 
         try {
