@@ -190,6 +190,20 @@ public class AttributeTest {
 
         var actual = ModuleDescriptor.read(new ByteArrayInputStream(bytes));
 
-        assertEquals(md, actual);
+        assertEquals(0, md.compareTo(actual));
+
+        /*
+
+          Don't call equals until a ModuleDescriptor bug is fixed (internal id 9073590). The
+          internal modsHashCode implementation assumes that equal sets iterate in the same
+          order, and is thus non-commutative.
+
+          Running this test case several times (in different JVM instances) eventually fails
+          because the requires modifier set (of four elements) varies in iteration order.
+
+          This bug was introduced by another fix: https://bugs.openjdk.org/browse/JDK-8275509
+
+          assertEquals(md, actual);
+        */
     }
 }
