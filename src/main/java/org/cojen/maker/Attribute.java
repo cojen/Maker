@@ -203,6 +203,15 @@ abstract class Attribute extends Attributed {
         }
     }
 
+    static class PermittedSubclasses extends ConstantList {
+        PermittedSubclasses(ConstantPool cp, Iterable<ConstantPool.C_Class> subclasses) {
+            super(cp, "PermittedSubclasses");
+            for (ConstantPool.C_Class subclass : subclasses) {
+                add(subclass);
+            }
+        }
+    }
+
     static class Code extends Attribute {
         private final int mMaxStack, mMaxLocals;
         private final byte[] mCode;

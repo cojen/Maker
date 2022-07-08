@@ -190,16 +190,17 @@ public interface ClassMaker extends Maker {
     /**
      * Set a class that this class extends.
      *
-     * @param superClass non-null Class or String
+     * @param superClass non-null type, specified by a Class or a String, etc.
      * @return this
      * @throws IllegalStateException if already assigned
      */
     ClassMaker extend(Object superClass);
 
     /**
-     * Add an interface that this class or interface implements.
+     * Add an interface that this class or interface implements. Call this method multiple
+     * times to implement more interfaces.
      *
-     * @param iface Class or String
+     * @param iface non-null type, specified by a Class or a String, etc.
      * @return this
      */
     ClassMaker implement(Object iface);
@@ -208,6 +209,15 @@ public interface ClassMaker extends Maker {
      * {@inheritDoc}
      */
     ClassMaker signature(Object... components);
+
+    /**
+     * Convert this class into a sealed class by permitting a subclass. Call this method
+     * multiple times to permit more subclasses.
+     *
+     * @param subclass non-null type, specified by a Class or a String, etc.
+     * @return this
+     */
+    ClassMaker permitSubclass(Object subclass);
 
     /**
      * Add a field to the class.

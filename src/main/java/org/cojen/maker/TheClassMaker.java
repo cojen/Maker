@@ -73,6 +73,8 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
 
     private Attribute.InnerClasses mInnerClasses;
 
+    private Set<ConstantPool.C_Class> mPermittedSubclasses;
+
     // Accessed by ConstantsRegistry.
     Object mExactConstants;
 
@@ -238,7 +240,19 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
 
     @Override
     public ClassMaker signature(Object... components) {
+        checkFinished();
         addSignature(components);
+        return this;
+    }
+
+    @Override
+    public ClassMaker permitSubclass(Object subclass) {
+        requireNonNull(subclass);
+        checkFinished();
+        if (mPermittedSubclasses == null) {
+            mPermittedSubclasses = new LinkedHashSet<>(4);
+        }
+        mPermittedSubclasses.add(mConstants.addClass(typeFrom(subclass)));
         return this;
     }
 
@@ -739,6 +753,8 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
         } catch (IOException e) {
             // Not expected.
             throw new RuntimeException(e);
+        } finally {
+            mConstants = null;
         }
 
         if (DEBUG) {
@@ -757,6 +773,7 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
             finishTo(bout, false);
             bout.flush();
         } finally {
+            mConstants = null;
             mInjector.unreserve(name);
         }
     }
@@ -769,6 +786,14 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
 
         // Ensure that mSuperClass has been assigned.
         superClass();
+
+        int version = 0x0000_0037; // Java 11.
+
+        if (mPermittedSubclasses != null) {
+            version = 0x0000_003d; // Java 17.
+            addAttribute(new Attribute.PermittedSubclasses(mConstants, mPermittedSubclasses));
+            mPermittedSubclasses = null;
+        }
 
         mBootstrapMethods = null;
 
@@ -796,7 +821,7 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
         }
 
         out.writeInt(0xCAFEBABE);
-        out.writeInt(0x0000_0037); // Java 11.
+        out.writeInt(version);
 
         mConstants.writeTo(out);
 
@@ -838,7 +863,6 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
         writeAttributesTo(out);
 
         mAttributes = null;
-        mConstants = null;
     }
 
     static void checkSize(Map<?,?> c, int maxSize, String desc) {

@@ -10,6 +10,7 @@ v2.4.0
 * Support named method parameters.
 * Support parameter annotations.
 * Support defining a module-info class.
+* Support sealed classes.
 
 v2.3.0 (2022-06-12)
 ------
