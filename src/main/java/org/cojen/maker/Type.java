@@ -265,7 +265,7 @@ abstract class Type {
     /**
      * @return 0 if not an array
      */
-    int dimensions() {
+    final int dimensions() {
         int dims = 0;
         for (Type type = elementType(); type != null; type = type.elementType()) {
             dims++;
@@ -276,7 +276,7 @@ abstract class Type {
     /**
      * Returns the type as an array or adds a dimension if already an array.
      */
-    Type asArray() {
+    final Type asArray() {
         return new Array(this);
     }
 
@@ -317,7 +317,7 @@ abstract class Type {
     /**
      * @return T_* or T_OBJECT
      */
-    int unboxTypeCode() {
+    final int unboxTypeCode() {
         Type t = unbox();
         return t == null ? T_OBJECT : t.typeCode();
     }
@@ -343,7 +343,7 @@ abstract class Type {
      *
      * @return conversion code, which is max value if disallowed
      */
-    int canConvertTo(Type to) {
+    final int canConvertTo(Type to) {
         if (this.equals(to)) {
             return 0;
         }
@@ -471,7 +471,7 @@ abstract class Type {
     /**
      * Tries to find a field in this type or in a super type.
      */
-    Field findField(String name) {
+    final Field findField(String name) {
         Type type = this;
         do {
             Field field = type.fields().get(name);
