@@ -193,9 +193,10 @@ public class AttributeTest {
         assertEquals(0, md.compareTo(actual));
 
         /*
+          Don't call equals until this ModuleDescriptor bug is fixed:
+          https://bugs.openjdk.org/browse/JDK-8290041.
 
-          Don't call equals until a ModuleDescriptor bug is fixed (internal id 9073590). The
-          internal modsHashCode implementation assumes that equal sets iterate in the same
+          The internal modsHashCode implementation assumes that equal sets iterate in the same
           order, and is thus non-commutative.
 
           Running this test case several times (in different JVM instances) eventually fails
