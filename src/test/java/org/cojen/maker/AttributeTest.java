@@ -16,6 +16,13 @@
 
 package org.cojen.maker;
 
+import java.lang.annotation.Annotation;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.IncompleteAnnotationException;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
 import java.lang.module.ModuleDescriptor;
 
 import java.lang.reflect.InvocationTargetException;
@@ -206,5 +213,148 @@ public class AttributeTest {
 
           assertEquals(md, actual);
         */
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void annotationDefault() throws Exception {
+        Class annClass;
+        {
+            ClassMaker cm = ClassMaker.begin().public_().annotation();
+            cm.addAnnotation(Retention.class, true)
+                .put("value", RetentionPolicy.RUNTIME);
+            cm.addAnnotation(Target.class, true)
+                .put("value", new ElementType[] {ElementType.METHOD});
+            {
+                MethodMaker mm = cm.addMethod(int.class, "num").public_().abstract_();
+                mm.addAttribute("AnnotationDefault", 100);
+            }
+            {
+                MethodMaker mm = cm.addMethod(String.class, "name").public_().abstract_();
+                mm.addAttribute("AnnotationDefault", "bob");
+            }
+            annClass = cm.finish();
+        }
+
+        ClassMaker cm = ClassMaker.begin().public_();
+
+        {
+            MethodMaker mm = cm.addMethod(null, "test1").public_().static_();
+            mm.return_();
+            mm.addAnnotation(annClass, true);
+        }
+
+        {
+            MethodMaker mm = cm.addMethod(null, "test2").public_().static_();
+            mm.return_();
+            mm.addAnnotation(annClass, true).put("num", 99);
+        }
+
+        var clazz = cm.finish();
+
+        {
+            Object ann = clazz.getMethod("test1").getAnnotation(annClass);
+            assertEquals(100, ann.getClass().getMethod("num").invoke(ann));
+            assertEquals("bob", ann.getClass().getMethod("name").invoke(ann));
+        }
+
+        {
+            Object ann = clazz.getMethod("test2").getAnnotation(annClass);
+            assertEquals(99, ann.getClass().getMethod("num").invoke(ann));
+            assertEquals("bob", ann.getClass().getMethod("name").invoke(ann));
+        }
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void brokenAnnotationDefault() throws Throwable {
+        {
+            ClassMaker cm = ClassMaker.begin().public_().annotation();
+            cm.addAnnotation(Retention.class, true)
+                .put("value", RetentionPolicy.RUNTIME);
+            cm.addAnnotation(Target.class, true)
+                .put("value", new ElementType[] {ElementType.METHOD});
+
+            MethodMaker mm = cm.addMethod(int.class, "num").public_().abstract_();
+
+            // Adding the annotation to the class instead of the method.
+            cm.addAttribute("AnnotationDefault", 100);
+
+            Class annClass = cm.finish();
+
+            cm = ClassMaker.begin().public_();
+            mm = cm.addMethod(null, "test").public_().static_();
+            mm.return_();
+            mm.addAnnotation(annClass, true);
+
+            var clazz = cm.finish();
+
+            Object ann = clazz.getMethod("test").getAnnotation(annClass);
+            try {
+                ann.getClass().getMethod("num").invoke(ann);
+                fail();
+            } catch (InvocationTargetException e) {
+                Throwable cause = e.getCause();
+                if (!(cause instanceof IncompleteAnnotationException)) {
+                    throw cause;
+                }
+            }
+        }
+
+        {
+            // Not calling the annotation method.
+            ClassMaker cm = ClassMaker.begin().public_().interface_().implement(Annotation.class);
+            cm.addAnnotation(Retention.class, true)
+                .put("value", RetentionPolicy.RUNTIME);
+            cm.addAnnotation(Target.class, true)
+                .put("value", new ElementType[] {ElementType.METHOD});
+
+            MethodMaker mm = cm.addMethod(int.class, "num").public_().abstract_();
+            mm.addAttribute("AnnotationDefault", 100);
+
+            Class annClass = cm.finish();
+
+            cm = ClassMaker.begin().public_();
+            mm = cm.addMethod(null, "test").public_().static_();
+            mm.return_();
+            mm.addAnnotation(annClass, true);
+
+            var clazz = cm.finish();
+
+            assertNull(clazz.getMethod("test").getAnnotation(annClass));
+        }
+
+        {
+            ClassMaker cm = ClassMaker.begin().public_().annotation();
+            cm.addAnnotation(Retention.class, true)
+                .put("value", RetentionPolicy.RUNTIME);
+            cm.addAnnotation(Target.class, true)
+                .put("value", new ElementType[] {ElementType.METHOD});
+
+            MethodMaker mm = cm.addMethod(int.class, "num").public_().abstract_();
+
+            // Wrong name.
+            mm.addAttribute("Fake", 100);
+
+            Class annClass = cm.finish();
+
+            cm = ClassMaker.begin().public_();
+            mm = cm.addMethod(null, "test").public_().static_();
+            mm.return_();
+            mm.addAnnotation(annClass, true);
+
+            var clazz = cm.finish();
+
+            Object ann = clazz.getMethod("test").getAnnotation(annClass);
+            try {
+                ann.getClass().getMethod("num").invoke(ann);
+                fail();
+            } catch (InvocationTargetException e) {
+                Throwable cause = e.getCause();
+                if (!(cause instanceof IncompleteAnnotationException)) {
+                    throw cause;
+                }
+            }
+        }
     }
 }

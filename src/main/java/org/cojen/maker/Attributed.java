@@ -49,61 +49,67 @@ abstract class Attributed {
 
     public void addAttribute(String name, Object value) {
         Objects.requireNonNull(name);
-        addAttribute(defineAttribute(name, value));
+        addAttribute(NamedAttribute.make(this, mConstants, name, value));
     }
 
-    private Attribute defineAttribute(String name, Object value) {
-        define: {
-            if (value == null) {
-                return new Attribute.Empty(mConstants, name);
-            } else if (value instanceof byte[]) {
-                return new Attribute.Bytes(mConstants, name, (byte[]) value);
-            } else if (!value.getClass().isArray()) {
-                final ConstantPool.Constant constant;
-                if (value instanceof String) {
-                    constant = mConstants.addUTF8((String) value);
-                } else if (value instanceof Class) {
-                    constant = mConstants.addClass(Type.from((Class) value));
-                } else if (value instanceof Typed) {
-                    constant = mConstants.addClass(((Typed) value).type());
-                } else if (value instanceof Number) {
-                    if (value instanceof Integer) {
-                        constant = mConstants.addInteger((int) value);
-                    } else if (value instanceof Long) {
-                        constant = mConstants.addLong((long) value);
-                    } else if (value instanceof Float) {
-                        constant = mConstants.addFloat((float) value);
-                    } else if (value instanceof Double) {
-                        constant = mConstants.addDouble((double) value);
+    private static class NamedAttribute {
+        // This code is in an inner class to avoid loading it eagerly.
+
+        static Attribute make(Attributed a, ConstantPool cp, String name, Object value) {
+            define: {
+                if (a instanceof TheMethodMaker && ((TheMethodMaker) a).mClassMaker.isAnnotation()
+                    && "AnnotationDefault".equals(name))
+                {
+                    return new Attribute.AnnotationDefault
+                        (cp, TheAnnotationMaker.toElement(null, cp, value));
+                } else if (value == null) {
+                    return new Attribute.Empty(cp, name);
+                } else if (value instanceof byte[]) {
+                    return new Attribute.Bytes(cp, name, (byte[]) value);
+                } else if (!value.getClass().isArray()) {
+                    final ConstantPool.Constant constant;
+                    if (value instanceof String) {
+                        constant = cp.addUTF8((String) value);
+                    } else if (value instanceof Class) {
+                        constant = cp.addClass(Type.from((Class) value));
+                    } else if (value instanceof Typed) {
+                        constant = cp.addClass(((Typed) value).type());
+                    } else if (value instanceof Number) {
+                        if (value instanceof Integer) {
+                            constant = cp.addInteger((int) value);
+                        } else if (value instanceof Long) {
+                            constant = cp.addLong((long) value);
+                        } else if (value instanceof Float) {
+                            constant = cp.addFloat((float) value);
+                        } else if (value instanceof Double) {
+                            constant = cp.addDouble((double) value);
+                        } else {
+                            break define;
+                        }
+                    } else if (value instanceof ModuleDescriptor) {
+                        return ModuleAttribute.make(a, name, (ModuleDescriptor) value);
                     } else {
                         break define;
                     }
-                } else if (value instanceof ModuleDescriptor) {
-                    return ModuleAttribute.make(this, name, (ModuleDescriptor) value);
-                } else {
-                    break define;
+
+                    return new Attribute.Constant(cp, name, constant);
+                } else if (value instanceof Object[]) {
+                    var values = (Object[]) value;
+                    if (values.length == 0) {
+                        return make(a, cp, name, null);
+                    } else if (values.length == 1) {
+                        return make(a, cp, name, values[0]);
+                    } else {
+                        var entries = new Attribute[values.length];
+                        for (int i=0; i<values.length; i++) {
+                            entries[i] = make(a, cp, null, values[i]);
+                        }
+                        return new Attribute.Composite(cp, name, entries);
+                    }
                 }
-
-                return new Attribute.Constant(mConstants, name, constant);
-            } else if (value instanceof Object[]) {
-                return defineCompositeAttribute(name, (Object[]) value);
             }
-        }
 
-        throw new IllegalArgumentException();
-    }
-
-    private Attribute defineCompositeAttribute(String name, Object[] values) {
-        if (values.length == 0) {
-            return defineAttribute(name, null);
-        } else if (values.length == 1) {
-            return defineAttribute(name, values[0]);
-        } else {
-            var entries = new Attribute[values.length];
-            for (int i=0; i<values.length; i++) {
-                entries[i] = defineAttribute(null, values[i]);
-            }
-            return new Attribute.Composite(mConstants, name, entries);
+            throw new IllegalArgumentException();
         }
     }
 

@@ -316,4 +316,33 @@ public class AnnotationTest {
             assertEquals("yo", ((Ann3) anns[0]).name());
         }
     }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void makeAnnotation() throws Exception {
+        for (int i = 1; i <= 2; i++) {
+            Class annClass;
+            {
+                ClassMaker cm = ClassMaker.begin().public_().annotation();
+                if (i == 2) {
+                    cm = cm.annotation(); // okay to call again
+                }
+                cm.addAnnotation(Retention.class, true)
+                    .put("value", RetentionPolicy.RUNTIME);
+                cm.addAnnotation(Target.class, true)
+                    .put("value", new ElementType[] {ElementType.METHOD});
+                annClass = cm.finish();
+            }
+
+            ClassMaker cm = ClassMaker.begin().public_();
+
+            MethodMaker mm = cm.addMethod(null, "test").public_().static_();
+            mm.return_();
+            mm.addAnnotation(annClass, true);
+
+            var clazz = cm.finish();
+
+            assertNotNull(clazz.getMethod("test").getAnnotation(annClass));
+        }
+    }
 }

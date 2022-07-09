@@ -11,6 +11,7 @@ v2.4.0
 * Support parameter annotations.
 * Support defining a module-info class.
 * Support sealed classes.
+* Support defining annotations.
 
 v2.3.0 (2022-06-12)
 ------

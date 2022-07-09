@@ -19,12 +19,15 @@ package org.cojen.maker;
 import java.io.IOException;
 import java.io.OutputStream;
 
+import java.lang.annotation.Annotation;
+
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -196,6 +199,19 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
         checkFinished();
         mModifiers = Modifiers.toEnum(mModifiers);
         return this;
+    }
+
+    @Override
+    public ClassMaker annotation() {
+        if (!isAnnotation()) {
+            interface_().implement(Annotation.class);
+            mModifiers |= 0x2000;
+        }
+        return this;
+    }
+
+    boolean isAnnotation() {
+        return (mModifiers & 0x2000) != 0;
     }
 
     @Override

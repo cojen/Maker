@@ -51,7 +51,7 @@ class TheAnnotationMaker implements AnnotationMaker {
         if (mElements.containsKey(utf)) {
             throw new IllegalStateException();
         }
-        mElements.put(utf, toElement(value));
+        mElements.put(utf, toElement(this, mClassMaker.mConstants, value));
     }
 
     @Override
@@ -78,10 +78,9 @@ class TheAnnotationMaker implements AnnotationMaker {
         }
     }
 
-    private Element toElement(Object value) {
+    static Element toElement(TheAnnotationMaker parent, ConstantPool cp, Object value) {
         Objects.requireNonNull(value);
 
-        ConstantPool cp = mClassMaker.mConstants;
         if (value instanceof String) {
             return new ConstElement('s', cp.addUTF8((String) value));
         } else if (value instanceof Integer) {
@@ -99,12 +98,12 @@ class TheAnnotationMaker implements AnnotationMaker {
             }
             var elements = new Element[length];
             for (int i=0; i<length; i++) {
-                elements[i] = toElement(Array.get(value, i));
+                elements[i] = toElement(parent, cp, Array.get(value, i));
             }
             return new ArrayElement(elements);
         } else if (value instanceof TheAnnotationMaker) {
             var am = (TheAnnotationMaker) value;
-            if (am.mParent != this) {
+            if (am.mParent != parent) {
                 throw new IllegalStateException();
             }
             am.mParent = null;

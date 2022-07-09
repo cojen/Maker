@@ -188,6 +188,13 @@ public interface ClassMaker extends Maker {
     ClassMaker enum_();
 
     /**
+     * Indicate that this class is defining an annotation interface.
+     *
+     * @return this
+     */
+    ClassMaker annotation();
+
+    /**
      * Set a class that this class extends.
      *
      * @param superClass non-null type, specified by a Class or a String, etc.

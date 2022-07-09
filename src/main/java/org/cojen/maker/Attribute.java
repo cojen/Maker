@@ -620,6 +620,25 @@ abstract class Attribute extends Attributed {
         }
     }
 
+    static class AnnotationDefault extends Attribute {
+        private final TheAnnotationMaker.Element mElement;
+
+        AnnotationDefault(ConstantPool cp, TheAnnotationMaker.Element element) {
+            super(cp, "AnnotationDefault");
+            mElement = element;
+        }
+
+        @Override
+        int length() {
+            return mElement.length();
+        }
+
+        @Override
+        void writeDataTo(BytesOut out) throws IOException {
+            mElement.writeTo(out);
+        }
+    }
+
     static class MethodParameters extends Attribute {
         private final ConstantPool.C_UTF8[] mNames;
 
