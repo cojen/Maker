@@ -1,7 +1,7 @@
 Changelog
 =========
 
-v2.4.0
+v2.4.0 (2022-07-10)
 ------
 * Fix concat method when given more than 100 arguments, and some of them are double or long
   variables.
