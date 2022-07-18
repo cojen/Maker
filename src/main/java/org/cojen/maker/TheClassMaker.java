@@ -65,8 +65,6 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
     private Map<String, TheFieldMaker> mFields;
     private List<TheMethodMaker> mMethods;
 
-    private boolean mHasConstructor;
-
     private ArrayList<TheMethodMaker> mClinitMethods;
 
     private Attribute.BootstrapMethods mBootstrapMethods;
@@ -353,11 +351,6 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
     private TheMethodMaker doAddMethod(Object retType, String name, Object... paramTypes) {
         var mm = new TheMethodMaker(this, defineMethod(retType, name, paramTypes));
         doAddMethod(mm);
-
-        if (!mHasConstructor && name.equals("<init>")) {
-            mHasConstructor = true;
-        }
-
         return mm;
     }
 
