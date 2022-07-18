@@ -274,7 +274,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         if (mThisVar instanceof InitThisVar) {
-            if (((InitThisVar) mThisVar).smCode() == SM_UNINIT_THIS) {
+            if (mThisVar.smCode() == SM_UNINIT_THIS) {
                 throw new IllegalStateException("Super or this constructor never invoked");
             }
         }
@@ -3848,7 +3848,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                 m.mLocalVariableTypeTable = table;
             }
             // Without support for variable scopes, just cover the whole range.
-            table.add(0, Integer.MAX_VALUE, constants.addUTF8(mVar.name()),
+            table.add(0, Integer.MAX_VALUE, constants.addUTF8(name),
                       constants.addUTF8(mSignature), slot);
         }
     }
