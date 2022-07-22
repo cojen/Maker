@@ -293,7 +293,7 @@ public interface Variable {
     Variable ne(Object value);
 
     /**
-     * Determine if this variable is less than to another variable or constant, and assign the
+     * Determine if this variable is less than another variable or constant, and assign the
      * result to a new boolean variable.
      *
      * @param value a {@link Variable} or a constant
@@ -315,7 +315,7 @@ public interface Variable {
     Variable ge(Object value);
 
     /**
-     * Determine if this variable is greater than to another variable or constant, and assign
+     * Determine if this variable is greater than another variable or constant, and assign
      * the result to a new boolean variable.
      *
      * @param value a {@link Variable} or a constant
