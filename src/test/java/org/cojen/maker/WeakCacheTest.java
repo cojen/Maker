@@ -61,6 +61,29 @@ public class WeakCacheTest {
         assertTrue(found < 10_000);
     }
 
+    @Test
+    public void collision() {
+        var cache = new WeakCache<String, Value>();
+
+        var values = new Value[] {new Value(), new Value(), new Value(), new Value()};
+
+        cache.put("Ea", values[0]);
+        cache.put("FB", values[1]);
+
+        assertEquals(values[0], cache.get("Ea"));
+        assertEquals(values[1], cache.get("FB"));
+
+        cache.put("Ea", values[2]);
+
+        assertEquals(values[2], cache.get("Ea"));
+        assertEquals(values[1], cache.get("FB"));
+
+        cache.put("FB", values[3]);
+
+        assertEquals(values[2], cache.get("Ea"));
+        assertEquals(values[3], cache.get("FB"));
+    }
+
     private static class Value {
     }
 }
