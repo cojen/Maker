@@ -68,26 +68,16 @@ class ClassInjector extends ClassLoader {
     public Class<?> loadClass(String name) throws ClassNotFoundException {
         Group group = findPackageGroup(name, false);
 
-        Exception ex = null;
-
         if (group != null) {
             try {
                 return group.doLoadClass(name);
             } catch (ClassNotFoundException e) {
-                ex = e;
             }
         }
 
-        try {
-            // Classes aren't defined directly in the ClassInjector itself, so go straight to
-            // the parent. Calling super.loadClass causes deadlocks.
-            return getParent().loadClass(name);
-        } catch (ClassNotFoundException e) {
-            if (ex != null) {
-                e.addSuppressed(ex);
-            }
-            throw e;
-        }
+        // Classes aren't defined directly in the ClassInjector itself, so go straight to the
+        // parent. Calling super.loadClass causes deadlocks.
+        return getParent().loadClass(name);
     }
 
     Class<?> define(Group group, String name, byte[] b) {

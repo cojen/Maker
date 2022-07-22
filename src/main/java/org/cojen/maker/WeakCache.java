@@ -75,12 +75,15 @@ class WeakCache<K, V> extends ReferenceQueue<Object> {
         for (Entry<K, V> e = entries[index], prev = null; e != null; e = e.mNext) {
             if (e.mKey.equals(key)) {
                 V replaced = e.get();
-                e.clear();
+                if (replaced != null) {
+                    e.clear();
+                }
                 var newEntry = new Entry<K, V>(key, value, hash, this);
                 if (prev == null) {
                     newEntry.mNext = e.mNext;
                 } else {
                     prev.mNext = e.mNext;
+                    newEntry.mNext = entries[index];
                 }
                 VarHandle.storeStoreFence(); // ensure that entry value is safely visible
                 entries[index] = newEntry;
@@ -90,7 +93,7 @@ class WeakCache<K, V> extends ReferenceQueue<Object> {
             }
         }
 
-        if (mSize >= mEntries.length) {
+        if (mSize >= entries.length) {
             // Rehash.
             var newEntries = new Entry[entries.length << 1];
             int size = 0;
