@@ -1,9 +1,11 @@
 Changelog
 =========
 
-v2.4.1
+v2.4.1 (2022-07-24)
 ------
 * Fixed a bug which caused loaded classes to sometimes get lost.
+* Don't pollute the ClassLoader lock table with lookup class names that will never be removed.
+* If available, use a virtual thread to clean up cache entries.
 
 v2.4.0 (2022-07-10)
 ------
