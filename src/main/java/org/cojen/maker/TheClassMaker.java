@@ -114,14 +114,8 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
 
     // Called by ClassInjector.Group.
     TheClassMaker(String className, ClassInjector injector, ClassInjector.Group injectorGroup) {
-        super(new ConstantPool());
-        mParent = null;
-        mExternal = false;
-        mLookup = null;
-        mInjector = injector;
+        this(null, false, className, null, injector);
         mInjectorGroup = injectorGroup;
-        className = injector.reserve(this, className, false);
-        mThisClass = mConstants.addClass(Type.begin(injector, this, className));
     }
 
     @Override
