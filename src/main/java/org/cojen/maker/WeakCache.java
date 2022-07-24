@@ -16,6 +16,9 @@
 
 package org.cojen.maker;
 
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 import java.lang.invoke.VarHandle;
 
 import java.lang.ref.WeakReference;
@@ -27,6 +30,22 @@ import java.lang.ref.ReferenceQueue;
  * @author Brian S O'Neill
  */
 class WeakCache<K, V> extends ReferenceQueue<Object> {
+    private static final MethodHandle START_VIRTUAL_THREAD;
+
+    static {
+        MethodHandle mh;
+        try {
+            var mt = MethodType.methodType(Thread.class, Runnable.class);
+            mh = MethodHandles.lookup().findStatic(Thread.class, "startVirtualThread", mt);
+            // Test if feature is enabled.
+            var t = (Thread) mh.invokeExact((Runnable) () -> { });
+        } catch (Throwable e) {
+            mh = null;
+        }
+
+        START_VIRTUAL_THREAD = mh;
+    }
+
     private Entry<K, V>[] mEntries;
     private int mSize;
 
@@ -34,6 +53,23 @@ class WeakCache<K, V> extends ReferenceQueue<Object> {
     public WeakCache() {
         // Initial capacity must be a power of 2.
         mEntries = new Entry[2];
+
+        if (START_VIRTUAL_THREAD != null) {
+            try {
+                var t = (Thread) START_VIRTUAL_THREAD.invokeExact((Runnable) () -> {
+                    try {
+                        while (true) {
+                            Object ref = remove();
+                            synchronized (WeakCache.this) {
+                                cleanup(ref);
+                            }
+                        }
+                    } catch (InterruptedException e) {
+                    }
+                });
+            } catch (Throwable e) {
+            }
+        }
     }
 
     /**
@@ -41,10 +77,10 @@ class WeakCache<K, V> extends ReferenceQueue<Object> {
      * Double check with synchronization.
      */
     public V get(K key) {
-        Object obj = poll();
-        if (obj != null) {
+        Object ref = poll();
+        if (ref != null) {
             synchronized (this) {
-                cleanup(obj);
+                cleanup(ref);
             }
         }
 
@@ -63,9 +99,9 @@ class WeakCache<K, V> extends ReferenceQueue<Object> {
      */
     @SuppressWarnings({"unchecked"})
     public synchronized V put(K key, V value) {
-        Object obj = poll();
-        if (obj != null) {
-            cleanup(obj);
+        Object ref = poll();
+        if (ref != null) {
+            cleanup(ref);
         }
 
         var entries = mEntries;
@@ -126,13 +162,13 @@ class WeakCache<K, V> extends ReferenceQueue<Object> {
     /**
      * Caller must be synchronized.
      *
-     * @param obj not null
+     * @param ref not null
      */
     @SuppressWarnings({"unchecked"})
-    private void cleanup(Object obj) {
+    private void cleanup(Object ref) {
         var entries = mEntries;
         do {
-            var cleared = (Entry<K, V>) obj;
+            var cleared = (Entry<K, V>) ref;
             int ix = cleared.mHash & (entries.length - 1);
             for (Entry<K, V> e = entries[ix], prev = null; e != null; e = e.mNext) {
                 if (e == cleared) {
@@ -147,7 +183,7 @@ class WeakCache<K, V> extends ReferenceQueue<Object> {
                     prev = e;
                 }
             }
-        } while ((obj = poll()) != null);
+        } while ((ref = poll()) != null);
     }
 
     private static final class Entry<K, V> extends WeakReference<V> {
