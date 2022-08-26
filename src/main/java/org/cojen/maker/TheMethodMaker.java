@@ -148,19 +148,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
         positionReturnLabel();
 
-        boolean isEndReached = true;
-        if (mLastOp instanceof BytecodeOp) {
-            if (mLastOp instanceof ReturnOp) {
-                isEndReached = false;
-            } else {
-                byte op = ((BytecodeOp) mLastOp).op();
-                if (op == GOTO || op == GOTO_W || op == ATHROW) {
-                    isEndReached = false;
-                }
-            }
-        }
-
-        if (isEndReached) {
+        if (flowsThroughEnd(mLastOp)) {
             if (mMethod.returnType() == VOID) {
                 if (mLastOp == null &&
                     "<init>".equals(getName()) && mMethod.paramTypes().length == 0)
@@ -168,7 +156,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                     invokeSuperConstructor();
                 }
                 doReturn();
-            } else {
+            } else if (mLastOp == null) {
                 throw new IllegalStateException
                     ("End reached without returning: " + mMethod.returnType().name());
             }
@@ -236,6 +224,8 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         mCode = new byte[Math.min(MAX_CODE_LENGTH, opCount * 2)];
         mStack = new LocalVar[8];
 
+        Op lastAppendedOp = null;
+
         while (true) {
             mCodeLen = 0;
 
@@ -250,6 +240,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             for (Op op = mFirstOp; op != null; op = op.mNext) {
                 if (op.mVisited) { // only append if visited by flow analysis
                     op.appendTo(this);
+                    lastAppendedOp = op;
                 }
             }
 
@@ -273,18 +264,21 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             new Flow(varList, varUsage).run(mFirstOp);
         }
 
-        if (mThisVar instanceof InitThisVar) {
-            if (mThisVar.smCode() == SM_UNINIT_THIS) {
-                throw new IllegalStateException("Super or this constructor never invoked");
-            }
-        }
-
         mParams = null;
         mFirstOp = null;
         mLastOp = null;
         mReturnLabel = null;
         mVars = null;
         mStack = null;
+
+        if (mThisVar instanceof InitThisVar && mThisVar.smCode() == SM_UNINIT_THIS) {
+            throw new IllegalStateException("Super or this constructor never invoked");
+        }
+
+        if (flowsThroughEnd(lastAppendedOp)) {
+            throw new IllegalStateException
+                ("End reached without returning: " + mMethod.returnType().name());
+        }
 
         var codeAttr = new Attribute.Code
             (mConstants, mMaxStackSlot, maxLocals, mCode, mCodeLen, mExceptionHandlers);
@@ -347,6 +341,20 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         first.doFinish();
+    }
+
+    private static boolean flowsThroughEnd(Op lastOp) {
+        if (lastOp instanceof BytecodeOp) {
+            if (lastOp instanceof ReturnOp) {
+                return false;
+            } else {
+                byte opcode = ((BytecodeOp) lastOp).op();
+                if (opcode == GOTO || opcode == GOTO_W || opcode == ATHROW) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     @Override

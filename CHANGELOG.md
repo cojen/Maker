@@ -1,6 +1,10 @@
 Changelog
 =========
 
+v2.4.2
+------
+* Fixed detection of code flowing through the end of a method when the code at the end is dead.
+
 v2.4.1 (2022-07-24)
 ------
 * Fixed a bug which caused loaded classes to sometimes get lost.

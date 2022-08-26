@@ -42,7 +42,7 @@ public interface MethodMaker extends Maker {
      * @see #finish
      */
     static MethodMaker begin(MethodHandles.Lookup lookup,
-                                    Object retType, String name, Object... paramTypes)
+                             Object retType, String name, Object... paramTypes)
     {
         return begin(lookup, null, retType, name, paramTypes);
     }

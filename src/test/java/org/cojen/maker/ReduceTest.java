@@ -65,4 +65,25 @@ public class ReduceTest {
 
         cm.finish().getMethod("test", int.class).invoke(null, 10);
     }
+
+    @Test
+    public void deadCode() throws Exception {
+        // Handles cases where the code flows through the end, even when the end is dead code.
+
+        ClassMaker cm = ClassMaker.begin().public_();
+
+        MethodMaker mm = cm.addConstructor();
+        mm.invokeSuperConstructor();
+        mm.nop();
+
+        mm = cm.addMethod(int.class, "test").public_().static_();
+        mm.return_(1);
+        mm.label().here();
+
+        mm = cm.addMethod(void.class, "test2").public_().static_();
+        mm.return_();
+        mm.nop();
+
+        cm.finish().getMethod("test").invoke(null);
+    }
 }
