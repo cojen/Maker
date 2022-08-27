@@ -16,6 +16,8 @@
 
 package org.cojen.maker;
 
+import java.io.Serializable;
+
 import org.junit.*;
 import static org.junit.Assert.*;
 
@@ -57,5 +59,22 @@ public class InterfaceTest {
         Object result = clazz.getMethod("test2", int.class).invoke(obj, 10);
 
         assertEquals(10 + 100 + 1, result);
+    }
+
+    @Test
+    public void useMakerAfterFinished() throws Exception {
+        ClassMaker cm1 = ClassMaker.begin().public_().implement(Serializable.class);
+        cm1.addConstructor().public_();
+        Class<?> c1 = cm1.finish();
+
+        ClassMaker cm2 = ClassMaker.begin().public_();
+        MethodMaker mm = cm2.addMethod(Serializable.class, "test").public_().static_();
+        // Should be able to reference cm1 and see that it implements Serializable.
+        mm.return_(mm.new_(cm1));
+
+        Class<?> c2 = cm2.finish();
+        Object result = c2.getMethod("test").invoke(null);
+
+        assertEquals(c1, result.getClass());
     }
 }

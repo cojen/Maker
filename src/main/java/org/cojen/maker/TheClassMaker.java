@@ -794,13 +794,9 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
         if (mPermittedSubclasses != null) {
             version = 0x0000_003d; // Java 17.
             addAttribute(new Attribute.PermittedSubclasses(mConstants, mPermittedSubclasses));
-            mPermittedSubclasses = null;
         }
 
-        mBootstrapMethods = null;
-
         TheMethodMaker.doFinish(mClinitMethods);
-        mClinitMethods = null;
 
         checkSize(mInterfaces, 65535, "Interface");
         checkSize(mFields, 65535, "Field");
@@ -839,7 +835,6 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
             for (ConstantPool.C_Class iface : mInterfaces) {
                 out.writeShort(iface.mIndex);
             }
-            mInterfaces = null;
         }
 
         if (mFields == null) {
@@ -849,7 +844,6 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
             for (TheFieldMaker field : mFields.values()) {
                 field.writeTo(out);
             }
-            mFields = null;
         }
 
         if (mMethods == null) {
@@ -859,12 +853,9 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
             for (TheMethodMaker method : mMethods) {
                 method.writeTo(out);
             }
-            mMethods = null;
         }
 
         writeAttributesTo(out);
-
-        mAttributes = null;
     }
 
     static void checkSize(Map<?,?> c, int maxSize, String desc) {
