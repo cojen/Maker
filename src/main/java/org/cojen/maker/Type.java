@@ -1558,6 +1558,14 @@ abstract class Type {
                 }
             }
 
+            if (specificReturnType != null && !methods.isEmpty()) {
+                methods.removeIf(m -> !specificReturnType.equals(m.returnType()));
+            }
+
+            if (specificParamTypes != null && !methods.isEmpty()) {
+                methods.removeIf(m -> !Arrays.equals(specificParamTypes, m.paramTypes()));
+            }
+
             if (methods.size() > 1) {
                 Iterator<Method> it = methods.iterator();
                 Method best = it.next();
@@ -1579,14 +1587,6 @@ abstract class Type {
                 }
 
                 methods = bestSet;
-            }
-
-            if (specificReturnType != null && !methods.isEmpty()) {
-                methods.removeIf(m -> !specificReturnType.equals(m.returnType()));
-            }
-
-            if (specificParamTypes != null && !methods.isEmpty()) {
-                methods.removeIf(m -> !Arrays.equals(specificParamTypes, m.paramTypes()));
             }
 
             if (methods.size() > 1) {
