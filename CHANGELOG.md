@@ -1,7 +1,7 @@
 Changelog
 =========
 
-v2.4.2
+v2.4.2 (2022-08-30)
 ------
 * Fixed detection of code flowing through the end of a method when the code at the end is dead.
 * Type information from a freshly made class is now still available after the class is finished.
