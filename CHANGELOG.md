@@ -1,6 +1,11 @@
 Changelog
 =========
 
+v2.4.3
+------
+* Fixed a bug which could eliminate labels used by exception handlers, which would cause a
+  ClassFormatError.
+
 v2.4.2 (2022-08-30)
 ------
 * Fixed detection of code flowing through the end of a method when the code at the end is dead.

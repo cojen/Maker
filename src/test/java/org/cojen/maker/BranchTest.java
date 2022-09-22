@@ -820,4 +820,31 @@ public class BranchTest {
         isFalse.here();
         mm.return_("false");
     }
+
+    @Test
+    public void handlerLabel() throws Exception {
+        // Test that a label used by an exception handler isn't removed.
+
+        ClassMaker cm = ClassMaker.begin().public_();
+        MethodMaker mm = cm.addMethod(null, "run", boolean.class).static_().public_();
+
+        Label start = mm.label();
+        mm.param(0).ifTrue(start);
+        Label done = mm.label().goto_();
+
+        start.here();
+        mm.class_().invoke("toString");
+        mm.return_();
+        Label end = mm.label().here();
+
+        var exVar = mm.catch_(start, end, Throwable.class);
+        mm.new_(RuntimeException.class, exVar);
+
+        done.here();
+        mm.return_();
+
+        var clazz = cm.finish();
+        clazz.getMethod("run", boolean.class).invoke(null, true);
+    }
+
 }

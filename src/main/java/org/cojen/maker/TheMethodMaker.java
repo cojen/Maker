@@ -1107,6 +1107,9 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             mEndLab = end;
             mHandlerLab = handler;
             mCatchClass = catchClass;
+            start.handler();
+            end.handler();
+            handler.handler();
         }
 
         @Override
@@ -1267,7 +1270,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                 exits.put(target, handlerLab);
             }
             target = handlerLab;
-            target.used();
+            target.targeted();
         }
         return target;
     }
@@ -3133,10 +3136,10 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         /**
-         * Must be called when label is used as a branch target, but never when used as an
+         * Must be called when label is used as a branch target, but never when used by an
          * exception handler.
          */
-        void used() {
+        void targeted() {
             mUsedCount++;
             if (mTrackOffsets == null) {
                 mTrackOffsets = new int[4];
@@ -3145,21 +3148,35 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         /**
-         * @return true if totally unused
+         * Must be called when label is used by an exception handler.
+         */
+        void handler() {
+            mUsedCount |= (1 << 31);
+        }
+
+        /**
+         * @return true if totally unused as a branch target or an exception handler.
          */
         boolean lessUsed() {
-            if (--mUsedCount <= 0) {
-                mTrackOffsets = null;
-                return true;
+            int uc = mUsedCount;
+            int count = uc & ~(1 << 31);
+
+            if (count != 0) {
+                count--;
+                if (count == 0) {
+                    mTrackOffsets = null;
+                }
+                mUsedCount = uc = uc & (1 << 31) | count; 
             }
-            return false;
+
+            return uc == 0;
         }
 
         /**
          * By default, only returns true if label was reached by a branch.
          */
         boolean isTarget() {
-            return mUsedCount > 0;
+            return (mUsedCount & ~(1 << 31)) != 0;
         }
 
         /**
@@ -3351,7 +3368,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         BranchOp(byte op, int stackPop, Lab target) {
             super(op, stackPop);
             mTarget = target;
-            target.used();
+            target.targeted();
         }
 
         @Override
@@ -3423,7 +3440,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                 Op cont = mNext;
                 mNext = new BranchOp(GOTO_W, 0, mTarget);
                 mTarget = m.new Lab();
-                mTarget.used();
+                mTarget.targeted();
                 mNext.mNext = mTarget;
                 mTarget.mNext = cont;
             }
@@ -4164,11 +4181,11 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                 return;
             }
 
-            defaultLab.used();
+            defaultLab.targeted();
 
             Lab[] labs = new Lab[labels.length];
             for (int i=0; i<labels.length; i++) {
-                (labs[i] = target(labels[i])).used();
+                (labs[i] = target(labels[i])).targeted();
             }
 
             cases = cases.clone();
