@@ -74,18 +74,21 @@ loadScripts(document, 'script');</script>
 <section class="package-description" id="package-description">
 <div class="block">Dynamic Java class file generator. Here's a simple "hello, world" example:
 
- <blockquote><pre><code>
- ClassMaker cm = ClassMaker.begin().public_();
+ 
+<div class="snippet-container"><button class="copy snippet-copy" onclick="copySnippet(this)"><span data-copied="Copied!">Copy</span><img src="../../../../copy.svg" alt="Copy"></button>
+<pre class="snippet"><code class="language-java">ClassMaker cm = ClassMaker.begin().public_();
 
- // public static void run()...
- MethodMaker mm = cm.addMethod(null, "run").public_().static_();
+// public static void run()...
+MethodMaker mm = cm.addMethod(null, "run").public_().static_();
 
- // System.out.println(...
- mm.var(System.class).field("out").invoke("println", "hello, world");
+// System.out.println(...
+mm.var(System.class).field("out").invoke("println", "hello, world");
 
- Class&lt;?&gt; clazz = cm.finish();
- clazz.getMethod("run").invoke(null);
- </code></pre></blockquote>
+Class&lt;?&gt; clazz = cm.finish();
+clazz.getMethod("run").invoke(null);
+</code></pre>
+</div>
+
 
  <h2>Types and Values</h2>
 
@@ -109,25 +112,31 @@ loadScripts(document, 'script');</script>
  ClassMaker</code>. Unless explicitly specified, the actual name of the class being made isn't
  known until it's finished.
 
- <blockquote><pre><code>
- ClassMaker cm = ...
- MethodMaker factory = ...
+ 
+<div class="snippet-container"><button class="copy snippet-copy" onclick="copySnippet(this)"><span data-copied="Copied!">Copy</span><img src="../../../../copy.svg" alt="Copy"></button>
+<pre class="snippet"><code class="language-java">ClassMaker cm = ...
+MethodMaker factory = ...
 
- // Pass the ClassMaker as the type to instantiate.
- var instance = factory.new_(cm, ...);
- ...
- factory.return_(instance)
- </code></pre></blockquote>
+// Pass the ClassMaker as the type to instantiate.
+var instance = factory.new_(cm, ...);
+...
+factory.return_(instance)
+</code></pre>
+</div>
+
 
  A <code>Variable</code> can be used as a generic type carrier, and this won't actually allocate a variable slot.
 
- <blockquote><pre><code>
- MethodMaker mm = ...
- var builderType = mm.var(StringBuilder.class);
- var b1 = mm.new_(builderType, ...);
- var b2 = mm.new_(builderType, ...);
- ...
- </code></pre></blockquote>
+ 
+<div class="snippet-container"><button class="copy snippet-copy" onclick="copySnippet(this)"><span data-copied="Copied!">Copy</span><img src="../../../../copy.svg" alt="Copy"></button>
+<pre class="snippet"><code class="language-java">MethodMaker mm = ...
+var builderType = mm.var(StringBuilder.class);
+var b1 = mm.new_(builderType, ...);
+var b2 = mm.new_(builderType, ...);
+...
+</code></pre>
+</div>
+
 
  <h3>Values</h3>
 
@@ -173,11 +182,14 @@ loadScripts(document, 'script');</script>
  automatically widened to <code>double</code>. For these cases, an explicit cast is required.
  In addition, a calculation on a small primitive type doesn't automatically get converted to
  <code>int</code>:
- <blockquote><pre><code>
-     // Make an unsigned conversion: int a = bytes[i] &amp; 0xff;
-     // Without the cast, the 'and' operation only accepts a byte, and the result would be a byte.
-     var aVar = bytesVar.aget(iVar).cast(int.class).and(0xff);
- </code></pre></blockquote>
+ 
+<div class="snippet-container"><button class="copy snippet-copy" onclick="copySnippet(this)"><span data-copied="Copied!">Copy</span><img src="../../../../copy.svg" alt="Copy"></button>
+<pre class="snippet"><code class="language-java">// Make an unsigned conversion: int a = bytes[i] &amp; 0xff;
+// Without the cast, the 'and' operation only accepts a byte, and the result would be a byte.
+var aVar = bytesVar.aget(iVar).cast(int.class).and(0xff);
+</code></pre>
+</div>
+
 
  Narrowing of primitive constants is performed automatically if no information would be lost
  in the conversion. If the above example didn't have an explicit cast, passing the <code>

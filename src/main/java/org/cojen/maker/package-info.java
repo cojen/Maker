@@ -17,7 +17,7 @@
 /**
  * Dynamic Java class file generator. Here's a simple "hello, world" example:
  *
- * <blockquote><pre>{@code
+ * {@snippet lang="java" :
  * ClassMaker cm = ClassMaker.begin().public_();
  *
  * // public static void run()...
@@ -28,7 +28,7 @@
  *
  * Class<?> clazz = cm.finish();
  * clazz.getMethod("run").invoke(null);
- * }</pre></blockquote>
+ * }
  *
  * <h2>Types and Values</h2>
  *
@@ -52,7 +52,7 @@
  * ClassMaker}. Unless explicitly specified, the actual name of the class being made isn't
  * known until it's finished.
  *
- * <blockquote><pre>{@code
+ * {@snippet lang="java" :
  * ClassMaker cm = ...
  * MethodMaker factory = ...
  *
@@ -60,17 +60,17 @@
  * var instance = factory.new_(cm, ...);
  * ...
  * factory.return_(instance)
- * }</pre></blockquote>
+ * }
  *
  * A {@code Variable} can be used as a generic type carrier, and this won't actually allocate a variable slot.
  *
- * <blockquote><pre>{@code
+ * {@snippet lang="java" :
  * MethodMaker mm = ...
  * var builderType = mm.var(StringBuilder.class);
  * var b1 = mm.new_(builderType, ...);
  * var b2 = mm.new_(builderType, ...);
  * ...
- * }</pre></blockquote>
+ * }
  *
  * <h3>Values</h3>
  *
@@ -117,11 +117,11 @@
  * automatically widened to {@code double}. For these cases, an explicit cast is required.
  * In addition, a calculation on a small primitive type doesn't automatically get converted to
  * {@code int}:
- * <blockquote><pre>{@code
- *     // Make an unsigned conversion: int a = bytes[i] & 0xff;
- *     // Without the cast, the 'and' operation only accepts a byte, and the result would be a byte.
- *     var aVar = bytesVar.aget(iVar).cast(int.class).and(0xff);
- * }</pre></blockquote>
+ * {@snippet lang="java" :
+ * // Make an unsigned conversion: int a = bytes[i] & 0xff;
+ * // Without the cast, the 'and' operation only accepts a byte, and the result would be a byte.
+ * var aVar = bytesVar.aget(iVar).cast(int.class).and(0xff);
+ * }
  *
  * Narrowing of primitive constants is performed automatically if no information would be lost
  * in the conversion. If the above example didn't have an explicit cast, passing the {@code
