@@ -100,12 +100,12 @@ clazz.getMethod("run").invoke(null);
  The following kinds of types are supported:
 
  <ul>
- <li><a href="https://docs.oracle.com/en/java/javase/18/docs/api/java.base/java/lang/Class.html" title="class or interface in java.lang" class="external-link"><code>Class</code></a> — Examples: <code>int.class</code>, <code>String.class</code>, <code>int[].class</code>, etc.
- <li><a href="https://docs.oracle.com/en/java/javase/18/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link"><code>String</code></a> — Fully qualified class name or descriptor: <code>"int"</code>, <code>"java.lang.String"</code>, <code>"int[]"</code>, <code>"I"</code>, <code>"Ljava/lang/String;"</code>, <code>"[I"</code>, etc.
+ <li><a href="https://docs.oracle.com/en/java/javase/19/docs/api/java.base/java/lang/Class.html" title="class or interface in java.lang" class="external-link"><code>Class</code></a> — Examples: <code>int.class</code>, <code>String.class</code>, <code>int[].class</code>, etc.
+ <li><a href="https://docs.oracle.com/en/java/javase/19/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link"><code>String</code></a> — Fully qualified class name or descriptor: <code>"int"</code>, <code>"java.lang.String"</code>, <code>"int[]"</code>, <code>"I"</code>, <code>"Ljava/lang/String;"</code>, <code>"[I"</code>, etc.
  <li><a href="ClassMaker.html" title="interface in org.cojen.maker"><code>ClassMaker</code></a> — Specifies the class being made.
  <li><a href="Variable.html" title="interface in org.cojen.maker"><code>Variable</code></a> or <a href="Field.html" title="interface in org.cojen.maker"><code>Field</code></a> — Specifies the type used by the given <code>Variable</code> or <code>Field</code>.
  <li><code>null</code> — Specifies the <code>null</code> type or a context specific default such as <code>void.class</code>.
- <li><a href="https://docs.oracle.com/en/java/javase/18/docs/api/java.base/java/lang/constant/ClassDesc.html" title="class or interface in java.lang.constant" class="external-link"><code>ClassDesc</code></a> — Specifies a type descriptor.
+ <li><a href="https://docs.oracle.com/en/java/javase/19/docs/api/java.base/java/lang/constant/ClassDesc.html" title="class or interface in java.lang.constant" class="external-link"><code>ClassDesc</code></a> — Specifies a type descriptor.
  </ul>
 
  When making a factory method that constructs the class being made, pass the current <code>
@@ -145,13 +145,13 @@ var b2 = mm.new_(builderType, ...);
  <ul>
  <li>Primitive constant — Examples: <code>123</code>, <code>true</code>, etc.
  <li>Boxed constant — <code>Integer</code>, <code>Boolean</code>, etc.
- <li><a href="https://docs.oracle.com/en/java/javase/18/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link"><code>String</code></a> constant
- <li><a href="https://docs.oracle.com/en/java/javase/18/docs/api/java.base/java/lang/Class.html" title="class or interface in java.lang" class="external-link"><code>Class</code></a> constant
- <li><a href="https://docs.oracle.com/en/java/javase/18/docs/api/java.base/java/lang/Enum.html" title="class or interface in java.lang" class="external-link"><code>Enum</code></a> constant
- <li><a href="https://docs.oracle.com/en/java/javase/18/docs/api/java.base/java/lang/invoke/MethodType.html" title="class or interface in java.lang.invoke" class="external-link"><code>MethodType</code></a> constant
- <li><a href="https://docs.oracle.com/en/java/javase/18/docs/api/java.base/java/lang/invoke/MethodHandleInfo.html" title="class or interface in java.lang.invoke" class="external-link"><code>MethodHandleInfo</code></a> constant
- <li><a href="https://docs.oracle.com/en/java/javase/18/docs/api/java.base/java/lang/constant/ConstantDesc.html" title="class or interface in java.lang.constant" class="external-link"><code>ConstantDesc</code></a> constant
- <li><a href="https://docs.oracle.com/en/java/javase/18/docs/api/java.base/java/lang/constant/Constable.html" title="class or interface in java.lang.constant" class="external-link"><code>Constable</code></a> constant
+ <li><a href="https://docs.oracle.com/en/java/javase/19/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link"><code>String</code></a> constant
+ <li><a href="https://docs.oracle.com/en/java/javase/19/docs/api/java.base/java/lang/Class.html" title="class or interface in java.lang" class="external-link"><code>Class</code></a> constant
+ <li><a href="https://docs.oracle.com/en/java/javase/19/docs/api/java.base/java/lang/Enum.html" title="class or interface in java.lang" class="external-link"><code>Enum</code></a> constant
+ <li><a href="https://docs.oracle.com/en/java/javase/19/docs/api/java.base/java/lang/invoke/MethodType.html" title="class or interface in java.lang.invoke" class="external-link"><code>MethodType</code></a> constant
+ <li><a href="https://docs.oracle.com/en/java/javase/19/docs/api/java.base/java/lang/invoke/MethodHandleInfo.html" title="class or interface in java.lang.invoke" class="external-link"><code>MethodHandleInfo</code></a> constant
+ <li><a href="https://docs.oracle.com/en/java/javase/19/docs/api/java.base/java/lang/constant/ConstantDesc.html" title="class or interface in java.lang.constant" class="external-link"><code>ConstantDesc</code></a> constant
+ <li><a href="https://docs.oracle.com/en/java/javase/19/docs/api/java.base/java/lang/constant/Constable.html" title="class or interface in java.lang.constant" class="external-link"><code>Constable</code></a> constant
  </ul>
 
  Constants of type <code>MethodHandleInfo</code> are treated specially when assigning them to
