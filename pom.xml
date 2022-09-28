@@ -153,6 +153,7 @@
             <notimestamp>true</notimestamp>
             <reportOutputDirectory>${basedir}/docs</reportOutputDirectory>
             <destDir>javadoc</destDir>
+            <!-- <additionalOptions>-Xdoclint:none</additionalOptions> -->
           </configuration>
           <executions>
             <execution>
