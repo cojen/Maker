@@ -1,10 +1,9 @@
 Changelog
 =========
 
-v2.4.3
+v2.4.3 (2022-10-03)
 ------
-* Fixed a bug which could eliminate labels used by exception handlers, which would cause a
-  ClassFormatError.
+* Fixed a bug which could eliminate labels used by exception handlers, causing a ClassFormatError.
 
 v2.4.2 (2022-08-30)
 ------
