@@ -42,7 +42,7 @@ The `java.lang.invoke` package provides powerful features for dynamically genera
 
 Another nice feature is the `setExact` method, which allows arbitrary object instances to be passed into dynamically generated classes. Ordinarily, only simple constants can be specified, or else the "condy" feature must be used to reconstruct the object upon demand. Underneath the covers, `setExact` uses the condy feature to extract the object instance from a special hash table, keyed by the class instance itself. This feature doesn't work for generated classes which are loaded from a file.
 
-The implementation of the Cojen/Maker system is relatively small, and it has no dependencies. The release jar size is ~231KiB, which includes all debugging information.
+The implementation of the Cojen/Maker system is relatively small, and it has no dependencies. The release jar size is ~240KiB, which includes all debugging information.
 
 Limitations
 -----------
