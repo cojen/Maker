@@ -113,6 +113,68 @@ public class RecordTest {
         assertEquals("hello", obj.toString());
     }
 
+    @Test
+    public void ctorReturn() throws Exception {
+        // Fields are set even if constructor returns.
+
+        Assume.assumeTrue(Runtime.version().feature() >= 16);
+
+        ClassMaker cm = ClassMaker.begin().public_();
+        cm.addField(int.class, "num").private_().final_();
+
+        {
+            MethodMaker ctor = cm.asRecord();
+            var num = ctor.param(0);
+            Label isZero = ctor.label();
+            num.ifEq(0, isZero);
+            ctor.return_();
+            isZero.here();
+            num.set(-1);
+        }
+        
+        Class<?> clazz = cm.finish();
+        assertIsRecord(clazz);
+
+        var ctor = clazz.getConstructor(int.class);
+        var m = clazz.getMethod("num");
+
+        assertEquals(-1, m.invoke(ctor.newInstance(0)));
+        assertEquals(100, m.invoke(ctor.newInstance(100)));
+    }
+
+    @Test
+    public void selfRef() throws Exception {
+        Assume.assumeTrue(Runtime.version().feature() >= 16);
+
+        ClassMaker cm = ClassMaker.begin().public_();
+        cm.addField(cm, "self").private_().final_();
+
+        {
+            MethodMaker ctor = cm.asRecord();
+            var self = ctor.param(0);
+            Label notNull = ctor.label();
+            self.ifNe(null, notNull);
+            self.set(ctor.this_());
+            notNull.here();
+        }
+
+        Class<?> clazz = cm.finish();
+        assertIsRecord(clazz);
+
+        var ctor = clazz.getConstructor(clazz);
+        var m = clazz.getMethod("self");
+
+        Object obj1 = ctor.newInstance((Object) null);
+        assertSame(obj1, m.invoke(obj1));
+
+        Object obj2 = ctor.newInstance(obj1);
+        assertSame(obj1, m.invoke(obj2));
+
+        assertEquals(obj1, obj2);
+
+        // Don't call hashCode or toString, since they'll throw StackOverflowError.
+    }
+
     private static void assertIsRecord(Class<?> clazz) throws Exception {
         assertEquals(true, Class.class.getMethod("isRecord").invoke(clazz));
     }
