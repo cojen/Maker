@@ -23,12 +23,17 @@ import java.lang.reflect.Modifier;
  *
  * @author Brian S O'Neill
  */
-final class TheFieldMaker extends ClassMember implements FieldMaker {
+final class TheFieldMaker extends ClassMember implements FieldMaker, Typed {
     private final Type.Field mField;
 
     TheFieldMaker(TheClassMaker classMaker, Type.Field field) {
         super(classMaker, field.name(), field.type().descriptor());
         mField = field;
+    }
+
+    @Override
+    public Type type() {
+        return mField.type();
     }
 
     @Override

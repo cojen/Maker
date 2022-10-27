@@ -1,6 +1,10 @@
 Changelog
 =========
 
+v2.5.0
+------
+* Support defining records.
+
 v2.4.3 (2022-10-03)
 ------
 * Fixed a bug which could eliminate labels used by exception handlers, causing a ClassFormatError.

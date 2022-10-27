@@ -234,17 +234,13 @@ abstract class Attribute extends Attributed {
 
         @Override
         int length() {
-            int length = (2 + 2 + 4 + 2 + 2) + mCodeLen;
+            int length = (2 + 2 + 4 + 2) + mCodeLen;
 
             if (mExceptionHandlers != null) {
                 length += 8 * mExceptionHandlers.size();
             }
 
-            if (mAttributes != null) {
-                for (Attribute attr : mAttributes) {
-                    length += 6 + attr.length();
-                }
-            }
+            length += attributesLength();
 
             return length;
         }
@@ -664,6 +660,57 @@ abstract class Attribute extends Attributed {
             for (ConstantPool.C_UTF8 name : mNames) {
                 out.writeShort(name == null ? 0 : name.mIndex);
                 out.writeShort(0); // access flags
+            }
+        }
+    }
+
+    static class Record extends ListAttribute<Record.Entry> {
+        Record(ConstantPool cp) {
+            super(cp, "Record");
+        }
+
+        Entry add(TheFieldMaker field) {
+            return add(field.mName, field.mDescriptor);
+        }
+
+        /**
+         * @param name record component name
+         * @param descriptor record component type
+         */
+        Entry add(ConstantPool.C_UTF8 name, ConstantPool.C_UTF8 descriptor) {
+            var e = new Entry(mConstants, name, descriptor);
+            addEntry(e);
+            return e;
+        }
+
+        @Override
+        int length() {
+            int length = 2;
+            for (int i=numEntries(); --i>=0; ) {
+                length += 2 + 2 + entry(i).attributesLength();
+            }
+            return length;
+        }
+
+        @Override
+        protected int entryLength() {
+            throw new AssertionError();
+        }
+
+        @Override
+        protected void writeEntryTo(BytesOut out, Entry entry) throws IOException {
+            out.writeShort(entry.mName.mIndex);
+            out.writeShort(entry.mDescriptor.mIndex);
+            writeAttributesTo(out);
+        }
+
+        static class Entry extends Attributed {
+            final ConstantPool.C_UTF8 mName, mDescriptor;
+
+            Entry(ConstantPool cp, ConstantPool.C_UTF8 name, ConstantPool.C_UTF8 descriptor) {
+                super(cp);
+                mName = name;
+                mDescriptor = descriptor;
             }
         }
     }

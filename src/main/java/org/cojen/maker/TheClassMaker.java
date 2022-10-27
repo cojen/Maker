@@ -27,6 +27,7 @@ import java.lang.invoke.MethodType;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -62,7 +63,7 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
     int mModifiers;
 
     private Set<ConstantPool.C_Class> mInterfaces;
-    private Map<String, TheFieldMaker> mFields;
+    private LinkedHashMap<String, TheFieldMaker> mFields;
     private List<TheMethodMaker> mMethods;
 
     private ArrayList<TheMethodMaker> mClinitMethods;
@@ -74,6 +75,8 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
     private Attribute.InnerClasses mInnerClasses;
 
     private Set<ConstantPool.C_Class> mPermittedSubclasses;
+
+    private ArrayList<TheMethodMaker> mRecordCtors;
 
     // Accessed by ConstantsRegistry.
     Object mExactConstants;
@@ -387,6 +390,11 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
         mm.useReturnLabel();
         mClinitMethods.add(mm);
         return mm;
+    }
+
+    @Override
+    public MethodMaker asRecord() {
+        return AsRecord.apply(this);
     }
 
     @Override
@@ -791,6 +799,11 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
 
         int version = 0x0000_0037; // Java 11.
 
+        if (mRecordCtors != null) {
+            version = 0x0000_003c; // Java 16.
+            TheMethodMaker.doFinish(mRecordCtors);
+        }
+
         if (mPermittedSubclasses != null) {
             version = 0x0000_003d; // Java 17.
             addAttribute(new Attribute.PermittedSubclasses(mConstants, mPermittedSubclasses));
@@ -935,6 +948,172 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
                 throw new IllegalStateException(e);
             }
             e = cause;
+        }
+    }
+
+    /**
+     * Define this code in a separate class such that it only loads when actually needed.
+     */
+    private static class AsRecord {
+        private static TheMethodMaker apply(TheClassMaker cm) {
+            cm.extend("java.lang.Record").final_();
+
+            Attribute.Record recordAttr = new Attribute.Record(cm.mConstants);
+            cm.addAttribute(recordAttr);
+
+            Map<String, TheFieldMaker> fields = cm.mFields;
+
+            if (fields == null) {
+                fields = Collections.emptyMap();
+            }
+
+            Object[] paramTypes = new Object[fields.size()];
+            {
+                int i = 0;
+                for (TheFieldMaker fm : fields.values()) {
+                    recordAttr.add(fm);
+                    paramTypes[i++] = fm;
+                }
+            }
+
+            TheMethodMaker ctor = cm.addConstructor(paramTypes);
+            ctor.mModifiers = cm.mModifiers
+                & (Modifier.PUBLIC | Modifier.PROTECTED | Modifier.PRIVATE);
+            ctor.useReturnLabel();
+            ctor.invokeSuperConstructor();
+
+            cm.mRecordCtors = new ArrayList<TheMethodMaker>(2);
+            cm.mRecordCtors.add(ctor);
+
+            if (!fields.isEmpty()) {
+                var finisher = new TheMethodMaker(ctor);
+                cm.mRecordCtors.add(finisher);
+
+                int i = 0;
+                for (TheFieldMaker fm : fields.values()) {
+                    finisher.field(fm.getName()).set(finisher.param(i++));
+                }
+            }
+
+            // Identify the methods which have already been added, and don't add them again.
+
+            // 1: add equals, 2: add hashCode, 4: add toString
+            int toAdd = 1 | 2 | 4;
+
+            Set<String> toSkip = null;
+
+            if (cm.mMethods != null) {
+                for (TheMethodMaker mm : cm.mMethods) {
+                    Type.Method m = mm.mMethod;
+                    String name = m.name();
+
+                    switch (name) {
+                    case "equals":
+                        if (m.returnType() == Type.BOOLEAN && m.paramTypes().length == 1
+                            && m.paramTypes()[0] == Type.from(Object.class))
+                        {
+                            toAdd &= ~1;
+                        }
+                        continue;
+                    case "hashCode":
+                        if (m.returnType() == Type.INT && m.paramTypes().length == 0) {
+                            toAdd &= ~2;
+                        }
+                        continue;
+                    case "toString":
+                        if (m.paramTypes().length == 0
+                            && m.returnType() == Type.from(String.class))
+                        {
+                            toAdd &= ~4;
+                        }
+                        continue;
+                    }
+
+                    TheFieldMaker field = fields.get(name);
+                    if (field != null
+                        && m.paramTypes().length == 0 && m.returnType() == field.type())
+                    {
+                        if (toSkip == null) {
+                            toSkip = new LinkedHashSet<>();
+                        }
+                        toSkip.add(name);
+                    }
+                }
+            }
+
+            // Add the accessor methods.
+
+            for (TheFieldMaker fm : fields.values()) {
+                String name = fm.getName();
+                if (toSkip == null || !toSkip.contains(name)) {
+                    MethodMaker mm = cm.addMethod(fm, name).public_().final_();
+                    mm.return_(mm.field(name));
+                }
+            }
+
+            // Add the basic Object methods.
+
+            if ((toAdd & 1) != 0) {
+                MethodMaker mm = cm.addMethod(boolean.class, "equals", Object.class)
+                    .public_().final_();
+
+                var args = new Object[2 + fields.size()];
+                args[0] = mm.class_();
+                args[1] = ""; // no names
+                getters(mm, fields, args, 2);
+
+                var bootstrap =  mm.var("java.lang.runtime.ObjectMethods").indy("bootstrap", args);
+
+                mm.return_(bootstrap.invoke
+                           (boolean.class, "equals",
+                            new Object[] {cm, Object.class}, mm.this_(), mm.param(0)));
+            }
+
+            if ((toAdd & 2) != 0) {
+                MethodMaker mm = cm.addMethod(int.class, "hashCode").public_().final_();
+
+                var args = new Object[2 + fields.size()];
+                args[0] = mm.class_();
+                args[1] = ""; // no names
+                getters(mm, fields, args, 2);
+
+                var bootstrap =  mm.var("java.lang.runtime.ObjectMethods").indy("bootstrap", args);
+
+                mm.return_(bootstrap.invoke(int.class, "hashCode",
+                                            new Object[] {cm}, mm.this_()));
+            }
+
+            if ((toAdd & 4) != 0) {
+                MethodMaker mm = cm.addMethod(String.class, "toString").public_().final_();
+
+                var names = new StringBuilder();
+                for (String name : fields.keySet()) {
+                    if (!names.isEmpty()) {
+                        names.append(';');
+                    }
+                    names.append(name);
+                }
+
+                var args = new Object[2 + fields.size()];
+                args[0] = mm.class_();
+                args[1] = names.toString();
+                getters(mm, fields, args, 2);
+                
+                var bootstrap =  mm.var("java.lang.runtime.ObjectMethods").indy("bootstrap", args);
+
+                mm.return_(bootstrap.invoke(String.class, "toString",
+                                            new Object[] {cm}, mm.this_()));
+            }
+
+            return ctor;
+        }
+
+        private static void getters(MethodMaker mm, Map<String, TheFieldMaker> fields,
+                                    Object[] args, int offset)
+        {
+            for (String name : fields.keySet()) {
+                args[offset++] = mm.field(name).methodHandleGet();
+            }
         }
     }
 }

@@ -279,6 +279,18 @@ public interface ClassMaker extends Maker {
     MethodMaker addClinit();
 
     /**
+     * Convert this class to a {@code record}, and return a newly added constructor for it.
+     * Each field which is currently defined in this class is treated as a record component,
+     * and each is also represented by a constructor parameter. The constructor shouldn't set
+     * the fields directly, since this is performed automatically at the end.
+     *
+     * <p>Unless already defined, the {@code equals}, {@code hashCode}, and {@code toString}
+     * methods are automatically added. The same rule applies for the component accessor
+     * methods.
+     */
+    MethodMaker asRecord();
+
+    /**
      * Add an inner class to this class. The actual class name will have a suitable suffix
      * applied to ensure uniqueness.
      *

@@ -220,6 +220,16 @@ abstract class Attributed {
         return i;
     }
 
+    int attributesLength() {
+        int length = 2;
+        if (mAttributes != null) {
+            for (Attribute attr : mAttributes) {
+                length += 6 + attr.length();
+            }
+        }
+        return length;
+    }
+
     void writeAttributesTo(BytesOut out) throws IOException {
         if (mAttributes == null) {
             out.writeShort(0);
