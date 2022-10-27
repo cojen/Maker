@@ -31,6 +31,8 @@ public class RecordTest {
 
     @Test
     public void empty() throws Exception {
+        Assume.assumeTrue(Runtime.version().feature() >= 16);
+
         ClassMaker cm = ClassMaker.begin().public_();
         cm.asRecord();
 
@@ -46,6 +48,8 @@ public class RecordTest {
 
     @Test
     public void basic() throws Exception {
+        Assume.assumeTrue(Runtime.version().feature() >= 16);
+
         ClassMaker cm = ClassMaker.begin().public_();
         cm.addField(int.class, "num").private_().final_();
         cm.addField(String.class, "str").private_().final_();
@@ -78,6 +82,8 @@ public class RecordTest {
 
     @Test
     public void methodsExist() throws Exception {
+        Assume.assumeTrue(Runtime.version().feature() >= 16);
+
         ClassMaker cm = ClassMaker.begin().public_();
         cm.addField(int.class, "num").private_().final_();
         cm.addField(String.class, "str").private_().final_();
@@ -108,8 +114,6 @@ public class RecordTest {
     }
 
     private static void assertIsRecord(Class<?> clazz) throws Exception {
-        if (Runtime.version().feature() >= 16) {
-            assertEquals(true, Class.class.getMethod("isRecord").invoke(clazz));
-        }
+        assertEquals(true, Class.class.getMethod("isRecord").invoke(clazz));
     }
 }

@@ -1088,7 +1088,7 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
 
                 var names = new StringBuilder();
                 for (String name : fields.keySet()) {
-                    if (!names.isEmpty()) {
+                    if (names.length() != 0) {
                         names.append(';');
                     }
                     names.append(name);
