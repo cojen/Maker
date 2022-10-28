@@ -4,6 +4,7 @@ Changelog
 v2.4.4
 ------
 * Support defining records.
+* FieldMaker can now be used as a type specifier.
 
 v2.4.3 (2022-10-03)
 ------
