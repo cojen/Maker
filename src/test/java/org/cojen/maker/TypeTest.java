@@ -18,13 +18,13 @@ package org.cojen.maker;
 
 import java.lang.constant.ConstantDescs;
 
+import java.io.IOException;
 import java.io.Serializable;
 
 import java.net.URL;
 import java.net.URLClassLoader;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 import org.junit.*;
 import static org.junit.Assert.*;
@@ -320,6 +320,77 @@ public class TypeTest {
             fail();
         } catch (IllegalStateException e) {
             assertTrue(e.getMessage().startsWith("Cannot return"));
+        }
+    }
+
+    @Test
+    public void commonCatchType() throws Exception {
+        Type objType = Type.from(Object.class);
+
+        Type[] types = {
+            Type.from(RuntimeException.class),
+            Type.from(NullPointerException.class),
+            Type.from(IllegalArgumentException.class),
+            Type.from(IllegalFormatException.class),
+            Type.from(IOException.class),
+            Type.from(Exception.class),
+            Type.from(Error.class),
+        };
+
+        var map = new HashMap<Type, List<Type>>();
+
+        for (int i=0; i<types.length; i++) {
+            for (int j=0; j<types.length; j++) {
+                map.clear();
+
+                map.put(types[i], null);
+                map.put(types[j], null);
+
+                Type common = Type.commonCatchType(map);
+
+                assertNotEquals(common, objType);
+
+                assertTrue(common.isAssignableFrom(types[i]));
+                assertTrue(common.isAssignableFrom(types[j]));
+
+                if (map.size() == 1) {
+                    assertTrue(common == types[i] || common == types[j]);
+                }
+            }
+        }
+
+        for (int i=0; i<types.length; i++) {
+            for (int j=0; j<types.length; j++) {
+                if (j == i) {
+                    continue;
+                }
+
+                for (int k=0; k<types.length; k++) {
+                    if (k == j || k == i) {
+                        continue;
+                    }
+
+                    map.clear();
+
+                    map.put(types[i], null);
+                    map.put(types[j], null);
+                    map.put(types[k], null);
+
+                    Type common = Type.commonCatchType(map);
+
+                    assertNotEquals(common, objType);
+
+                    assertTrue(common.isAssignableFrom(types[i]));
+                    assertTrue(common.isAssignableFrom(types[j]));
+                    assertTrue(common.isAssignableFrom(types[k]));
+
+                    if (map.size() == 1) {
+                        assertTrue(common == types[i] || common == types[j] || common == types[k]);
+                    } else {
+                        assertEquals(3, map.size());
+                    }
+                }
+            }
         }
     }
 }

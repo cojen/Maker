@@ -1,6 +1,10 @@
 Changelog
 =========
 
+v2.4.5
+------
+* Support catching multiple exception types in the same handler.
+
 v2.4.4 (2022-10-31)
 ------
 * Support defining records.

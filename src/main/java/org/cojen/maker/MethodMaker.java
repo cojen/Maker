@@ -367,6 +367,18 @@ public interface MethodMaker extends Maker {
     Variable catch_(Label tryStart, Label tryEnd, Object type);
 
     /**
+     * Define an exception handler here, which catches exceptions between the given labels. Any
+     * code prior to the handler must not flow into it directly. This variant supports matching
+     * on multiple exception types, and the effective exception type is the common superclass.
+     *
+     * @param types exception types to catch; pass null to catch anything
+     * @return a variable which references the exception instance
+     * @throws IllegalArgumentException if no types are given
+     * @throws IllegalStateException if start is unpositioned
+     */
+    Variable catch_(Label tryStart, Label tryEnd, Object... types);
+
+    /**
      * Convenience method which defines an exception handler here. Code prior to the handler
      * flows around it.
      *

@@ -988,11 +988,15 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
     @Override
     public Variable catch_(Label start, Label end, Object type) {
+        return catch_(startLab(start), target(end), type);
+    }
+
+    private Lab startLab(Label start) {
         Lab startLab = target(start);
         if (!startLab.isPositioned()) {
             throw new IllegalStateException("Start is unpositioned");
         }
-        return catch_(startLab, target(end), type);
+        return startLab;
     }
 
     private Variable catch_(Lab startLab, Lab endLab, Object type) {
@@ -1003,6 +1007,13 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             catchType = mClassMaker.typeFrom(type);
         }
 
+        return catch_(catchType, startLab, endLab, type);
+    }
+
+    /**
+     * @param type user-given catch type; is only checked if null or not
+     */
+    private Variable catch_(Type catchType, Lab startLab, Lab endLab, Object type) {
         mHasBranches = true;
 
         ConstantPool.C_Class catchClass = mConstants.addClass(catchType);
@@ -1057,11 +1068,63 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     }
 
     @Override
-    public void catch_(Label start, Object type, Consumer<Variable> handler) {
-        Lab startLab = target(start);
-        if (!startLab.isPositioned()) {
-            throw new IllegalStateException("Start is unpositioned");
+    public Variable catch_(Label start, Label end, Object... types) {
+        if (types == null) {
+            return catch_(start, end, (Object) null);
         }
+
+        if (types.length <= 1) {
+            if (types.length == 1) {
+                return catch_(start, end, types[0]);
+            }
+            throw new IllegalArgumentException("No catch types given");
+        }
+
+        var catchMap = new HashMap<Type, List<Type>>(types.length << 1);
+
+        for (Object type : types) {
+            if (type == null) {
+                return catch_(start, end, (Object) null);
+            }
+            Type t = mClassMaker.typeFrom(type);
+            if (!t.isObject()) {
+                throw new IllegalArgumentException(t.name());
+            }
+            catchMap.put(t, null);
+        }
+
+        Lab startLab = startLab(start);
+        Lab endLab = target(end);
+
+        if (catchMap.size() == 1) {
+            return catch_(catchMap.keySet().iterator().next(), startLab, endLab, types[0]);
+        }
+
+        Type commonCatchType = Type.commonCatchType(catchMap);
+
+        Variable exVar = catch_(commonCatchType, startLab, endLab, types[0]);
+
+        if (catchMap.size() > 1) {
+            // Modify the newly added handler to catch a specific type, and then add new
+            // handlers for each additional type.
+
+            Iterator<Type> catchTypes = catchMap.keySet().iterator();
+
+            Handler handler = mExceptionHandlers.get(mExceptionHandlers.size() - 1);
+            handler.mCatchClass = mConstants.addClass(catchTypes.next());
+
+            do {
+                handler = new Handler(handler, mConstants.addClass(catchTypes.next()));
+                mExceptionHandlers.add(handler);
+            } while (catchTypes.hasNext());
+        }
+
+        return exVar;
+    }
+
+    @Override
+    public void catch_(Label start, Object type, Consumer<Variable> handler) {
+        Lab startLab = startLab(start);
         Label cont = label();
         goto_(cont);
         Lab endLab = new Lab();
@@ -1100,7 +1163,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     private static final class Handler implements ExceptionHandler {
         final Lab mStartLab, mEndLab;
         final HandlerLab mHandlerLab;
-        final ConstantPool.C_Class mCatchClass;
+        ConstantPool.C_Class mCatchClass;
 
         Handler(Lab start, Lab end, HandlerLab handler, ConstantPool.C_Class catchClass) {
             mStartLab = start;
@@ -1110,6 +1173,16 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             start.handler();
             end.handler();
             handler.handler();
+        }
+
+        /**
+         * Copy constructor.
+         */
+        Handler(Handler h, ConstantPool.C_Class catchClass) {
+            mStartLab = h.mStartLab;
+            mEndLab = h.mEndLab;
+            mHandlerLab = h.mHandlerLab;
+            mCatchClass = catchClass;
         }
 
         @Override

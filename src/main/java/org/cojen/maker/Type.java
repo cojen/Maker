@@ -24,6 +24,7 @@ import java.lang.ref.SoftReference;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Modifier;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
@@ -612,6 +613,61 @@ abstract class Type {
 
     Method inventMethod(int flags, Type returnType, String name, Type... paramTypes) {
         throw new IllegalStateException();
+    }
+
+    /**
+     * Finds a common catch type, modifying the map as a side effect. New lists are added into
+     * the map, and some map entries might be removed. Each list is the hierarchy for the type.
+     */
+    static Type commonCatchType(Map<Type, List<Type>> catchMap) {
+        // For each catch type, fill up a list with the corresponding class hierarchy.
+
+        int minPos = Integer.MIN_VALUE;
+        for (var entry : catchMap.entrySet()) {
+            var list = new ArrayList<Type>();
+            var catchType = entry.getKey();
+            do {
+                list.add(catchType);
+            } while ((catchType = catchType.superType()) != null);
+            entry.setValue(list);
+            minPos = Math.max(minPos, -list.size());
+        }
+
+        // Compare the type at the same level of each hierarchy. If all types are the same at a
+        // given level, then that's a common type. Keep going to a lower level to find a more
+        // specific common type.
+
+        Type commonType = null;
+
+        for (int pos = -1; pos >= minPos; pos--) {
+            Iterator<Map.Entry<Type, List<Type>>> it = catchMap.entrySet().iterator();
+
+            List<Type> list = it.next().getValue();
+            Type levelType = list.get(list.size() + pos);
+
+            while (it.hasNext()) {
+                list = it.next().getValue();
+                Type type = list.get(list.size() + pos);
+                if (!levelType.equals(type)) {
+                    return commonType;
+                }
+            }
+
+            commonType = levelType;
+        }
+
+        // This point is reached when the common type is a specific catch type. All the other
+        // catch types are subclasses, and so they don't need too be caught.
+
+        Iterator<Type> it = catchMap.keySet().iterator();
+        while (it.hasNext()) {
+            Type type = it.next();
+            if (type != commonType) {
+                it.remove();
+            }
+        }
+
+        return commonType;
     }
 
     @Override

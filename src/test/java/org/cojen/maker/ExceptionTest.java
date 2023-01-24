@@ -16,6 +16,10 @@
 
 package org.cojen.maker;
 
+import java.io.IOException;
+
+import java.lang.reflect.InvocationTargetException;
+
 import org.junit.*;
 import static org.junit.Assert.*;
 
@@ -215,6 +219,194 @@ public class ExceptionTest {
             fail();
         } catch (IllegalStateException e) {
             assertTrue(e.getMessage().contains("exception handler"));
+        }
+    }
+
+    @Test
+    public void multiCatch() throws Exception {
+        ClassMaker cm = ClassMaker.begin().public_();
+        cm.addConstructor().public_();
+
+        {
+            MethodMaker mm = cm.addMethod(String.class, "a", Throwable.class).public_().static_();
+
+            Label start = mm.label().here();
+            mm.param(0).throw_();
+            Label end = mm.label().here();
+            var exVar = mm.catch_(start, end, IllegalStateException.class,
+                                  IllegalArgumentException.class);
+            assertEquals(RuntimeException.class, exVar.classType());
+            mm.return_(exVar.invoke("getMessage"));
+        }
+
+        {
+            MethodMaker mm = cm.addMethod(String.class, "b", Throwable.class).public_().static_();
+
+            Label start = mm.label().here();
+            mm.param(0).throw_();
+            Label end = mm.label().here();
+            var exVar = mm.catch_(start, end, IllegalStateException.class,
+                                  IllegalArgumentException.class, IOException.class);
+            assertEquals(Exception.class, exVar.classType());
+            mm.return_(exVar.invoke("getMessage"));
+        }
+
+        Class<?> clazz = cm.finish();
+
+        var method = clazz.getMethod("a", Throwable.class);
+
+        assertEquals("hello", method.invoke(null, new IllegalStateException("hello")));
+        assertEquals("world", method.invoke(null, new IllegalArgumentException("world")));
+
+        try {
+            method.invoke(null, new ArithmeticException());
+            fail();
+        } catch (InvocationTargetException e) {
+            assertTrue(e.getCause() instanceof ArithmeticException);
+        }
+
+        method = clazz.getMethod("b", Throwable.class);
+
+        assertEquals("hello", method.invoke(null, new IllegalStateException("hello")));
+        assertEquals("world", method.invoke(null, new IllegalArgumentException("world")));
+        assertEquals("fail", method.invoke(null, new IOException("fail")));
+
+        try {
+            method.invoke(null, new ArithmeticException());
+            fail();
+        } catch (InvocationTargetException e) {
+            assertTrue(e.getCause() instanceof ArithmeticException);
+        }
+    }
+
+    @Test
+    public void multiCatch2() throws Exception {
+        // Test a few illegal cases and basic cases.
+
+        ClassMaker cm = ClassMaker.begin().public_();
+        cm.addConstructor().public_();
+        MethodMaker mm = cm.addMethod(String.class, "a", Throwable.class).public_().static_();
+
+        Label start = mm.label().here();
+        mm.param(0).throw_();
+        Label end = mm.label().here();
+
+        try {
+            mm.catch_(start, end);
+        } catch (IllegalArgumentException e) {
+            assertTrue(e.getMessage().contains("No catch types"));
+        }
+
+        try {
+            mm.catch_(start, end, int.class);
+        } catch (IllegalArgumentException e) {
+            // Must be an object type.
+        }
+
+        try {
+            mm.catch_(start, end, int.class, Throwable.class);
+        } catch (IllegalArgumentException e) {
+            // Must be an object type.
+        }
+
+        Object[] args = {IllegalStateException.class};
+        var exVar = mm.catch_(start, end, args);
+        assertEquals(IllegalStateException.class, exVar.classType());
+        mm.return_(exVar.invoke("getMessage"));
+
+        Class<?> clazz = cm.finish();
+
+        var method = clazz.getMethod("a", Throwable.class);
+
+        assertEquals("hello", method.invoke(null, new IllegalStateException("hello")));
+
+        try {
+            method.invoke(null, new ArithmeticException());
+            fail();
+        } catch (InvocationTargetException e) {
+            assertTrue(e.getCause() instanceof ArithmeticException);
+        }
+    }
+
+    @Test
+    public void multiCatch3() throws Exception {
+        // Test catching everything by passing in null.
+
+        ClassMaker cm = ClassMaker.begin().public_();
+        cm.addConstructor().public_();
+
+        {
+            MethodMaker mm = cm.addMethod(String.class, "a", Throwable.class).public_().static_();
+            Label start = mm.label().here();
+            mm.param(0).throw_();
+            Label end = mm.label().here();
+            var exVar = mm.catch_(start, end, (Object[]) null);
+            assertEquals(Throwable.class, exVar.classType());
+            mm.return_(exVar.invoke("getMessage"));
+        }
+
+        {
+            MethodMaker mm = cm.addMethod(String.class, "b", Throwable.class).public_().static_();
+            Label start = mm.label().here();
+            mm.param(0).throw_();
+            Label end = mm.label().here();
+            Object[] args = {IllegalStateException.class, null};
+            var exVar = mm.catch_(start, end, args);
+            assertEquals(Throwable.class, exVar.classType());
+            mm.return_(exVar.invoke("getMessage"));
+        }
+
+        Class<?> clazz = cm.finish();
+
+        {
+            var method = clazz.getMethod("a", Throwable.class);
+            assertEquals("hello", method.invoke(null, new IllegalStateException("hello")));
+        }
+
+        {
+            var method = clazz.getMethod("b", Throwable.class);
+            assertEquals("hello", method.invoke(null, new IllegalStateException("hello")));
+        }
+    }
+
+    @Test
+    public void multiCatch4() throws Exception {
+        // Test catching redundant types.
+
+        ClassMaker cm = ClassMaker.begin().public_();
+        cm.addConstructor().public_();
+
+        {
+            MethodMaker mm = cm.addMethod(String.class, "a", Throwable.class).public_().static_();
+            Label start = mm.label().here();
+            mm.param(0).throw_();
+            Label end = mm.label().here();
+            var exVar = mm.catch_(start, end, IllegalStateException.class,
+                                  IllegalStateException.class);
+            assertEquals(IllegalStateException.class, exVar.classType());
+            mm.return_(exVar.invoke("getMessage"));
+        }
+
+        {
+            MethodMaker mm = cm.addMethod(String.class, "b", Throwable.class).public_().static_();
+            Label start = mm.label().here();
+            mm.param(0).throw_();
+            Label end = mm.label().here();
+            var exVar = mm.catch_(start, end, RuntimeException.class, IllegalStateException.class);
+            assertEquals(RuntimeException.class, exVar.classType());
+            mm.return_(exVar.invoke("getMessage"));
+        }
+
+        Class<?> clazz = cm.finish();
+
+        {
+            var method = clazz.getMethod("a", Throwable.class);
+            assertEquals("hello", method.invoke(null, new IllegalStateException("hello")));
+        }
+
+        {
+            var method = clazz.getMethod("b", Throwable.class);
+            assertEquals("hello", method.invoke(null, new IllegalStateException("hello")));
         }
     }
 }
