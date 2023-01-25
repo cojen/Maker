@@ -838,7 +838,8 @@ extends <a href="Maker.html" title="interface in org.cojen.maker">Maker</a></spa
  <a href="https://docs.oracle.com/en/java/javase/19/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>...&nbsp;types)</span></div>
 <div class="block">Define an exception handler here, which catches exceptions between the given labels. Any
  code prior to the handler must not flow into it directly. This variant supports matching
- on multiple exception types, and the effective exception type is the common superclass.</div>
+ on multiple exception types, and the effective exception type is the nearest common
+ superclass.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>types</code> - exception types to catch; pass null to catch anything</dd>

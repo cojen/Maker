@@ -369,7 +369,8 @@ public interface MethodMaker extends Maker {
     /**
      * Define an exception handler here, which catches exceptions between the given labels. Any
      * code prior to the handler must not flow into it directly. This variant supports matching
-     * on multiple exception types, and the effective exception type is the common superclass.
+     * on multiple exception types, and the effective exception type is the nearest common
+     * superclass.
      *
      * @param types exception types to catch; pass null to catch anything
      * @return a variable which references the exception instance
