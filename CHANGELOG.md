@@ -3,6 +3,9 @@ Changelog
 
 v2.4.5
 ------
+* Never discard references to exact constants until the owning class is unloaded. This
+  prevents race conditions when multiple threads attempt to resolve the constant at the same
+  time. This behavior is also required for supporting class redefinition.
 * Support catching multiple exception types in the same handler.
 
 v2.4.4 (2022-10-31)
