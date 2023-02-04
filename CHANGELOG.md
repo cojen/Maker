@@ -1,7 +1,7 @@
 Changelog
 =========
 
-v2.4.5
+v2.4.5 (2023-02-04)
 ------
 * Never discard references to exact constants until the owning class is unloaded. This
   prevents race conditions when multiple threads attempt to resolve the constant at the same
