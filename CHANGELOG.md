@@ -1,6 +1,10 @@
 Changelog
 =========
 
+v2.4.6
+------
+* Prevent class loading deadlock when a class in one group needs to load a class in another group.
+
 v2.4.5 (2023-02-04)
 ------
 * Never discard references to exact constants until the owning class is unloaded. This

@@ -69,9 +69,9 @@ class ClassInjector extends ClassLoader {
         Group group = findPackageGroup(name, false);
 
         if (group != null) {
-            try {
-                return group.doLoadClass(name);
-            } catch (ClassNotFoundException e) {
+            Class<?> clazz = group.tryFindClass(name);
+            if (clazz != null) {
+                return clazz;
             }
         }
 
@@ -271,8 +271,13 @@ class ClassInjector extends ClassLoader {
             return ClassInjector.this.loadClass(name);
         }
 
-        private Class<?> doLoadClass(String name) throws ClassNotFoundException {
-            return super.loadClass(name);
+        @Override
+        protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
+            return ClassInjector.this.loadClass(name);
+        }
+
+        private Class<?> tryFindClass(String name) {
+            return findLoadedClass(name);
         }
 
         private Class<?> define(String name, byte[] b) {
