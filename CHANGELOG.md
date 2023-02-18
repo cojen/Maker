@@ -1,7 +1,7 @@
 Changelog
 =========
 
-v2.4.6
+v2.4.6 (2023-02-18)
 ------
 * Prevent class loading deadlock when a class in one group needs to load a class in another group.
 
