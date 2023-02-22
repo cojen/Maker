@@ -358,6 +358,11 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     }
 
     @Override
+    public String name() {
+        return mMethod.name();
+    }
+
+    @Override
     public MethodMaker public_() {
         mModifiers = Modifiers.toPublic(mModifiers);
         return this;
@@ -531,15 +536,29 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         if (index < 0) {
             throw new IndexOutOfBoundsException();
         }
+        LocalVar[] params = params();
+        if (mThisVar != null) {
+            index++;
+        }
+        return params[index];
+    }
+
+    @Override
+    public int paramCount() {
+        int count = params().length;
+        if (mThisVar != null) {
+            count--;
+        }
+        return count;
+    }
+
+    private LocalVar[] params() {
         LocalVar[] params = mParams;
         if (params == null) {
             initParams();
             params = mParams;
         }
-        if (mThisVar != null) {
-            index++;
-        }
-        return params[index];
+        return params;
     }
 
     private void initParams() {

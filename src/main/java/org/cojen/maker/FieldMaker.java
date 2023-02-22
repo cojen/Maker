@@ -24,6 +24,11 @@ package org.cojen.maker;
  */
 public interface FieldMaker extends Maker {
     /**
+     * Returns the name of this field.
+     */
+    String name();
+
+    /**
      * Switch this field to be public. Fields are package-private by default.
      *
      * @return this

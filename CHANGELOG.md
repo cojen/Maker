@@ -1,6 +1,11 @@
 Changelog
 =========
 
+v2.4.7
+------
+* Added methods to obtain the FieldMaker name, the MethodMaker name, and the MethodMaker
+  parameter count.
+
 v2.4.6 (2023-02-18)
 ------
 * Prevent class loading deadlock when a class in one group needs to load a class in another group.

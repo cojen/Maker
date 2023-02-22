@@ -41,9 +41,15 @@ public class MethodParametersTest {
         mm.param(1).name("p2");
         mm.this_().name("self"); // ignored
 
+        assertEquals("t1", mm.name());
+        assertEquals(2, mm.paramCount());
+
         mm = cm.addMethod(null, "t2", String.class, long.class).public_().static_();
         mm.param(0).name("p1");
         mm.param(1).name("p2");
+
+        assertEquals("t2", mm.name());
+        assertEquals(2, mm.paramCount());
 
         mm = cm.addMethod(null, "t3", String.class, long.class).public_().static_();
         mm.param(1).name("p2");

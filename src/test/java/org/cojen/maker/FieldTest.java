@@ -44,6 +44,7 @@ public class FieldTest {
 
         FieldMaker fm = cm.addField(float.class, "num3");
         assertEquals(cm, fm.classMaker());
+        assertEquals("num3", fm.name());
 
         try {
             fm.init(10.0f);

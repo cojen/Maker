@@ -114,6 +114,11 @@ public interface MethodMaker extends Maker {
     }
 
     /**
+     * Returns the name of this method.
+     */
+    String name();
+
+    /**
      * Switch this method to be public. Methods are package-private by default.
      *
      * @return this
@@ -242,6 +247,12 @@ public interface MethodMaker extends Maker {
      * @throws IndexOutOfBoundsException if index is out of bounds
      */
     Variable param(int index);
+
+    /**
+     * Returns the number of parameters which can be accessed by the {@link #param param}
+     * method.
+     */
+    int paramCount();
 
     /**
      * Returns a new uninitialized variable with the given type. Call {@link Variable#set set} to
