@@ -2514,8 +2514,10 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
     /**
      * Adds a constant using the ConstantsRegistry.
+     *
+     * @param remove pass true to remove the constant when found
      */
-    private ConstantPool.C_Dynamic addExactConstant(Type type, Object value) {
+    private ConstantPool.C_Dynamic addExactConstant(Type type, Object value, boolean remove) {
         Set<Type.Method> bootstraps = Type.from(ConstantsRegistry.class).findMethods
             ("find",
              new Type[] {Type.from(MethodHandles.Lookup.class), Type.from(String.class),
@@ -2530,6 +2532,10 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         ConstantPool.C_MethodHandle bootHandle = mConstants.addMethodHandle(REF_invokeStatic, ref);
 
         int slot = mClassMaker.addExactConstant(value);
+
+        if (remove) {
+            slot |= (1 << 31);
+        }
 
         ConstantPool.Constant[] bootArgs = {
             addLoadableConstant(Type.INT, slot)
@@ -2686,7 +2692,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             type = Type.from(value.getClass());
         }
 
-        return addExactConstant(type, value);
+        return addExactConstant(type, value, false);
     }
 
     private static IllegalArgumentException unsupportedConstant(Object value) {
@@ -4032,7 +4038,11 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                 throw new IllegalStateException("Mismatched type");
             }
 
-            addStoreConstantOp(new ExplicitConstantOp(addExactConstant(type, value), type));
+            // Class initialization only runs once, and so constants can be safely removed once
+            // they are found.
+            boolean remove = TheMethodMaker.this.name().equals("<clinit>");
+
+            addStoreConstantOp(new ExplicitConstantOp(addExactConstant(type, value, remove), type));
 
             return this;
         }

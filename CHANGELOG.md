@@ -5,6 +5,8 @@ v2.4.7
 ------
 * Added methods to obtain the FieldMaker name, the MethodMaker name, and the MethodMaker
   parameter count.
+* Restore discarding of references to exact constants when they're accessed by a class
+  initializer. This is safe because class initialization runs at most once.
 
 v2.4.6 (2023-02-18)
 ------
