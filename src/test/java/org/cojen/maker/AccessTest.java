@@ -77,12 +77,14 @@ public class AccessTest {
 
     @Test
     public void lookup() throws Exception {
-        doLookup("a.b.c.Dee"); 
-        if (withoutEnsureInitialized()) {
-            try {
-                doLookup("w.x.y.Zee");
-            } finally {
-                restoreEnsureInitialized();
+        synchronized (getClass()) {
+            doLookup("a.b.c.Dee"); 
+            if (withoutEnsureInitialized()) {
+                try {
+                    doLookup("w.x.y.Zee");
+                } finally {
+                    restoreEnsureInitialized();
+                }
             }
         }
     }
@@ -115,12 +117,14 @@ public class AccessTest {
 
     @Test
     public void lookup3() throws Exception {
-        doLookup3("a.b.c.Dee");
-        if (withoutEnsureInitialized()) {
-            try {
-                doLookup3("w.x.y.Zee");
-            } finally {
-                restoreEnsureInitialized();
+        synchronized (getClass()) {
+            doLookup3("a.b.c.Dee");
+            if (withoutEnsureInitialized()) {
+                try {
+                    doLookup3("w.x.y.Zee");
+                } finally {
+                    restoreEnsureInitialized();
+                }
             }
         }
     }
