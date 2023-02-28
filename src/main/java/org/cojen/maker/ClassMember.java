@@ -51,14 +51,14 @@ abstract class ClassMember extends Attributed implements Maker {
         return addAnnotation(new TheAnnotationMaker(mClassMaker, annotationType), visible);
     }
 
+    public String name() {
+        return mName.mValue;
+    }
+
     final void writeTo(BytesOut out) throws IOException {
         out.writeShort(mModifiers);
         out.writeShort(mName.mIndex);
         out.writeShort(mDescriptor.mIndex);
         writeAttributesTo(out);
-    }
-
-    String getName() {
-        return mName.mValue;
     }
 }

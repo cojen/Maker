@@ -587,7 +587,7 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
                         break;
                     }
                     for (TheMethodMaker method : mMethods) {
-                        if (initName.equals(method.getName())) {
+                        if (initName.equals(method.name())) {
                             id = ThreadLocalRandom.current().nextInt(Integer.MAX_VALUE);
                             continue selectName;
                         }
@@ -991,7 +991,7 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
 
                 int i = 0;
                 for (TheFieldMaker fm : fields.values()) {
-                    finisher.field(fm.getName()).set(finisher.param(i++));
+                    finisher.field(fm.name()).set(finisher.param(i++));
                 }
             }
 
@@ -1044,7 +1044,7 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
             // Add the accessor methods.
 
             for (TheFieldMaker fm : fields.values()) {
-                String name = fm.getName();
+                String name = fm.name();
                 if (toSkip == null || !toSkip.contains(name)) {
                     MethodMaker mm = cm.addMethod(fm, name).public_().final_();
                     mm.return_(mm.field(name));

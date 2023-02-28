@@ -151,7 +151,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         if (flowsThroughEnd(mLastOp)) {
             if (mMethod.returnType() == VOID) {
                 if (mLastOp == null &&
-                    "<init>".equals(getName()) && mMethod.paramTypes().length == 0)
+                    "<init>".equals(name()) && mMethod.paramTypes().length == 0)
                 {
                     invokeSuperConstructor();
                 }
@@ -194,7 +194,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                 Handler h = it.next();
                 if (!h.mEndLab.isPositioned()) {
                     throw new IllegalStateException
-                        ("Unpositioned exception handler end label in method: " + getName());
+                        ("Unpositioned exception handler end label in method: " + name());
                 }
                 if (!h.mHandlerLab.mVisited) {
                     it.remove();
@@ -246,7 +246,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
             if (mUnpositionedLabels != 0) {
                 throw new IllegalStateException("Unpositioned labels in method: " + 
-                                                getName() + ": " + mUnpositionedLabels);
+                                                name() + ": " + mUnpositionedLabels);
             }
 
             if (mFinished >= 0) {
@@ -355,11 +355,6 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             }
         }
         return true;
-    }
-
-    @Override
-    public String name() {
-        return mMethod.name();
     }
 
     @Override
@@ -567,7 +562,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
         if (!Modifier.isStatic(mModifiers)) {
             Type type = mClassMaker.type();
-            mThisVar = "<init>".equals(getName()) ? new InitThisVar(type) : new ParamVar(type, 0);
+            mThisVar = "<init>".equals(name()) ? new InitThisVar(type) : new ParamVar(type, 0);
             mThisVar.mSlot = 0;
             count++;
             slot = 1;
@@ -708,7 +703,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     }
 
     private void invokeConstructor(ConstantPool.C_Class type, Object[] values) {
-        if (!"<init>".equals(getName())) {
+        if (!"<init>".equals(name())) {
             throw new IllegalStateException("Not defining a constructor");
         }
 
@@ -2552,7 +2547,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
     private void addExplicitConstantOp(ExplicitConstantOp op) {
         if (CONDY_WORKAROUND && op.mConstant instanceof ConstantPool.C_Dynamic
-            && mHasBranches && !"<clinit>".equals(getName()))
+            && mHasBranches && !"<clinit>".equals(name()))
         {
             /*
               Workaround a HotSpot bug which prevents code compilation. When an instruction
@@ -2582,7 +2577,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                 fm.private_().static_().final_();
                 TheMethodMaker mm = mClassMaker.addClinit();
                 mm.addOp(new ExplicitConstantOp(op.mConstant, op.mType));
-                field =  mm.field(fm.getName()).mFieldRef;
+                field =  mm.field(fm.name()).mFieldRef;
                 mm.addOp(new FieldOp(PUTSTATIC, 1, field));
                 mClassMaker.mResolvedConstants.put(op.mConstant, field);
             }

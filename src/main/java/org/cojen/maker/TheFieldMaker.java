@@ -37,11 +37,6 @@ final class TheFieldMaker extends ClassMember implements FieldMaker, Typed {
     }
 
     @Override
-    public String name() {
-        return mField.name();
-    }
-
-    @Override
     public FieldMaker public_() {
         mModifiers = Modifiers.toPublic(mModifiers);
         return this;
