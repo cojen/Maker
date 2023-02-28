@@ -49,6 +49,8 @@ public abstract class ConstantsRegistry {
 
     /**
      * Add an entry and return the slot assigned to it.
+     *
+     * @throws NullPointerException if the value is null
      */
     static int add(TheClassMaker cm, Object value) {
         Objects.requireNonNull(value);
@@ -127,6 +129,7 @@ public abstract class ConstantsRegistry {
      * @param name unused
      * @param type unused
      * @param slot if bit 31 is set, then also remove the constant
+     * @throws NullPointerException if the constant isn't found
      */
     public static Object find(MethodHandles.Lookup lookup, String name, Class<?> type, int slot) {
         if ((lookup.lookupModes() & ACCESS_MODE) == 0) {
@@ -159,7 +162,7 @@ public abstract class ConstantsRegistry {
         }
 
         if (value == null) {
-            return null;
+            throw new NullPointerException();
         }
 
         if (value instanceof Entries) {
@@ -167,7 +170,7 @@ public abstract class ConstantsRegistry {
             synchronized (entries) {
                 value = entries.mValues[slot & Integer.MAX_VALUE];
                 if (value == null) {
-                    return null;
+                    throw new NullPointerException();
                 }
                 int size = entries.mSize;
                 if (size > 1) {

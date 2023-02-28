@@ -352,7 +352,12 @@ public class CondyTest {
 
         int slot = 1 << 31;
 
-        assertNull(ConstantsRegistry.find(MethodHandles.lookup(), "_", null, slot));
+        try {
+            ConstantsRegistry.find(MethodHandles.lookup(), "_", null, slot);
+            fail();
+        } catch (NullPointerException e) {
+            // No constant exists for this test class.
+        }
 
         try {
             ConstantsRegistry.find(MethodHandles.lookup().in(clazz), "_", null, slot);
@@ -378,8 +383,13 @@ public class CondyTest {
         Object const1 = ConstantsRegistry.find(lookup, "_", null, slot);
         assertEquals(const0, const1);
 
-        // Stolen!
-        assertNull(clazz.getField("test").get(null));
+        try {
+            clazz.getField("test").get(null);
+            fail();
+        } catch (BootstrapMethodError e) {
+            // Stolen!
+            assertTrue(e.getCause() instanceof NullPointerException);
+        }
     }
 
     @Test
