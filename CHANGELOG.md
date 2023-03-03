@@ -3,6 +3,7 @@ Changelog
 
 v2.4.7
 ------
+* Fixed a bug in the override method which failed to look for super class interfaces.
 * Added methods to obtain the FieldMaker name, the MethodMaker name, and the MethodMaker
   parameter count.
 * Restore discarding of references to exact constants when they're accessed by a class

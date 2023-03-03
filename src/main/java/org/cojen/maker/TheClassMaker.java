@@ -270,19 +270,29 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
      * @return empty set if no interfaces
      */
     Set<Type> allInterfaces() {
-        if (mInterfaces == null) {
-            return Collections.emptySet();
+        Set<Type> all = null;
+
+        if (mInterfaces != null) {
+            all = new LinkedHashSet<>(mInterfaces.size());
+
+            for (ConstantPool.C_Class clazz : mInterfaces) {
+                Type type = clazz.mType;
+                all.add(type);
+                all.addAll(type.interfaces());
+            }
         }
 
-        Set<Type> all = new LinkedHashSet<>(mInterfaces.size());
-
-        for (ConstantPool.C_Class clazz : mInterfaces) {
-            Type type = clazz.mType;
-            all.add(type);
-            all.addAll(type.interfaces());
+        for (Type s = superType(); s != null; s = s.superType()) {
+            Set<Type> inherited = s.interfaces();
+            if (inherited != null && !inherited.isEmpty()) {
+                if (all == null) {
+                    all = new LinkedHashSet<>(inherited.size());
+                }
+                all.addAll(inherited);
+            }
         }
 
-        return all;
+        return all == null ? Collections.emptySet() : all;
     }
 
     @Override
