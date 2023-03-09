@@ -86,8 +86,7 @@ public abstract class ConstantsRegistry {
 
         ClassLoader loader = clazz.getClassLoader();
 
-        if (loader instanceof ClassInjector.Group) {
-            var group = (ClassInjector.Group) loader;            
+        if (loader instanceof ClassInjector.Group group) {
             synchronized (group) {
                 Map<Class, Object> constants = group.mConstants;
                 if (constants == null) {
@@ -142,8 +141,7 @@ public abstract class ConstantsRegistry {
         ConstantsRegistry registry = null;
 
         Object value;
-        if (loader instanceof ClassInjector.Group) {
-            var group = (ClassInjector.Group) loader;
+        if (loader instanceof ClassInjector.Group group) {
             synchronized (group) {
                 value = group.mConstants == null ? null : group.mConstants.get(clazz);
             }
@@ -165,8 +163,7 @@ public abstract class ConstantsRegistry {
             throw new NullPointerException();
         }
 
-        if (value instanceof Entries) {
-            var entries = (Entries) value;
+        if (value instanceof Entries entries) {
             synchronized (entries) {
                 value = entries.mValues[slot & Integer.MAX_VALUE];
                 if (value == null) {
@@ -184,8 +181,7 @@ public abstract class ConstantsRegistry {
         }
 
         if (slot < 0) {
-            if (loader instanceof ClassInjector.Group) {
-                var group = (ClassInjector.Group) loader;
+            if (loader instanceof ClassInjector.Group group) {
                 synchronized (group) {
                     group.mConstants.remove(clazz);
                     if (group.mConstants.isEmpty()) {
@@ -224,14 +220,8 @@ public abstract class ConstantsRegistry {
         MethodMaker mm = cm.addClinit();
         mm.field("_").set(mm.new_(cm));
 
-        Class<?> clazz;
-        if (cm.supportsHiddenClasses()) {
-            // The hidden class must also be strongly referenced by the class loader.
-            clazz = cm.finishHidden(true).lookupClass();
-        } else {
-            // Ordinary classes are always strongly referenced by the class loader.
-            clazz = cm.finish();
-        }
+        // The hidden class must also be strongly referenced by the class loader.
+        Class<?> clazz = cm.finishHidden(true).lookupClass();
 
         VarHandle vh;
         try {

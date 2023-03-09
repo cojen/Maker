@@ -21,12 +21,8 @@ import java.io.OutputStream;
 
 import java.lang.annotation.Annotation;
 
-import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
-import java.lang.invoke.MethodType;
 
-import java.lang.reflect.Array;
-import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
 import java.util.ArrayList;
@@ -565,9 +561,6 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
 
         var lookupRef = new MethodHandles.Lookup[1];
 
-        // Find the MethodHandles.Lookup.ensureInitialized method, available in Java 15.
-        Method m = ensureInitialized();
-
         // Allow exact constant to be set. Once the caller has decided to finish into a loaded
         // class, they've already decided to not bother creating an external class anyhow.
         boolean wasExternal = mExternal;
@@ -577,51 +570,14 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
             var lookupVar = mm.var(MethodHandles.class).invoke("lookup");
             mm.var(lookupRef.getClass()).setExact(lookupRef).aset(0, lookupVar);
 
-            if (m != null) {
-                MethodHandles.Lookup lookup = mLookup;
+            MethodHandles.Lookup lookup = mLookup;
 
-                if (lookup == null) {
-                    lookup = mInjectorGroup.lookup(name(), false);
-                }
-
-                m.invoke(lookup, finish());
-            } else {
-                // Without the ensureInitialized method, do something much more complicated
-                // which involves defining a special "init" method.
-
-                String initName;
-
-                selectName: for (int id=0;;) {
-                    initName = "$init-" + id;
-                    if (mMethods == null) {
-                        break;
-                    }
-                    for (TheMethodMaker method : mMethods) {
-                        if (initName.equals(method.name())) {
-                            id = ThreadLocalRandom.current().nextInt(Integer.MAX_VALUE);
-                            continue selectName;
-                        }
-                    }
-                    break;
-                }
-
-                addMethod(null, initName).static_().synthetic();
-
-                var clazz = finish();
-
-                if (mLookup != null) {
-                    MethodHandle init = mLookup.findStatic
-                        (clazz, initName, MethodType.methodType(void.class));
-                    init.invokeExact();
-                } else {
-                    MethodHandles.Lookup lookup = mInjectorGroup.lookup(name(), true);
-                    MethodHandle hook = lookup.findStatic
-                        (lookup.lookupClass(), "hook",
-                         MethodType.methodType(void.class, Class.class, String.class));
-                    hook.invokeExact(clazz, initName);
-                }
+            if (lookup == null) {
+                lookup = mInjectorGroup.lookup(name());
             }
-        } catch (Throwable e) {
+
+            lookup.ensureInitialized(finish());
+        } catch (Exception e) {
             throw toUnchecked(e);
         } finally {
             if (wasExternal) {
@@ -635,30 +591,6 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
         return lookup;
     }
 
-    // These fields are modified by AccessTest.
-    static volatile Method cEnsureInitialized;
-    static boolean cNoEnsureInitialized;
-
-    private static Method ensureInitialized() {
-        Method m = cEnsureInitialized;
-
-        if (m == null && !cNoEnsureInitialized) {
-            try {
-                m = MethodHandles.Lookup.class.getMethod("ensureInitialized", Class.class);
-                cEnsureInitialized = m;
-            } catch (Throwable e) {
-                cNoEnsureInitialized = true;
-            }
-        }
-
-        return m;
-    }
-
-    boolean supportsHiddenClasses() {
-        defineHidden();
-        return cHiddenClassOptions != null;
-    }
-
     @Override
     public MethodHandles.Lookup finishHidden() {
         return finishHidden(false);
@@ -666,24 +598,24 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
 
     /**
      * @param strong pass true to maintain a strong reference to the class
-     * @throws RuntimeException if strong and hidden classes aren't truly supported
      */
     MethodHandles.Lookup finishHidden(boolean strong) {
         MethodHandles.Lookup lookup = mLookup;
 
         if (lookup == null) {
-            lookup = mInjectorGroup.lookup(name(), ensureInitialized() == null);
+            lookup = mInjectorGroup.lookup(name());
         }
 
-        Method m = defineHidden();
-        Object options = cHiddenClassOptions;
-
-        if (strong && (options = cHiddenClassStrongOptions) == null) {
-            try {
-                cHiddenClassStrongOptions = options = hiddenOptions("STRONG");
-            } catch (Throwable e) {
-                throw toUnchecked(e);
-            }
+        MethodHandles.Lookup.ClassOption[] options;
+        if (!strong) {
+            options = new MethodHandles.Lookup.ClassOption[] {
+                MethodHandles.Lookup.ClassOption.NESTMATE
+            };
+        } else {
+            options = new MethodHandles.Lookup.ClassOption[] {
+                MethodHandles.Lookup.ClassOption.NESTMATE,
+                MethodHandles.Lookup.ClassOption.STRONG
+            };
         }
 
         String originalName = name();
@@ -692,12 +624,7 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
 
         MethodHandles.Lookup result;
         try {
-            if (options == null) {
-                var clazz = (Class<?>) m.invoke(cUnsafe, lookup.lookupClass(), bytes, null);
-                result = lookup.in(clazz);
-            } else {
-                result = ((MethodHandles.Lookup) m.invoke(lookup, bytes, false, options));
-            }
+            result = lookup.defineHiddenClass(bytes, false, options);
         } catch (Exception e) {
             throw toUnchecked(e);
         } finally {
@@ -707,50 +634,6 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
         ConstantsRegistry.finish(this, lookup, result.lookupClass());
 
         return result;
-    }
-
-    private static volatile Method cDefineHidden;
-    private static Object cHiddenClassOptions;
-    private static Object cHiddenClassStrongOptions;
-    private static Object cUnsafe;
-
-    private static Method defineHidden() {
-        Method m = cDefineHidden;
-
-        if (m != null) {
-            return m;
-        }
-
-        try {
-            Object options = hiddenOptions("NESTMATE");
-            m = MethodHandles.Lookup.class.getMethod
-                ("defineHiddenClass", byte[].class, boolean.class, options.getClass());
-            cHiddenClassOptions = options;
-            cDefineHidden = m;
-            return m;
-        } catch (Throwable e) {
-        }
-
-        try {
-            var unsafeClass = Class.forName("sun.misc.Unsafe");
-            m = unsafeClass.getMethod
-                ("defineAnonymousClass", Class.class, byte[].class, Object[].class);
-            var field = unsafeClass.getDeclaredField("theUnsafe");
-            field.setAccessible(true);
-            cUnsafe = field.get(null);
-            cDefineHidden = m;
-            return m;
-        } catch (Throwable e) {
-        }
-
-        throw new UnsupportedOperationException("Cannot define hidden classes");
-    }
-
-    private static Object hiddenOptions(String optionName) throws Throwable {
-        var optionClass = Class.forName("java.lang.invoke.MethodHandles$Lookup$ClassOption");
-        Object options = Array.newInstance(optionClass, 1);
-        Array.set(options, 0, optionClass.getField(optionName).get(null));
-        return options;
     }
 
     @Override
@@ -807,15 +690,13 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
         // Ensure that mSuperClass has been assigned.
         superClass();
 
-        int version = 0x0000_0037; // Java 11.
+        int version = 0x0000_003d; // Java 17.
 
         if (mRecordCtors != null) {
-            version = 0x0000_003c; // Java 16.
             TheMethodMaker.doFinish(mRecordCtors);
         }
 
         if (mPermittedSubclasses != null) {
-            version = 0x0000_003d; // Java 17.
             addAttribute(new Attribute.PermittedSubclasses(mConstants, mPermittedSubclasses));
         }
 
@@ -833,7 +714,7 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
 
         if (hidden) {
             // Clean up the generated class name. It will be given a unique name by the
-            // defineHiddenClass or defineAnonymousClass method.
+            // defineHiddenClass.
             String name = mThisClass.mValue.mValue;
             int ix = name.lastIndexOf('-');
             if (ix > 0) {

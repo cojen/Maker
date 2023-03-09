@@ -1,6 +1,10 @@
 Changelog
 =========
 
+v2.5.0
+------
+* Depends on Java 17 (was Java 12 previously).
+
 v2.4.7 (2023-03-04)
 ------
 * Fixed a bug in the override method which failed to look for super class interfaces.

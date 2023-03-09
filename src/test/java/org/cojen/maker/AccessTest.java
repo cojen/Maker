@@ -77,22 +77,9 @@ public class AccessTest {
 
     @Test
     public void lookup() throws Exception {
-        synchronized (getClass()) {
-            doLookup("a.b.c.Dee"); 
-            if (withoutEnsureInitialized()) {
-                try {
-                    doLookup("w.x.y.Zee");
-                } finally {
-                    restoreEnsureInitialized();
-                }
-            }
-        }
-    }
-
-    private void doLookup(String name) throws Exception {
         // Can call a private method when calling finishLookup.
         for (int i=0; i<2; i++) {
-            ClassMaker cm = ClassMaker.begin(name);
+            ClassMaker cm = ClassMaker.begin("a.b.c.Dee");
             MethodMaker mm = cm.addMethod(null, "run").private_().static_();
             MethodHandles.Lookup lookup = cm.finishLookup();
             var clazz = lookup.lookupClass();
@@ -116,22 +103,9 @@ public class AccessTest {
     }
 
     @Test
-    public void lookup3() throws Exception {
-        synchronized (getClass()) {
-            doLookup3("a.b.c.Dee");
-            if (withoutEnsureInitialized()) {
-                try {
-                    doLookup3("w.x.y.Zee");
-                } finally {
-                    restoreEnsureInitialized();
-                }
-            }
-        }
-    }
-
-    private void doLookup3(String name) throws Exception {
+    public void lookupExternal() throws Exception {
         // Can call a private method when calling finishLookup.
-        ClassMaker cm = ClassMaker.beginExternal(name);
+        ClassMaker cm = ClassMaker.beginExternal("a.b.c.Dee");
         MethodMaker mm = cm.addMethod(null, "run").private_().static_();
         MethodHandles.Lookup lookup = cm.finishLookup();
         var clazz = lookup.lookupClass();
@@ -170,25 +144,6 @@ public class AccessTest {
                 assertTrue(e.getCause() instanceof IllegalAccessError);
             }
         }
-    }
-
-    // Called by SubAccessTest.
-    public static boolean withoutEnsureInitialized() {
-        if (TheClassMaker.cEnsureInitialized == null) {
-            return false;
-        } else {
-            // Don't use the ensureInitialized method, even if available. It became available
-            // in Java 15.
-            TheClassMaker.cNoEnsureInitialized = true;
-            TheClassMaker.cEnsureInitialized = null;
-            return true;
-        }
-    }
-
-    // Called by SubAccessTest.
-    public static void restoreEnsureInitialized() {
-        // This forces the method to be looked up again.
-        TheClassMaker.cNoEnsureInitialized = false;
     }
 
     @Test

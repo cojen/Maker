@@ -761,16 +761,10 @@ abstract class Type {
 
         @Override
         public boolean equals(Object obj) {
-            if (this == obj) {
-                return true;
-            }
-            if (obj instanceof Field) {
-                var other = (Field) obj;
-                return name().equals(other.name())
-                    && type().equals(other.type())
-                    && isStatic() == other.isStatic();
-            }
-            return false;
+            return this == obj || obj instanceof Field other
+                && name().equals(other.name())
+                && type().equals(other.type())
+                && isStatic() == other.isStatic();
         }
 
         @Override
@@ -843,17 +837,11 @@ abstract class Type {
 
         @Override
         public boolean equals(Object obj) {
-            if (this == obj) {
-                return true;
-            }
-            if (obj instanceof Method) {
-                var other = (Method) obj;
-                return name().equals(other.name())
-                    && returnType().equals(other.returnType())
-                    && isStatic() == other.isStatic()
-                    && Arrays.equals(mParamTypes, other.mParamTypes);
-            }
-            return false;
+            return this == obj || obj instanceof Method other
+                && name().equals(other.name())
+                && returnType().equals(other.returnType())
+                && isStatic() == other.isStatic()
+                && Arrays.equals(mParamTypes, other.mParamTypes);
         }
 
         @Override
@@ -889,16 +877,10 @@ abstract class Type {
 
         @Override
         public boolean equals(Object obj) {
-            if (this == obj) {
-                return true;
-            }
-            if (obj instanceof MethodKey) {
-                var other = (MethodKey) obj;
-                return name.equals(other.name)
-                    && returnType.equals(other.returnType)
-                    && Arrays.equals(paramTypes, other.paramTypes);
-            }
-            return false;
+            return this == obj || obj instanceof MethodKey other
+                && name.equals(other.name)
+                && returnType.equals(other.returnType)
+                && Arrays.equals(paramTypes, other.paramTypes);
         }
 
         @Override
@@ -1056,10 +1038,7 @@ abstract class Type {
 
         @Override
         public boolean equals(Object obj) {
-            if (obj instanceof Primitive) {
-                return mTypeCode == ((Primitive) obj).mTypeCode;
-            }
-            return false;
+            return obj instanceof Primitive other && mTypeCode == other.mTypeCode;
         }
 
         @Override
@@ -1237,13 +1216,8 @@ abstract class Type {
 
         @Override
         public boolean equals(Object obj) {
-            if (obj == this) {
-                return true;
-            }
-            if (obj instanceof Array) {
-                return mElementType.equals(((Array) obj).mElementType);
-            }
-            return false;
+            return obj == this || obj instanceof Array
+                && mElementType.equals(((Array) obj).mElementType);
         }
 
         @Override
@@ -1802,13 +1776,8 @@ abstract class Type {
 
         @Override
         public boolean equals(Object obj) {
-            if (obj == this) {
-                return true;
-            }
-            if (obj instanceof Clazz) {
-                return name().equals(((Clazz) obj).name());
-            }
-            return false;
+            return obj == this || obj instanceof Clazz other
+                && name().equals(other.name());
         }
 
         @Override
@@ -1819,7 +1788,7 @@ abstract class Type {
         /**
          * Composite key used to cache the results of doFindMethods.
          */
-        private static class FindKey {
+        private static final class FindKey {
             final Type[] params;
             final int inherit;
             final int staticAllowed;
@@ -1849,18 +1818,12 @@ abstract class Type {
 
             @Override
             public boolean equals(Object obj) {
-                if (this == obj) {
-                    return true;
-                }
-                if (obj instanceof FindKey) {
-                    var other = (FindKey) obj;
-                    return Arrays.equals(params, other.params)
-                        && inherit == other.inherit
-                        && staticAllowed == other.staticAllowed
-                        && Objects.equals(specificReturnType, other.specificReturnType)
-                        && Arrays.equals(specificParamTypes, other.specificParamTypes);
-                }
-                return false;
+                return this == obj ||  obj instanceof FindKey other
+                    && Arrays.equals(params, other.params)
+                    && inherit == other.inherit
+                    && staticAllowed == other.staticAllowed
+                    && Objects.equals(specificReturnType, other.specificReturnType)
+                    && Arrays.equals(specificParamTypes, other.specificParamTypes);
             }
 
             @Override

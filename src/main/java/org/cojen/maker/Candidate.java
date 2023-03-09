@@ -28,7 +28,7 @@ final class Candidate {
      * parameter types must be better or equal based on conversion cost.
      *
      * @param params actual types supplied to the invoke method
-     * @return -1 if if method a is better, 1 if b is better, or 0 if neither is strictly better
+     * @return -1 if method a is better, 1 if b is better, or 0 if neither is strictly better
      */
     public static int compare(Type[] params, Type.Method a, Type.Method b) {
         Type[] aParams = a.paramTypes();

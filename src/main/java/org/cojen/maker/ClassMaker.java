@@ -347,9 +347,6 @@ public interface ClassMaker extends Maker {
      * referenced, even if the class loader still is. If a lookup object was passed to the
      * begin method, the hidden class is defined in the same nest as the lookup class.
      *
-     * <p>This feature is fully supported only with Java 15 and above. Hidden classes created
-     * with earlier versions don't support all the lookup features.
-     *
      * @return the lookup for the class; call {@link MethodHandles.Lookup#lookupClass lookupClass}
      * to obtain the actual class
      * @throws IllegalStateException if already finished or if the definition is broken

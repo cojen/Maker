@@ -203,15 +203,9 @@ class ClassInjector extends ClassLoader {
 
         @Override
         public boolean equals(Object obj) {
-            if (obj == this) {
-                return true;
-            }
-            if (obj instanceof Key) {
-                var other = (Key) obj;
-                return mHash == other.mHash
-                    && Objects.equals(get(), other.get()) && Objects.equals(mRest, other.mRest);
-            }
-            return false;
+            return obj == this || obj instanceof Key other
+                && mHash == other.mHash
+                && Objects.equals(get(), other.get()) && Objects.equals(mRest, other.mRest);
         }
     }
 
@@ -256,12 +250,11 @@ class ClassInjector extends ClassLoader {
          * Returns a lookup object in the group's package.
          *
          * @param className used to extract the package name
-         * @param hook when true, also define a "hook" method which invokes a named init method
          */
-        MethodHandles.Lookup lookup(String className, boolean hook) {
+        MethodHandles.Lookup lookup(String className) {
             MethodHandles.Lookup lookup = mLookup;
             if (lookup == null) {
-                lookup = makeLookup(className, hook);
+                lookup = makeLookup(className);
             }
             return lookup;
         }
@@ -288,7 +281,7 @@ class ClassInjector extends ClassLoader {
             return findLoadedClass(name) != null;
         }
 
-        private synchronized MethodHandles.Lookup makeLookup(String className, boolean hook) {
+        private synchronized MethodHandles.Lookup makeLookup(String className) {
             MethodHandles.Lookup lookup = mLookup;
             if (lookup != null) {
                 return lookup;
@@ -305,13 +298,6 @@ class ClassInjector extends ClassLoader {
             mm.new_(IllegalAccessError.class).throw_();
             ok.here();
             mm.return_(mm.var(MethodHandles.class).invoke("lookup"));
-
-            if (hook) {
-                mm = cm.addMethod(null, "hook", Class.class, String.class)
-                    .public_().static_().synthetic();
-                var initMethodVar = mm.param(0).invoke("getDeclaredMethod", mm.param(1));
-                initMethodVar.invoke("invoke", (Object) null);
-            }
 
             // Ideally, this should be a hidden class which can eventually be GC'd.
             // Unfortunately, this requires that a package-level lookup already exists.

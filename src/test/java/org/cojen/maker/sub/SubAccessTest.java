@@ -53,15 +53,6 @@ public class SubAccessTest {
 
     @Test
     public void lookup2() throws Exception {
-        synchronized (AccessTest.class) {
-            AccessTest.doLookup2(MethodHandles.lookup());
-            if (AccessTest.withoutEnsureInitialized()) {
-                try {
-                    AccessTest.doLookup2(MethodHandles.lookup());
-                } finally {
-                    AccessTest.restoreEnsureInitialized();
-                }
-            }
-        }
+        AccessTest.doLookup2(MethodHandles.lookup());
     }
 }

@@ -195,13 +195,11 @@ class ConstantPool {
     Constant tryAddLoadableConstant(Object value) {
         if (value instanceof String) {
             return addString((String) value);
-        } else if (value instanceof Class) {
-            Class clazz = (Class) value;
+        } else if (value instanceof Class clazz) {
             if (!clazz.isPrimitive()) {
                 return doAddClass(Type.from(clazz));
             }
-        } else if (value instanceof Type) {
-            Type type = (Type) value;
+        } else if (value instanceof Type type) {
             if (type.isObject()) {
                 return doAddClass(type);
             }
@@ -284,14 +282,8 @@ class ConstantPool {
     
         @Override
         public boolean equals(Object obj) {
-            if (this == obj) {
-                return true;
-            }
-            if (obj instanceof C_UTF8) {
-                C_UTF8 other = (C_UTF8) obj;
-                return mValue.equals(other.mValue);
-            }
-            return false;
+            return this == obj || obj instanceof C_UTF8 other
+                && mValue.equals(other.mValue);
         }
 
         @Override
@@ -316,14 +308,8 @@ class ConstantPool {
     
         @Override
         public boolean equals(Object obj) {
-            if (this == obj) {
-                return true;
-            }
-            if (obj instanceof C_Integer) {
-                C_Integer other = (C_Integer) obj;
-                return mValue == other.mValue;
-            }
-            return false;
+            return this == obj || obj instanceof C_Integer other
+                && mValue == other.mValue;
         }
     
         @Override
@@ -348,14 +334,8 @@ class ConstantPool {
     
         @Override
         public boolean equals(Object obj) {
-            if (this == obj) {
-                return true;
-            }
-            if (obj instanceof C_Float) {
-                C_Float other = (C_Float) obj;
-                return Float.floatToRawIntBits(mValue) == Float.floatToRawIntBits(other.mValue);
-            }
-            return false;
+            return this == obj || obj instanceof C_Float other
+                && Float.floatToRawIntBits(mValue) == Float.floatToRawIntBits(other.mValue);
         }
     
         @Override
@@ -380,14 +360,8 @@ class ConstantPool {
     
         @Override
         public boolean equals(Object obj) {
-            if (this == obj) {
-                return true;
-            }
-            if (obj instanceof C_Long) {
-                C_Long other = (C_Long) obj;
-                return mValue == other.mValue;
-            }
-            return false;
+            return this == obj || obj instanceof C_Long other
+                && mValue == other.mValue;
         }
     
         @Override
@@ -412,15 +386,8 @@ class ConstantPool {
     
         @Override
         public boolean equals(Object obj) {
-            if (this == obj) {
-                return true;
-            }
-            if (obj instanceof C_Double) {
-                C_Double other = (C_Double) obj;
-                return Double.doubleToRawLongBits(mValue)
-                    == Double.doubleToRawLongBits(other.mValue);
-            }
-            return false;
+            return this == obj || obj instanceof C_Double other
+                && Double.doubleToRawLongBits(mValue) == Double.doubleToRawLongBits(other.mValue);
         }
     
         @Override
@@ -445,14 +412,8 @@ class ConstantPool {
     
         @Override
         public boolean equals(Object obj) {
-            if (this == obj) {
-                return true;
-            }
-            if (obj instanceof C_String) {
-                C_String other = (C_String) obj;
-                return mTag == other.mTag && mValue.equals(other.mValue);
-            }
-            return false;
+            return this == obj || obj instanceof C_String other
+                && mTag == other.mTag && mValue.equals(other.mValue);
         }
 
         @Override
@@ -492,14 +453,8 @@ class ConstantPool {
 
         @Override
         public boolean equals(Object obj) {
-            if (this == obj) {
-                return true;
-            }
-            if (obj instanceof C_NameAndType) {
-                C_NameAndType other = (C_NameAndType) obj;
-                return mName.equals(other.mName) && mTypeDesc.equals(other.mTypeDesc);
-            }
-            return false;
+            return this == obj || obj instanceof C_NameAndType other
+                && mName.equals(other.mName) && mTypeDesc.equals(other.mTypeDesc);
         }
 
         @Override
@@ -527,15 +482,9 @@ class ConstantPool {
 
         @Override
         public boolean equals(Object obj) {
-            if (this == obj) {
-                return true;
-            }
-            if (obj instanceof C_MemberRef) {
-                C_MemberRef other = (C_MemberRef) obj;
-                return mTag == other.mTag && mClass.equals(other.mClass)
-                    && mNameAndType.equals(other.mNameAndType);
-            }
-            return false;
+            return this == obj || obj instanceof C_MemberRef other
+                && mTag == other.mTag && mClass.equals(other.mClass)
+                && mNameAndType.equals(other.mNameAndType);
         }
     
         @Override
@@ -581,14 +530,8 @@ class ConstantPool {
 
         @Override
         public boolean equals(Object obj) {
-            if (this == obj) {
-                return true;
-            }
-            if (obj instanceof C_MethodHandle) {
-                C_MethodHandle other = (C_MethodHandle) obj;
-                return mKind == other.mKind && mRef.equals(other.mRef);
-            }
-            return false;
+            return this == obj || obj instanceof C_MethodHandle other
+                && mKind == other.mKind && mRef.equals(other.mRef);
         }
 
         @Override
@@ -616,15 +559,9 @@ class ConstantPool {
 
         @Override
         public boolean equals(Object obj) {
-            if (this == obj) {
-                return true;
-            }
-            if (obj instanceof C_Dynamic) {
-                C_Dynamic other = (C_Dynamic) obj;
-                return mTag == other.mTag && mBootstrapIndex == other.mBootstrapIndex
-                    && mNameAndType.equals(other.mNameAndType);
-            }
-            return false;
+            return this == obj || obj instanceof C_Dynamic other
+                && mTag == other.mTag && mBootstrapIndex == other.mBootstrapIndex
+                && mNameAndType.equals(other.mNameAndType);
         }
     
         @Override

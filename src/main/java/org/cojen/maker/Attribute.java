@@ -426,14 +426,8 @@ abstract class Attribute extends Attributed {
     
             @Override
             public boolean equals(Object obj) {
-                if (this == obj) {
-                    return true;
-                }
-                if (obj instanceof Entry) {
-                    Entry other = (Entry) obj;
-                    return mMethod.equals(other.mMethod) && Arrays.equals(mArgs, other.mArgs);
-                }
-                return false;
+                return this == obj || obj instanceof Entry other
+                    && mMethod.equals(other.mMethod) && Arrays.equals(mArgs, other.mArgs);
             }
         }
     }

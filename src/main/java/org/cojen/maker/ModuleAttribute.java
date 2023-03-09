@@ -30,11 +30,9 @@ import java.util.Set;
  */
 class ModuleAttribute extends Attribute {
     static ModuleAttribute make(Attributed a, String name, ModuleDescriptor desc) {
-        if (!(a instanceof TheClassMaker) || !"Module".equals(name)) {
+        if (!(a instanceof TheClassMaker cm) || !"Module".equals(name)) {
             throw new IllegalArgumentException();
         }
-
-        var cm = (TheClassMaker) a;
 
         if (!"module-info".equals(cm.name())) {
             throw new IllegalStateException();

@@ -61,8 +61,7 @@ abstract class ConstableSupport {
         } else if (value instanceof DirectMethodHandleDesc) {
             type = Type.from(MethodHandle.class);
             constant = addMethodHandle(mm, (DirectMethodHandleDesc) value);
-        } else if (value instanceof DynamicConstantDesc) {
-            var dcd = (DynamicConstantDesc) value;
+        } else if (value instanceof DynamicConstantDesc dcd) {
             type = mm.mClassMaker.typeFrom(dcd.constantType().descriptorString());
 
             DirectMethodHandleDesc bootDesc = dcd.bootstrapMethod();
@@ -165,8 +164,7 @@ abstract class ConstableSupport {
                 return Type.from(MethodType.class);
             } else if (value instanceof DirectMethodHandleDesc) {
                 return Type.from(MethodHandle.class);
-            } else if (value instanceof DynamicConstantDesc) {
-                var dcd = (DynamicConstantDesc) value;
+            } else if (value instanceof DynamicConstantDesc dcd) {
                 return mm.mClassMaker.typeFrom(dcd.constantType().descriptorString());
             } else if (value instanceof ClassDesc) {
                 return Type.from(Class.class);

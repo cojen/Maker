@@ -87,8 +87,7 @@ class TheAnnotationMaker implements AnnotationMaker {
             return new ConstElement('I', cp.addInteger((Integer) value));
         } else if (value instanceof Boolean) {
             return new ConstElement('Z', cp.addInteger(((Boolean) value) ? 1 : 0));
-        } else if (value instanceof Enum) {
-            var ev = (Enum) value;
+        } else if (value instanceof Enum ev) {
             return new EnumElement(cp.addUTF8(Type.from(ev.getDeclaringClass()).descriptor()),
                                    cp.addUTF8(ev.name()));
         } else if (value.getClass().isArray()) {
@@ -101,8 +100,7 @@ class TheAnnotationMaker implements AnnotationMaker {
                 elements[i] = toElement(parent, cp, Array.get(value, i));
             }
             return new ArrayElement(elements);
-        } else if (value instanceof TheAnnotationMaker) {
-            var am = (TheAnnotationMaker) value;
+        } else if (value instanceof TheAnnotationMaker am) {
             if (am.mParent != parent) {
                 throw new IllegalStateException();
             }

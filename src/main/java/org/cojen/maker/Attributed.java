@@ -93,8 +93,7 @@ abstract class Attributed {
                     }
 
                     return new Attribute.Constant(cp, name, constant);
-                } else if (value instanceof Object[]) {
-                    var values = (Object[]) value;
+                } else if (value instanceof Object[] values) {
                     if (values.length == 0) {
                         return make(a, cp, name, null);
                     } else if (values.length == 1) {

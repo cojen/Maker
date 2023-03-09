@@ -1270,13 +1270,11 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
             lastTransformed = true;
 
-            if (op instanceof BranchOp) {
-                var branchOp = (BranchOp) op;
+            if (op instanceof BranchOp branchOp) {
                 branchOp.mTarget = finallyExit(inside, exits, branchOp.mTarget);
             } else if (op instanceof SwitchOp) {
                 ((SwitchOp) op).finallyExits(this, inside, exits);
-            } else if (op instanceof ReturnOp) {
-                var retOp = (ReturnOp) op;
+            } else if (op instanceof ReturnOp retOp) {
 
                 if (retHandler == null) {
                     retHandler = new Lab();
@@ -2083,8 +2081,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     }
 
     private Type doAddPushOp(Type type, Object value) {
-        if (value instanceof OwnedVar) {
-            var owned = (OwnedVar) value;
+        if (value instanceof OwnedVar owned) {
             if (owned.tryPushTo(this)) {
                 return addConversionOp(owned.type(), type);
             }
@@ -2105,9 +2102,8 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                     ("String constant is too large: " + utflen + " bytes");
             }
             constantType = Type.from(String.class);
-        } else if (value instanceof Class) {
+        } else if (value instanceof Class clazz) {
             constantType = Type.from(Class.class);
-            Class clazz = (Class) value;
             if (clazz.isPrimitive()) {
                 new LocalVar(Type.from(clazz).box()).field("TYPE").push();
                 return addConversionOp(constantType, type);
@@ -2407,9 +2403,8 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                     break;
                 }
             }
-        } else if (value instanceof Type) {
+        } else if (value instanceof Type actualType) {
             constantType = Type.from(Class.class);
-            Type actualType = (Type) value;
             if (actualType.isPrimitive()) {
                 new LocalVar(actualType.box()).field("TYPE").push();
                 return addConversionOp(constantType, type);
@@ -2625,8 +2620,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                             // Not expected. Should have been handled by tryAddLoadableConstant.
                             break special;
                         }
-                    } else if (value instanceof Class) {
-                        var clazz = (Class) value;
+                    } else if (value instanceof Class clazz) {
                         if (!clazz.isPrimitive()) {
                             // Not expected. Should have been handled by tryAddLoadableConstant.
                             break special;
@@ -2865,8 +2859,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     }
 
     private Lab target(Label label) {
-        if (label instanceof Lab) {
-            Lab lab = (Lab) label;
+        if (label instanceof Lab lab) {
             if (lab.methodMaker() == this) {
                 return lab;
             }
@@ -3494,11 +3487,9 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
                 // If the next op is a goto, then flip the condition and remove the goto.
 
-                if (!(next instanceof BranchOp)) {
+                if (!(next instanceof BranchOp nextBranch)) {
                     break;
                 }
-
-                BranchOp nextBranch = (BranchOp) next;
 
                 if (nextBranch.op() != GOTO || next.mNext != target) {
                     break;
@@ -3843,8 +3834,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             // stack variable and avoid extra steps.
 
             Op next = mNext;
-            if (next instanceof PushVarOp) {
-                var push = (PushVarOp) next;
+            if (next instanceof PushVarOp push) {
                 LocalVar var = mVar;
                 if (var == push.mVar && var.mPushCount == 1) {
                     var.mPushCount = 0;
@@ -4126,8 +4116,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                 push(typeCmp);
                 addPushOp(typeCmp, value);
             } else {
-                if (value instanceof Number) {
-                    Number num = (Number) value;
+                if (value instanceof Number num) {
                     if (num.longValue() == 0 && num.doubleValue() == 0
                         && (Type.from(value.getClass()).unboxTypeCode() != T_OBJECT))
                     {
