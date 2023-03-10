@@ -23,7 +23,7 @@ package org.cojen.maker;
  * @see Maker#addAnnotation Maker.addAnnotation
  * @see Variable#addAnnotation Variable.addAnnotation
  */
-public interface AnnotationMaker {
+public sealed interface AnnotationMaker permits TheAnnotationMaker {
     /**
      * Put a name-value pair into the annotation, where the value can be a primitive type, a
      * {@link String}, an {@link Enum}, a {@link Class}, an {@code AnnotationMaker}, or an array.

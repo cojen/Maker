@@ -22,7 +22,7 @@ package org.cojen.maker;
  * @author Brian S O'Neill
  * @see ClassMaker#addField
  */
-public interface FieldMaker extends Maker {
+public sealed interface FieldMaker extends Maker permits TheFieldMaker {
     /**
      * Returns the name of this field.
      */

@@ -29,7 +29,7 @@ import java.util.Map;
  *
  * @author Brian S O'Neill
  */
-class TheAnnotationMaker implements AnnotationMaker {
+final class TheAnnotationMaker implements AnnotationMaker {
     private final TheClassMaker mClassMaker;
     private final ConstantPool.C_UTF8 mType;
     private final Map<ConstantPool.C_UTF8, Element> mElements;

@@ -22,7 +22,7 @@ package org.cojen.maker;
  * @author Brian S O'Neill
  * @see MethodMaker#label
  */
-public interface Label {
+public sealed interface Label permits TheMethodMaker.Lab {
     /**
      * Sets the position of the label at the location of the next code instruction.
      *

@@ -24,7 +24,7 @@ package org.cojen.maker;
  * @see Variable#indy indy
  * @see Variable#condy condy
  */
-public interface Bootstrap {
+public sealed interface Bootstrap permits TheMethodMaker.BootstrapImpl {
     /**
      * Invoke a dynamically generated constant, or a dynamically generated method that has no
      * parameters.

@@ -23,7 +23,9 @@ import java.io.IOException;
  *
  * @author Brian S O'Neill
  */
-abstract class ClassMember extends Attributed implements Maker {
+abstract sealed class ClassMember extends Attributed implements Maker
+    permits TheFieldMaker, TheMethodMaker
+{
     final TheClassMaker mClassMaker;
     final ConstantPool.C_UTF8 mName;
     final ConstantPool.C_UTF8 mDescriptor;
