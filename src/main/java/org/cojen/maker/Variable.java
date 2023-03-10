@@ -29,7 +29,7 @@ import java.lang.invoke.MethodType;
  * @author Brian S O'Neill
  * @see MethodMaker#var
  */
-public sealed interface Variable permits Field, TheMethodMaker.OwnedVar {
+public interface Variable {
     /**
      * Returns the type of this variable, if bound to an existing class. Null is returned if
      * bound to a class which is being made.

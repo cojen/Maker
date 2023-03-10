@@ -393,6 +393,16 @@ public class UsageTest {
             check(e, "Unknown label");
         }
         try {
+            mm2.goto_(new Label() {
+                public Label here() {return this;}
+                public Label goto_() {return this;}
+                public MethodMaker methodMaker() {return null;}
+            });
+            fail();
+        } catch (IllegalStateException e) {
+            check(e, "Unknown label");
+        }
+        try {
             a.here();
             fail();
         } catch (IllegalStateException e) {

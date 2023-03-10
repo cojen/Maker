@@ -26,7 +26,7 @@ import java.lang.invoke.VarHandle;
  * @author Brian S O'Neill
  * @see MethodMaker#field
  */
-public sealed interface Field extends Variable permits TheMethodMaker.BaseFieldVar {
+public interface Field extends Variable {
     /**
      * Fields cannot be renamed, and so this method always throws an {@link
      * IllegalStateException}.

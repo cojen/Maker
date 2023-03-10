@@ -21,7 +21,7 @@ package org.cojen.maker;
  *
  * @author Brian S O'Neill
  */
-public sealed interface Maker permits ClassMember, ClassMaker, FieldMaker, MethodMaker {
+public interface Maker {
     /**
      * Switch this item to be public.
      *

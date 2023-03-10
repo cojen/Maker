@@ -54,9 +54,7 @@ import static org.cojen.maker.BytesOut.*;
  *
  * @author Brian S O'Neill
  */
-sealed class TheMethodMaker extends ClassMember implements MethodMaker
-    permits StandaloneMethodMaker
-{
+class TheMethodMaker extends ClassMember implements MethodMaker {
     private static final int MAX_CODE_LENGTH = 65535;
 
     private static final boolean CONDY_WORKAROUND;
@@ -3067,7 +3065,7 @@ sealed class TheMethodMaker extends ClassMember implements MethodMaker
         }
     }
 
-    sealed class Lab extends Op implements Label {
+    class Lab extends Op implements Label {
         int mAddress = -1;
 
         private int mUsedCount;
@@ -3350,7 +3348,7 @@ sealed class TheMethodMaker extends ClassMember implements MethodMaker
     /**
      * Special label which decrements the tracked stack but doesn't actually emit a pop opcode.
      */
-    final class PopLab extends Lab {
+    class PopLab extends Lab {
         PopLab() {
         }
 
@@ -3368,7 +3366,7 @@ sealed class TheMethodMaker extends ClassMember implements MethodMaker
     /**
      * Exception handler catch label.
      */
-    final class HandlerLab extends Lab {
+    class HandlerLab extends Lab {
         private final Type mCatchType;
         private final int mSmCatchCode;
 
@@ -3958,7 +3956,7 @@ sealed class TheMethodMaker extends ClassMember implements MethodMaker
         }
     }
 
-    sealed abstract class OwnedVar implements Variable, Typed {
+    abstract class OwnedVar implements Variable, Typed {
         @Override
         public Class<?> classType() {
             return type().clazz();
@@ -4942,7 +4940,7 @@ sealed class TheMethodMaker extends ClassMember implements MethodMaker
         }
     }
 
-    sealed class LocalVar extends OwnedVar implements Comparable<LocalVar> {
+    class LocalVar extends OwnedVar implements Variable, Comparable<LocalVar> {
         final Type mType;
 
         int mSlot = -1;
@@ -5057,7 +5055,7 @@ sealed class TheMethodMaker extends ClassMember implements MethodMaker
     /**
      * Method parameter variable.
      */
-    sealed class ParamVar extends LocalVar {
+    class ParamVar extends LocalVar {
         private final int mIndex;
 
         ParamVar(Type type, int index) {
@@ -5134,7 +5132,7 @@ sealed class TheMethodMaker extends ClassMember implements MethodMaker
     /**
      * Unmodifiable variable which refers to a constant.
      */
-    sealed class ConstantVar extends LocalVar {
+    class ConstantVar extends LocalVar {
         final ConstantPool.Constant mConstant;
 
         ConstantVar(Type type, ConstantPool.Constant constant) {
@@ -5312,7 +5310,7 @@ sealed class TheMethodMaker extends ClassMember implements MethodMaker
         }
     }
 
-    sealed abstract class BaseFieldVar extends OwnedVar implements Field {
+    abstract class BaseFieldVar extends OwnedVar implements Field {
         @Override
         public void inc(Object value) {
             set(add(value));

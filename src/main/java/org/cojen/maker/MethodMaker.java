@@ -31,7 +31,7 @@ import java.util.function.Consumer;
  * @author Brian S O'Neill
  * @see ClassMaker#addMethod
  */
-public sealed interface MethodMaker extends Maker permits TheMethodMaker {
+public interface MethodMaker extends Maker {
     /**
      * Begin defining a standalone method, defined in the same nest as the lookup class.
      *
@@ -65,30 +65,41 @@ public sealed interface MethodMaker extends Maker permits TheMethodMaker {
     private static MethodMaker begin(MethodHandles.Lookup lookup, MethodType type,
                                      Object retType, String methodName, Object... paramTypes)
     {
-        if (methodName == null) {
-            methodName = "_";
-        }
+        final String mname = methodName == null ? "_" : methodName;
 
         Class<?> lookupClass = lookup.lookupClass();
         String className = lookupClass.getName();
-        className = className.substring(0, className.lastIndexOf('.') + 1) + methodName;
+        className = className.substring(0, className.lastIndexOf('.') + 1) + mname;
         ClassLoader loader = lookupClass.getClassLoader();
         TheClassMaker cm = TheClassMaker.begin(false, className, true, loader, null, lookup);
 
-        Type.Method method = cm.defineMethod(retType, methodName, paramTypes);
+        Type.Method method = cm.defineMethod(retType, mname, paramTypes);
 
-        if (type == null) {
+        final MethodType mtype;
+        if (type != null) {
+            mtype = type;
+        } else {
             Type[] ptypes = method.paramTypes();
             var pclasses = new Class[ptypes.length];
             for (int i=0; i<pclasses.length; i++) {
                 pclasses[i] = classFor(ptypes[i]);
             }
-            type = MethodType.methodType(classFor(method.returnType()), pclasses);
+            mtype = MethodType.methodType(classFor(method.returnType()), pclasses);
         }
 
-        var mm = new StandaloneMethodMaker(cm, method, methodName, type);
-        mm.static_();
+        var mm = new TheMethodMaker(cm, method) {
+            @Override
+            public MethodHandle finish() {
+                MethodHandles.Lookup lookup = mClassMaker.finishHidden();
+                try {
+                    return lookup.findStatic(lookup.lookupClass(), mname, mtype);
+                } catch (NoSuchMethodException | IllegalAccessException e) {
+                    throw new IllegalStateException(e);
+                }
+            }
+        };
 
+        mm.static_();
         cm.doAddMethod(mm);
 
         return mm;

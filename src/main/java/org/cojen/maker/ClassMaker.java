@@ -28,7 +28,7 @@ import java.lang.invoke.MethodType;
  * @author Brian S O'Neill
  * @see #begin
  */
-public sealed interface ClassMaker extends Maker permits TheClassMaker {
+public interface ClassMaker extends Maker {
     /**
      * Begin defining a class with an automatically assigned name.
      */
