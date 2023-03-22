@@ -81,12 +81,12 @@ class TheAnnotationMaker implements AnnotationMaker {
     static Element toElement(TheAnnotationMaker parent, ConstantPool cp, Object value) {
         Objects.requireNonNull(value);
 
-        if (value instanceof String) {
-            return new ConstElement('s', cp.addUTF8((String) value));
-        } else if (value instanceof Integer) {
-            return new ConstElement('I', cp.addInteger((Integer) value));
-        } else if (value instanceof Boolean) {
-            return new ConstElement('Z', cp.addInteger(((Boolean) value) ? 1 : 0));
+        if (value instanceof String str) {
+            return new ConstElement('s', cp.addUTF8(str));
+        } else if (value instanceof Integer num) {
+            return new ConstElement('I', cp.addInteger(num));
+        } else if (value instanceof Boolean b) {
+            return new ConstElement('Z', cp.addInteger(b ? 1 : 0));
         } else if (value instanceof Enum ev) {
             return new EnumElement(cp.addUTF8(Type.from(ev.getDeclaringClass()).descriptor()),
                                    cp.addUTF8(ev.name()));
@@ -106,22 +106,22 @@ class TheAnnotationMaker implements AnnotationMaker {
             }
             am.mParent = null;
             return new AnnotationElement(am);
-        } else if (value instanceof Long) {
-            return new ConstElement('J', cp.addLong((Long) value));
-        } else if (value instanceof Double) {
-            return new ConstElement('D', cp.addDouble((Double) value));
-        } else if (value instanceof Class) {
-            return new ConstElement('c', cp.addUTF8(Type.from((Class) value).descriptor()));
-        } else if (value instanceof Character) {
-            return new ConstElement('C', cp.addInteger(((Character) value).charValue()));
-        } else if (value instanceof Byte) {
-            return new ConstElement('B', cp.addInteger(((Byte) value).intValue()));
-        } else if (value instanceof Short) {
-            return new ConstElement('S', cp.addInteger(((Short) value).intValue()));
-        } else if (value instanceof Float) {
-            return new ConstElement('F', cp.addFloat((Float) value));
-        } else if (value instanceof Typed) {
-            return new ConstElement('c', cp.addUTF8(((Typed) value).type().descriptor()));
+        } else if (value instanceof Long num) {
+            return new ConstElement('J', cp.addLong(num));
+        } else if (value instanceof Double num) {
+            return new ConstElement('D', cp.addDouble(num));
+        } else if (value instanceof Class clazz) {
+            return new ConstElement('c', cp.addUTF8(Type.from(clazz).descriptor()));
+        } else if (value instanceof Character c) {
+            return new ConstElement('C', cp.addInteger(c.charValue()));
+        } else if (value instanceof Byte num) {
+            return new ConstElement('B', cp.addInteger(num.intValue()));
+        } else if (value instanceof Short num) {
+            return new ConstElement('S', cp.addInteger(num.intValue()));
+        } else if (value instanceof Float num) {
+            return new ConstElement('F', cp.addFloat(num));
+        } else if (value instanceof Typed typed) {
+            return new ConstElement('c', cp.addUTF8(typed.type().descriptor()));
         } else {
             throw new IllegalArgumentException();
         }

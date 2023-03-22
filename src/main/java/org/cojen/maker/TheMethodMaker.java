@@ -625,7 +625,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         Type type = mMethod.returnType();
 
         if (type == VOID) {
-            if (value instanceof Typed && ((Typed) value).type() == VOID) {
+            if (value instanceof Typed typed && typed.type() == VOID) {
                 doReturn();
                 return;
             }
@@ -1152,8 +1152,8 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     }
 
     private static void adjustPushCount(Object value, int amt) {
-        if (value instanceof OwnedVar) {
-            ((OwnedVar) value).adjustPushCount(amt);
+        if (value instanceof OwnedVar var) {
+            var.adjustPushCount(amt);
         }
     }
 
@@ -1241,11 +1241,11 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             if (op == endLab) {
                 break;
             }
-            if (op instanceof Lab) {
+            if (op instanceof Lab lab) {
                 if (inside == null) {
                     inside = new HashSet<>();
                 }
-                inside.add((Lab) op);
+                inside.add(lab);
             }
         }
 
@@ -1272,8 +1272,8 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
             if (op instanceof BranchOp branchOp) {
                 branchOp.mTarget = finallyExit(inside, exits, branchOp.mTarget);
-            } else if (op instanceof SwitchOp) {
-                ((SwitchOp) op).finallyExits(this, inside, exits);
+            } else if (op instanceof SwitchOp switchOp) {
+                switchOp.finallyExits(this, inside, exits);
             } else if (op instanceof ReturnOp retOp) {
 
                 if (retHandler == null) {
@@ -1384,8 +1384,8 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         if (values.length > 100) {
             int numSlots = values.length;
             for (Object value : values) {
-                if (value instanceof LocalVar) {
-                    int tc = ((LocalVar) value).type().typeCode();
+                if (value instanceof LocalVar var) {
+                    int tc = var.type().typeCode();
                     if (tc == T_DOUBLE || tc == T_LONG) {
                         numSlots++;
                     }
@@ -1607,36 +1607,36 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         if (value == null) {
             appendByte(ACONST_NULL);
             stackPush(Null.THE);
-        } else if (value instanceof String) {
-            pushConstant(mConstants.addString((String) value), type);
-        } else if (value instanceof Class) {
-            pushConstant(mConstants.addClass(Type.from((Class) value)), type);
+        } else if (value instanceof String str) {
+            pushConstant(mConstants.addString(str), type);
+        } else if (value instanceof Class clazz) {
+            pushConstant(mConstants.addClass(Type.from(clazz)), type);
         } else if (value instanceof Number) {
-            if (value instanceof Integer) {
-                pushConstant(((Integer) value).intValue(), type);
-            } else if (value instanceof Long) {
-                pushConstant(((Long) value).longValue(), type);
-            } else if (value instanceof Float) {
-                pushConstant(((Float) value).floatValue(), type);
-            } else if (value instanceof Double) {
-                pushConstant(((Double) value).doubleValue(), type);
-            } else if (value instanceof Byte) {
-                pushConstant(((Byte) value).byteValue(), type);
-            } else if (value instanceof Short) {
-                pushConstant(((Short) value).shortValue(), type);
+            if (value instanceof Integer num) {
+                pushConstant(num.intValue(), type);
+            } else if (value instanceof Long num) {
+                pushConstant(num.longValue(), type);
+            } else if (value instanceof Float num) {
+                pushConstant(num.floatValue(), type);
+            } else if (value instanceof Double num) {
+                pushConstant(num.doubleValue(), type);
+            } else if (value instanceof Byte num) {
+                pushConstant(num.byteValue(), type);
+            } else if (value instanceof Short num) {
+                pushConstant(num.shortValue(), type);
             } else {
                 throw new AssertionError();
             }
-        } else if (value instanceof Boolean) {
-            pushConstant(((Boolean) value) ? 1 : 0, type);
-        } else if (value instanceof Character) {
-            pushConstant(((Character) value).charValue(), type);
-        } else if (value instanceof Type) {
-            pushConstant(mConstants.addClass((Type) value), type);
-        } else if (value instanceof MethodType) {
-            pushConstant(mConstants.addMethodType((MethodType) value), type);
-        } else if (value instanceof MethodHandleInfo) {
-            pushConstant(mConstants.addMethodHandle((MethodHandleInfo) value), type);
+        } else if (value instanceof Boolean b) {
+            pushConstant(b ? 1 : 0, type);
+        } else if (value instanceof Character c) {
+            pushConstant(c.charValue(), type);
+        } else if (value instanceof Type t) {
+            pushConstant(mConstants.addClass(t), type);
+        } else if (value instanceof MethodType mt) {
+            pushConstant(mConstants.addMethodType(mt), type);
+        } else if (value instanceof MethodHandleInfo info) {
+            pushConstant(mConstants.addMethodHandle(info), type);
         } else {
             throw new AssertionError();
         }
@@ -2095,8 +2095,8 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                 throw new IllegalStateException("Cannot store null into primitive variable");
             }
             constantType = Null.THE;
-        } else if (value instanceof String) {
-            int utflen = BytesOut.checkUTF((String) value);
+        } else if (value instanceof String str) {
+            int utflen = BytesOut.checkUTF(str);
             if (utflen > 0) {
                 throw new IllegalArgumentException
                     ("String constant is too large: " + utflen + " bytes");
@@ -2417,9 +2417,9 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                 // Conversion to MethodHandle is automatic.
                 constantType = type;
             }
-        } else if (value instanceof Enum) {
+        } else if (value instanceof Enum e) {
             constantType = Type.from(value.getClass());
-            new LocalVar(constantType).field(((Enum) value).name()).push();
+            new LocalVar(constantType).field(e.name()).push();
             return addConversionOp(constantType, type);
         } else {
             String actualTypeDesc = ConstableSupport.toTypeDescriptor(value);
@@ -2483,8 +2483,8 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         // Rebox without throwing NPE. Code is in the range 10..14.
 
         LocalVar fromVar;
-        if (mLastOp instanceof PushVarOp) {
-            fromVar = ((PushVarOp) mLastOp).mVar;
+        if (mLastOp instanceof PushVarOp op) {
+            fromVar = op.mVar;
         } else {
             fromVar = new LocalVar(from);
             addOp(new StoreVarOp(fromVar));
@@ -2626,9 +2626,9 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                             break special;
                         }
                         type = Type.from(clazz);
-                    } else if (value instanceof Enum) {
+                    } else if (value instanceof Enum e) {
                         method = "enumConstant";
-                        name = ((Enum) value).name();
+                        name = e.name();
                         retType = Type.from(Enum.class);
                         paramType = Type.from(value.getClass());
                         break prim;
@@ -2658,8 +2658,8 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         if (value instanceof Variable) {
-            if (value instanceof ConstantVar) {
-                if ((c = ((ConstantVar) value).tryObtain(this)) != null) {
+            if (value instanceof ConstantVar cv) {
+                if ((c = cv.tryObtain(this)) != null) {
                     return c;
                 }
             }
@@ -3690,7 +3690,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             // Check if storing to an unused variable and remove the pair.
 
             Op next = mNext;
-            if (next instanceof StoreVarOp && ((StoreVarOp) next).unusedVar()) {
+            if (next instanceof StoreVarOp op && op.unusedVar()) {
                 next = next.mNext;
                 // Removing 2 ops, but specify 1 because the store op won't be visited.
                 flow.removeOps(prev, this, next, 1);
@@ -3797,7 +3797,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             // Check if storing to an unused variable and remove the pair.
 
             Op next = mNext;
-            if (next instanceof StoreVarOp && ((StoreVarOp) next).unusedVar()) {
+            if (next instanceof StoreVarOp op && op.unusedVar()) {
                 mVar.mPushCount--;
                 next = next.mNext;
                 // Removing 2 ops, but specify 1 because the store op won't be visited.
@@ -4111,8 +4111,8 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
             Type typeCmp;
 
-            if (value instanceof LocalVar) {
-                typeCmp = comparisonType(((LocalVar) value).mType, eq);
+            if (value instanceof LocalVar var) {
+                typeCmp = comparisonType(var.mType, eq);
                 push(typeCmp);
                 addPushOp(typeCmp, value);
             } else {
@@ -4347,8 +4347,8 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                     requireNonNull(val);
                 }
             } else if (CONDY_WORKAROUND) capture: {
-                if (val instanceof ConstantVar) {
-                    var constant = ((ConstantVar) val).mConstant;
+                if (val instanceof ConstantVar cv) {
+                    var constant = cv.mConstant;
                     if (!(constant instanceof ConstantPool.C_Dynamic)) {
                         break capture;
                     }
@@ -4846,8 +4846,8 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                 Type type;
                 if (arg == null) {
                     type = Null.THE;
-                } else if (arg instanceof Typed) {
-                    type = ((Typed) arg).type();
+                } else if (arg instanceof Typed typed) {
+                    type = typed.type();
                 } else if (arg instanceof MethodHandleInfo) {
                     // Conversion to MethodHandle is automatic.
                     type = Type.from(MethodHandle.class);
@@ -5849,9 +5849,9 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                 allTypes[i] = addPushOp(mCoordinateTypes[i], mCoordinates[i]);
             }
 
-            if (value instanceof ExplicitConstantOp) {
+            if (value instanceof ExplicitConstantOp op) {
                 allTypes[i] = mType;
-                addExplicitConstantOp((ExplicitConstantOp) value);
+                addExplicitConstantOp(op);
             } else {
                 allTypes[i] = addPushOp(mType, value);
             }

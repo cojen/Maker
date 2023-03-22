@@ -64,16 +64,16 @@ abstract class Attributed {
                         (cp, TheAnnotationMaker.toElement(null, cp, value));
                 } else if (value == null) {
                     return new Attribute.Empty(cp, name);
-                } else if (value instanceof byte[]) {
-                    return new Attribute.Bytes(cp, name, (byte[]) value);
+                } else if (value instanceof byte[] bytes) {
+                    return new Attribute.Bytes(cp, name, bytes);
                 } else if (!value.getClass().isArray()) {
                     final ConstantPool.Constant constant;
-                    if (value instanceof String) {
-                        constant = cp.addUTF8((String) value);
-                    } else if (value instanceof Class) {
-                        constant = cp.addClass(Type.from((Class) value));
-                    } else if (value instanceof Typed) {
-                        constant = cp.addClass(((Typed) value).type());
+                    if (value instanceof String str) {
+                        constant = cp.addUTF8(str);
+                    } else if (value instanceof Class clazz) {
+                        constant = cp.addClass(Type.from(clazz));
+                    } else if (value instanceof Typed typed) {
+                        constant = cp.addClass(typed.type());
                     } else if (value instanceof Number) {
                         if (value instanceof Integer) {
                             constant = cp.addInteger((int) value);
@@ -86,8 +86,8 @@ abstract class Attributed {
                         } else {
                             break define;
                         }
-                    } else if (value instanceof ModuleDescriptor) {
-                        return ModuleAttribute.make(a, name, (ModuleDescriptor) value);
+                    } else if (value instanceof ModuleDescriptor md) {
+                        return ModuleAttribute.make(a, name, md);
                     } else {
                         break define;
                     }
@@ -157,15 +157,15 @@ abstract class Attributed {
     }
 
     private static String resolveComponent(Object component) {
-        if (component instanceof String) {
-            return (String) component;
+        if (component instanceof String str) {
+            return str;
         }
 
         Type type;
-        if (component instanceof Class) {
-            type = Type.from((Class) component);
-        } else if (component instanceof Typed) {
-            type = ((Typed) component).type();
+        if (component instanceof Class clazz) {
+            type = Type.from(clazz);
+        } else if (component instanceof Typed typed) {
+            type = typed.type();
         } else {
             throw new IllegalArgumentException("Unsupported component type");
         }

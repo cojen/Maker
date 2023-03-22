@@ -828,11 +828,11 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
      */
     static RuntimeException toUnchecked(Throwable e) {
         while (true) {
-            if (e instanceof RuntimeException) {
-                throw (RuntimeException) e;
+            if (e instanceof RuntimeException e2) {
+                throw e2;
             }
-            if (e instanceof Error) {
-                throw (Error) e;
+            if (e instanceof Error e2) {
+                throw e2;
             }
             Throwable cause = e.getCause();
             if (cause == null) {

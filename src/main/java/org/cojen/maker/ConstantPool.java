@@ -193,8 +193,8 @@ class ConstantPool {
     }
 
     Constant tryAddLoadableConstant(Object value) {
-        if (value instanceof String) {
-            return addString((String) value);
+        if (value instanceof String str) {
+            return addString(str);
         } else if (value instanceof Class clazz) {
             if (!clazz.isPrimitive()) {
                 return doAddClass(Type.from(clazz));
@@ -204,19 +204,19 @@ class ConstantPool {
                 return doAddClass(type);
             }
         } else if (value instanceof Number) {
-            if (value instanceof Integer) {
-                return addInteger((Integer) value);
-            } else if (value instanceof Long) {
-                return addLong((Long) value);
-            } else if (value instanceof Float) {
-                return addFloat((Float) value);
-            } else if (value instanceof Double) {
-                return addDouble((Double) value);
+            if (value instanceof Integer num) {
+                return addInteger(num);
+            } else if (value instanceof Long num) {
+                return addLong(num);
+            } else if (value instanceof Float num) {
+                return addFloat(num);
+            } else if (value instanceof Double num) {
+                return addDouble(num);
             }
-        } else if (value instanceof MethodType) {
-            return addMethodType((MethodType) value);
-        } else if (value instanceof MethodHandleInfo) {
-            return addMethodHandle((MethodHandleInfo) value);
+        } else if (value instanceof MethodType mt) {
+            return addMethodType(mt);
+        } else if (value instanceof MethodHandleInfo info) {
+            return addMethodHandle(info);
         }
         return null;
     }

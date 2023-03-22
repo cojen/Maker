@@ -40,8 +40,8 @@ abstract class ConstableSupport {
      * @param value expected to be a ClassDesc
      */
     static String toTypeDescriptor(Object value) {
-        if (value instanceof ClassDesc) {
-            return ((ClassDesc) value).descriptorString();
+        if (value instanceof ClassDesc desc) {
+            return desc.descriptorString();
         }
         return null;
     }
@@ -55,19 +55,19 @@ abstract class ConstableSupport {
         Type type;
         ConstantPool.Constant constant;
 
-        if (value instanceof MethodTypeDesc) {
+        if (value instanceof MethodTypeDesc desc) {
             type = Type.from(MethodType.class);
-            constant = mm.mConstants.addMethodType(((MethodTypeDesc) value).descriptorString());
-        } else if (value instanceof DirectMethodHandleDesc) {
+            constant = mm.mConstants.addMethodType(desc.descriptorString());
+        } else if (value instanceof DirectMethodHandleDesc desc) {
             type = Type.from(MethodHandle.class);
-            constant = addMethodHandle(mm, (DirectMethodHandleDesc) value);
-        } else if (value instanceof DynamicConstantDesc dcd) {
-            type = mm.mClassMaker.typeFrom(dcd.constantType().descriptorString());
+            constant = addMethodHandle(mm, desc);
+        } else if (value instanceof DynamicConstantDesc desc) {
+            type = mm.mClassMaker.typeFrom(desc.constantType().descriptorString());
 
-            DirectMethodHandleDesc bootDesc = dcd.bootstrapMethod();
+            DirectMethodHandleDesc bootDesc = desc.bootstrapMethod();
             ConstantPool.C_MethodHandle bootHandle = addMethodHandle(mm, bootDesc);
 
-            ConstantDesc[] bootArgs = dcd.bootstrapArgs();
+            ConstantDesc[] bootArgs = desc.bootstrapArgs();
             var bootConstants = new ConstantPool.Constant[bootArgs.length];
 
             ConstantPool cp = mm.mConstants;
@@ -78,13 +78,13 @@ abstract class ConstableSupport {
 
             constant = cp.addDynamicConstant
                 (mm.mClassMaker.addBootstrapMethod(bootHandle, bootConstants),
-                 dcd.constantName(), type);
-        } else if (value instanceof ClassDesc) {
+                 desc.constantName(), type);
+        } else if (value instanceof ClassDesc desc) {
             type = Type.from(Class.class);
             constant = mm.addLoadableConstant
-                (type, mm.mClassMaker.typeFrom(((ClassDesc) value).descriptorString()));
-        } else if (value instanceof Constable) {
-            var opt = ((Constable) value).describeConstable();
+                (type, mm.mClassMaker.typeFrom(desc.descriptorString()));
+        } else if (value instanceof Constable c) {
+            var opt = c.describeConstable();
             if (opt.isEmpty()) {
                 return null;
             }
@@ -164,8 +164,8 @@ abstract class ConstableSupport {
                 return Type.from(MethodType.class);
             } else if (value instanceof DirectMethodHandleDesc) {
                 return Type.from(MethodHandle.class);
-            } else if (value instanceof DynamicConstantDesc dcd) {
-                return mm.mClassMaker.typeFrom(dcd.constantType().descriptorString());
+            } else if (value instanceof DynamicConstantDesc desc) {
+                return mm.mClassMaker.typeFrom(desc.constantType().descriptorString());
             } else if (value instanceof ClassDesc) {
                 return Type.from(Class.class);
             }
@@ -177,8 +177,8 @@ abstract class ConstableSupport {
     static boolean isDynamicConstant(Object value) {
         if (value instanceof DynamicConstantDesc) {
             return true;
-        } else if (value instanceof Constable) {
-            var opt = ((Constable) value).describeConstable();
+        } else if (value instanceof Constable c) {
+            var opt = c.describeConstable();
             return opt.isPresent() && opt.get() instanceof DynamicConstantDesc;
         } else {
             return false;

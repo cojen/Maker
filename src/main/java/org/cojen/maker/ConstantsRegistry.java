@@ -80,8 +80,8 @@ public abstract class ConstantsRegistry {
             return;
         }
 
-        if (obj instanceof Entries) {
-            ((Entries) obj).prune();
+        if (obj instanceof Entries entries) {
+            entries.prune();
         }
 
         ClassLoader loader = clazz.getClassLoader();

@@ -90,12 +90,12 @@ abstract class Type {
     }
 
     static Type from(ClassLoader loader, Object type) {
-        if (type instanceof Class) {
-            return from((Class) type);
-        } else if (type instanceof Typed) {
-            return ((Typed) type).type();
-        } else if (type instanceof String) {
-            return from(loader, (String) type);
+        if (type instanceof Class clazz) {
+            return from(clazz);
+        } else if (type instanceof Typed typed) {
+            return typed.type();
+        } else if (type instanceof String str) {
+            return from(loader, str);
         } else if (type == null) {
             return Null.THE;
         } else {
@@ -1216,8 +1216,8 @@ abstract class Type {
 
         @Override
         public boolean equals(Object obj) {
-            return obj == this || obj instanceof Array
-                && mElementType.equals(((Array) obj).mElementType);
+            return obj == this || obj instanceof Array other
+                && mElementType.equals(other.mElementType);
         }
 
         @Override

@@ -113,8 +113,8 @@ final class TheFieldMaker extends ClassMember implements FieldMaker, Typed {
             nonInt: {
                 switch (mField.type().typeCode()) {
                 case Type.T_BOOLEAN:
-                    if (value instanceof Boolean) {
-                        ivalue = ((boolean) value) ? 1 : 0;
+                    if (value instanceof Boolean b) {
+                        ivalue = b ? 1 : 0;
                         break nonInt;
                     }
                     break;
@@ -165,8 +165,8 @@ final class TheFieldMaker extends ClassMember implements FieldMaker, Typed {
                         // Fields are null by default.
                         return this;
                     }
-                    if (value instanceof String && mField.type() == Type.from(String.class)) {
-                        constant = mConstants.addString((String) value);
+                    if (value instanceof String str && mField.type() == Type.from(String.class)) {
+                        constant = mConstants.addString(str);
                         break addConstant;
                     }
                     break;
