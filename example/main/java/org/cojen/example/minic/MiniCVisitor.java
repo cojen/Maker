@@ -1,4 +1,4 @@
-// Generated from MiniC.g4 by ANTLR 4.9.1
+// Generated from MiniC.g4 by ANTLR 4.12.0
 package org.cojen.example.minic;
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 

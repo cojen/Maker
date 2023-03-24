@@ -432,7 +432,7 @@ public class Compiler extends MiniCBaseVisitor<Object> {
     @Override
     public Object visitUnaryOperation(UnaryOperationContext ctx) {
         // Don't bother with constant folding or flipping binary expressions.
-        var value = asVariable(ctx.expression());
+        var value = asVariable(visit(ctx.expression()));
 
         switch (ctx.op.getType()) {
         case MINUS: return value.neg();
