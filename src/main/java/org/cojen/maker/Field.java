@@ -41,7 +41,7 @@ public interface Field extends Variable {
      * always throws an {@link IllegalStateException}.
      */
     @Override
-    default Variable signature(Object... components) {
+    default Field signature(Object... components) {
         throw new IllegalStateException("Cannot define a signature");
     }
 
