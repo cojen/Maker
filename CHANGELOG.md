@@ -4,6 +4,7 @@ Changelog
 v2.5.0
 ------
 * Depends on Java 17 (was Java 12 previously).
+* Added a switch method which supports string cases.
 
 v2.4.7 (2023-03-04)
 ------

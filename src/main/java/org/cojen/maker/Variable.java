@@ -189,15 +189,24 @@ public interface Variable {
     void ifLe(Object value, Label label);
 
     /**
-     * Generates a switch statement against this {@code int} or {@code Integer} variable. None
-     * of the labels need to be positioned yet.
+     * Generates a switch statement against this {@code int} or non-null {@code Integer}
+     * variable. None of the labels need to be positioned yet.
      *
      * @param defaultLabel required
      * @throws IllegalArgumentException if the number of cases and labels don't match
      * @throws IllegalStateException if this type cannot be automatically cast to an int
-     * or if the number of cases and labels don't match
      */
     void switch_(Label defaultLabel, int[] cases, Label... labels);
+
+    /**
+     * Generates a switch statement against this non-null {@code String} variable. None of the
+     * labels need to be positioned yet.
+     *
+     * @param defaultLabel required
+     * @throws IllegalArgumentException if the number of cases and labels don't match
+     * @throws IllegalStateException if this type isn't a String
+     */
+    void switch_(Label defaultLabel, String[] cases, Label... labels);
 
     /**
      * Add this variable with another variable or a constant, and assign the result back to

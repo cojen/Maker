@@ -4281,6 +4281,11 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
+        public void switch_(Label defaultLabel, String[] cases, Label... labels) {
+            Switcher.switchString(TheMethodMaker.this, this, defaultLabel, cases, labels);
+        }
+
+        @Override
         public LocalVar add(Object value) {
             return addMathOp("add", IADD, this, value);
         }
