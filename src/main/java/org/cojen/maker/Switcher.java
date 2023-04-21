@@ -61,7 +61,7 @@ final class Switcher {
                 if (matches instanceof ArrayList) {
                     list = (ArrayList<Object>) matches;
                 } else {
-                    list = new ArrayList<Object>();
+                    list = new ArrayList<>();
                     list.add(matches);
                     hashMatches.put(hash, list);
                 }
@@ -86,18 +86,18 @@ final class Switcher {
 
             if (matches instanceof ArrayList list) {
                 for (var match : list) {
-                    ((StringMatch) match).addCheck(mm, condition);
+                    ((StringMatch) match).addCheck(condition);
                 }
             } else {
-                ((StringMatch) matches).addCheck(mm, condition);
+                ((StringMatch) matches).addCheck(condition);
             }
 
             mm.goto_(defaultLabel);
         }
     }
 
-    private static record StringMatch(String key, Label label) {
-        void addCheck(MethodMaker mm, Variable condition) {
+    private record StringMatch(String key, Label label) {
+        void addCheck(Variable condition) {
             condition.invoke("equals", key).ifTrue(label);
         }
     }
