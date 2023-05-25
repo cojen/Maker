@@ -5,6 +5,8 @@ v2.5.0
 ------
 * Depends on Java 17 (was Java 12 previously).
 * Added a switch method which supports string cases.
+* Use Boolean.TRUE/FALSE when setting an object variable to a boolean constant instead of
+  calling Boolean.valueOf(true/false).
 
 v2.4.7 (2023-03-04)
 ------
