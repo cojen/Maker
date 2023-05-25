@@ -803,7 +803,7 @@ extends <a href="Maker.html" title="interface in org.cojen.maker">Maker</a></spa
  be initialized.</div>
 <dl class="notes">
 <dt>Returns:</dt>
-<dd>the lookup for the class; call <code>lookupClass</code>
+<dd>the lookup for the class; call <a href="https://docs.oracle.com/en/java/javase/19/docs/api/java.base/java/lang/invoke/MethodHandles.Lookup.html#lookupClass()" title="class or interface in java.lang.invoke" class="external-link"><code>lookupClass</code></a>
  to obtain the actual class</dd>
 <dt>Throws:</dt>
 <dd><code><a href="https://docs.oracle.com/en/java/javase/19/docs/api/java.base/java/lang/IllegalStateException.html" title="class or interface in java.lang" class="external-link">IllegalStateException</a></code> - if already finished or if the definition is broken</dd>
@@ -817,10 +817,10 @@ extends <a href="Maker.html" title="interface in org.cojen.maker">Maker</a></spa
 <div class="block">Finishes the definition of a new hidden class, returning a lookup which has full
  privilege access to the class. Hidden classes are automatically unloaded when no longer
  referenced, even if the class loader still is. If a lookup object was passed to the
- begin method, the hidden class is defined in the same nest as the lookup class.</div>
+ <code>begin</code> method, the hidden class is defined in the same nest as the lookup class.</div>
 <dl class="notes">
 <dt>Returns:</dt>
-<dd>the lookup for the class; call <code>lookupClass</code>
+<dd>the lookup for the class; call <a href="https://docs.oracle.com/en/java/javase/19/docs/api/java.base/java/lang/invoke/MethodHandles.Lookup.html#lookupClass()" title="class or interface in java.lang.invoke" class="external-link"><code>lookupClass</code></a>
  to obtain the actual class</dd>
 <dt>Throws:</dt>
 <dd><code><a href="https://docs.oracle.com/en/java/javase/19/docs/api/java.base/java/lang/IllegalStateException.html" title="class or interface in java.lang" class="external-link">IllegalStateException</a></code> - if already finished or if the definition is broken</dd>
