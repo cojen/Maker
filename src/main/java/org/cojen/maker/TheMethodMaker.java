@@ -2370,7 +2370,13 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             } else {
                 throw unsupportedConstant(value);
             }
-        } else if (value instanceof Boolean) {
+        } else if (value instanceof Boolean b) {
+            if (type != null && type.isObject()) {
+                var boolType = Type.from(Boolean.class);
+                Type.Field field = boolType.findField(b ? "TRUE" : "FALSE");
+                addOp(new FieldOp(GETSTATIC, 0, mConstants.addField(field)));
+                return addConversionOp(boolType, type);
+            }
             constantType = BOOLEAN;
         } else if (value instanceof Character) {
             constantType = CHAR;

@@ -1,6 +1,11 @@
 Changelog
 =========
 
+v2.4.8
+------
+* Use Boolean.TRUE/FALSE when setting an object variable to a boolean constant instead of
+  calling Boolean.valueOf(true/false).
+
 v2.4.7 (2023-03-04)
 ------
 * Fixed a bug in the override method which failed to look for super class interfaces.
