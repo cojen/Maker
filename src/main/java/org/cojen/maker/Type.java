@@ -657,7 +657,7 @@ abstract class Type {
         }
 
         // This point is reached when the common type is a specific catch type. All the other
-        // catch types are subclasses, and so they don't need too be caught.
+        // catch types are subclasses, and so they don't need to be caught.
 
         Iterator<Type> it = catchMap.keySet().iterator();
         while (it.hasNext()) {
@@ -954,32 +954,32 @@ abstract class Type {
 
         @Override
         String name() {
-            switch (mTypeCode) {
-            default:        return "void";
-            case T_BOOLEAN: return "boolean";
-            case T_BYTE:    return "byte";
-            case T_CHAR:    return "char";
-            case T_SHORT:   return "short";
-            case T_INT:     return "int";
-            case T_FLOAT:   return "float";
-            case T_LONG:    return "long";
-            case T_DOUBLE:  return "double";
-            }
+            return switch (mTypeCode) {
+                default -> "void";
+                case T_BOOLEAN -> "boolean";
+                case T_BYTE -> "byte";
+                case T_CHAR -> "char";
+                case T_SHORT -> "short";
+                case T_INT -> "int";
+                case T_FLOAT -> "float";
+                case T_LONG -> "long";
+                case T_DOUBLE -> "double";
+            };
         }
 
         @Override
         String descriptor() {
-            switch (mTypeCode) {
-            default:        return "V";
-            case T_BOOLEAN: return "Z";
-            case T_BYTE:    return "B";
-            case T_CHAR:    return "C";
-            case T_SHORT:   return "S";
-            case T_INT:     return "I";
-            case T_FLOAT:   return "F";
-            case T_LONG:    return "J";
-            case T_DOUBLE:  return "D";
-            }
+            return switch (mTypeCode) {
+                default -> "V";
+                case T_BOOLEAN -> "Z";
+                case T_BYTE -> "B";
+                case T_CHAR -> "C";
+                case T_SHORT -> "S";
+                case T_INT -> "I";
+                case T_FLOAT -> "F";
+                case T_LONG -> "J";
+                case T_DOUBLE -> "D";
+            };
         }
 
         @Override
@@ -991,17 +991,17 @@ abstract class Type {
                 synchronized (this) {
                     boxRef = mBoxRef;
                     if (boxRef == null || (box = boxRef.get()) == null) {
-                        switch (mTypeCode) {
-                        default:        box = from(Void.class); break;
-                        case T_BOOLEAN: box = from(Boolean.class); break;
-                        case T_BYTE:    box = from(Byte.class); break;
-                        case T_CHAR:    box = from(Character.class); break;
-                        case T_SHORT:   box = from(Short.class); break;
-                        case T_INT:     box = from(Integer.class); break;
-                        case T_FLOAT:   box = from(Float.class); break;
-                        case T_LONG:    box = from(Long.class); break;
-                        case T_DOUBLE:  box = from(Double.class); break;
-                        }
+                        box = switch (mTypeCode) {
+                            default -> from(Void.class);
+                            case T_BOOLEAN -> from(Boolean.class);
+                            case T_BYTE -> from(Byte.class);
+                            case T_CHAR -> from(Character.class);
+                            case T_SHORT -> from(Short.class);
+                            case T_INT -> from(Integer.class);
+                            case T_FLOAT -> from(Float.class);
+                            case T_LONG -> from(Long.class);
+                            case T_DOUBLE -> from(Double.class);
+                        };
 
                         mBoxRef = new SoftReference<>(box);
                     }
@@ -1023,17 +1023,17 @@ abstract class Type {
 
         @Override
         Class clazz() {
-            switch (mTypeCode) {
-            default:        return void.class;
-            case T_BOOLEAN: return boolean.class;
-            case T_BYTE:    return byte.class;
-            case T_CHAR:    return char.class;
-            case T_SHORT:   return short.class;
-            case T_INT:     return int.class;
-            case T_FLOAT:   return float.class;
-            case T_LONG:    return long.class;
-            case T_DOUBLE:  return double.class;
-            }
+            return switch (mTypeCode) {
+                default -> void.class;
+                case T_BOOLEAN -> boolean.class;
+                case T_BYTE -> byte.class;
+                case T_CHAR -> char.class;
+                case T_SHORT -> short.class;
+                case T_INT -> int.class;
+                case T_FLOAT -> float.class;
+                case T_LONG -> long.class;
+                case T_DOUBLE -> double.class;
+            };
         }
 
         @Override
@@ -1846,15 +1846,15 @@ abstract class Type {
 
             if (unbox == null) {
                 switch (name().substring(10)) {
-                case "Boolean":   unbox = BOOLEAN; break;
-                case "Byte":      unbox = BYTE; break;
-                case "Short":     unbox = SHORT; break;
-                case "Character": unbox = CHAR; break;
-                case "Integer":   unbox = INT; break;
-                case "Float":     unbox = FLOAT; break;
-                case "Double":    unbox = DOUBLE; break;
-                case "Long":      unbox = LONG; break;
-                case "Void":      unbox = VOID; break;
+                    case "Boolean" -> unbox = BOOLEAN;
+                    case "Byte" -> unbox = BYTE;
+                    case "Short" -> unbox = SHORT;
+                    case "Character" -> unbox = CHAR;
+                    case "Integer" -> unbox = INT;
+                    case "Float" -> unbox = FLOAT;
+                    case "Double" -> unbox = DOUBLE;
+                    case "Long" -> unbox = LONG;
+                    case "Void" -> unbox = VOID;
                 }
 
                 mUnbox = unbox;

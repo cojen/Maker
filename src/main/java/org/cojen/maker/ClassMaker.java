@@ -335,7 +335,7 @@ public interface ClassMaker extends Maker {
      * access to the class. Calling this method has the side effect of forcing the new class to
      * be initialized.
      *
-     * @return the lookup for the class; call {@link MethodHandles.Lookup#lookupClass lookupClass}
+     * @return the lookup for the class; call {@link MethodHandles.Lookup#lookupClass() lookupClass}
      * to obtain the actual class
      * @throws IllegalStateException if already finished or if the definition is broken
      */
@@ -345,9 +345,9 @@ public interface ClassMaker extends Maker {
      * Finishes the definition of a new hidden class, returning a lookup which has full
      * privilege access to the class. Hidden classes are automatically unloaded when no longer
      * referenced, even if the class loader still is. If a lookup object was passed to the
-     * begin method, the hidden class is defined in the same nest as the lookup class.
+     * {@code begin} method, the hidden class is defined in the same nest as the lookup class.
      *
-     * @return the lookup for the class; call {@link MethodHandles.Lookup#lookupClass lookupClass}
+     * @return the lookup for the class; call {@link MethodHandles.Lookup#lookupClass() lookupClass}
      * to obtain the actual class
      * @throws IllegalStateException if already finished or if the definition is broken
      */

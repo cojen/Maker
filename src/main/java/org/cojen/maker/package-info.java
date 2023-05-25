@@ -32,7 +32,7 @@
  *
  * <h2>Types and Values</h2>
  *
- * The API supports many different kinds of data types and values. To keep things simple, types
+ * The API supports many kinds of data types and values. To keep things simple, types
  * and values are passed as any kind of {@code Object}, but only a subset is allowed.
  *
  * <h3>Types</h3>

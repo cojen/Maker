@@ -632,26 +632,14 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             throw new IllegalStateException("Cannot return a value from this method");
         }
 
-        byte op;
-        switch (type.stackMapCode()) {
-        default:
-            throw new IllegalStateException("Unsupported return type: " + type.name());
-        case SM_INT:
-            op = IRETURN;
-            break;
-        case SM_FLOAT:
-            op = FRETURN;
-            break;
-        case SM_DOUBLE:
-            op = DRETURN;
-            break;
-        case SM_LONG:
-            op = LRETURN;
-            break;
-        case SM_OBJECT:
-            op = ARETURN;
-            break;
-        }
+        byte op = switch (type.stackMapCode()) {
+            default -> throw new IllegalStateException("Unsupported return type: " + type.name());
+            case SM_INT -> IRETURN;
+            case SM_FLOAT -> FRETURN;
+            case SM_DOUBLE -> DRETURN;
+            case SM_LONG -> LRETURN;
+            case SM_OBJECT -> ARETURN;
+        };
 
         addPushOp(type, value);
         addOp(new ReturnOp(op, 1));
@@ -946,18 +934,17 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                         }
                     });
                 } else {
-                    byte atype;
-                    switch (elementType.typeCode()) {
-                    case T_BOOLEAN: atype = 4; break;
-                    case T_CHAR: atype = 5; break;
-                    case T_FLOAT: atype = 6; break;
-                    case T_DOUBLE: atype = 7; break;
-                    case T_BYTE: atype = 8; break;
-                    case T_SHORT: atype = 9; break;
-                    case T_INT: atype = 10; break;
-                    case T_LONG: atype = 11; break;
-                    default: throw new IllegalArgumentException(elementType.name());
-                    }
+                    byte atype = switch (elementType.typeCode()) {
+                        case T_BOOLEAN -> 4;
+                        case T_CHAR -> 5;
+                        case T_FLOAT -> 6;
+                        case T_DOUBLE -> 7;
+                        case T_BYTE -> 8;
+                        case T_SHORT -> 9;
+                        case T_INT -> 10;
+                        case T_LONG -> 11;
+                        default -> throw new IllegalArgumentException(elementType.name());
+                    };
 
                     addOp(new BytecodeOp(NEWARRAY, 0) {
                         @Override
@@ -1585,11 +1572,10 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
      * Remove the top stack entry.
      */
     private void stackPop() {
-        byte op;
-        switch (stackTop().mType.typeCode()) {
-        default: op = POP; break;
-        case T_LONG: case T_DOUBLE: op = POP2; break;
-        }
+        byte op = switch (stackTop().mType.typeCode()) {
+            default -> POP;
+            case T_LONG, T_DOUBLE -> POP2;
+        };
 
         appendOp(op, 1);
     }
@@ -4184,7 +4170,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             case SM_DOUBLE:
                 cmpOp = (zeroOp == IFLE || zeroOp == IFLT) ? DCMPG : DCMPL;
                 break;
-            
+
             case SM_LONG:
                 cmpOp = LCMP;
                 break;
@@ -4972,10 +4958,10 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         int slotWidth() {
-            switch (mType.typeCode()) {
-            default: return 1;
-            case T_DOUBLE: case T_LONG: return 2;
-            }
+            return switch (mType.typeCode()) {
+                default -> 1;
+                case T_DOUBLE, T_LONG -> 2;
+            };
         }
 
         /**
