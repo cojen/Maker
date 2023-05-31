@@ -29,7 +29,7 @@ import java.lang.ref.ReferenceQueue;
  *
  * @author Brian S O'Neill
  */
-class WeakCache<K, V> extends ReferenceQueue<Object> {
+final class WeakCache<K, V> extends ReferenceQueue<Object> implements Runnable {
     private static final MethodHandle START_VIRTUAL_THREAD;
 
     static {
@@ -58,17 +58,7 @@ class WeakCache<K, V> extends ReferenceQueue<Object> {
 
         if (START_VIRTUAL_THREAD != null) {
             try {
-                var t = (Thread) START_VIRTUAL_THREAD.invokeExact((Runnable) () -> {
-                    try {
-                        while (true) {
-                            Object ref = remove();
-                            synchronized (WeakCache.this) {
-                                cleanup(ref);
-                            }
-                        }
-                    } catch (InterruptedException e) {
-                    }
-                });
+                var t = (Thread) START_VIRTUAL_THREAD.invokeExact((Runnable) this);
             } catch (Throwable e) {
             }
         }
@@ -186,6 +176,19 @@ class WeakCache<K, V> extends ReferenceQueue<Object> {
                 }
             }
         } while ((ref = poll()) != null);
+    }
+
+    @Override
+    public void run() {
+        try {
+            while (true) {
+                Object ref = remove();
+                synchronized (this) {
+                    cleanup(ref);
+                }
+            }
+        } catch (InterruptedException e) {
+        }
     }
 
     private static final class Entry<K, V> extends WeakReference<V> {
