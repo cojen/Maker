@@ -199,20 +199,10 @@ public class AttributeTest {
 
         assertEquals(0, md.compareTo(actual));
 
-        /*
-          Don't call equals until this ModuleDescriptor bug is fixed:
-          https://bugs.openjdk.org/browse/JDK-8290041.
-
-          The internal modsHashCode implementation assumes that equal sets iterate in the same
-          order, and is thus non-commutative.
-
-          Running this test case several times (in different JVM instances) eventually fails
-          because the requires modifier set (of four elements) varies in iteration order.
-
-          This bug was introduced by another fix: https://bugs.openjdk.org/browse/JDK-8275509
-
-          assertEquals(md, actual);
-        */
+        if (Runtime.version().feature() >= 20) {
+            // https://bugs.openjdk.org/browse/JDK-8290041.
+            assertEquals(md, actual);
+        }
     }
 
     @Test
