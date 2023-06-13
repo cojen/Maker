@@ -5064,6 +5064,9 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         public LocalVar name(String name) {
             super.name(name);
 
+            // TODO: 4.7.24. The MethodParameters Attribute
+            //       Support ACC_FINAL, ACC_SYNTHETIC, and ACC_MANDATED
+
             var thisVar = mThisVar;
             if (this != thisVar) {
                 Attribute.MethodParameters mparams = mMethodParameters;
