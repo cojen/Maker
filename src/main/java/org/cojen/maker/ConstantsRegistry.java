@@ -33,13 +33,6 @@ import java.util.WeakHashMap;
  * @hidden
  */
 public abstract class ConstantsRegistry {
-    private static final int ACCESS_MODE;
-
-    static {
-        ACCESS_MODE = Runtime.version().feature() >= 16
-            ? /*MethodHandles.Lookup.ORIGINAL*/ 64 : MethodHandles.Lookup.PRIVATE;
-    }
-
     private static WeakHashMap<ClassLoader, WeakReference<ConstantsRegistry>> cRegistries;
 
     private Map<Class, Object> mConstants;
@@ -131,7 +124,7 @@ public abstract class ConstantsRegistry {
      * @throws NullPointerException if the constant isn't found
      */
     public static Object find(MethodHandles.Lookup lookup, String name, Class<?> type, int slot) {
-        if ((lookup.lookupModes() & ACCESS_MODE) == 0) {
+        if ((lookup.lookupModes() & MethodHandles.Lookup.ORIGINAL) == 0) {
             throw new IllegalStateException();
         }
 

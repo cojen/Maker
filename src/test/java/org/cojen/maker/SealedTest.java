@@ -31,8 +31,6 @@ public class SealedTest {
 
     @Test
     public void basic() throws Exception {
-        Assume.assumeTrue(Runtime.version().feature() >= 17);
-
         ClassMaker cm1 = ClassMaker.begin().public_();
         ClassMaker cm2 = ClassMaker.begin().public_().final_().extend(cm1);
         ClassMaker cm3 = ClassMaker.begin().public_().final_().extend(cm1);

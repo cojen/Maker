@@ -609,9 +609,7 @@ public class UsageTest {
 
     @Test
     public void noAccessHidden() throws Exception {
-        if (Runtime.version().feature() >= 15) {
-            noAccess(true);
-        }
+        noAccess(true);
     }
 
     private void noAccess(boolean hidden) throws Exception {

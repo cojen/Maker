@@ -31,8 +31,6 @@ public class RecordTest {
 
     @Test
     public void empty() throws Exception {
-        Assume.assumeTrue(Runtime.version().feature() >= 16);
-
         ClassMaker cm = ClassMaker.begin().public_();
         cm.asRecord();
 
@@ -48,8 +46,6 @@ public class RecordTest {
 
     @Test
     public void basic() throws Exception {
-        Assume.assumeTrue(Runtime.version().feature() >= 16);
-
         ClassMaker cm = ClassMaker.begin().public_();
         cm.addField(int.class, "num").private_().final_();
         cm.addField(String.class, "str").private_().final_();
@@ -82,8 +78,6 @@ public class RecordTest {
 
     @Test
     public void methodsExist() throws Exception {
-        Assume.assumeTrue(Runtime.version().feature() >= 16);
-
         ClassMaker cm = ClassMaker.begin().public_();
         cm.addField(int.class, "num").private_().final_();
         cm.addField(String.class, "str").private_().final_();
@@ -117,8 +111,6 @@ public class RecordTest {
     public void ctorReturn() throws Exception {
         // Fields are set even if constructor returns.
 
-        Assume.assumeTrue(Runtime.version().feature() >= 16);
-
         ClassMaker cm = ClassMaker.begin().public_();
         cm.addField(int.class, "num").private_().final_();
 
@@ -144,8 +136,6 @@ public class RecordTest {
 
     @Test
     public void selfRef() throws Exception {
-        Assume.assumeTrue(Runtime.version().feature() >= 16);
-
         ClassMaker cm = ClassMaker.begin().public_();
         cm.addField(cm, "self").private_().final_();
 

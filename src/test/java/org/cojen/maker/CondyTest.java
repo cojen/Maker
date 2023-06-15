@@ -374,11 +374,6 @@ public class CondyTest {
             // Doesn't have private access.
         }
 
-        if (Runtime.version().feature() < 15) {
-            // Hidden classes aren't really supported, and so private lookup isn't available.
-            return;
-        }
-
         // Works when given full permission.
         Object const1 = ConstantsRegistry.find(lookup, "_", null, slot);
         assertEquals(const0, const1);

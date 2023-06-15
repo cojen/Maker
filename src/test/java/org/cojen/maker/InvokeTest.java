@@ -1406,7 +1406,6 @@ public class InvokeTest {
         // Tests Java 16 toString generator using the ObjectMethods class. This test just
         // ensures that a complex bootstrap method can be invoked. If the format of the
         // generated string changes, then this test needs to be revised.
-        Assume.assumeTrue(Runtime.version().feature() >= 16);
 
         var cm = ClassMaker.begin().public_();
 
