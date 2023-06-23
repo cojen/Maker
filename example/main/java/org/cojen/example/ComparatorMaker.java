@@ -51,7 +51,7 @@ public class ComparatorMaker<T> {
      *
      * <p>If chain resolves to a primitive type, the ordering is the same as for its boxed
      * representation. Primitive booleans are ordered false low, true high. Floating point
-     * primitves are ordered exactly the same way as {@link Float#compareTo(Float)
+     * primitives are ordered exactly the same way as {@link Float#compareTo(Float)
      * Float.compareTo} and {@link Double#compareTo(Double) Double.compareTo}.
      *
      * <p>As a convenience, clauses may lead with a '-' or '+' character prefix to specify sort
