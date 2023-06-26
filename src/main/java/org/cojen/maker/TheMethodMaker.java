@@ -4278,6 +4278,11 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
+        public void switch_(Label defaultLabel, Enum[] cases, Label... labels) {
+            Switcher.switchEnum(TheMethodMaker.this, this, defaultLabel, cases, labels);
+        }
+
+        @Override
         public LocalVar add(Object value) {
             return addMathOp("add", IADD, this, value);
         }

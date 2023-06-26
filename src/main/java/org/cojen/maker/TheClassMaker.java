@@ -80,6 +80,9 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
     // Maps constants to static final fields. Accessed by TheMethodMaker.
     Map<ConstantPool.Constant, ConstantPool.C_Field> mResolvedConstants;
 
+    // Accessed by Switcher.
+    Map<Class<?>, ClassMaker> mEnumSwitchMaps;
+
     static TheClassMaker begin(boolean external, String className, boolean explicit,
                                ClassLoader parentLoader, Object key, MethodHandles.Lookup lookup)
     {
@@ -409,7 +412,7 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
     }
 
     TheClassMaker addInnerClass(final String className, final Type.Method hostMethod) {
-        TheClassMaker nestHost = nestHost(this);
+        TheClassMaker nestHost = nestHost();
 
         String prefix = name();
         int ix = prefix.lastIndexOf('-');
@@ -451,7 +454,8 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
         return clazz;
     }
 
-    private static TheClassMaker nestHost(TheClassMaker cm) {
+    TheClassMaker nestHost() {
+        TheClassMaker cm = this;
         while (true) {
             cm.checkFinished();
             TheClassMaker parent = cm.mParent;
