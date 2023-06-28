@@ -1,7 +1,7 @@
 Changelog
 =========
 
-v2.4.8
+v2.4.8 (2023-06-28)
 ------
 * Added a switch method which supports string cases.
 * Use Boolean.TRUE/FALSE when setting an object variable to a boolean constant instead of
