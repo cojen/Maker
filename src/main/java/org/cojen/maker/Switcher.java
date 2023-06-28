@@ -84,8 +84,8 @@ final class Switcher {
         for (Object matches : hashMatches.values()) {
             hashLabels[i++].here();
 
-            if (matches instanceof ArrayList list) {
-                for (var match : list) {
+            if (matches instanceof ArrayList) {
+                for (var match : (ArrayList) matches) {
                     ((StringMatch) match).addCheck(condition);
                 }
             } else {
@@ -96,9 +96,17 @@ final class Switcher {
         }
     }
 
-    private record StringMatch(String key, Label label) {
+    private static class StringMatch {
+        final String mKey;
+        final Label mLabel;
+
+        StringMatch(String key, Label label) {
+            mKey = key;
+            mLabel = label;
+        }
+
         void addCheck(Variable condition) {
-            condition.invoke("equals", key).ifTrue(label);
+            condition.invoke("equals", mKey).ifTrue(mLabel);
         }
     }
 }

@@ -2370,9 +2370,10 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             } else {
                 throw unsupportedConstant(value);
             }
-        } else if (value instanceof Boolean b) {
+        } else if (value instanceof Boolean) {
             if (type != null && type.isObject()) {
                 constantType = Type.from(Boolean.class);
+                var b = (Boolean) value;
                 Type.Field field = constantType.findField(b ? "TRUE" : "FALSE");
                 addOp(new FieldOp(GETSTATIC, 0, mConstants.addField(field)));
                 return addConversionOp(constantType, type);
