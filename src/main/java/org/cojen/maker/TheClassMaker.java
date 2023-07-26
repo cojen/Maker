@@ -624,7 +624,13 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
 
         MethodHandles.Lookup result;
         try {
-            result = lookup.defineHiddenClass(bytes, false, options);
+            Object classData = mExactConstants;
+            if (classData == null) {
+                result = lookup.defineHiddenClass(bytes, false, options);
+            } else {
+                result = lookup.defineHiddenClassWithClassData(bytes, classData, false, options);
+                mExactConstants = null;
+            }
         } catch (Exception e) {
             throw toUnchecked(e);
         } finally {

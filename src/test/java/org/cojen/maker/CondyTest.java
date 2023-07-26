@@ -334,16 +334,16 @@ public class CondyTest {
 
     @Test
     public void sneaky() throws Exception {
-        // Try to steal a complex constant, to verify some of the security features. When given
-        // enough access, the constant can be stolen. This isn't a feature, but just an
-        // artifact of the current implementation.
+        // Try to steal a complex constant, to verify some of the security features.
 
         ClassMaker cm = ClassMaker.begin(null, MethodHandles.lookup());
         cm.addField(byte[].class, "test").public_().static_().final_();
+        cm.addField(String.class, "test2").private_().static_().final_();
 
         MethodMaker mm = cm.addClinit();
         var const0 = new byte[] {1,2,3};
         mm.field("test").setExact(const0);
+        mm.field("test2").setExact("hello " + this);
 
         var lookup = cm.finishHidden();
         var clazz = lookup.lookupClass();
@@ -374,16 +374,10 @@ public class CondyTest {
             // Doesn't have private access.
         }
 
-        // Works when given full permission.
-        Object const1 = ConstantsRegistry.find(lookup, "_", null, slot);
-        assertEquals(const0, const1);
-
         try {
-            clazz.getField("test").get(null);
-            fail();
-        } catch (BootstrapMethodError e) {
-            // Stolen!
-            assertTrue(e.getCause() instanceof NullPointerException);
+            ConstantsRegistry.find(lookup, "_", byte[].class, slot);
+        } catch (NullPointerException e) {
+            // Hidden class was initialzed and removed the constants first.
         }
     }
 

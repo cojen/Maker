@@ -2530,7 +2530,6 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
         int bi = mClassMaker.addBootstrapMethod(bootHandle, bootArgs);
 
-        // Note that "_" isn't used by the bootstrap method. It's a dummy name.
         return mConstants.addDynamicConstant(bi, "_", type);
     }
 

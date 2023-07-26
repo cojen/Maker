@@ -118,8 +118,6 @@ public abstract class ConstantsRegistry {
     /**
      * Finds the constant assigned to the given slot. This is a dynamic bootstrap method.
      *
-     * @param name unused
-     * @param type unused
      * @param slot if bit 31 is set, then also remove the constant
      * @throws NullPointerException if the constant isn't found
      */
@@ -129,25 +127,47 @@ public abstract class ConstantsRegistry {
         }
 
         Class<?> clazz = lookup.lookupClass();
-        ClassLoader loader = clazz.getClassLoader();
-
+        ClassLoader loader = null;
         ConstantsRegistry registry = null;
 
         Object value;
-        if (loader instanceof ClassInjector.Group group) {
-            synchronized (group) {
-                value = group.mConstants == null ? null : group.mConstants.get(clazz);
+
+        if (clazz.isHidden()) {
+            if ((slot & Integer.MAX_VALUE) != 0) {
+                type = Entries.class;
+            }
+            try {
+                while (true) {
+                    try {
+                        value = MethodHandles.classData(lookup, name, type);
+                        break;
+                    } catch (ClassCastException e) {
+                        if (type == Entries.class) {
+                            throw e;
+                        }
+                        type = Entries.class;
+                    }
+                }
+            } catch (IllegalAccessException e) {
+                throw new IllegalStateException();
             }
         } else {
-            WeakReference<ConstantsRegistry> registryRef;
-            synchronized (ConstantsRegistry.class) {
-                registryRef = cRegistries.get(loader);
-            }
-            if (registryRef == null || (registry = registryRef.get()) == null) {
-                value = null;
+            loader = clazz.getClassLoader();
+            if (loader instanceof ClassInjector.Group group) {
+                synchronized (group) {
+                    value = group.mConstants == null ? null : group.mConstants.get(clazz);
+                }
             } else {
-                synchronized (registry) {
-                    value = registry.mConstants == null ? null : registry.mConstants.get(clazz);
+                WeakReference<ConstantsRegistry> registryRef;
+                synchronized (ConstantsRegistry.class) {
+                    registryRef = cRegistries.get(loader);
+                }
+                if (registryRef == null || (registry = registryRef.get()) == null) {
+                    value = null;
+                } else {
+                    synchronized (registry) {
+                        value = registry.mConstants == null ? null : registry.mConstants.get(clazz);
+                    }
                 }
             }
         }
@@ -163,11 +183,11 @@ public abstract class ConstantsRegistry {
                     throw new NullPointerException();
                 }
                 int size = entries.mSize;
-                if (size > 1) {
-                    if (slot < 0) {
-                        entries.mValues[slot & Integer.MAX_VALUE] = null;
-                        entries.mSize = size - 1;
-                    }
+                if (slot < 0) {
+                    entries.mValues[slot & Integer.MAX_VALUE] = null;
+                    entries.mSize = --size;
+                }
+                if (size > 0) {
                     return value;
                 }
             }
@@ -181,7 +201,7 @@ public abstract class ConstantsRegistry {
                         group.mConstants = null;
                     }
                 }
-            } else {
+            } else if (registry != null) {
                 synchronized (registry) {
                     registry.mConstants.remove(clazz);
                     if (registry.mConstants.isEmpty()) {
