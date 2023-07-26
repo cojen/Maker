@@ -377,7 +377,7 @@ public class CondyTest {
         try {
             ConstantsRegistry.find(lookup, "_", byte[].class, slot);
         } catch (NullPointerException e) {
-            // Hidden class was initialzed and removed the constants first.
+            // Hidden class was initialized and removed the constants first.
         }
     }
 
