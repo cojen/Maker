@@ -118,6 +118,7 @@ public abstract class ConstantsRegistry {
     /**
      * Finds the constant assigned to the given slot. This is a dynamic bootstrap method.
      *
+     * @param type unused
      * @param slot if bit 31 is set, then also remove the constant
      * @throws NullPointerException if the constant isn't found
      */
@@ -133,21 +134,8 @@ public abstract class ConstantsRegistry {
         Object value;
 
         if (clazz.isHidden()) {
-            if ((slot & Integer.MAX_VALUE) != 0) {
-                type = Entries.class;
-            }
             try {
-                while (true) {
-                    try {
-                        value = MethodHandles.classData(lookup, name, type);
-                        break;
-                    } catch (ClassCastException e) {
-                        if (type == Entries.class) {
-                            throw e;
-                        }
-                        type = Entries.class;
-                    }
-                }
+                value = MethodHandles.classData(lookup, name, Object.class);
             } catch (IllegalAccessException e) {
                 throw new IllegalStateException();
             }
