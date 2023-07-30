@@ -1,7 +1,7 @@
 Changelog
 =========
 
-v2.5.0
+v2.5.0 (2023-07-29)
 ------
 * Depends on Java 17 (was Java 12 previously).
 * Hidden classes which have exact constants are no longer prevented from being unloaded.
