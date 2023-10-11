@@ -115,7 +115,7 @@
         </executions>
         <configuration>
           <excludes>
-            <exclude>**/DebugWriter.class,**/TheClassMaker$AsRecord.class</exclude>
+            <exclude>**/DebugWriter.class</exclude>
           </excludes>
         </configuration>
       </plugin>
