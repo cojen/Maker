@@ -5721,8 +5721,17 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                 ConstantPool.C_MethodHandle bootHandle =
                     mConstants.addMethodHandle(REF_invokeStatic, ref);
 
+                ConstantPool.Constant enclosingClassConstant;
+
+                Class enclosingClass = mFieldRef.mField.enclosingType().clazz();
+                if (enclosingClass == null || !enclosingClass.isHidden()) {
+                    enclosingClassConstant = mFieldRef.mClass;
+                } else {
+                    enclosingClassConstant = addLoadableConstant(classType, enclosingClass);
+                }
+
                 ConstantPool.Constant[] bootArgs = {
-                    mFieldRef.mClass, addLoadableConstant(null, mFieldRef.mField.type())
+                    enclosingClassConstant, addLoadableConstant(null, mFieldRef.mField.type())
                 };
 
                 mVarHandle = mConstants.addDynamicConstant

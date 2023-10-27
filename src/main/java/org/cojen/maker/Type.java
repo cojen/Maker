@@ -428,6 +428,13 @@ abstract class Type {
     abstract Class clazz();
 
     /**
+     * If true is returned, then clazz isn't null.
+     */
+    boolean isHidden() {
+        return false;
+    }
+
+    /**
      * Returns null if class already exists.
      */
     ClassMaker maker() {
@@ -1358,6 +1365,12 @@ abstract class Type {
         }
 
         @Override
+        boolean isHidden() {
+            Class clazz = clazz();
+            return clazz == null ? false : clazz.isHidden();
+        }
+
+        @Override
         Type superType() {
             Type superType = mSuperType;
             if (superType == null) {
@@ -1833,7 +1846,7 @@ abstract class Type {
         }
     }
 
-    private static class JavaLang extends Clazz {
+    private static final class JavaLang extends Clazz {
         private volatile Type mUnbox;
 
         JavaLang(Class clazz) {
@@ -1864,7 +1877,7 @@ abstract class Type {
         }
     }
 
-    private static class NewClazz extends Clazz {
+    private static final class NewClazz extends Clazz {
         private final TheClassMaker mMaker;
 
         NewClazz(ClassLoader loader, TheClassMaker maker, String name) {

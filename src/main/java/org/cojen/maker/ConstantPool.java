@@ -196,11 +196,11 @@ class ConstantPool {
         if (value instanceof String str) {
             return addString(str);
         } else if (value instanceof Class clazz) {
-            if (!clazz.isPrimitive()) {
+            if (!clazz.isHidden() && !clazz.isPrimitive()) {
                 return doAddClass(Type.from(clazz));
             }
         } else if (value instanceof Type type) {
-            if (type.isObject()) {
+            if (!type.isHidden() && type.isObject()) {
                 return doAddClass(type);
             }
         } else if (value instanceof Number) {
