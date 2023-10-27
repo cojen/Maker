@@ -57,11 +57,7 @@ import static org.cojen.maker.BytesOut.*;
 class TheMethodMaker extends ClassMember implements MethodMaker {
     private static final int MAX_CODE_LENGTH = 65535;
 
-    private static final boolean CONDY_WORKAROUND;
-
-    static {
-        CONDY_WORKAROUND = Runtime.version().feature() < 19;
-    }
+    private static final boolean CONDY_WORKAROUND = Runtime.version().feature() < 19;
 
     final Type.Method mMethod;
 
@@ -656,13 +652,13 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         return new FieldVar(instance, mConstants.addField(field));
     }
 
-    private FieldVar field(LocalVar var, String name) {
+    private BaseFieldVar field(LocalVar var, String name) {
         Type type = var.mType.box();
         Type.Field field = findField(type, name);
         if (field.isStatic()) {
             var = null;
         }
-        return new FieldVar(var, mConstants.addField(field));
+        return new FieldVar(var, mConstants.addField(field)).access();
     }
 
     private Type.Field findField(Type type, String name) {
@@ -4341,6 +4337,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                     requireNonNull(val);
                 }
             } else if (CONDY_WORKAROUND) capture: {
+                mHasBranches = true;
                 if (val instanceof ConstantVar cv) {
                     var constant = cv.mConstant;
                     if (!(constant instanceof ConstantPool.C_Dynamic)) {
@@ -5041,7 +5038,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
-        public FieldVar field(String name) {
+        public BaseFieldVar field(String name) {
             return TheMethodMaker.this.field(this, name);
         }
     }
@@ -5499,9 +5496,40 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         /**
          * @param instance must be null for static fields
          */
-        FieldVar(LocalVar instance, ConstantPool.C_Field fieldRef) {
+        private FieldVar(LocalVar instance, ConstantPool.C_Field fieldRef) {
             mInstance = instance;
             mFieldRef = fieldRef;
+        }
+
+        /**
+         * Returns this FieldVar if the enclosing class is normal, else a HandleVar is returned
+         * if the enclosing class is hidden.
+         */
+        BaseFieldVar access() {
+            return !isHidden(enclosingClass()) ? this : toHandleVar();
+        }
+
+        private Class enclosingClass() {
+            return mFieldRef.mField.enclosingType().clazz();
+        }
+
+        private static boolean isHidden(Class clazz) {
+            return clazz != null && clazz.isHidden();
+        }
+
+        private HandleVar toHandleVar() {
+            Type[] coordinateTypes;
+            Object[] coordinates;
+
+            if (mInstance == null) {
+                coordinateTypes = new Type[0];
+                coordinates = new Object[0];
+            } else {
+                coordinateTypes = new Type[] {mInstance.type()};
+                coordinates = new Object[] {mInstance};
+            }
+
+            return new HandleVar(varHandle(), type(), coordinateTypes, coordinates);
         }
 
         @Override
@@ -5723,8 +5751,8 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
                 ConstantPool.Constant enclosingClassConstant;
 
-                Class enclosingClass = mFieldRef.mField.enclosingType().clazz();
-                if (enclosingClass == null || !enclosingClass.isHidden()) {
+                Class enclosingClass = enclosingClass();
+                if (!isHidden(enclosingClass)) {
                     enclosingClassConstant = mFieldRef.mClass;
                 } else {
                     enclosingClassConstant = addLoadableConstant(classType, enclosingClass);
