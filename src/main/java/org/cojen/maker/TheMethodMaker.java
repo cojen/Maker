@@ -652,18 +652,16 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
     FieldVar field(Type type, String name) {
         Type.Field field = findField(type, name);
-
-        LocalVar instance = mThisVar;
-        if (instance == null && !field.isStatic()) {
-            instance = this_();
-        }
-
+        LocalVar instance = field.isStatic() ? null : this_();
         return new FieldVar(instance, mConstants.addField(field));
     }
 
     private FieldVar field(LocalVar var, String name) {
         Type type = var.mType.box();
         Type.Field field = findField(type, name);
+        if (field.isStatic()) {
+            var = null;
+        }
         return new FieldVar(var, mConstants.addField(field));
     }
 
@@ -5498,6 +5496,9 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
         private ConstantPool.C_Dynamic mVarHandle;
 
+        /**
+         * @param instance must be null for static fields
+         */
         FieldVar(LocalVar instance, ConstantPool.C_Field fieldRef) {
             mInstance = instance;
             mFieldRef = fieldRef;
@@ -5529,14 +5530,14 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
         @Override
         public ConstantVar methodHandleSet() {
-            int kind = mFieldRef.mField.isStatic() ? REF_putStatic : REF_putField;
+            int kind = mInstance == null ? REF_putStatic : REF_putField;
             return new ConstantVar(Type.from(MethodHandle.class),
                                    mConstants.addMethodHandle(kind, mFieldRef));
         }
 
         @Override
         public ConstantVar methodHandleGet() {
-            int kind = mFieldRef.mField.isStatic() ? REF_getStatic : REF_getField;
+            int kind = mInstance == null ? REF_getStatic : REF_getField;
             return new ConstantVar(Type.from(MethodHandle.class),
                                    mConstants.addMethodHandle(kind, mFieldRef));
         }
@@ -5548,7 +5549,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
             byte op;
             int stackPop;
-            if (field.isStatic()) {
+            if (mInstance == null) {
                 op = GETSTATIC;
                 stackPop = 0;
             } else {
@@ -5562,7 +5563,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
         @Override
         void adjustPushCount(int amt) {
-            if (!mFieldRef.mField.isStatic()) {
+            if (mInstance != null) {
                 mInstance.adjustPushCount(amt);
             }
         }
@@ -5575,7 +5576,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         private void addBeginStoreFieldOp() {
-            if (!mFieldRef.mField.isStatic()) {
+            if (mInstance != null) {
                 addPushOp(null, mInstance);
             }
         }
@@ -5586,7 +5587,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
             byte op;
             int stackPop;
-            if (field.isStatic()) {
+            if (mInstance == null) {
                 op = PUTSTATIC;
                 stackPop = 1;
             } else {
@@ -5711,8 +5712,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                     Type.from(String.class), classType, classType, classType
                 };
 
-                String bootName = mFieldRef.mField.isStatic()
-                    ? "staticFieldVarHandle" : "fieldVarHandle";
+                String bootName = mInstance == null ? "staticFieldVarHandle" : "fieldVarHandle";
 
                 ConstantPool.C_Method ref = mConstants.addMethod
                     (Type.from(ConstantBootstraps.class).inventMethod

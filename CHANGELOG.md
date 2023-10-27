@@ -1,6 +1,11 @@
 Changelog
 =========
 
+v2.5.1
+------
+* Fixed a bug in which static fields sometimes behaved as if they were instance fields. This
+  only affected field accesses which indirectly used a VarHandle.
+
 v2.5.0 (2023-07-29)
 ------
 * Depends on Java 17 (was Java 12 previously).

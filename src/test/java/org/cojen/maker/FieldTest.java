@@ -124,6 +124,7 @@ public class FieldTest {
         assertVar.invoke("assertEquals", 10.1f, mm.field("num3"), 0.0f);
         assertVar.invoke("assertEquals", 10.2d, mm.field("num4"), 0.0f);
         assertVar.invoke("assertEquals", 10, mm.field("num5"));
+        assertVar.invoke("assertEquals", 10, mm.field("num5").getVolatile());
         assertVar.invoke("assertEquals", Long.MAX_VALUE, mm.field("num6"));
 
         num1Var.inc(10);
