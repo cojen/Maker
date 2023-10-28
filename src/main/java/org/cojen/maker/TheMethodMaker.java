@@ -4740,8 +4740,10 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                 }
             }
 
-            if (name.equals(".new") && returnType == type()) {
-                return doNew(returnType, values, paramTypes);
+            Type newReturnType;
+
+            if (name.equals(".new") && (newReturnType = newReturnType(returnType)) != null) {
+                return doNew(newReturnType, values, paramTypes);
             } else {
                 return doInvoke(invocationType(), invocationInstance(),
                                 name, inherit(), values, returnType, paramTypes);
@@ -4765,8 +4767,10 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             Type.Method method;
             int kind;
 
-            if (name.equals(".new") && returnType == type()) {
-                method = returnType.findMethod("<init>", paramTypes, -1, -1, null, paramTypes);
+            Type newReturnType;
+
+            if (name.equals(".new") && (newReturnType = newReturnType(returnType)) != null) {
+                method = newReturnType.findMethod("<init>", paramTypes, -1, -1, null, paramTypes);
                 kind = REF_newInvokeSpecial;
             } else {
                 Type type = invocationType();
@@ -4790,6 +4794,11 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
             return new ConstantVar(Type.from(MethodHandle.class),
                                    mConstants.addMethodHandle(kind, mConstants.addMethod(method)));
+        }
+
+        private Type newReturnType(Type returnType) {
+            Type type = type();
+            return (returnType == null || returnType == type) ? type : null;
         }
 
         /**

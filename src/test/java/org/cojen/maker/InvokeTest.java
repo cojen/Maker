@@ -1349,12 +1349,6 @@ public class InvokeTest {
         var v1 = mm.var(ArrayList.class)
             .invoke(ArrayList.class, ".new", new Object[] {int.class}, 10);
 
-        try {
-            mm.var(ArrayList.class).invoke((Object) null, ".new", new Object[] {int.class}, 10);
-            fail();
-        } catch (IllegalStateException e) {
-        }
-
         var v2 = mm.var(String[].class).invoke(String[].class, ".new", null, 10);
 
         try {
@@ -1365,10 +1359,13 @@ public class InvokeTest {
 
         var v3 = mm.super_().invoke(Object.class, ".new", null);
 
+        var v4 = mm.var(ArrayList.class).invoke((Object) null, ".new", null, 10);
+
         var assertVar = mm.var(Assert.class);
         assertVar.invoke("assertTrue", v1.instanceOf(ArrayList.class));
         assertVar.invoke("assertTrue", v2.instanceOf(String[].class));
         assertVar.invoke("assertTrue", v3.invoke("getClass").invoke("equals", Object.class));
+        assertVar.invoke("assertTrue", v4.instanceOf(ArrayList.class));
 
         cm.finish().getMethod("run").invoke(null);
     }
