@@ -1196,11 +1196,7 @@ public class InvokeTest {
         MethodMaker mm = cm.addMethod(null, "run").public_().static_();
         var assertVar = mm.var(Assert.class);
 
-        try {
-            mm.var(ArrayList.class).methodHandle(null, ".new", int.class);
-            fail();
-        } catch (IllegalStateException e) {
-        }
+        mm.var(ArrayList.class).methodHandle(null, ".new", int.class);
 
         var mhVar = mm.var(ArrayList.class).methodHandle(ArrayList.class, ".new", int.class);
         var bootstrap = mm.var(InvokeTest.class).indy("bootTest2", mhVar);

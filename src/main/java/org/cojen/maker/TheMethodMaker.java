@@ -4752,7 +4752,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
         @Override
         public Variable methodHandle(Object retType, String name, Object... types) {
-            Type returnType = retType == null ? Type.VOID : mClassMaker.typeFrom(retType);
+            Type returnType = retType == null ? null : mClassMaker.typeFrom(retType);
 
             Type[] paramTypes;
             if (types == null) {
