@@ -752,19 +752,9 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             throw e;
         }
 
-        if (instance != null && !method.isStatic()) {
+        if (instance != null && !method.isStatic() && !type.isHidden()) {
             // Need to go back and push the instance before the arguments.
-            Op end = mLastOp;
-            if (end == savepoint) {
-                instance.pushObject();
-                savepoint = mLastOp;
-            } else {
-                Op rest = rollback(savepoint);
-                instance.pushObject();
-                savepoint = mLastOp;
-                mLastOp.mNext = rest;
-                mLastOp = end;
-            }
+            savepoint = pushInstanceAt(savepoint, instance);
         }
 
         Type[] actualTypes = method.paramTypes();
@@ -815,6 +805,45 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         int stackPop = actualTypes.length;
+        Type returnType = method.returnType();
+
+        if (type.isHidden()) {
+            ConstantVar mhVar;
+
+            Type objectType = Type.from(Object.class);
+
+            if (instance != null) {
+                mhVar = instance.methodHandle(returnType, methodName, actualTypes);
+
+                Type[] invokeTypes;
+
+                if (method.isStatic()) {
+                    invokeTypes = actualTypes;
+                } else {
+                    // The object instance needs to be passed to. Update the types to reflect
+                    // this, and also go back and push the instance to the stack.
+                    invokeTypes = new Type[actualTypes.length + 1];
+                    System.arraycopy(actualTypes, 0, invokeTypes, 1, actualTypes.length);
+                    invokeTypes[0] = objectType;
+
+                    // Push the instance to the stack as the first argument.
+                    pushInstanceAt(savepoint, instance);
+                    stackPop++;
+                }
+
+                method = mhVar.type().inventMethod(0, returnType, "invoke", invokeTypes);
+            } else {
+                assert methodName == "<init>";
+                inherit = 0; // to select INVOKEVIRTUAL below
+                mhVar = new LocalVar(type).methodHandle(null, ".new", actualTypes);
+                method = mhVar.type().inventMethod(0, objectType, "invoke", actualTypes);
+                returnType = type;
+            }
+
+            // Need to go back and push the MethodHandle instance before the arguments.
+            savepoint = pushInstanceAt(savepoint, mhVar);
+        }
+
         ConstantPool.C_Method methodRef = mConstants.addMethod(method);
 
         final BytecodeOp invokeOp;
@@ -845,7 +874,6 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
         addOp(invokeOp);
 
-        Type returnType = method.returnType();
         if (returnType == null || returnType == VOID) {
             return null;
         }
@@ -960,7 +988,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                     }
                 });
             }
-        } else {
+        } else if (!type.isHidden()) {
             ConstantPool.C_Class constant = mConstants.addClass(type);
 
             addOp(new BytecodeOp(NEW, 0) {
@@ -976,6 +1004,8 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             });
 
             doInvoke(type, null, "<init>", -1, values, null, specificParamTypes);
+        } else {
+            return doInvoke(type, null, "<init>", -1, values, null, specificParamTypes);
         }
 
         return storeToNewVar(type);
@@ -2038,6 +2068,28 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     }
 
     /**
+     * Insert an object push operation immediately after a savepoint.
+     *
+     * @param savepoint was mLastOp
+     * @param instance object instance to push
+     * @return updated savepoint
+     */
+    private Op pushInstanceAt(Op savepoint, OwnedVar instance) {
+        Op end = mLastOp;
+        if (end == savepoint) {
+            instance.pushObject();
+            savepoint = mLastOp;
+        } else {
+            Op rest = rollback(savepoint);
+            instance.pushObject();
+            savepoint = mLastOp;
+            mLastOp.mNext = rest;
+            mLastOp = end;
+        }
+        return savepoint;
+    }
+
+    /**
      * @param stackPop amount of stack elements popped by this operation
      */
     private void addBytecodeOp(byte op, int stackPop) {
@@ -2893,6 +2945,10 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         long lSize = 8 + 8L * cases.length;
         byte op = (tSize <= lSize) ? TABLESWITCH : LOOKUPSWITCH;
         addOp(new SwitchOp(op, defaultLabel, cases, labels));
+    }
+
+    private static boolean isHidden(Class clazz) {
+        return clazz != null && clazz.isHidden();
     }
 
     /**
@@ -4751,7 +4807,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
-        public Variable methodHandle(Object retType, String name, Object... types) {
+        public ConstantVar methodHandle(Object retType, String name, Object... types) {
             Type returnType = retType == null ? null : mClassMaker.typeFrom(retType);
 
             Type[] paramTypes;
@@ -4764,6 +4820,10 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                 }
             }
 
+            return methodHandle(returnType, name, paramTypes);
+        }
+
+        ConstantVar methodHandle(Type returnType, String name, Type... paramTypes) {
             Type.Method method;
             int kind;
 
@@ -4792,8 +4852,53 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                 }
             }
 
-            return new ConstantVar(Type.from(MethodHandle.class),
-                                   mConstants.addMethodHandle(kind, mConstants.addMethod(method)));
+            Class<?> clazz = classType();
+            Type mhType = Type.from(MethodHandle.class);
+
+            ConstantPool.Constant mhConstant;
+
+            if (!isHidden(clazz)) {
+                mhConstant = mConstants.addMethodHandle(kind, mConstants.addMethod(method));
+            } else {
+                Type classType = Type.from(Class.class);
+                Type classArrayType = Type.from(Class[].class);
+
+                Type[] bootParams = {
+                    Type.from(MethodHandles.Lookup.class), Type.from(String.class), classType,
+                    Type.INT,      // kind
+                    classType,     // declaringClass
+                    classType,     // returnType
+                    classArrayType // paramTypes
+                };
+
+                ConstantPool.C_Method ref = mConstants.addMethod
+                    (Type.from(MethodHandleBootstraps.class).inventMethod
+                     (Type.FLAG_STATIC, mhType, "methodHandle", bootParams));
+
+                ConstantPool.C_MethodHandle bootHandle =
+                    mConstants.addMethodHandle(REF_invokeStatic, ref);
+
+                paramTypes = method.paramTypes();
+                var bootArgs = new ConstantPool.Constant[3 + paramTypes.length];
+
+                bootArgs[0] = mConstants.addInteger(kind);                    // kind
+                bootArgs[1] = addLoadableConstant(null, clazz);               // declaringClass
+                bootArgs[2] = addLoadableConstant(null, method.returnType()); // returnType
+
+                for (int i=0; i<paramTypes.length; i++) {
+                    bootArgs[3 + i] = addLoadableConstant(null, paramTypes[i]);
+                }
+
+                if (kind == REF_newInvokeSpecial) {
+                    // The name isn't needed, and ".new" is illegal.
+                    name = "_";
+                }
+
+                mhConstant = mConstants.addDynamicConstant
+                    (mClassMaker.addBootstrapMethod(bootHandle, bootArgs), name, mhType);
+            }
+
+            return new ConstantVar(mhType, mhConstant);
         }
 
         private Type newReturnType(Type returnType) {
@@ -4975,7 +5080,11 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         int smCode() {
             int code = mType.stackMapCode();
             if (code == SM_OBJECT) {
-                code |= (mConstants.addClass(mType).mIndex << 8);
+                Type type = mType;
+                if (type.isHidden()) {
+                    type = Type.from(Object.class);
+                }
+                code |= (mConstants.addClass(type).mIndex << 8);
             }
             return code;
         }
@@ -5522,10 +5631,6 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             return mFieldRef.mField.enclosingType().clazz();
         }
 
-        private static boolean isHidden(Class clazz) {
-            return clazz != null && clazz.isHidden();
-        }
-
         private HandleVar toHandleVar() {
             Type[] coordinateTypes;
             Object[] coordinates;
@@ -5534,7 +5639,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                 coordinateTypes = new Type[0];
                 coordinates = new Object[0];
             } else {
-                coordinateTypes = new Type[] {mInstance.type()};
+                coordinateTypes = new Type[] {Type.from(Object.class)};
                 coordinates = new Object[] {mInstance};
             }
 
