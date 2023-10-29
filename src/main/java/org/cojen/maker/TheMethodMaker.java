@@ -752,14 +752,13 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             throw e;
         }
 
-        if (method.enclosingType() != type && type.isHidden()) {
-            // Prefer calling a method normally over using a MethodHandle.
-            type = method.enclosingType();
-        }
-
-        if (instance != null && !method.isStatic() && !type.isHidden()) {
-            // Need to go back and push the instance before the arguments.
-            savepoint = pushInstanceAt(savepoint, instance);
+        if (type.isHidden()) {
+            // Prefer calling a method normally instead of using a MethodHandle.
+            Type.Method preferred = method.tryNonHidden();
+            if (preferred != null) {
+                method = preferred;
+                type = method.enclosingType();
+            }
         }
 
         Type[] actualTypes = method.paramTypes();
@@ -812,7 +811,12 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         int stackPop = actualTypes.length;
         Type returnType = method.returnType();
 
-        if (type.isHidden()) {
+        if (!type.isHidden()) {
+            if (instance != null && !method.isStatic()) {
+                // Need to go back and push the instance before the arguments.
+                savepoint = pushInstanceAt(savepoint, instance);
+            }
+        } else {
             ConstantVar mhVar;
 
             if (instance != null) {

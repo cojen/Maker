@@ -837,6 +837,37 @@ abstract class Type {
             return desc;
         }
 
+        /**
+         * If the enclosingType of this method is hidden, attempt to find a parent method which
+         * has the same signature, but whose enclosingType isn't hidden. If the enclosingType
+         * of this method isn't hidden, then this method is simply returned.
+         */
+        Method tryNonHidden() {
+            final Type type = enclosingType();
+
+            if (!type.isHidden()) {
+                return this;
+            }
+
+            final var key = new MethodKey(returnType(), name(), paramTypes());
+
+            for (Type s = type.superType(); s != null; s = s.superType()) {
+                Type.Method m = s.methods().get(key);
+                if (m != null && !m.enclosingType().isHidden()) {
+                    return m;
+                }
+            }
+
+            for (Type iface : type.interfaces()) {
+                Type.Method m = iface.methods().get(key);
+                if (m != null && !m.enclosingType().isHidden()) {
+                    return m;
+                }
+            }
+
+            return null;
+        }
+
         @Override
         public int hashCode() {
             int hash = mHash;

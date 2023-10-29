@@ -39,6 +39,10 @@ public class HiddenTest {
         public final int addOne(int x) {
             return x + 1;
         }
+
+        public int subOne(int x) {
+            return x - 1;
+        }
     }
 
     public static interface Iface {
@@ -47,6 +51,8 @@ public class HiddenTest {
         public default int negate(int x) {
             return -x;
         }
+
+        public int flip(int x);
     }
 
     @Before
@@ -77,6 +83,12 @@ public class HiddenTest {
 
         mm = cm.addMethod(null, "setValue", int.class).public_();
         mm.field("value").set(mm.param(0));
+
+        mm = cm.addMethod(int.class, "subOne", int.class).public_();
+        mm.return_(mm.param(0).sub(1));
+
+        mm = cm.addMethod(int.class, "flip", int.class).public_();
+        mm.return_(mm.param(0).com());
 
         mHidden = cm.finishHidden().lookupClass();
     }
@@ -170,6 +182,8 @@ public class HiddenTest {
 
         makeAssertTrue(hInstanceVar.invoke("addOne", 1).eq(2));
         makeAssertTrue(hInstanceVar.invoke("negate", 1).eq(-1));
+        makeAssertTrue(hInstanceVar.invoke("subOne", 2).eq(1));
+        makeAssertTrue(hInstanceVar.invoke("flip", 1).eq(~1));
 
         // FIXME: Dynamic constants are duplicated, even when they're the same.
 
