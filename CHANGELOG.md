@@ -5,6 +5,11 @@ v2.5.1
 ------
 * Fixed a bug in which static fields sometimes behaved as if they were instance fields. This
   only affected field accesses which indirectly used a VarHandle.
+* Fixed a bug in which local variables used as pseudo field coordinates might be unavailable
+  for future use.
+* Allow direct access to the fields, constructors, and methods of hidden classes.
+* Allow exact constant slots to be shared, which can help eliminate duplicated dynamic
+  constants.
 
 v2.5.0 (2023-07-29)
 ------
