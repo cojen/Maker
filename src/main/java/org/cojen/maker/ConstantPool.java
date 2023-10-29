@@ -235,7 +235,7 @@ class ConstantPool {
 
     C_NameAndType addNameAndType(String name, String typeDesc) {
         return addNameAndType(addUTF8(name), addUTF8(typeDesc));
-    } 
+    }
 
     C_NameAndType addNameAndType(C_UTF8 name, C_UTF8 typeDesc) {
         return addConstant(new C_NameAndType(name, typeDesc));
@@ -279,7 +279,7 @@ class ConstantPool {
         public int hashCode() {
             return mValue.hashCode();
         }
-    
+
         @Override
         public boolean equals(Object obj) {
             return this == obj || obj instanceof C_UTF8 other
@@ -305,13 +305,13 @@ class ConstantPool {
         public int hashCode() {
             return Integer.hashCode(mValue);
         }
-    
+
         @Override
         public boolean equals(Object obj) {
             return this == obj || obj instanceof C_Integer other
                 && mValue == other.mValue;
         }
-    
+
         @Override
         void writeTo(BytesOut out) throws IOException {
             super.writeTo(out);
@@ -331,13 +331,13 @@ class ConstantPool {
         public int hashCode() {
             return Float.hashCode(mValue);
         }
-    
+
         @Override
         public boolean equals(Object obj) {
             return this == obj || obj instanceof C_Float other
                 && Float.floatToRawIntBits(mValue) == Float.floatToRawIntBits(other.mValue);
         }
-    
+
         @Override
         void writeTo(BytesOut out) throws IOException {
             super.writeTo(out);
@@ -357,13 +357,13 @@ class ConstantPool {
         public int hashCode() {
             return Long.hashCode(mValue);
         }
-    
+
         @Override
         public boolean equals(Object obj) {
             return this == obj || obj instanceof C_Long other
                 && mValue == other.mValue;
         }
-    
+
         @Override
         void writeTo(BytesOut out) throws IOException {
             super.writeTo(out);
@@ -383,13 +383,13 @@ class ConstantPool {
         public int hashCode() {
             return Double.hashCode(mValue);
         }
-    
+
         @Override
         public boolean equals(Object obj) {
             return this == obj || obj instanceof C_Double other
                 && Double.doubleToRawLongBits(mValue) == Double.doubleToRawLongBits(other.mValue);
         }
-    
+
         @Override
         void writeTo(BytesOut out) throws IOException {
             super.writeTo(out);
@@ -409,7 +409,7 @@ class ConstantPool {
         public int hashCode() {
             return mValue.hashCode() * 31 + mTag;
         }
-    
+
         @Override
         public boolean equals(Object obj) {
             return this == obj || obj instanceof C_String other
@@ -486,7 +486,7 @@ class ConstantPool {
                 && mTag == other.mTag && mClass.equals(other.mClass)
                 && mNameAndType.equals(other.mNameAndType);
         }
-    
+
         @Override
         void writeTo(BytesOut out) throws IOException {
             super.writeTo(out);
@@ -563,7 +563,7 @@ class ConstantPool {
                 && mTag == other.mTag && mBootstrapIndex == other.mBootstrapIndex
                 && mNameAndType.equals(other.mNameAndType);
         }
-    
+
         @Override
         void writeTo(BytesOut out) throws IOException {
             super.writeTo(out);
