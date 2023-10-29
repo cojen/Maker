@@ -168,7 +168,6 @@ public class HiddenTest {
 
         // Test inherited method access.
 
-        // FIXME: Is using a MethodHandle still.
         makeAssertTrue(hInstanceVar.invoke("addOne", 1).eq(2));
         makeAssertTrue(hInstanceVar.invoke("negate", 1).eq(-1));
 

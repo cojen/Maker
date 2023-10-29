@@ -752,6 +752,11 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             throw e;
         }
 
+        if (method.enclosingType() != type && type.isHidden()) {
+            // Prefer calling a method normally over using a MethodHandle.
+            type = method.enclosingType();
+        }
+
         if (instance != null && !method.isStatic() && !type.isHidden()) {
             // Need to go back and push the instance before the arguments.
             savepoint = pushInstanceAt(savepoint, instance);
@@ -810,8 +815,6 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         if (type.isHidden()) {
             ConstantVar mhVar;
 
-            Type objectType = Type.from(Object.class);
-
             if (instance != null) {
                 mhVar = instance.methodHandle(returnType, methodName, actualTypes);
 
@@ -824,7 +827,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                     // this, and also go back and push the instance to the stack.
                     invokeTypes = new Type[actualTypes.length + 1];
                     System.arraycopy(actualTypes, 0, invokeTypes, 1, actualTypes.length);
-                    invokeTypes[0] = objectType;
+                    invokeTypes[0] = Type.from(Object.class);
 
                     // Push the instance to the stack as the first argument.
                     pushInstanceAt(savepoint, instance);
@@ -836,7 +839,8 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                 assert methodName == "<init>";
                 inherit = 0; // to select INVOKEVIRTUAL below
                 mhVar = new LocalVar(type).methodHandle(null, ".new", actualTypes);
-                method = mhVar.type().inventMethod(0, objectType, "invoke", actualTypes);
+                Type instanceType = type.nonHiddenBase();
+                method = mhVar.type().inventMethod(0, instanceType, "invoke", actualTypes);
                 returnType = type;
             }
 
@@ -5080,11 +5084,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         int smCode() {
             int code = mType.stackMapCode();
             if (code == SM_OBJECT) {
-                Type type = mType;
-                if (type.isHidden()) {
-                    type = Type.from(Object.class);
-                }
-                code |= (mConstants.addClass(type).mIndex << 8);
+                code |= (mConstants.addClass(mType.nonHiddenBase()).mIndex << 8);
             }
             return code;
         }

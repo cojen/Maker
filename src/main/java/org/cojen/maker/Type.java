@@ -435,6 +435,13 @@ abstract class Type {
     }
 
     /**
+     * Returns the nearest parent type which isn't hidden.
+     */
+    Type nonHiddenBase() {
+        return this;
+    }
+
+    /**
      * Returns null if class already exists.
      */
     ClassMaker maker() {
@@ -1368,6 +1375,19 @@ abstract class Type {
         boolean isHidden() {
             Class clazz = clazz();
             return clazz == null ? false : clazz.isHidden();
+        }
+
+        @Override
+        Type nonHiddenBase() {
+            Class clazz = clazz();
+            return (clazz == null || !clazz.isHidden()) ? this : findNonHiddenBase(clazz);
+        }
+
+        private static Type findNonHiddenBase(Class clazz) {
+            do {
+                clazz = clazz.getSuperclass();
+            } while (clazz.isHidden());
+            return Type.from(clazz);
         }
 
         @Override
