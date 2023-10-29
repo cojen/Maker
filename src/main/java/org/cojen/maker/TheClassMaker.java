@@ -28,6 +28,7 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -76,6 +77,8 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
 
     // Accessed by ConstantsRegistry.
     Object mExactConstants;
+
+    private IdentityHashMap<Object, Integer> mSharedExactConstants;
 
     // Maps constants to static final fields. Accessed by TheMethodMaker.
     Map<ConstantPool.Constant, ConstantPool.C_Field> mResolvedConstants;
@@ -821,12 +824,32 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
     /**
      * @return slot
      */
-    int addExactConstant(Object value) {
+    int addExactConstant(Object value, boolean shared) {
         checkFinished();
+
         if (mExternal) {
             throw new IllegalStateException("Making an external class");
         }
-        return ConstantsRegistry.add(this, value);
+
+        if (!shared) {
+            return ConstantsRegistry.add(this, value);
+        }
+
+        var map = mSharedExactConstants;
+
+        if (map == null) {
+            mSharedExactConstants = map = new IdentityHashMap<>();
+        } else {
+            Integer slot = map.get(value);
+            if (slot != null) {
+                return slot;
+            }
+        }
+
+        int slot = ConstantsRegistry.add(this, value);
+        map.put(value, slot);
+
+        return slot;
     }
 
     /**

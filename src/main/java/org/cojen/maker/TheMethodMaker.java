@@ -2570,11 +2570,15 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         ConstantPool.C_Method ref = mConstants.addMethod(bootstraps.iterator().next());
         ConstantPool.C_MethodHandle bootHandle = mConstants.addMethodHandle(REF_invokeStatic, ref);
 
-        int slot = mClassMaker.addExactConstant(value);
+        // Class initialization only runs once, and so constants can be safely removed once
+        // they are found. For this reason, the slots cannot be shared.
+        boolean shared = !"<clinit>".equals(name());
 
-        if ("<clinit>".equals(name())) {
-            // Class initialization only runs once, and so constants can be safely removed once
-            // they are found.
+        int slot = mClassMaker.addExactConstant(value, shared);
+
+        if (!shared) {
+            // Flip the bit to indicate that the constant can be removed once found. See the
+            // clinit comment above.
             slot |= (1 << 31);
         }
 

@@ -185,8 +185,6 @@ public class HiddenTest {
         makeAssertTrue(hInstanceVar.invoke("subOne", 2).eq(1));
         makeAssertTrue(hInstanceVar.invoke("flip", 1).eq(~1));
 
-        // FIXME: Dynamic constants are duplicated, even when they're the same.
-
         Class<?> clazz = cm.finish();
         clazz.getMethod("test").invoke(null);
     }
