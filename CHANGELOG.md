@@ -8,6 +8,7 @@ v2.5.1
 * Fixed a bug in which local variables used as pseudo field coordinates might be unavailable
   for future use.
 * Allow direct access to the fields, constructors, and methods of hidden classes.
+* Allow hidden classes to work with the cast and instanceOf methods.
 * Allow exact constant slots to be shared, which can help eliminate duplicated dynamic
   constants.
 

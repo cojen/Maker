@@ -18,6 +18,9 @@ package org.cojen.maker;
 
 import java.lang.invoke.*;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+
 import org.junit.*;
 import static org.junit.Assert.*;
 
@@ -55,8 +58,8 @@ public class HiddenTest {
         public int flip(int x);
     }
 
-    @Before
-    public void setup() {
+    @BeforeClass
+    public static void setup() {
         ClassMaker cm = ClassMaker.begin().public_().extend(Base.class).implement(Iface.class);
 
         cm.addField(int.class, "state").public_().static_();
@@ -90,10 +93,10 @@ public class HiddenTest {
         mm = cm.addMethod(int.class, "flip", int.class).public_();
         mm.return_(mm.param(0).com());
 
-        mHidden = cm.finishHidden().lookupClass();
+        cHidden = cm.finishHidden().lookupClass();
     }
 
-    private Class mHidden;
+    private static Class<?> cHidden;
 
     @Test
     public void access() throws Exception {
@@ -103,7 +106,7 @@ public class HiddenTest {
 
         MethodMaker mm = cm.addMethod(null, "test").public_().static_();
 
-        var hVar = mm.var(mHidden);
+        var hVar = mm.var(cHidden);
 
         // Test static field access.
 
@@ -187,6 +190,51 @@ public class HiddenTest {
 
         Class<?> clazz = cm.finish();
         clazz.getMethod("test").invoke(null);
+    }
+
+    @Test
+    public void cast() throws Exception {
+        // Test that an object can be cast to a hidden class type and acted upon.
+
+        var hInstance = cHidden.getConstructor(int.class).newInstance(123);
+
+        ClassMaker cm = ClassMaker.begin().public_();
+
+        MethodMaker mm = cm.addMethod(int.class, "test", Object.class).public_().static_();
+        var hVar = mm.param(0).cast(cHidden);
+        var v = hVar.field("value").get();
+        v.set(hVar.invoke("addOne", v));
+        v.set(hVar.invoke("negate", v));
+        mm.return_(v);
+
+        Class<?> clazz = cm.finish();
+        Method method = clazz.getMethod("test", Object.class);
+
+        assertEquals(-124, method.invoke(null, hInstance));
+
+        try {
+            method.invoke(null, "hello");
+        } catch (InvocationTargetException e) {
+            assertTrue(e.getCause() instanceof ClassCastException);
+        }
+    }
+
+    @Test
+    public void instanceOf() throws Exception {
+        // Test the instanceOf method against a hidden class.
+
+        var hInstance = cHidden.getConstructor(int.class).newInstance(123);
+
+        ClassMaker cm = ClassMaker.begin().public_();
+
+        MethodMaker mm = cm.addMethod(boolean.class, "test", Object.class).public_().static_();
+        mm.return_(mm.param(0).instanceOf(cHidden));
+
+        Class<?> clazz = cm.finish();
+        Method method = clazz.getMethod("test", Object.class);
+
+        assertEquals(Boolean.TRUE, method.invoke(null, hInstance));
+        assertEquals(Boolean.FALSE, method.invoke(null, "hello"));
     }
 
     private static void makeAssertTrue(Variable v) {

@@ -4525,18 +4525,36 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             }
 
             Type isType = mClassMaker.typeFrom(clazz);
-            ConstantPool.C_Class constant = mConstants.addClass(isType);
 
-            push();
+            if (!isType.isHidden()) {
+                ConstantPool.C_Class constant = mConstants.addClass(isType);
 
-            addOp(new BytecodeOp(INSTANCEOF, 1) {
-                @Override
-                void appendTo(TheMethodMaker m) {
-                    super.appendTo(m);
-                    m.appendShort(constant.mIndex);
-                    m.stackPush(BOOLEAN);
-                }
-            });
+                push();
+
+                addOp(new BytecodeOp(INSTANCEOF, 1) {
+                    @Override
+                    void appendTo(TheMethodMaker m) {
+                        super.appendTo(m);
+                        m.appendShort(constant.mIndex);
+                        m.stackPush(BOOLEAN);
+                    }
+                });
+            } else {
+                // Call the Class.isInstance method.
+
+                Type classType = Type.from(Class.class);
+                Type objType = Type.from(Object.class);
+
+                ConstantPool.C_Method ref = mConstants.addMethod
+                    (classType.findMethod("isInstance", new Type[] {objType}, 0, -1, null, null));
+
+                var classVar = new LocalVar(classType);
+                classVar.setExact(isType.clazz());
+                addOp(new PushVarOp(classVar));
+                push();
+
+                addOp(new InvokeOp(INVOKEVIRTUAL, 2, ref));
+            }
 
             return storeToNewVar(BOOLEAN);
         }
@@ -4565,6 +4583,29 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                 }
 
                 // Basic object cast.
+
+                if (toType.isHidden()) {
+                    // Use a MethodHandle to do the work. See ConstantBootstraps.explicitCast.
+
+                    Class<?> toClass = toType.clazz();
+                    MethodHandle id = MethodHandles.identity(toClass);
+                    MethodType mt = MethodType.methodType(toClass, Object.class);
+                    MethodHandle converter = MethodHandles.explicitCastArguments(id, mt);
+
+                    Type handleType = Type.from(MethodHandle.class);
+                    var handleVar = new LocalVar(handleType);
+                    handleVar.setExact(converter);
+                    addOp(new PushVarOp(handleVar));
+                    push();
+
+                    ConstantPool.C_Method ref = mConstants.addMethod
+                        (handleType.inventMethod(0, toType.nonHiddenBase(),
+                                                 "invoke", Type.from(Object.class)));
+
+                    addOp(new InvokeOp(INVOKEVIRTUAL, 2, ref));
+
+                    return storeToNewVar(toType);
+                }
 
                 ConstantPool.C_Class constant = mConstants.addClass(toType);
 
