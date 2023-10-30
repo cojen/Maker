@@ -30,7 +30,10 @@ import static java.lang.invoke.MethodHandleInfo.*;
  * @author Brian S. O'Neill
  * @hidden
  */
-public class MethodHandleBootstraps {
+public final class MethodHandleBootstraps {
+    private MethodHandleBootstraps() {
+    }
+
     /**
      * Condy bootstrap method for finding a MethodHandle.
      *
