@@ -16,8 +16,6 @@
 
 package org.cojen.maker;
 
-import java.lang.invoke.*;
-
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 

@@ -17,7 +17,6 @@
 package org.cojen.maker;
 
 import org.junit.*;
-import static org.junit.Assert.*;
 
 /**
  * 

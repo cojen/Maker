@@ -1405,7 +1405,7 @@ abstract class Type {
         @Override
         boolean isHidden() {
             Class clazz = clazz();
-            return clazz == null ? false : clazz.isHidden();
+            return clazz != null && clazz.isHidden();
         }
 
         @Override

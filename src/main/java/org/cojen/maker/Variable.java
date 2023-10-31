@@ -472,7 +472,7 @@ public interface Variable {
      * this is equivalent to calling {@link #get get}.
      *
      * @return the result in a new variable
-     * @throws IllegalStateException if cannot be unboxed
+     * @throws IllegalStateException if this variable cannot be unboxed
      */
     Variable unbox();
 
