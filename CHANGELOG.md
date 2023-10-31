@@ -1,7 +1,7 @@
 Changelog
 =========
 
-v2.5.1
+v2.5.1 (2023-10-31)
 ------
 * Fixed a bug in which static fields sometimes behaved as if they were instance fields. This
   only affected field accesses which indirectly used a VarHandle.
