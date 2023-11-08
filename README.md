@@ -1,6 +1,6 @@
 [![Maven Central](https://img.shields.io/maven-central/v/org.cojen/cojen-maker.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22org.cojen%22%20AND%20a:%22cojen-maker%22)
 
-The Cojen/Maker framework is a lightweight, full-featured, low-level dynamic Java class generator which is designed for [ease of use](https://github.com/cojen/Maker/wiki/Ease-of-use).
+The Cojen/Maker library is a lightweight, full-featured, low-level dynamic Java class generator which is designed for [ease of use](https://github.com/cojen/Maker/wiki/Ease-of-use).
 
 Here's a simple "hello, world" example:
 
@@ -21,7 +21,7 @@ clazz.getMethod("run").invoke(null);
 - [Coding patterns](https://github.com/cojen/Maker/wiki/Coding-patterns)
 - [Examples](example/main/java/org/cojen/example)
 
-A key feature of the framework is that the JVM operand stack isn't directly accessible, which makes it much easier to use. Local variables are used exclusively, and conversion to the stack-based representation is automatic. In some cases, this can result in more local variables than is strictly necessary, but modern JVMs reduce the set using liveness analysis.
+A key feature of the library is that the JVM operand stack isn't directly accessible, which makes it much easier to use. Local variables are used exclusively, and conversion to the stack-based representation is automatic. In some cases, this can result in more local variables than is strictly necessary, but modern JVMs reduce the set using liveness analysis.
 
 In addition to simplifying basic class generation, the features of the `java.lang.invoke` package are fully integrated, but without all the complexity. The `ObjectMethods` example shows how to define a bootstrap method which generates code "just in time".
 
@@ -47,8 +47,8 @@ The implementation of the Cojen/Maker system is relatively small, and it has no 
 Limitations
 -----------
 
-The Cojen/Maker framework is designed for implementing dynamic languages, and for designing utilities that achieve higher performance than is possible when using the reflection API. It isn't designed for modifying classes or for implementing instrumentation agents. That is, you cannot start with an existing class and make modifications to it &mdash; classes are only ever made "from scratch". A future version might support class modifications, but there's no plans at this time.
+The Cojen/Maker library is designed for implementing dynamic languages, and for designing utilities that achieve higher performance than is possible when using the reflection API. It isn't designed for modifying classes or for implementing instrumentation agents. That is, you cannot start with an existing class and make modifications to it &mdash; classes are only ever made "from scratch". A future version might support class modifications, but there's no plans at this time.
 
-Although the framework can be used for writing a frontend compiler, it doesn't have any facilities for reading class symbols. For example, it's possible to write a Java compiler that uses Cojen for writing class files, but it would need another tool for extracting symbols from pre-compiled jar files and so forth. Such a feature could be added of course, but it's a lower priority.
+Although the library can be used for writing a frontend compiler, it doesn't have any facilities for reading class symbols. For example, it's possible to write a Java compiler that uses Cojen for writing class files, but it would need another tool for extracting symbols from pre-compiled jar files and so forth. Such a feature could be added of course, but it's a lower priority.
 
-Because of its somewhat low-level design, the framework doesn't prevent the creation of broken classes. For example, failing to definitely assign a value to a variable will cause a `VerifyError` to be thrown when loading the class. The [Coding errors](https://github.com/cojen/Maker/wiki/Coding-errors) page has more details.
+Because of its somewhat low-level design, the library doesn't prevent the creation of broken classes. For example, failing to definitely assign a value to a variable will cause a `VerifyError` to be thrown when loading the class. The [Coding errors](https://github.com/cojen/Maker/wiki/Coding-errors) page has more details.
