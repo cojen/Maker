@@ -1,6 +1,10 @@
 Changelog
 =========
 
+v2.5.2
+------
+* Fixed hidden method invocation against inherited methods.
+
 v2.5.1 (2023-10-31)
 ------
 * Fixed a bug in which static fields sometimes behaved as if they were instance fields. This

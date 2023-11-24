@@ -79,8 +79,14 @@ abstract class Type {
         DOUBLE = new Primitive(SM_DOUBLE, T_DOUBLE),
         VOID = new Primitive(SM_TOP, T_VOID);
 
-    static final int FLAG_PRIVATE = 1, FLAG_STATIC = 2, FLAG_FINAL = 4,
-        FLAG_BRIDGE = 8, FLAG_VARARGS = 16;
+    static final int
+        FLAG_PUBLIC = Modifier.PUBLIC,
+        FLAG_PRIVATE = Modifier.PRIVATE,
+        FLAG_PROTECTED = Modifier.PROTECTED,
+        FLAG_STATIC = Modifier.STATIC,
+        FLAG_FINAL = Modifier.FINAL,
+        FLAG_BRIDGE = 0x40,
+        FLAG_VARARGS = 0x80;
 
     /**
      * Called when making a new class.
@@ -698,17 +704,6 @@ abstract class Type {
         return type == null ? null : type.name();
     }
 
-    private static int commonFlags(int modifiers) {
-        int flags = Modifier.isPrivate(modifiers) ? FLAG_PRIVATE : 0;
-        if (Modifier.isStatic(modifiers)) {
-            flags |= FLAG_STATIC;
-        }
-        if (Modifier.isFinal(modifiers)) {
-            flags |= FLAG_FINAL;
-        }
-        return flags;
-    }
-
     /**
      * Base class for Field and Method.
      */
@@ -732,6 +727,10 @@ abstract class Type {
 
         final void toPrivate() {
             mFlags |= FLAG_PRIVATE;
+        }
+
+        final boolean isPackagePrivate() {
+            return (mFlags & (FLAG_PUBLIC | FLAG_PRIVATE | FLAG_PROTECTED)) == 0;
         }
 
         final boolean isStatic() {
@@ -838,9 +837,9 @@ abstract class Type {
         }
 
         /**
-         * If the enclosingType of this method is hidden, attempt to find a parent method which
-         * has the same signature, but whose enclosingType isn't hidden. If the enclosingType
-         * of this method isn't hidden, then this method is simply returned.
+         * If the enclosingType of this method is hidden, attempt to find a parent overridable
+         * method whose enclosingType isn't hidden. If the enclosingType of this method isn't
+         * hidden, then this method is simply returned.
          */
         Method tryNonHidden() {
             final Type type = enclosingType();
@@ -849,23 +848,35 @@ abstract class Type {
                 return this;
             }
 
+            if ((mFlags & (FLAG_PRIVATE | FLAG_STATIC)) != 0 || "<init>".equals(name())) {
+                return null;
+            }
+
             final var key = new MethodKey(returnType(), name(), paramTypes());
 
             for (Type s = type.superType(); s != null; s = s.superType()) {
-                Type.Method m = s.methods().get(key);
-                if (m != null && !m.enclosingType().isHidden()) {
-                    return m;
+                Method parent = s.methods().get(key);
+                if (parent != null && parent.allowHiddenOverride()) {
+                    return parent;
                 }
             }
 
             for (Type iface : type.interfaces()) {
-                Type.Method m = iface.methods().get(key);
-                if (m != null && !m.enclosingType().isHidden()) {
-                    return m;
+                Method parent = iface.methods().get(key);
+                if (parent != null && parent.allowHiddenOverride()) {
+                    return parent;
                 }
             }
 
             return null;
+        }
+
+        private boolean allowHiddenOverride() {
+            // Note that package-private overrides are simply rejected. A proper check requires
+            // that both classes be in the same package and ClassLoader.
+            return
+                (mFlags & (FLAG_PRIVATE | FLAG_STATIC | FLAG_FINAL)) == 0 &&
+                !isPackagePrivate() && !enclosingType().isHidden();
         }
 
         @Override
@@ -1542,7 +1553,7 @@ abstract class Type {
             Class clazz = clazz();
             if (clazz != null) {
                 for (var field : clazz.getDeclaredFields()) {
-                    int flags = commonFlags(field.getModifiers());
+                    int flags = field.getModifiers();
                     String name = field.getName();
                     Type type = from(field.getType());
                     fields.put(name, new Field(flags, type, name));
@@ -1819,14 +1830,7 @@ abstract class Type {
         private void addMethod(Map<MethodKey, Method> methods,
                                String name, Executable method, Type returnType)
         {
-            int modifiers = method.getModifiers();
-            int flags = commonFlags(modifiers);
-            if (Modifier.isVolatile(modifiers)) {
-                flags |= FLAG_BRIDGE;
-            }
-            if (method.isVarArgs()) {
-                flags |= FLAG_VARARGS;
-            }
+            int flags = method.getModifiers();
 
             Class<?>[] params = method.getParameterTypes();
             var paramTypes = new Type[params.length];

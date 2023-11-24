@@ -44,6 +44,14 @@ public class HiddenTest {
         public int subOne(int x) {
             return x - 1;
         }
+
+        private int a(int a) {
+            return a;
+        }
+
+        int b(int b) {
+            return b;
+        }
     }
 
     public static interface Iface {
@@ -90,6 +98,12 @@ public class HiddenTest {
 
         mm = cm.addMethod(int.class, "flip", int.class).public_();
         mm.return_(mm.param(0).com());
+
+        mm = cm.addMethod(int.class, "a", int.class).public_();
+        mm.return_(mm.param(0).add(1));
+
+        mm = cm.addMethod(int.class, "b", int.class).public_();
+        mm.return_(mm.param(0).add(2));
 
         cHidden = cm.finishHidden().lookupClass();
     }
@@ -178,6 +192,9 @@ public class HiddenTest {
         makeAssertTrue(hInstanceVar.invoke("getValue").eq(555));
         makeAssertTrue(hInstanceVar.methodHandle(int.class, "getValue").invoke
                        (int.class, "invoke", new Object[] {Object.class}, hInstanceVar).eq(555));
+
+        makeAssertTrue(hInstanceVar.invoke("a", 1).eq(2));
+        makeAssertTrue(hInstanceVar.invoke("b", 1).eq(3));
 
         // Test inherited method access.
 
