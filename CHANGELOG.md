@@ -1,7 +1,7 @@
 Changelog
 =========
 
-v2.5.2
+v2.5.2 (2023-11-27)
 ------
 * Fixed hidden method invocation against inherited methods.
 
