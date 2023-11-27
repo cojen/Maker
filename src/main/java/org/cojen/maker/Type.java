@@ -20,6 +20,7 @@ import java.lang.invoke.MethodHandle;
 import java.lang.invoke.VarHandle;
 
 import java.lang.ref.SoftReference;
+import java.lang.ref.WeakReference;
 
 import java.lang.reflect.Executable;
 import java.lang.reflect.Modifier;
@@ -1933,11 +1934,15 @@ abstract class Type {
     }
 
     private static final class NewClazz extends Clazz {
-        private final TheClassMaker mMaker;
+        // Keep a weak reference to TheClassMaker because NewClazz instances can live a long
+        // time as FindKey parameters. A null reference should never be observed because access
+        // to NewClazz instances is only possible via classes which maintain a strong reference
+        // to TheClassMaker. They are: Variable, Field, FieldMaker, and TheClassMaker itself.
+        private final WeakReference<TheClassMaker> mMakerRef;
 
         NewClazz(ClassLoader loader, TheClassMaker maker, String name) {
             super(loader, name, null, false);
-            mMaker = maker;
+            mMakerRef = new WeakReference<>(maker);
         }
 
         @Override
@@ -1948,15 +1953,15 @@ abstract class Type {
         }
 
         @Override
-        ClassMaker maker() {
-            return mMaker;
+        TheClassMaker maker() {
+            return mMakerRef.get();
         }
 
         @Override
         Type superType() {
             Type superType = mSuperType;
             if (superType == null) {
-                mSuperType = superType = mMaker.superType();
+                mSuperType = superType = maker().superType();
             }
             return superType;
         }
@@ -1968,7 +1973,7 @@ abstract class Type {
                 synchronized (this) {
                     interfaces = mInterfaces;
                     if (interfaces == null) {
-                        mInterfaces = interfaces = mMaker.allInterfaces();
+                        mInterfaces = interfaces = maker().allInterfaces();
                     }
                 }
             }
