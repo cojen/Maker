@@ -1,6 +1,10 @@
 Changelog
 =========
 
+v2.5.3
+------
+* Added convenience methods for generating conditional logic.
+
 v2.5.2 (2023-11-27)
 ------
 * Fixed hidden method invocation against inherited methods.

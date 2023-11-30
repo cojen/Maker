@@ -847,4 +847,110 @@ public class BranchTest {
         clazz.getMethod("run", boolean.class).invoke(null, true);
     }
 
+    @Test
+    public void callbacks() throws Exception {
+        ClassMaker cm = ClassMaker.begin().public_();
+        MethodMaker mm = cm.addMethod(null, "run").static_().public_();
+
+        var assertVar = mm.var(Assert.class);
+        Runnable fail = () -> assertVar.invoke("fail");
+        var passVar = mm.var(int.class).set(0);
+        Runnable pass = () -> passVar.inc(1);
+        int passCount = 0;
+
+        {
+            var v1 = mm.var(boolean.class).set(false);
+            v1.ifTrue(fail);
+            v1.ifTrue(fail, pass);
+            passCount++;
+            v1 = mm.var(boolean.class).set(true);
+            v1.ifTrue(pass);
+            passCount++;
+            v1.ifTrue(pass, fail);
+            passCount++;
+        }
+
+        {
+            var v1 = mm.var(boolean.class).set(true);
+            v1.ifFalse(fail);
+            v1.ifFalse(fail, pass);
+            passCount++;
+            v1 = mm.var(boolean.class).set(false);
+            v1.ifFalse(pass);
+            passCount++;
+            v1.ifFalse(pass, fail);
+            passCount++;
+        }
+
+        {
+            var v1 = mm.var(int.class).set(1);
+            v1.ifEq(2, fail);
+            v1.ifEq(2, fail, pass);
+            passCount++;
+            v1.ifEq(1, pass);
+            passCount++;
+            v1.ifEq(1, pass, fail);
+            passCount++;
+        }
+
+        {
+            var v1 = mm.var(int.class).set(1);
+            v1.ifNe(1, fail);
+            v1.ifNe(1, fail, pass);
+            passCount++;
+            v1.ifNe(2, pass);
+            passCount++;
+            v1.ifNe(2, pass, fail);
+            passCount++;
+        }
+
+        {
+            var v1 = mm.var(int.class).set(1);
+            v1.ifLt(1, fail);
+            v1.ifLt(1, fail, pass);
+            passCount++;
+            v1.ifLt(2, pass);
+            passCount++;
+            v1.ifLt(2, pass, fail);
+            passCount++;
+        }
+
+        {
+            var v1 = mm.var(int.class).set(1);
+            v1.ifGe(2, fail);
+            v1.ifGe(2, fail, pass);
+            passCount++;
+            v1.ifGe(1, pass);
+            passCount++;
+            v1.ifGe(1, pass, fail);
+            passCount++;
+        }
+
+        {
+            var v1 = mm.var(int.class).set(1);
+            v1.ifGt(1, fail);
+            v1.ifGt(1, fail, pass);
+            passCount++;
+            v1.ifGt(0, pass);
+            passCount++;
+            v1.ifGt(0, pass, fail);
+            passCount++;
+        }
+
+        {
+            var v1 = mm.var(int.class).set(1);
+            v1.ifLe(0, fail);
+            v1.ifLe(0, fail, pass);
+            passCount++;
+            v1.ifLe(1, pass);
+            passCount++;
+            v1.ifLe(1, pass, fail);
+            passCount++;
+        }
+
+        assertVar.invoke("assertEquals", passCount, passVar);
+
+        var clazz = cm.finish();
+        clazz.getMethod("run").invoke(null);
+    }
 }

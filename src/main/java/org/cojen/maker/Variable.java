@@ -130,9 +130,67 @@ public interface Variable {
     void ifTrue(Label label);
 
     /**
+     * Convenience method to generate conditional code if this variable is true.
+     *
+     * @param then called to generate the body of the "then" case
+     */
+    default void ifTrue(Runnable then) {
+        Label endLabel = methodMaker().label();
+        ifFalse(endLabel);
+        then.run();
+        endLabel.here();
+    }
+
+    /**
+     * Convenience method to generate conditional code if this variable is true.
+     *
+     * @param then called to generate the body of the "then" case
+     * @param else_ called to generate the body of the "else" case
+     */
+    default void ifTrue(Runnable then, Runnable else_) {
+        MethodMaker mm = methodMaker();
+        Label elseLabel = mm.label();
+        ifFalse(elseLabel);
+        then.run();
+        Label endLabel = mm.label().goto_();
+        elseLabel.here();
+        else_.run();
+        endLabel.here();
+    }
+
+    /**
      * Conditional goto if this variable is false. The label doesn't need to be positioned yet.
      */
     void ifFalse(Label label);
+
+    /**
+     * Convenience method to generate conditional code if this variable is false.
+     *
+     * @param then called to generate the body of the "then" case
+     */
+    default void ifFalse(Runnable then) {
+        Label endLabel = methodMaker().label();
+        ifTrue(endLabel);
+        then.run();
+        endLabel.here();
+    }
+
+    /**
+     * Convenience method to generate conditional code if this variable is false.
+     *
+     * @param then called to generate the body of the "then" case
+     * @param else_ called to generate the body of the "else" case
+     */
+    default void ifFalse(Runnable then, Runnable else_) {
+        MethodMaker mm = methodMaker();
+        Label elseLabel = mm.label();
+        ifTrue(elseLabel);
+        then.run();
+        Label endLabel = mm.label().goto_();
+        elseLabel.here();
+        else_.run();
+        endLabel.here();
+    }
 
     /**
      * Conditional goto if this variable is equal to another variable or constant. The label
@@ -144,6 +202,37 @@ public interface Variable {
     void ifEq(Object value, Label label);
 
     /**
+     * Convenience method to generate conditional code if this variable is equal to another
+     * variable or constant
+     *
+     * @param then called to generate the body of the "then" case
+     */
+    default void ifEq(Object value, Runnable then) {
+        Label endLabel = methodMaker().label();
+        ifNe(value, endLabel);
+        then.run();
+        endLabel.here();
+    }
+
+    /**
+     * Convenience method to generate conditional code if this variable is equal to another
+     * variable or constant
+     *
+     * @param then called to generate the body of the "then" case
+     * @param else_ called to generate the body of the "else" case
+     */
+    default void ifEq(Object value, Runnable then, Runnable else_) {
+        MethodMaker mm = methodMaker();
+        Label elseLabel = mm.label();
+        ifNe(value, elseLabel);
+        then.run();
+        Label endLabel = mm.label().goto_();
+        elseLabel.here();
+        else_.run();
+        endLabel.here();
+    }
+
+    /**
      * Conditional goto if this variable is not equal to another variable or constant. The
      * label doesn't need to be positioned yet.
      *
@@ -151,6 +240,37 @@ public interface Variable {
      * @throws IllegalArgumentException if not given a variable or a constant
      */
     void ifNe(Object value, Label label);
+
+    /**
+     * Convenience method to generate conditional code if this variable is not equal to another
+     * variable or constant
+     *
+     * @param then called to generate the body of the "then" case
+     */
+    default void ifNe(Object value, Runnable then) {
+        Label endLabel = methodMaker().label();
+        ifEq(value, endLabel);
+        then.run();
+        endLabel.here();
+    }
+
+    /**
+     * Convenience method to generate conditional code if this variable is not equal to another
+     * variable or constant
+     *
+     * @param then called to generate the body of the "then" case
+     * @param else_ called to generate the body of the "else" case
+     */
+    default void ifNe(Object value, Runnable then, Runnable else_) {
+        MethodMaker mm = methodMaker();
+        Label elseLabel = mm.label();
+        ifEq(value, elseLabel);
+        then.run();
+        Label endLabel = mm.label().goto_();
+        elseLabel.here();
+        else_.run();
+        endLabel.here();
+    }
 
     /**
      * Conditional goto if this variable is less than another variable or constant. The label
@@ -162,6 +282,37 @@ public interface Variable {
     void ifLt(Object value, Label label);
 
     /**
+     * Convenience method to generate conditional code if this variable is less than another
+     * variable or constant
+     *
+     * @param then called to generate the body of the "then" case
+     */
+    default void ifLt(Object value, Runnable then) {
+        Label endLabel = methodMaker().label();
+        ifGe(value, endLabel);
+        then.run();
+        endLabel.here();
+    }
+
+    /**
+     * Convenience method to generate conditional code if this variable is less than another
+     * variable or constant
+     *
+     * @param then called to generate the body of the "then" case
+     * @param else_ called to generate the body of the "else" case
+     */
+    default void ifLt(Object value, Runnable then, Runnable else_) {
+        MethodMaker mm = methodMaker();
+        Label elseLabel = mm.label();
+        ifGe(value, elseLabel);
+        then.run();
+        Label endLabel = mm.label().goto_();
+        elseLabel.here();
+        else_.run();
+        endLabel.here();
+    }
+
+    /**
      * Conditional goto if this variable is greater than or equal to another variable or
      * constant. The label doesn't need to be positioned yet.
      *
@@ -169,6 +320,37 @@ public interface Variable {
      * @throws IllegalArgumentException if not given a variable or a constant
      */
     void ifGe(Object value, Label label);
+
+    /**
+     * Convenience method to generate conditional code if this variable is greater than or
+     * equal to another variable or constant
+     *
+     * @param then called to generate the body of the "then" case
+     */
+    default void ifGe(Object value, Runnable then) {
+        Label endLabel = methodMaker().label();
+        ifLt(value, endLabel);
+        then.run();
+        endLabel.here();
+    }
+
+    /**
+     * Convenience method to generate conditional code if this variable is greater than or
+     * equal to another variable or constant
+     *
+     * @param then called to generate the body of the "then" case
+     * @param else_ called to generate the body of the "else" case
+     */
+    default void ifGe(Object value, Runnable then, Runnable else_) {
+        MethodMaker mm = methodMaker();
+        Label elseLabel = mm.label();
+        ifLt(value, elseLabel);
+        then.run();
+        Label endLabel = mm.label().goto_();
+        elseLabel.here();
+        else_.run();
+        endLabel.here();
+    }
 
     /**
      * Conditional goto if this variable is greater than another variable or constant. The
@@ -180,6 +362,37 @@ public interface Variable {
     void ifGt(Object value, Label label);
 
     /**
+     * Convenience method to generate conditional code if this variable is greater than another
+     * variable or constant
+     *
+     * @param then called to generate the body of the "then" case
+     */
+    default void ifGt(Object value, Runnable then) {
+        Label endLabel = methodMaker().label();
+        ifLe(value, endLabel);
+        then.run();
+        endLabel.here();
+    }
+
+    /**
+     * Convenience method to generate conditional code if this variable is greater than another
+     * variable or constant
+     *
+     * @param then called to generate the body of the "then" case
+     * @param else_ called to generate the body of the "else" case
+     */
+    default void ifGt(Object value, Runnable then, Runnable else_) {
+        MethodMaker mm = methodMaker();
+        Label elseLabel = mm.label();
+        ifLe(value, elseLabel);
+        then.run();
+        Label endLabel = mm.label().goto_();
+        elseLabel.here();
+        else_.run();
+        endLabel.here();
+    }
+
+    /**
      * Conditional goto if this variable is less than or equal to another variable or
      * constant. The label doesn't need to be positioned yet.
      *
@@ -187,6 +400,37 @@ public interface Variable {
      * @throws IllegalArgumentException if not given a variable or a constant
      */
     void ifLe(Object value, Label label);
+
+    /**
+     * Convenience method to generate conditional code if this variable is less than or equal
+     * to another variable or constant
+     *
+     * @param then called to generate the body of the "then" case
+     */
+    default void ifLe(Object value, Runnable then) {
+        Label endLabel = methodMaker().label();
+        ifGt(value, endLabel);
+        then.run();
+        endLabel.here();
+    }
+
+    /**
+     * Convenience method to generate conditional code if this variable is less than or equal
+     * to another variable or constant
+     *
+     * @param then called to generate the body of the "then" case
+     * @param else_ called to generate the body of the "else" case
+     */
+    default void ifLe(Object value, Runnable then, Runnable else_) {
+        MethodMaker mm = methodMaker();
+        Label elseLabel = mm.label();
+        ifGt(value, elseLabel);
+        then.run();
+        Label endLabel = mm.label().goto_();
+        elseLabel.here();
+        else_.run();
+        endLabel.here();
+    }
 
     /**
      * Generates a switch statement against this {@code int} or non-null {@code Integer}
