@@ -22,6 +22,8 @@ import java.io.IOException;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 
+import java.util.Set;
+
 /**
  * Allows new classes and interfaces to be defined dynamically.
  *
@@ -324,10 +326,12 @@ public interface ClassMaker extends Maker {
     ClassLoader classLoader();
 
     /**
-     * Checks if the class has defined any abstract methods or if it has inherited any abstract
-     * methods which haven't been implemented.
+     * Returns the set of methods which would need to be implemented by this class in order for
+     * it to be non-abstract. Each method in the set is represented by a simple signature.
+     *
+     * @return a non-null set, possibly empty
      */
-    boolean shouldBeAbstract();
+    Set<String> unimplementedMethods();
 
     /**
      * Finishes the definition of the new class.

@@ -838,6 +838,16 @@ abstract class Type {
         }
 
         /**
+         * Returns a string which matches how the method would appear in a Java source file,
+         * sans parameter names.
+         */
+        String signature() {
+            var b = new StringBuilder().append(returnType().name()).append(' ').append(name());
+            appendParams(b);
+            return b.toString();
+        }
+
+        /**
          * If the enclosingType of this method is hidden, attempt to find a parent overridable
          * method whose enclosingType isn't hidden. If the enclosingType of this method isn't
          * hidden, then this method is simply returned.
@@ -910,14 +920,20 @@ abstract class Type {
         }
 
         private String paramsToString() {
-            var b = new StringBuilder().append('[');
+            var b = new StringBuilder();
+            appendParams(b);
+            return b.toString();
+        }
+
+        private void appendParams(StringBuilder b) {
+            b.append('(');
             for (int i=0; i<mParamTypes.length; i++) {
                 if (i > 0) {
                     b.append(", ");
                 }
                 b.append(mParamTypes[i].name());
             }
-            return b.append(']').toString();
+            b.append(')');
         }
     }
 

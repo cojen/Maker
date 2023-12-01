@@ -35,6 +35,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -528,14 +529,18 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
     }
 
     @Override
-    public boolean shouldBeAbstract() {
+    public Set<String> unimplementedMethods() {
+        Set<String> unimplemented = null;
         var methodSet = new HashSet<Type.Method>();
 
         Type type = type();
         do {
             for (Type.Method method : type.methods().values()) {
                 if (methodSet.add(method) && Modifier.isAbstract(method.mFlags)) {
-                    return true;
+                    if (unimplemented == null) {
+                        unimplemented = new TreeSet<>();
+                    }
+                    unimplemented.add(method.signature());
                 }
             }
         } while ((type = type.superType()) != null);
@@ -552,12 +557,15 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
         for (Type ifaceType : type().interfaces()) {
             for (Type.Method method : ifaceType.methods().values()) {
                 if (Modifier.isAbstract(method.mFlags) && !methodSet.contains(method)) {
-                    return true;
+                    if (unimplemented == null) {
+                        unimplemented = new TreeSet<>();
+                    }
+                    unimplemented.add(method.signature());
                 }
             }
         }
 
-        return false;
+        return unimplemented == null ? Collections.emptySet() : unimplemented;
     }
 
     String name() {

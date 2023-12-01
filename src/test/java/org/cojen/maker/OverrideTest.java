@@ -16,6 +16,10 @@
 
 package org.cojen.maker;
 
+import java.util.AbstractList;
+import java.util.Comparator;
+import java.util.Set;
+
 import org.junit.*;
 import static org.junit.Assert.*;
 
@@ -135,22 +139,26 @@ public class OverrideTest {
 
     @Test
     public void shouldBeAbstract() throws Exception {
-        ClassMaker cm = ClassMaker.begin();
+        ClassMaker cm = ClassMaker.begin().extend(AbstractList.class);
 
-        cm.extend(java.util.AbstractList.class);
-        assertTrue(cm.shouldBeAbstract());
+        Set<String> unimplemented = cm.unimplementedMethods();
+        assertEquals("[int size(), java.lang.Object get(int)]", unimplemented.toString());
 
         cm.addMethod(Object.class, "get", int.class).override().public_().return_(null);
-        assertTrue(cm.shouldBeAbstract());
+        unimplemented = cm.unimplementedMethods();
+        assertEquals("[int size()]", unimplemented.toString());
 
         cm.addMethod(int.class, "size").override().public_().return_(0);
-        assertFalse(cm.shouldBeAbstract());
+        unimplemented = cm.unimplementedMethods();
+        assertTrue(unimplemented.isEmpty());
 
-        cm.implement(java.util.Comparator.class);
-        assertTrue(cm.shouldBeAbstract());
+        cm.implement(Comparator.class);
+        unimplemented = cm.unimplementedMethods();
+        assertEquals("[int compare(java.lang.Object, java.lang.Object)]", unimplemented.toString());
 
         cm.addMethod(int.class, "compare", Object.class, Object.class)
             .override().public_().return_(0);
-        assertFalse(cm.shouldBeAbstract());
+        unimplemented = cm.unimplementedMethods();
+        assertTrue(unimplemented.isEmpty());
     }
 }
