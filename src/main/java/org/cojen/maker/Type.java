@@ -463,7 +463,7 @@ abstract class Type {
     }
 
     /**
-     * Returns null if not applicable or unknown.
+     * Returns the set of all interfaces, or null if not applicable or unknown.
      */
     Set<Type> interfaces() {
         return null;

@@ -324,6 +324,12 @@ public interface ClassMaker extends Maker {
     ClassLoader classLoader();
 
     /**
+     * Checks if the class has defined any abstract methods or if it has inherited any abstract
+     * methods which haven't been implemented.
+     */
+    boolean shouldBeAbstract();
+
+    /**
      * Finishes the definition of the new class.
      *
      * @throws IllegalStateException if already finished or if the definition is broken

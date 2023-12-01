@@ -64,6 +64,8 @@ public class SignatureTest {
         ClassMaker cm = ClassMaker.begin().public_().implement(Comparator.class)
             .signature(Object.class, Comparator.class, "<", String.class, ">");
 
+        cm.addMethod(int.class, "compare", Object.class, Object.class).public_().return_(0);
+
         cm.addMethod(void.class, "nothing", Object.class, cm).public_().static_()
             .signature("<E:", Comparator.class, ">(TE;", cm, ")V");
 

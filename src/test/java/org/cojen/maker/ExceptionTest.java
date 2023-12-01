@@ -97,7 +97,7 @@ public class ExceptionTest {
 
     @Test
     public void tiny() throws Exception {
-        ClassMaker cm = ClassMaker.begin().public_().implement(Runnable.class);
+        ClassMaker cm = ClassMaker.begin().public_();
         MethodMaker mm = cm.addMethod(void.class, "run").public_().static_();
 
         Label L1 = mm.label().here();
@@ -114,7 +114,7 @@ public class ExceptionTest {
     public void empty() throws Exception {
         // Labels are flipped compared to the tiny test, thus doing nothing.
 
-        ClassMaker cm = ClassMaker.begin().public_().implement(Runnable.class);
+        ClassMaker cm = ClassMaker.begin().public_();
         MethodMaker mm = cm.addMethod(void.class, "run").public_().static_();
 
         Label L1 = mm.label().here();
@@ -131,7 +131,7 @@ public class ExceptionTest {
     public void flowIntoHandler() throws Exception {
         // Detect direct flow into an exception handler.
 
-        ClassMaker cm = ClassMaker.begin().public_().implement(Runnable.class);
+        ClassMaker cm = ClassMaker.begin().public_();
         MethodMaker mm = cm.addMethod(void.class, "run").public_().static_();
 
         Label L1 = mm.label().here();

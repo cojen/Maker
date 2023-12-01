@@ -28,6 +28,7 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -524,6 +525,39 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
     @Override
     public ClassLoader classLoader() {
         return mLookup != null ? mLookup.lookupClass().getClassLoader() : mInjectorGroup;
+    }
+
+    @Override
+    public boolean shouldBeAbstract() {
+        var methodSet = new HashSet<Type.Method>();
+
+        Type type = type();
+        do {
+            for (Type.Method method : type.methods().values()) {
+                if (methodSet.add(method) && Modifier.isAbstract(method.mFlags)) {
+                    return true;
+                }
+            }
+        } while ((type = type.superType()) != null);
+
+        // Add all the default interface methods.
+        for (Type ifaceType : type().interfaces()) {
+            for (Type.Method method : ifaceType.methods().values()) {
+                if ((method.mFlags & (Modifier.STATIC | Modifier.ABSTRACT)) == 0) {
+                    methodSet.add(method);
+                }
+            }
+        }
+
+        for (Type ifaceType : type().interfaces()) {
+            for (Type.Method method : ifaceType.methods().values()) {
+                if (Modifier.isAbstract(method.mFlags) && !methodSet.contains(method)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     String name() {

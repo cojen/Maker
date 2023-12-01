@@ -132,4 +132,25 @@ public class OverrideTest {
         cm2.finish();
         cm3.finish();
     }
+
+    @Test
+    public void shouldBeAbstract() throws Exception {
+        ClassMaker cm = ClassMaker.begin();
+
+        cm.extend(java.util.AbstractList.class);
+        assertTrue(cm.shouldBeAbstract());
+
+        cm.addMethod(Object.class, "get", int.class).override().public_().return_(null);
+        assertTrue(cm.shouldBeAbstract());
+
+        cm.addMethod(int.class, "size").override().public_().return_(0);
+        assertFalse(cm.shouldBeAbstract());
+
+        cm.implement(java.util.Comparator.class);
+        assertTrue(cm.shouldBeAbstract());
+
+        cm.addMethod(int.class, "compare", Object.class, Object.class)
+            .override().public_().return_(0);
+        assertFalse(cm.shouldBeAbstract());
+    }
 }
