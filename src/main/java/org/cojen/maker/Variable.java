@@ -205,6 +205,7 @@ public interface Variable {
      * Convenience method to generate conditional code if this variable is equal to another
      * variable or constant.
      *
+     * @param value a {@link Variable} or a constant
      * @param then called to generate the body of the "then" case
      */
     default void ifEq(Object value, Runnable then) {
@@ -218,6 +219,7 @@ public interface Variable {
      * Convenience method to generate conditional code if this variable is equal to another
      * variable or constant.
      *
+     * @param value a {@link Variable} or a constant
      * @param then called to generate the body of the "then" case
      * @param else_ called to generate the body of the "else" case
      */
@@ -245,6 +247,7 @@ public interface Variable {
      * Convenience method to generate conditional code if this variable is not equal to another
      * variable or constant.
      *
+     * @param value a {@link Variable} or a constant
      * @param then called to generate the body of the "then" case
      */
     default void ifNe(Object value, Runnable then) {
@@ -258,6 +261,7 @@ public interface Variable {
      * Convenience method to generate conditional code if this variable is not equal to another
      * variable or constant.
      *
+     * @param value a {@link Variable} or a constant
      * @param then called to generate the body of the "then" case
      * @param else_ called to generate the body of the "else" case
      */
@@ -285,6 +289,7 @@ public interface Variable {
      * Convenience method to generate conditional code if this variable is less than another
      * variable or constant.
      *
+     * @param value a {@link Variable} or a constant
      * @param then called to generate the body of the "then" case
      */
     default void ifLt(Object value, Runnable then) {
@@ -298,6 +303,7 @@ public interface Variable {
      * Convenience method to generate conditional code if this variable is less than another
      * variable or constant.
      *
+     * @param value a {@link Variable} or a constant
      * @param then called to generate the body of the "then" case
      * @param else_ called to generate the body of the "else" case
      */
@@ -325,6 +331,7 @@ public interface Variable {
      * Convenience method to generate conditional code if this variable is greater than or
      * equal to another variable or constant.
      *
+     * @param value a {@link Variable} or a constant
      * @param then called to generate the body of the "then" case
      */
     default void ifGe(Object value, Runnable then) {
@@ -338,6 +345,7 @@ public interface Variable {
      * Convenience method to generate conditional code if this variable is greater than or
      * equal to another variable or constant.
      *
+     * @param value a {@link Variable} or a constant
      * @param then called to generate the body of the "then" case
      * @param else_ called to generate the body of the "else" case
      */
@@ -365,6 +373,7 @@ public interface Variable {
      * Convenience method to generate conditional code if this variable is greater than another
      * variable or constant.
      *
+     * @param value a {@link Variable} or a constant
      * @param then called to generate the body of the "then" case
      */
     default void ifGt(Object value, Runnable then) {
@@ -378,6 +387,7 @@ public interface Variable {
      * Convenience method to generate conditional code if this variable is greater than another
      * variable or constant.
      *
+     * @param value a {@link Variable} or a constant
      * @param then called to generate the body of the "then" case
      * @param else_ called to generate the body of the "else" case
      */
@@ -405,6 +415,7 @@ public interface Variable {
      * Convenience method to generate conditional code if this variable is less than or equal
      * to another variable or constant.
      *
+     * @param value a {@link Variable} or a constant
      * @param then called to generate the body of the "then" case
      */
     default void ifLe(Object value, Runnable then) {
@@ -418,6 +429,7 @@ public interface Variable {
      * Convenience method to generate conditional code if this variable is less than or equal
      * to another variable or constant.
      *
+     * @param value a {@link Variable} or a constant
      * @param then called to generate the body of the "then" case
      * @param else_ called to generate the body of the "else" case
      */
