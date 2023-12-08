@@ -6146,7 +6146,6 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
                 Type[] paramTypes = new Type[length];
                 for (int i=0; i<paramTypes.length; i++) {
-                    // FIXME: test with null
                     Type type = types == null ? null : mClassMaker.typeFrom(types[i]);
                     paramTypes[i] = addPushOp(type, values[i]);
                 }
