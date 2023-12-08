@@ -44,7 +44,7 @@
  * <li>{@link java.lang.String String} — Fully qualified class name or descriptor: {@code "int"}, {@code "java.lang.String"}, {@code "int[]"}, {@code "I"}, {@code "Ljava/lang/String;"}, {@code "[I"}, etc.
  * <li>{@link ClassMaker} — Specifies the class being made.
  * <li>{@link Variable}, {@link Field}, or {@link FieldMaker} — Specifies the type used by the given {@code Variable} or {@code Field}.
- * <li>{@code null} — Specifies the {@code null} type or a context specific default such as {@code void.class}.
+ * <li>{@code null} — Specifies a context specific default such as {@code void.class}.
  * <li>{@link java.lang.constant.ClassDesc ClassDesc} — Specifies a type descriptor.
  * </ul>
  *

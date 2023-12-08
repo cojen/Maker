@@ -101,18 +101,24 @@ public class TypeTest {
         }
 
         {
-            Type type = Type.from(loader, "null");
-            assertEquals("*null*", type.name());
+            Type type = Type.Null.THE;
+            assertEquals("java.lang.Object", type.name());
             assertEquals("Ljava/lang/Object;", type.descriptor());
             assertFalse(type.isPrimitive());
             assertNull(type.unbox());
             assertEquals(type, type.box());
             assertNull(type.clazz());
+            assertFalse(type.isInterface());
+            assertFalse(type.isArray());
+            assertNull(type.elementType());
+            assertEquals(Type.SM_NULL, type.stackMapCode());
+            assertFalse(type.isAssignableFrom(Type.from(Object.class)));
+        }
 
-            verifyNonObject(type);
-
-            // Find by pseudo descriptor.
-            assertEquals(type, Type.from(loader, ""));
+        try {
+            Type.from(loader, "");
+            fail();
+        } catch (IllegalArgumentException e) {
         }
 
         {
@@ -215,7 +221,7 @@ public class TypeTest {
         Type object = Type.from(Object.class);
         assertFalse(type.isAssignableFrom(object));
         
-        assertEquals(type == Type.Null.THE, object.isAssignableFrom(type));
+        assertFalse(object.isAssignableFrom(type));
     }
 
     @Test
@@ -247,9 +253,24 @@ public class TypeTest {
     @Test
     public void nonTypes() throws Exception {
         ClassLoader loader = getClass().getClassLoader();
-        assertEquals(Type.Null.THE, Type.from(loader, (String) null));
-        assertEquals(Type.Null.THE, Type.from(loader, (Object) null));
-        assertEquals(Type.Null.THE, Type.from((Class) null));
+
+        try {
+            Type.from(loader, (String) null);
+            fail();
+        } catch (NullPointerException e) {
+        }
+
+        try {
+            Type.from(loader, (Object) null);
+            fail();
+        } catch (NullPointerException e) {
+        }
+
+        try {
+            Type.from((Class) null);
+            fail();
+        } catch (NullPointerException e) {
+        }
 
         try {
             Type.from(loader, this);

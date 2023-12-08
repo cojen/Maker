@@ -5,6 +5,7 @@ v2.5.3
 ------
 * Added convenience methods for generating conditional logic.
 * Added a method which can check if the class being made has any unimplemented abstract methods.
+* Disallow null types, which never worked anyhow.
 
 v2.5.2 (2023-11-27)
 ------

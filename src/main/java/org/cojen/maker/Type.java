@@ -104,7 +104,7 @@ abstract class Type {
         } else if (type instanceof String str) {
             return from(loader, str);
         } else if (type == null) {
-            return Null.THE;
+            throw new NullPointerException();
         } else {
             String desc = ConstableSupport.toTypeDescriptor(type);
             if (desc == null) {
@@ -118,9 +118,6 @@ abstract class Type {
      * @param type class name, primitive type, or type descriptor
      */
     static Type from(ClassLoader loader, String type) {
-        if (type == null) {
-            return Null.THE;
-        }
         ConcurrentHashMap<Object, Type> cache = cache(loader);
         Type t = cache.get(type);
         return t != null ? t : cachePut(cache, type, find(loader, type));
@@ -139,7 +136,7 @@ abstract class Type {
         case "double":  case "D": return DOUBLE;
         case "long":    case "J": return LONG;
         case "void":    case "V": return VOID;
-        case "null":    case "":  return Null.THE;
+        case "": throw new IllegalArgumentException();
         }
 
         if (type.endsWith("[]")) {
@@ -182,9 +179,6 @@ abstract class Type {
     }
 
     static Type from(Class type) {
-        if (type == null) {
-            return Null.THE;
-        }
         ConcurrentHashMap<Object, Type> cache = cache(type.getClassLoader());
         Type t = cache.get(type);
         return t != null ? t : cachePut(cache, type, find(type));
@@ -301,14 +295,12 @@ abstract class Type {
     abstract int typeCode();
 
     /**
-     * Returns the type in Java syntax. If not applicable, it starts with an asterisk and is
-     * illegal.
+     * Returns the type in Java syntax.
      */
     abstract String name();
 
     /**
-     * Returns a class file type descriptor. If not applicable, it starts with an asterisk
-     * and is illegal.
+     * Returns a class file type descriptor.
      */
     abstract String descriptor();
 
@@ -1120,13 +1112,30 @@ abstract class Type {
         }
     }
 
-    static final class Null extends Type {
-        static final Null THE = new Null();
-
+    private static abstract class Obj extends Type {
         @Override
-        boolean isPrimitive() {
+        final boolean isPrimitive() {
             return false;
         }
+
+        @Override
+        int stackMapCode() {
+            return SM_OBJECT;
+        }
+
+        @Override
+        final int typeCode() {
+            return T_OBJECT;
+        }
+
+        @Override
+        final Type box() {
+            return this;
+        }
+    }
+
+    static final class Null extends Obj {
+        static final Null THE = new Null();
 
         @Override
         boolean isInterface() {
@@ -1149,23 +1158,13 @@ abstract class Type {
         }
 
         @Override
-        int typeCode() {
-            return T_OBJECT;
-        }
-
-        @Override
         String name() {
-            return "*null*";
+            return Object.class.getName();
         }
 
         @Override
         String descriptor() {
             return Object.class.descriptorString();
-        }
-
-        @Override
-        Type box() {
-            return this;
         }
 
         @Override
@@ -1181,28 +1180,6 @@ abstract class Type {
         @Override
         Class clazz() {
             return null;
-        }
-    }
-
-    private static abstract class Obj extends Type {
-        @Override
-        final boolean isPrimitive() {
-            return false;
-        }
-
-        @Override
-        final int stackMapCode() {
-            return SM_OBJECT;
-        }
-
-        @Override
-        final int typeCode() {
-            return T_OBJECT;
-        }
-
-        @Override
-        final Type box() {
-            return this;
         }
     }
 

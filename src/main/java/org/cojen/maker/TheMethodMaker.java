@@ -581,7 +581,6 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
     @Override
     public LocalVar var(Object type) {
-        requireNonNull(type);
         return new LocalVar(mClassMaker.typeFrom(type));
     }
 
@@ -4518,8 +4517,6 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
         @Override
         public LocalVar instanceOf(Object clazz) {
-            requireNonNull(clazz);
-
             if (!type().isObject()) {
                 throw new IllegalStateException("Not an object type");
             }
@@ -4561,8 +4558,6 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
         @Override
         public LocalVar cast(Object clazz) {
-            requireNonNull(clazz);
-
             final Type fromType = type();
             final Type toType = mClassMaker.typeFrom(clazz);
             final int code = fromType.canConvertTo(toType);
@@ -6151,6 +6146,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
                 Type[] paramTypes = new Type[length];
                 for (int i=0; i<paramTypes.length; i++) {
+                    // FIXME: test with null
                     Type type = types == null ? null : mClassMaker.typeFrom(types[i]);
                     paramTypes[i] = addPushOp(type, values[i]);
                 }
