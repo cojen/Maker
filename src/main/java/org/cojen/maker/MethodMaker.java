@@ -48,6 +48,13 @@ public interface MethodMaker extends Maker {
     }
 
     /**
+     * @hidden
+     */
+    static MethodMaker begin(MethodHandles.Lookup lookup, Object retType, String name) {
+        return begin(lookup, retType, name, Type.NO_ARGS);
+    }
+
+    /**
      * Begin defining a standalone method, defined in the same nest as the lookup class.
      *
      * @param lookup define the method using this lookup object
@@ -320,6 +327,13 @@ public interface MethodMaker extends Maker {
     Variable invoke(String name, Object... values);
 
     /**
+     * @hidden
+     */
+    default Variable invoke(String name) {
+        return invoke(name, Type.NO_ARGS);
+    }
+
+    /**
      * Invoke a super class constructor method on the enclosing object of this method, from
      * within a constructor.
      *
@@ -331,6 +345,13 @@ public interface MethodMaker extends Maker {
     void invokeSuperConstructor(Object... values);
 
     /**
+     * @hidden
+     */
+    default void invokeSuperConstructor() {
+        invokeSuperConstructor(Type.NO_ARGS);
+    }
+
+    /**
      * Invoke a this constructor method on the enclosing object of this method, from within a
      * constructor.
      *
@@ -340,6 +361,13 @@ public interface MethodMaker extends Maker {
      * constructor isn't found
      */
     void invokeThisConstructor(Object... values);
+
+    /**
+     * @hidden
+     */
+    default void invokeThisConstructor() {
+        invokeThisConstructor(Type.NO_ARGS);
+    }
 
     /**
      * Invoke a method via a {@link MethodHandle}. If making a class to be loaded {@link
@@ -355,6 +383,13 @@ public interface MethodMaker extends Maker {
     Variable invoke(MethodHandle handle, Object... values);
 
     /**
+     * @hidden
+     */
+    default Variable invoke(MethodHandle handle) {
+        return invoke(handle, Type.NO_ARGS);
+    }
+
+    /**
      * Allocate a new object. If type is an ordinary object, a matching constructor is
      * invoked. If type is an array, no constructor is invoked, and the given values represent
      * array dimension sizes.
@@ -366,6 +401,13 @@ public interface MethodMaker extends Maker {
      * @throws IllegalStateException if constructor isn't found
      */
     Variable new_(Object type, Object... values);
+
+    /**
+     * @hidden
+     */
+    default Variable new_(Object type) {
+        return new_(type, Type.NO_ARGS);
+    }
 
     /**
      * Define an exception handler here, which catches exceptions between the given labels. Any
@@ -443,6 +485,13 @@ public interface MethodMaker extends Maker {
      * {@code Constable}
      */
     Field access(VarHandle handle, Object... values);
+
+    /**
+     * @hidden
+     */
+    default Field access(VarHandle handle) {
+        return access(handle, Type.NO_ARGS);
+    }
 
     /**
      * Append an instruction which does nothing, which can be useful for debugging.

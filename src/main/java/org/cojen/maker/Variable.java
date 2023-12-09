@@ -780,6 +780,13 @@ public interface Variable {
     Variable invoke(String name, Object... values);
 
     /**
+     * @hidden
+     */
+    default Variable invoke(String name) {
+        return invoke(name, Type.NO_ARGS);
+    }
+
+    /**
      * Invoke a static or instance method on the object referenced by this variable.
      *
      * @param returnType method return type
@@ -792,6 +799,13 @@ public interface Variable {
      * @throws IllegalStateException if method isn't found
      */
     Variable invoke(Object returnType, String name, Object[] types, Object... values);
+
+    /**
+     * @hidden
+     */
+    default Variable invoke(Object returnType, String name, Object[] types) {
+        return invoke(returnType, name, types, Type.NO_ARGS);
+    }
 
     /**
      * Returns a {@link MethodHandle} variable which can invoke a static or instance method on
@@ -809,6 +823,13 @@ public interface Variable {
     Variable methodHandle(Object returnType, String name, Object... types);
 
     /**
+     * @hidden
+     */
+    default Variable methodHandle(Object returnType, String name) {
+        return methodHandle(returnType, name, Type.NO_ARGS);
+    }
+
+    /**
      * Specify a static bootstrap method for dynamically generating methods, as found in the
      * class type of this variable.
      *
@@ -818,6 +839,13 @@ public interface Variable {
      * @see java.lang.invoke
      */
     Bootstrap indy(String name, Object... args);
+
+    /**
+     * @hidden
+     */
+    default Bootstrap indy(String name) {
+        return indy(name, Type.NO_ARGS);
+    }
 
     /**
      * Specify a static bootstrap method for dynamically generating constants, as found in the
@@ -831,6 +859,13 @@ public interface Variable {
      * @see java.lang.invoke
      */
     Bootstrap condy(String name, Object... args);
+
+    /**
+     * @hidden
+     */
+    default Bootstrap condy(String name) {
+        return condy(name, Type.NO_ARGS);
+    }
 
     /**
      * Throw the exception object referred to by this variable.

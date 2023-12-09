@@ -245,6 +245,13 @@ public interface ClassMaker extends Maker {
     MethodMaker addMethod(Object retType, String name, Object... paramTypes);
 
     /**
+     * @hidden
+     */
+    default MethodMaker addMethod(Object retType, String name) {
+        return addMethod(retType, name, Type.NO_ARGS);
+    }
+
+    /**
      * Add a method to this class.
      *
      * @param type defines the return type and parameter types
@@ -259,6 +266,13 @@ public interface ClassMaker extends Maker {
      * @param paramTypes classes or names; can be null if constructor accepts no parameters
      */
     MethodMaker addConstructor(Object... paramTypes);
+
+    /**
+     * @hidden
+     */
+    default MethodMaker addConstructor() {
+        return addConstructor(Type.NO_ARGS);
+    }
 
     /**
      * Add a constructor to this class.

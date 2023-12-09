@@ -89,6 +89,8 @@ abstract class Type {
         FLAG_BRIDGE = 0x40,
         FLAG_VARARGS = 0x80;
 
+    static final Object[] NO_ARGS = new Object[0];
+
     /**
      * Called when making a new class.
      */

@@ -50,4 +50,11 @@ public interface Bootstrap {
      * @throws IllegalStateException if this is a condy bootstrap
      */
     Variable invoke(Object returnType, String name, Object[] types, Object... values);
+
+    /**
+     * @hidden
+     */
+    default Variable invoke(Object returnType, String name, Object[] types) {
+        return invoke(returnType, name, types, Type.NO_ARGS);
+    }
 }

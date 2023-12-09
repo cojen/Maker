@@ -4829,6 +4829,11 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
+        public LocalVar invoke(String name) {
+            return invoke(name, Type.NO_ARGS);
+        }
+
+        @Override
         public LocalVar invoke(Object retType, String name, Object[] types, Object... values) {
             Type returnType = null;
             Type[] paramTypes = null;
@@ -5681,7 +5686,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
             if (mInstance == null) {
                 coordinateTypes = new Type[0];
-                coordinates = new Object[0];
+                coordinates = Type.NO_ARGS;
             } else {
                 coordinateTypes = new Type[] {Type.from(Object.class)};
                 coordinates = new Object[] {mInstance};
