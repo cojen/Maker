@@ -1618,7 +1618,8 @@ loadScripts(document, 'script');</script>
 <dd><code>returnType</code> - method return type</dd>
 <dd><code>name</code> - method name; can be <code>".new"</code> to construct an instance of this variable
  type, and returnType can be null</dd>
-<dd><code>types</code> - method parameter types; can be null to infer from the values</dd>
+<dd><code>types</code> - method parameter types; the entire array or individual elements can be null
+ to infer the actual type from the corresponding value</dd>
 <dd><code>values</code> - <a href="Variable.html" title="interface in org.cojen.maker"><code>Variables</code></a> or constants</dd>
 <dt>Returns:</dt>
 <dd>the result of the method, which is null if void</dd>
