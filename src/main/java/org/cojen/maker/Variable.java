@@ -792,7 +792,8 @@ public interface Variable {
      * @param returnType method return type
      * @param name method name; can be {@code ".new"} to construct an instance of this variable
      * type, and returnType can be null
-     * @param types method parameter types; can be null to infer from the values
+     * @param types method parameter types; the entire array or individual elements can be null
+     * to infer the actual type from the corresponding value
      * @param values {@link Variable Variables} or constants
      * @return the result of the method, which is null if void
      * @throws IllegalArgumentException if not given a variable or a constant

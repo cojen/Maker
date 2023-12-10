@@ -43,7 +43,8 @@ public interface Bootstrap {
      *
      * @param returnType method return type; can be null for void
      * @param name method name
-     * @param types method parameter types; can be null to infer from the values
+     * @param types method parameter types; the entire array or individual elements can be null
+     * to infer the actual type from the corresponding value
      * @param values variables or constants
      * @return the result of the method, which is null if void
      * @throws IllegalArgumentException if not given a variable or a constant

@@ -726,6 +726,26 @@ public class InvokeTest {
     }
 
     @Test
+    public void invokeSpecific4() throws Exception {
+        ClassMaker cm = ClassMaker.begin().public_();
+        MethodMaker mm = cm.addMethod(null, "run").public_().static_();
+
+        var result = mm.var(InvokeTest.class).invoke
+            (String.class, "foo2", new Object[] {long.class, null}, 1, 2);
+        mm.var(Assert.class).invoke("assertEquals", "world12", result);
+
+        try {
+            mm.var(InvokeTest.class).invoke
+                (String.class, "foo2", new Object[] {null, null, null}, 2, 3);
+            fail();
+        } catch (IllegalStateException e) {
+            assertTrue(e.getMessage().startsWith("No matching"));
+        }
+
+        cm.finish().getMethod("run").invoke(null);
+    }
+
+    @Test
     public void invokeSelfStatic() throws Exception {
         ClassMaker cm = ClassMaker.begin().public_();
 

@@ -744,6 +744,22 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                 paramTypes[i] = addPushOp(null, args[i]);
             }
 
+            if (specificParamTypes != null) {
+                // Allow any null types to be inferred from the actual types.
+                final Type[] original = specificParamTypes;
+                for (int i=0; i<specificParamTypes.length; i++) {
+                    if (specificParamTypes[i] == null) {
+                        if (i >= paramTypes.length) {
+                            break;
+                        }
+                        if (specificParamTypes == original) {
+                            specificParamTypes = original.clone();
+                        }
+                        specificParamTypes[i] = paramTypes[i];
+                    }
+                }
+            }
+
             method = type.findMethod(methodName, paramTypes, inherit, staticAllowed,
                                      specificReturnType, specificParamTypes);
         } catch (Throwable e) {
@@ -4845,7 +4861,8 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             if (types != null) {
                 paramTypes = new Type[types.length];
                 for (int i=0; i<types.length; i++) {
-                    paramTypes[i] = mClassMaker.typeFrom(types[i]);
+                    Object type = types[i];
+                    paramTypes[i] = type == null ? null : mClassMaker.typeFrom(type);
                 }
             }
 
