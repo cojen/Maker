@@ -1,7 +1,7 @@
 Changelog
 =========
 
-v2.5.3
+v2.5.3 (2023-12-12)
 ------
 * Added convenience methods for generating conditional logic.
 * Added a method which can check if the class being made has any unimplemented abstract methods.
