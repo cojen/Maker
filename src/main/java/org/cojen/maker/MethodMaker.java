@@ -95,14 +95,24 @@ public interface MethodMaker extends Maker {
         }
 
         var mm = new TheMethodMaker(cm, method) {
+            private boolean mDisallowFinish;
+
             @Override
             public MethodHandle finish() {
+                if (mDisallowFinish) {
+                    throw new IllegalStateException();
+                }
                 MethodHandles.Lookup lookup = mClassMaker.finishHidden();
                 try {
                     return lookup.findStatic(lookup.lookupClass(), mname, mtype);
                 } catch (NoSuchMethodException | IllegalAccessException e) {
                     throw new IllegalStateException(e);
                 }
+            }
+
+            @Override
+            protected void disallowFinish(boolean disallow) {
+                mDisallowFinish = disallow;
             }
         };
 

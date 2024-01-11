@@ -41,6 +41,16 @@ public interface Label {
     Label goto_();
 
     /**
+     * Insert a body of code immediately after this positioned label, and return a new label
+     * which is positioned after the end of the inserted code body.
+     *
+     * @param body called to generate the body of the inserted code
+     * @return a label positioned at the end of the inserted code body
+     * @throws IllegalStateException if label is unpositioned
+     */
+    Label insert(Runnable body);
+
+    /**
      * Returns the {@code MethodMaker} that this label belongs to.
      */
     MethodMaker methodMaker();

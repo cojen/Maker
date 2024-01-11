@@ -396,6 +396,7 @@ public class UsageTest {
             mm2.goto_(new Label() {
                 public Label here() {return this;}
                 public Label goto_() {return this;}
+                public Label insert(Runnable body) {return null;}
                 public MethodMaker methodMaker() {return null;}
             });
             fail();

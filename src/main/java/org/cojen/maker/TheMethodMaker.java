@@ -339,6 +339,12 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         first.doFinish();
     }
 
+    /**
+     * Overridden by the subclass which allows standalone methods to be defined.
+     */
+    protected void disallowFinish(boolean disallow) {
+    }
+
     private static boolean flowsThroughEnd(Op lastOp) {
         if (lastOp instanceof BytecodeOp) {
             if (lastOp instanceof ReturnOp) {
@@ -3169,6 +3175,43 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         public Label goto_() {
             TheMethodMaker.this.goto_(this);
             return this;
+        }
+
+        @Override
+        public Label insert(Runnable body) {
+            final Op next = mNext;
+            final Op last = TheMethodMaker.this.mLastOp;
+
+            if (next == null) {
+                if (last != this) {
+                    // Unpositioned.
+                    throw new IllegalStateException();
+                }
+                // This label is the last operation, and so the body can be run immediately.
+                disallowFinish(true);
+                try {
+                    body.run();
+                    return label().here();
+                } finally {
+                    disallowFinish(false);
+                }
+            }
+
+            assert last != null && last != this;
+
+            // Temporarily position this label at the end.
+            mNext = null;
+            TheMethodMaker.this.mLastOp = this;
+
+            disallowFinish(true);
+            try {
+                body.run();
+                return label().here();
+            } finally {
+                TheMethodMaker.this.mLastOp.mNext = next;
+                TheMethodMaker.this.mLastOp = last;
+                disallowFinish(false);
+            }
         }
 
         @Override

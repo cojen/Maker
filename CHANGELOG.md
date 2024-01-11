@@ -1,6 +1,10 @@
 Changelog
 =========
 
+v2.5.4
+------
+* Added a method to insert code after a label.
+
 v2.5.3 (2023-12-12)
 ------
 * Added convenience methods for generating conditional logic.
