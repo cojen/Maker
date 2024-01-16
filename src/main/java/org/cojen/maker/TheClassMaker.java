@@ -582,14 +582,14 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
 
     @Override
     public Class<?> finish() {
-        String name = name();
+        byte[] bytes = finishBytes(false);
 
         Class clazz;
         if (mLookup == null) {
-            clazz = mInjector.define(mInjectorGroup, name, finishBytes(false));
+            clazz = mInjector.define(mInjectorGroup, name(), bytes);
         } else {
             try {
-                clazz = mLookup.defineClass(finishBytes(false));
+                clazz = mLookup.defineClass(bytes);
             } catch (Exception e) {
                 throw new IllegalStateException(e);
             }
