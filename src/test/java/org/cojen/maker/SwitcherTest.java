@@ -18,6 +18,9 @@ package org.cojen.maker;
 
 import java.lang.reflect.InvocationTargetException;
 
+import java.time.LocalTime;
+import java.time.Month;
+
 import org.junit.*;
 import static org.junit.Assert.*;
 
@@ -61,6 +64,7 @@ public class SwitcherTest {
             mm.param(0).switch_(def, new String[10], new Label[10]);
             fail();
         } catch (NullPointerException e) {
+            assertTrue(e.getMessage().contains("Case cannot be null"));
         }
     }
 
@@ -78,8 +82,18 @@ public class SwitcherTest {
     }
 
     private void basic(String... keys) throws Exception {
-        ClassMaker cm = ClassMaker.begin().public_();
-        MethodMaker mm = cm.addMethod(int.class, "map", String.class).public_().static_();
+        basic((Object[]) keys);
+    }
+
+    private void basic(Object... keys) throws Exception {
+        basic(ClassMaker.begin(), keys);
+    }
+
+    private void basic(ClassMaker cm, Object... keys) throws Exception {
+        cm.public_();
+
+        Class<?> paramType = keys instanceof String[] ? String.class : Object.class;
+        MethodMaker mm = cm.addMethod(int.class, "map", paramType).public_().static_();
 
         Label[] labels = new Label[keys.length];
         for (int i=0; i<labels.length; i++) {
@@ -88,7 +102,11 @@ public class SwitcherTest {
 
         Label notFound = mm.label();
 
-        mm.param(0).switch_(notFound, keys, labels);
+        if (keys instanceof String[] strKeys) {
+            mm.param(0).switch_(notFound, strKeys, labels);
+        } else {
+            mm.param(0).switch_(notFound, keys, labels);
+        }
 
         for (int i=0; i<labels.length; i++) {
             labels[i].here();
@@ -98,7 +116,7 @@ public class SwitcherTest {
         notFound.here();
         mm.return_(-1);
 
-        var m = cm.finish().getMethod("map", String.class);
+        var m = cm.finish().getMethod("map", paramType);
 
         for (int i=0; i<keys.length; i++) {
             assertEquals(i + 100, m.invoke(null, keys[i]));
@@ -149,5 +167,78 @@ public class SwitcherTest {
         assertEquals(0, test.invoke(ctor.newInstance("hello")));
         assertEquals(1, test.invoke(ctor.newInstance("world")));
         assertEquals(-1, test.invoke(ctor.newInstance("xxxxxxxxx")));
+    }
+
+    @Test
+    public void objects() throws Exception {
+        basic(LocalTime.of(1, 1), Month.FEBRUARY);
+        basic(LocalTime.of(1, 1), Month.FEBRUARY, LocalTime.of(3, 3, 3));
+        basic(LocalTime.of(1, 1), LocalTime.of(2, 2, 2));
+        basic(LocalTime.of(1, 1), LocalTime.of(2, 2, 2), this);
+    }
+
+    @Test
+    public void external() throws Exception {
+        String base = getClass().getName() + "_external$$$";
+
+        try {
+            basic(ClassMaker.beginExternal(base + 1), this);
+            fail();
+        } catch (IllegalArgumentException e) {
+            assertTrue(e.getMessage().contains("Unsupported"));
+        }
+
+        basic(ClassMaker.beginExternal(base + 2));
+        basic(ClassMaker.beginExternal(base + 3), Month.JANUARY);
+        basic(ClassMaker.beginExternal(base + 4), Month.JANUARY, Month.FEBRUARY);
+        basic(ClassMaker.beginExternal(base + 5), Month.JANUARY, Month.FEBRUARY, 123L);
+    }
+
+    @Test
+    public void primitive() throws Exception {
+        primitive(123L, Long.MAX_VALUE - 10);
+        primitive(123L, Long.MAX_VALUE - 10, -456L);
+    }
+
+    @Test
+    public void primitiveExternal() throws Exception {
+        String base = getClass().getName() + "_primitiveExternal$$$";
+        primitive(ClassMaker.beginExternal(base + 1), 123L, Long.MAX_VALUE - 10);
+        primitive(ClassMaker.beginExternal(base + 2), 123L, Long.MAX_VALUE - 10, -456L);
+    }
+
+    private void primitive(Long... keys) throws Exception {
+        primitive(ClassMaker.begin(), keys);
+    }
+
+    private void primitive(ClassMaker cm, Long... keys) throws Exception {
+        cm.public_();
+
+        MethodMaker mm = cm.addMethod(int.class, "map", long.class).public_().static_();
+
+        Label[] labels = new Label[keys.length];
+        for (int i=0; i<labels.length; i++) {
+            labels[i] = mm.label();
+        }
+
+        Label notFound = mm.label();
+
+        mm.param(0).switch_(notFound, keys, labels);
+
+        for (int i=0; i<labels.length; i++) {
+            labels[i].here();
+            mm.return_(i + 100);
+        }
+
+        notFound.here();
+        mm.return_(-1);
+
+        var m = cm.finish().getMethod("map", long.class);
+
+        for (int i=0; i<keys.length; i++) {
+            assertEquals(i + 100, m.invoke(null, keys[i]));
+        }
+
+        assertEquals(-1, m.invoke(null, 999L));
     }
 }

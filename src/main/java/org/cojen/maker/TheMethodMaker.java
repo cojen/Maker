@@ -4397,6 +4397,15 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
+        public void switch_(Label defaultLabel, Object[] cases, Label... labels) {
+            if (mClassMaker.allowExactConstants()) {
+                Switcher.switchObject(TheMethodMaker.this, this, defaultLabel, cases, labels);
+            } else {
+                Switcher.switchExternal(TheMethodMaker.this, this, defaultLabel, cases, labels);
+            }
+        }
+
+        @Override
         public LocalVar add(Object value) {
             return addMathOp("add", IADD, this, value);
         }
@@ -5534,7 +5543,12 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     abstract class BaseFieldVar extends OwnedVar implements Field {
         @Override
         public void switch_(Label defaultLabel, String[] cases, Label... labels) {
-            Switcher.switchString(TheMethodMaker.this, get(), defaultLabel, cases, labels);
+            get().switch_(defaultLabel, cases, labels);
+        }
+
+        @Override
+        public void switch_(Label defaultLabel, Object[] cases, Label... labels) {
+            get().switch_(defaultLabel, cases, labels);
         }
 
         @Override
