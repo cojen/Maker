@@ -5533,6 +5533,11 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
     abstract class BaseFieldVar extends OwnedVar implements Field {
         @Override
+        public void switch_(Label defaultLabel, String[] cases, Label... labels) {
+            Switcher.switchString(TheMethodMaker.this, get(), defaultLabel, cases, labels);
+        }
+
+        @Override
         public void inc(Object value) {
             set(add(value));
         }

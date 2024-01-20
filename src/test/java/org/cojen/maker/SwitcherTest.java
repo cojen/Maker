@@ -115,4 +115,39 @@ public class SwitcherTest {
             }
         }
     }
+
+    @Test
+    public void field() throws Exception {
+        ClassMaker cm = ClassMaker.begin().public_();
+
+        cm.addField(String.class, "cond").private_().final_();
+
+        MethodMaker mm = cm.addConstructor(String.class).public_();
+        mm.invokeSuperConstructor();
+        mm.field("cond").set(mm.param(0));
+
+        mm = cm.addMethod(int.class, "test").public_();
+
+        String[] keys = {"hello", "world"};
+        Label[] labels = {mm.label(), mm.label()};
+        Label notFound = mm.label();
+
+        mm.field("cond").switch_(notFound, keys, labels);
+
+        for (int i=0; i<labels.length; i++) {
+            labels[i].here();
+            mm.return_(i);
+        }
+
+        notFound.here();
+        mm.return_(-1);
+
+        Class<?> clazz = cm.finish();
+        var ctor = clazz.getConstructor(String.class);
+        var test = clazz.getMethod("test");
+
+        assertEquals(0, test.invoke(ctor.newInstance("hello")));
+        assertEquals(1, test.invoke(ctor.newInstance("world")));
+        assertEquals(-1, test.invoke(ctor.newInstance("xxxxxxxxx")));
+    }
 }
