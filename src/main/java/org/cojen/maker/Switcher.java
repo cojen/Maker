@@ -16,11 +16,6 @@
 
 package org.cojen.maker;
 
-import java.lang.invoke.CallSite;
-import java.lang.invoke.ConstantCallSite;
-import java.lang.invoke.MethodHandles;
-import java.lang.invoke.MethodType;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Objects;
@@ -29,9 +24,8 @@ import java.util.Objects;
  * Generates more types of switch statements.
  *
  * @author Brian S O'Neill
- * @hidden
  */
-public final class Switcher {
+final class Switcher {
     static void switchString(MethodMaker mm, Variable condition,
                              Label defaultLabel, String[] keys, Label... labels)
     {
@@ -51,61 +45,6 @@ public final class Switcher {
         }
 
         doSwitch(true, mm, condition, defaultLabel, keys, labels);
-    }
-
-    static void switchExternal(MethodMaker mm, Variable condition,
-                               Label defaultLabel, Object[] keys, Label... labels)
-    {
-        checkArgs(keys, labels);
-
-        if (keys.length <= 2) {
-            for (int i=0; i<keys.length; i++) {
-                check(false, condition, keys[i], labels[i]);
-            }
-            defaultLabel.goto_();
-            return;
-        }
-
-        var cases = new int[labels.length];
-        for (int i=0; i<cases.length; i++) {
-            cases[i] = i;
-        }
-        var indy = mm.var(Switcher.class).indy("ordinals", (Object[]) keys);
-        var ordinalVar = indy.invoke(int.class, "_", null, condition);
-        ordinalVar.switch_(defaultLabel, cases, labels);
-    }
-
-    /**
-     * Bootstrap method which makes a method that accepts a single argument and returns a
-     * zero-based ordinal value corresponding to one of the case keys. If none match, -1 is
-     * returned.
-     */
-    public static CallSite ordinals(MethodHandles.Lookup lookup, String name, MethodType type,
-                                    Object... keys)
-    {
-        if (type.returnType() != int.class || type.parameterCount() != 1) {
-            throw new IllegalArgumentException();
-        }
-
-        MethodMaker mm = MethodMaker.begin(lookup, name, type);
-
-        var labels = new Label[keys.length];
-        for (int i=0; i<labels.length; i++) {
-            labels[i] = mm.label();
-        }
-
-        Label defaultLabel = mm.label();
-
-        switchObject(mm, mm.param(0), defaultLabel, keys, labels);
-
-        for (int i=0; i<labels.length; i++) {
-            labels[i].here();
-            mm.return_(i);
-        }
-        defaultLabel.here();
-        mm.return_(-1);
-
-        return new ConstantCallSite(mm.finish());
     }
 
     private static void checkArgs(Object[] keys, Label... labels) {

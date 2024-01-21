@@ -179,19 +179,12 @@ public class SwitcherTest {
 
     @Test
     public void external() throws Exception {
-        String base = getClass().getName() + "_external$$$";
-
         try {
-            basic(ClassMaker.beginExternal(base + 1), this);
+            basic(ClassMaker.beginExternal("Foo"), Month.JANUARY);
             fail();
-        } catch (IllegalArgumentException e) {
-            assertTrue(e.getMessage().contains("Unsupported"));
+        } catch (IllegalStateException e) {
+            assertTrue(e.getMessage().contains("external"));
         }
-
-        basic(ClassMaker.beginExternal(base + 2));
-        basic(ClassMaker.beginExternal(base + 3), Month.JANUARY);
-        basic(ClassMaker.beginExternal(base + 4), Month.JANUARY, Month.FEBRUARY);
-        basic(ClassMaker.beginExternal(base + 5), Month.JANUARY, Month.FEBRUARY, 123L);
     }
 
     @Test
@@ -200,19 +193,8 @@ public class SwitcherTest {
         primitive(123L, Long.MAX_VALUE - 10, -456L);
     }
 
-    @Test
-    public void primitiveExternal() throws Exception {
-        String base = getClass().getName() + "_primitiveExternal$$$";
-        primitive(ClassMaker.beginExternal(base + 1), 123L, Long.MAX_VALUE - 10);
-        primitive(ClassMaker.beginExternal(base + 2), 123L, Long.MAX_VALUE - 10, -456L);
-    }
-
     private void primitive(Long... keys) throws Exception {
-        primitive(ClassMaker.begin(), keys);
-    }
-
-    private void primitive(ClassMaker cm, Long... keys) throws Exception {
-        cm.public_();
+        ClassMaker cm = ClassMaker.begin().public_();
 
         MethodMaker mm = cm.addMethod(int.class, "map", long.class).public_().static_();
 

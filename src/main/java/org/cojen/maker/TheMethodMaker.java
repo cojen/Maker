@@ -4398,11 +4398,10 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
         @Override
         public void switch_(Label defaultLabel, Object[] cases, Label... labels) {
-            if (mClassMaker.allowExactConstants()) {
-                Switcher.switchObject(TheMethodMaker.this, this, defaultLabel, cases, labels);
-            } else {
-                Switcher.switchExternal(TheMethodMaker.this, this, defaultLabel, cases, labels);
+            if (!mClassMaker.allowExactConstants()) {
+                throw new IllegalStateException("Making an external class");
             }
+            Switcher.switchObject(TheMethodMaker.this, this, defaultLabel, cases, labels);
         }
 
         @Override

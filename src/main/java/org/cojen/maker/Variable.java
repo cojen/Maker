@@ -466,11 +466,12 @@ public interface Variable {
 
     /**
      * Generates a switch statement against this non-null variable, of any type. None of the
-     * labels need to be positioned yet. If the class being made is {@link
-     * ClassMaker#beginExternal external}, then the cases must be {@link Constable}.
+     * labels need to be positioned yet.
      *
      * @param defaultLabel required
      * @throws IllegalArgumentException if the number of cases and labels don't match
+     * @throws IllegalStateException if the class being made is {@link ClassMaker#beginExternal
+     * external}
      */
     void switch_(Label defaultLabel, Object[] cases, Label... labels);
 
