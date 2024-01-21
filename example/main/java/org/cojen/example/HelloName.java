@@ -25,8 +25,6 @@ import org.cojen.maker.Label;
 import org.cojen.maker.MethodMaker;
 
 /**
- * Much smaller than the original Cojen example. https://github.com/cojen/Cojen/wiki/Example
- *
  * Based on HelloWorldBuilder from the Apache BCEL project.
  *
  * @author Brian S O'Neill
