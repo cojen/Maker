@@ -1125,12 +1125,17 @@ loadScripts(document, 'script');</script>
  <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>[]&nbsp;cases,
  <a href="Label.html" title="interface in org.cojen.maker">Label</a>...&nbsp;labels)</span></div>
 <div class="block">Generates a switch statement against this non-null variable, of any type. None of the
- labels need to be positioned yet.</div>
+ labels need to be positioned yet. The switch implementation assumes that this variable's
+ type and all the cases have valid <code>hashCode</code> and <code>equals</code> methods defined.
+
+ <p>Any of the cases can be <code>Variable</code> instances, as long as they are constants.
+ Such constants are generally provided by a <a href="#condy(java.lang.String,java.lang.Object...)"><code>condy</code></a> method.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>defaultLabel</code> - required</dd>
 <dt>Throws:</dt>
-<dd><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if the number of cases and labels don't match</dd>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if the number of cases and labels don't match, or if a
+ case type isn't supported</dd>
 <dd><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/IllegalStateException.html" title="class or interface in java.lang" class="external-link">IllegalStateException</a></code> - if the class being made is <a href="ClassMaker.html#beginExternal(java.lang.String)"><code>external</code></a></dd>
 </dl>
 </section>
