@@ -16,9 +16,15 @@
 
 package org.cojen.maker;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
+
+import org.cojen.maker.Variable;
 
 /**
  * Generates more types of switch statements.
@@ -26,6 +32,9 @@ import java.util.Objects;
  * @author Brian S O'Neill
  */
 final class Switcher {
+    // Accessed by tests.
+    static boolean NO_SWITCH_BOOTSTRAPS;
+
     static void switchString(MethodMaker mm, Variable condition,
                              Label defaultLabel, String[] keys, Label... labels)
     {
@@ -33,7 +42,82 @@ final class Switcher {
             throw new IllegalStateException("Not switching on a String type");
         }
 
-        doSwitch(false, mm, condition, defaultLabel, keys, labels);
+        checkArgs(keys, labels);
+
+        doSwitchObject(false, mm, condition, defaultLabel, keys, labels);
+    }
+
+    static void switchEnum(boolean external, MethodMaker mm, Variable condition,
+                           Label defaultLabel, Enum<?>[] keys, Label... labels)
+    {
+        Class<?> type = condition.classType();
+        if (type == null || !type.isEnum()) {
+            throw new IllegalStateException("Not switching on an Enum type");
+        }
+
+        checkArgs(keys, labels);
+
+        if (keys.length == 0) {
+            mm.var(Objects.class).invoke("requireNonNull", condition);
+            defaultLabel.goto_();
+            return;
+        }
+
+        for (Enum<?> key : keys) {
+            if (key.getClass() != type) {
+                throw new IllegalArgumentException("Enum case doesn't match the condition type");
+            }
+        }
+
+        if (NO_SWITCH_BOOTSTRAPS || Runtime.version().feature() < 21) {
+            if (!external) {
+                doSwitchObject(true, mm, condition, defaultLabel, keys, labels);
+                return;
+            }
+
+            Class<?> mapperClass = ordinalMapper(mm, type);
+
+            var ordinalCases = new int[keys.length];
+            for (int i=0; i<ordinalCases.length; i++) {
+                ordinalCases[i] = keys[i].ordinal() + 1;
+            }
+
+            mm.var(mapperClass).field("_").aget(condition.invoke("ordinal"))
+                .switch_(defaultLabel, ordinalCases, labels);
+
+            return;
+        }
+
+        Variable bootstraps;
+        try {
+            bootstraps = mm.var(Class.forName("java.lang.runtime.SwitchBootstraps"));
+        } catch (ClassNotFoundException e) {
+            throw new IllegalStateException(e);
+        }
+
+        var keyNames = new String[keys.length];
+        for (int i=0; i<keys.length; i++) {
+            keyNames[i] = keys[i].name();
+        }
+
+        var cases = new int[1 + labels.length];
+        for (int i=0; i<cases.length; i++) {
+            cases[i] = i - 1;
+        }
+
+        var newLabels = new Label[1 + labels.length];
+        newLabels[0] = mm.label(); // null case
+        System.arraycopy(labels, 0, newLabels, 1, labels.length);
+        labels = newLabels;
+
+        var indexVar = bootstraps.indy
+            ("enumSwitch", (Object[]) keyNames).invoke(int.class, "_", null, condition, 0);
+
+        indexVar.switch_(defaultLabel, cases, labels);
+
+        // Implement the null case.
+        labels[0].here();
+        mm.new_(NullPointerException.class).throw_();
     }
 
     static void switchObject(MethodMaker mm, Variable condition,
@@ -44,7 +128,9 @@ final class Switcher {
             condition = condition.box();
         }
 
-        doSwitch(true, mm, condition, defaultLabel, keys, labels);
+        checkArgs(keys, labels);
+
+        doSwitchObject(true, mm, condition, defaultLabel, keys, labels);
     }
 
     private static void checkArgs(Object[] keys, Label... labels) {
@@ -57,14 +143,16 @@ final class Switcher {
     }
 
     @SuppressWarnings("unchecked")
-    private static void doSwitch(boolean exact, MethodMaker mm, Variable condition,
-                                 Label defaultLabel, Object[] keys, Label... labels)
+    private static void doSwitchObject(boolean exact, MethodMaker mm, Variable condition,
+                                       Label defaultLabel, Object[] keys, Label... labels)
     {
-        checkArgs(keys, labels);
-
         if (keys.length <= 2) {
-            for (int i=0; i<keys.length; i++) {
-                check(exact, condition, keys[i], labels[i]);
+            if (keys.length == 0) {
+                mm.var(Objects.class).invoke("requireNonNull", condition);
+            } else {
+                for (int i=0; i<keys.length; i++) {
+                    check(exact, condition, keys[i], labels[i]);
+                }
             }
             defaultLabel.goto_();
             return;
@@ -128,8 +216,63 @@ final class Switcher {
 
     private static void check(boolean exact, Variable condition, Object key, Label label) {
         if (exact) {
+            if (key instanceof Variable) {
+                throw new IllegalArgumentException("Case isn't a constant");
+            }
             key = condition.methodMaker().var(Object.class).setExact(key);
         }
         condition.invoke("equals", key).ifTrue(label);
+    }
+
+    /**
+     * Returns a class with a static final int[] field named "_" which maps actual runtime
+     * ordinal values to switch ordinals. The first valid switch ordinal is 1.
+     */
+    private static Class<?> ordinalMapper(MethodMaker mm, Class<?> enumType) {
+        var enclosing = (TheClassMaker) mm.classMaker();
+
+        Map<Class<?>, Class<?>> mappers = enclosing.mEnumMappers;
+        if (mappers == null) {
+            enclosing.mEnumMappers = mappers = new HashMap<>();
+        } else {
+            Class<?> mapper = mappers.get(enumType);
+            if (mapper != null) {
+                return mapper;
+            }
+        }
+
+        Enum[] enumValues;
+        try {
+            enumValues = (Enum[]) enumType.getMethod("values").invoke(null);
+        } catch (InvocationTargetException e) {
+            throw new IllegalStateException(e.getCause());
+        } catch (IllegalAccessException | NoSuchMethodException | ClassCastException e) {
+            throw new IllegalStateException(e);
+        }
+
+        ClassMaker cm = mm.addInnerClass(null).private_().static_();
+        cm.addField(int[].class, "_").private_().static_().final_();
+        MethodMaker clinit = cm.addClinit();
+
+        var enumVar = clinit.var(enumType);
+
+        var mapperVar = clinit.new_(int[].class, enumVar.invoke("values").alength());
+        clinit.field("_").set(mapperVar);
+
+        var indexVar = clinit.var(int.class);
+
+        for (int i=0; i<enumValues.length; i++) {
+            Enum e = enumValues[i];
+            Label tryStart = clinit.label().here();
+            indexVar.set(enumVar.field(e.name()).invoke("ordinal"));
+            mapperVar.aset(indexVar, i + 1);
+            clinit.catch_(tryStart, NoSuchFieldError.class, exVar -> {});
+        }
+
+        Class<?> mapper = cm.finish();
+
+        mappers.put(enumType, mapper);
+
+        return mapper;
     }
 }

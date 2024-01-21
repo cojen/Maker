@@ -465,6 +465,17 @@ public interface Variable {
     void switch_(Label defaultLabel, String[] cases, Label... labels);
 
     /**
+     * Generates a switch statement against this non-null {@code Enum} variable. None of the
+     * labels need to be positioned yet.
+     *
+     * @param defaultLabel required
+     * @throws IllegalArgumentException if the number of cases and labels don't match, or if
+     * a case type doesn't match this variable's type
+     * @throws IllegalStateException if this type isn't an Enum
+     */
+    void switch_(Label defaultLabel, Enum<?>[] cases, Label... labels);
+
+    /**
      * Generates a switch statement against this non-null variable, of any type. None of the
      * labels need to be positioned yet.
      *

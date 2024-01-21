@@ -85,6 +85,9 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
     // Maps constants to static final fields. Accessed by TheMethodMaker.
     Map<ConstantPool.Constant, ConstantPool.C_Field> mResolvedConstants;
 
+    // Accessed by Switcher.
+    Map<Class<?>, Class<?>> mEnumMappers;
+
     static TheClassMaker begin(boolean external, String className, boolean explicit,
                                ClassLoader parentLoader, Object key, MethodHandles.Lookup lookup)
     {

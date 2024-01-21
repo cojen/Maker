@@ -4397,6 +4397,12 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
+        public void switch_(Label defaultLabel, Enum<?>[] cases, Label... labels) {
+            Switcher.switchEnum(!mClassMaker.allowExactConstants(),
+                                TheMethodMaker.this, this, defaultLabel, cases, labels);
+        }
+
+        @Override
         public void switch_(Label defaultLabel, Object[] cases, Label... labels) {
             if (!mClassMaker.allowExactConstants()) {
                 throw new IllegalStateException("Making an external class");
@@ -5542,6 +5548,11 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     abstract class BaseFieldVar extends OwnedVar implements Field {
         @Override
         public void switch_(Label defaultLabel, String[] cases, Label... labels) {
+            get().switch_(defaultLabel, cases, labels);
+        }
+
+        @Override
+        public void switch_(Label defaultLabel, Enum<?>[] cases, Label... labels) {
             get().switch_(defaultLabel, cases, labels);
         }
 
