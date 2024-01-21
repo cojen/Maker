@@ -4,8 +4,7 @@ Changelog
 v2.5.4
 ------
 * Added a method to insert code after a label.
-* Added a switch method which supports enum cases.
-* Added a switch method which supports object cases.
+* Added switch methods which support enum and object cases.
 
 v2.5.3 (2023-12-12)
 ------

@@ -16,6 +16,11 @@
 
 package org.cojen.maker;
 
+import java.lang.invoke.CallSite;
+import java.lang.invoke.ConstantCallSite;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
@@ -30,8 +35,9 @@ import org.cojen.maker.Variable;
  * Generates more types of switch statements.
  *
  * @author Brian S O'Neill
+ * @hidden
  */
-final class Switcher {
+public final class Switcher {
     // Accessed by tests.
     static boolean NO_SWITCH_BOOTSTRAPS;
 
@@ -44,7 +50,7 @@ final class Switcher {
 
         checkArgs(keys, labels);
 
-        doSwitchObject(false, mm, condition, defaultLabel, keys, labels);
+        doSwitchObject(false, false, mm, condition, defaultLabel, keys, labels);
     }
 
     static void switchEnum(boolean external, MethodMaker mm, Variable condition,
@@ -71,7 +77,7 @@ final class Switcher {
 
         if (NO_SWITCH_BOOTSTRAPS || Runtime.version().feature() < 21) {
             if (!external) {
-                doSwitchObject(true, mm, condition, defaultLabel, keys, labels);
+                doSwitchObject(true, false, mm, condition, defaultLabel, keys, labels);
                 return;
             }
 
@@ -128,22 +134,29 @@ final class Switcher {
             condition = condition.box();
         }
 
-        checkArgs(keys, labels);
+        boolean hasConstantVars = checkArgs(keys, labels);
 
-        doSwitchObject(true, mm, condition, defaultLabel, keys, labels);
+        doSwitchObject(true, hasConstantVars, mm, condition, defaultLabel, keys, labels);
     }
 
-    private static void checkArgs(Object[] keys, Label... labels) {
+    /**
+     * @return true if any keys are ConstantVars
+     */
+    private static boolean checkArgs(Object[] keys, Label... labels) {
         if (keys.length != labels.length) {
             throw new IllegalArgumentException("Number of cases and labels doesn't match");
         }
+        boolean isConstantVar = false;
         for (Object key : keys) {
             Objects.requireNonNull(key, "Case cannot be null");
+            isConstantVar |= key instanceof TheMethodMaker.ConstantVar;
         }
+        return isConstantVar;
     }
 
     @SuppressWarnings("unchecked")
-    private static void doSwitchObject(boolean exact, MethodMaker mm, Variable condition,
+    private static void doSwitchObject(boolean exact, boolean hasConstantVars,
+                                       MethodMaker mm, Variable condition,
                                        Label defaultLabel, Object[] keys, Label... labels)
     {
         if (keys.length <= 2) {
@@ -155,6 +168,20 @@ final class Switcher {
                 }
             }
             defaultLabel.goto_();
+            return;
+        }
+
+        if (hasConstantVars) {
+            // Cannot immediately calculate the hash codes of the constants if they're
+            // dynamically generated. For this reason, dynamically generate another switch
+            // statement which maps to an ordinal value, and switch on that.
+            var cases = new int[labels.length];
+            for (int i=0; i<cases.length; i++) {
+                cases[i] = i;
+            }
+            var indy = mm.var(Switcher.class).indy("ordinals", (Object[]) keys);
+            var ordinalVar = indy.invoke(int.class, "_", null, condition);
+            ordinalVar.switch_(defaultLabel, cases, labels);
             return;
         }
 
@@ -216,12 +243,51 @@ final class Switcher {
 
     private static void check(boolean exact, Variable condition, Object key, Label label) {
         if (exact) {
+            MethodMaker mm = condition.methodMaker();
             if (key instanceof Variable) {
-                throw new IllegalArgumentException("Case isn't a constant");
+                if (!(key instanceof TheMethodMaker.ConstantVar cv)) {
+                    throw new IllegalArgumentException("Case isn't a constant");
+                }
+                key = ((TheMethodMaker) mm).var(Object.class).setConstant(cv);
+            } else {
+                key = mm.var(Object.class).setExact(key);
             }
-            key = condition.methodMaker().var(Object.class).setExact(key);
         }
+
         condition.invoke("equals", key).ifTrue(label);
+    }
+
+    /**
+     * Bootstrap method which makes a method that accepts a single argument and returns a
+     * zero-based ordinal value corresponding to one of the case keys. If none match, -1 is
+     * returned.
+     */
+    public static CallSite ordinals(MethodHandles.Lookup lookup, String name, MethodType type,
+                                    Object... keys)
+    {
+        if (type.returnType() != int.class || type.parameterCount() != 1) {
+            throw new IllegalArgumentException();
+        }
+
+        MethodMaker mm = MethodMaker.begin(lookup, name, type);
+
+        var labels = new Label[keys.length];
+        for (int i=0; i<labels.length; i++) {
+            labels[i] = mm.label();
+        }
+
+        Label defaultLabel = mm.label();
+
+        switchObject(mm, mm.param(0), defaultLabel, keys, labels);
+
+        for (int i=0; i<labels.length; i++) {
+            labels[i].here();
+            mm.return_(i);
+        }
+        defaultLabel.here();
+        mm.return_(-1);
+
+        return new ConstantCallSite(mm.finish());
     }
 
     /**

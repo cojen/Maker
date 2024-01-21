@@ -477,10 +477,15 @@ public interface Variable {
 
     /**
      * Generates a switch statement against this non-null variable, of any type. None of the
-     * labels need to be positioned yet.
+     * labels need to be positioned yet. The switch implementation assumes that this variable's
+     * type and all the cases have valid {@code hashCode} and {@code equals} methods defined.
+     *
+     * <p>Any of the cases can be {@code Variable} instances, as long as they are constants.
+     * Such constants are generally provided by a {@link #condy condy} method.
      *
      * @param defaultLabel required
-     * @throws IllegalArgumentException if the number of cases and labels don't match
+     * @throws IllegalArgumentException if the number of cases and labels don't match, or if a
+     * case type isn't supported
      * @throws IllegalStateException if the class being made is {@link ClassMaker#beginExternal
      * external}
      */

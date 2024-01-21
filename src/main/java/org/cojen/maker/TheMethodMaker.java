@@ -2729,9 +2729,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
         if (value instanceof Variable) {
             if (value instanceof ConstantVar cv) {
-                if ((c = cv.tryObtain(this)) != null) {
-                    return c;
-                }
+                return cv.obtain(this);
             }
             throw unsupportedConstant(value);
         }
@@ -4144,6 +4142,21 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             return this;
         }
 
+        /**
+         * @throws IllegalArgumentException if the constant isn't defined in the same ClassMaker
+         */
+        Variable setConstant(ConstantVar cv) {
+            Type type = type();
+
+            if (!type.isAssignableFrom(cv.type())) {
+                throw new IllegalStateException("Mismatched type");
+            }
+
+            addStoreConstantOp(new ExplicitConstantOp(cv.obtain(TheMethodMaker.this), type));
+
+            return this;
+        }
+
         abstract void addStoreConstantOp(ExplicitConstantOp op);
 
         @Override
@@ -5391,10 +5404,13 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         /**
-         * @return null if the constant isn't defined in the same ClassMaker.
+         * @throws IllegalArgumentException if the constant isn't defined in the same ClassMaker
          */
-        ConstantPool.Constant tryObtain(TheMethodMaker mm) {
-            return (mm.mClassMaker == TheMethodMaker.this.mClassMaker) ? mConstant : null;
+        ConstantPool.Constant obtain(TheMethodMaker mm) {
+            if (mm.mClassMaker == TheMethodMaker.this.mClassMaker) {
+                return mConstant;
+            }
+            throw new IllegalArgumentException("Unknown constant");
         }
 
         @Override

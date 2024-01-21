@@ -16,12 +16,16 @@
 
 package org.cojen.maker;
 
+import java.lang.invoke.MethodHandles;
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import java.time.DayOfWeek;
 import java.time.LocalTime;
 import java.time.Month;
+
+import java.util.Set;
 
 import org.junit.*;
 import static org.junit.Assert.*;
@@ -410,6 +414,84 @@ public class SwitcherTest {
             assertEquals(300, m.invoke(null, DayOfWeek.FRIDAY));
             assertEquals(301, m.invoke(null, DayOfWeek.MONDAY));
             assertEquals(-1, m.invoke(null, DayOfWeek.SUNDAY));
+        }
+    }
+
+    @Test
+    public void condy() throws Exception {
+        // Test that switch cases can be defined by "condy" constants.
+        condy(0);
+        condy(2);
+        condy(5);
+    }
+
+    private void condy(int numCases) throws Exception {
+        ClassMaker cm = ClassMaker.begin().public_();
+
+        MethodMaker mm = cm.addMethod(int.class, "map", Object.class).public_().static_();
+
+        Bootstrap condy = mm.var(SwitcherTest.class).condy("condyNewSet");
+
+        var keys = new Object[numCases];
+        var labels = new Label[numCases];
+        for (int i=0; i<keys.length; i++) {
+            keys[i] = condy.invoke(Set.class, "value" + i);
+            labels[i] = mm.label();
+        }
+
+        Label notFound = mm.label();
+
+        mm.param(0).switch_(notFound, keys, labels);
+
+        for (int i=0; i<labels.length; i++) {
+            labels[i].here();
+            mm.return_(i + 100);
+        }
+
+        notFound.here();
+        mm.return_(-1);
+
+        var m = cm.finish().getMethod("map", Object.class);
+
+        assertEquals(-1, m.invoke(null, "foo"));
+
+        for (int i=0; i<numCases; i++) {
+            assertEquals(i + 100, m.invoke(null, Set.of("value" + i)));
+        }
+    }
+
+    public static Object condyNewSet(MethodHandles.Lookup lookup, String name, Class<?> type) {
+        return Set.of(name);
+    }
+
+    @Test
+    public void condyInvalid() throws Exception {
+        // Test that a constant in one ClassMaker cannot be used in another.
+        var c1 = ClassMaker.begin().public_().addMethod(null, "test")
+            .var(SwitcherTest.class).condy("condyNewSet").invoke(Set.class, "xxx");
+
+        ClassMaker cm = ClassMaker.begin().public_();
+
+        MethodMaker mm = cm.addMethod(int.class, "map", Object.class).public_().static_();
+
+        try {
+            Object[] keys = {"hello", c1};
+            Label[] labels = {mm.label(), mm.label()};
+            Label notFound = mm.label();
+            mm.param(0).switch_(notFound, keys, labels);
+            fail();
+        } catch (IllegalArgumentException e) {
+            assertTrue(e.getMessage().contains("Unknown constant"));
+        }
+
+        try {
+            Object[] keys = {"hello", c1, "world"};
+            Label[] labels = {mm.label(), mm.label(), mm.label()};
+            Label notFound = mm.label();
+            mm.param(0).switch_(notFound, keys, labels);
+            fail();
+        } catch (IllegalArgumentException e) {
+            assertTrue(e.getMessage().contains("Unknown constant"));
         }
     }
 }
