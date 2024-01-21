@@ -57,7 +57,7 @@ public interface Variable {
 
     /**
      * Define a signature for this named variable, which is a string for supporting generic
-     * types. The components can be strings or types (class, ClassMaker, etc), which are
+     * types. The components can be strings or types (class, ClassMaker, etc.), which are
      * concatenated into a single string. Consult the JVM specification for the signature
      * syntax.
      *

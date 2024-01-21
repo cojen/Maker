@@ -6116,7 +6116,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         void adjustPushCount(int amt) {
             mHandleVar.adjustPushCount(amt);
             for (Object coordinate : mCoordinates) {
-                TheMethodMaker.this.adjustPushCount(coordinate, amt);
+                TheMethodMaker.adjustPushCount(coordinate, amt);
             }
         }
 

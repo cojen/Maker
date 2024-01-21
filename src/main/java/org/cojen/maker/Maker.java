@@ -66,7 +66,7 @@ public interface Maker {
 
     /**
      * Define a signature for this member, which is a string for supporting generic types.
-     * The components can be strings or types (class, ClassMaker, etc), which are concatenated
+     * The components can be strings or types (class, ClassMaker, etc.), which are concatenated
      * into a single string. Consult the JVM specification for the signature syntax.
      *
      * @throws IllegalArgumentException if given an unsupported component
