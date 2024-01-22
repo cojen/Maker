@@ -4404,6 +4404,11 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             addSwitchOp(defaultLab, cases, labs);
         }
 
+        // Note: When defining new kinds of switch methods, be sure to define overrides in the
+        // BaseFieldVar class, to ensure that the switch is acting upon a stable local variable
+        // instead of a field. This prevents problems caused by the field value changing while
+        // the switch implementation examines it multiple times.
+
         @Override
         public void switch_(Label defaultLabel, String[] cases, Label... labels) {
             Switcher.switchString(TheMethodMaker.this, this, defaultLabel, cases, labels);
