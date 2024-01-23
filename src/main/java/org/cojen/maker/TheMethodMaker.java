@@ -268,7 +268,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         mStack = null;
 
         if (mThisVar instanceof InitThisVar && mThisVar.smCode() == SM_UNINIT_THIS) {
-            throw new IllegalStateException("Super or this constructor never invoked");
+            throw new IllegalStateException("Super or this constructor is never invoked");
         }
 
         if (flowsThroughEnd(lastAppendedOp)) {
@@ -958,7 +958,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     private LocalVar doNew(Type type, Object[] values, Type[] specificParamTypes) {
         if (type.isArray()) {
             if (values == null || values.length == 0) {
-                throw new IllegalArgumentException("At least one dimension required");
+                throw new IllegalArgumentException("At least one dimension is required");
             }
 
             int dims = type.dimensions();
@@ -2790,7 +2790,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         final Type primType = varType.unbox();
 
         if (primType == null) {
-            throw new IllegalStateException("Cannot '" + name + "' to a non-numeric type");
+            throw new IllegalStateException("Cannot '" + name + "' against a non-numeric type");
         }
 
         if (op != INEG && value == null) {
@@ -2820,7 +2820,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             op += 3;
             break;
         default:
-            throw new IllegalStateException("Cannot '" + name + "' to a non-numeric type");
+            throw new IllegalStateException("Cannot '" + name + "' against a non-numeric type");
         }
 
         addPushOp(primType, var);
@@ -2853,7 +2853,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         final Type primType = varType.unbox();
 
         if (primType == null) {
-            throw new IllegalStateException("Cannot '" + name + "' to a non-numeric type");
+            throw new IllegalStateException("Cannot '" + name + "' against a non-numeric type");
         }
 
         if (value == null) {
@@ -2884,7 +2884,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             op += 1;
             break;
         case T_FLOAT: case T_DOUBLE:
-            throw new IllegalStateException("Cannot '" + name + "' to a non-integer type");
+            throw new IllegalStateException("Cannot '" + name + "' against a non-integer type");
         case T_BOOLEAN: {
             switch (op) {
             case IAND: case IOR: case IXOR:
@@ -2893,7 +2893,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             // fallthrough
         }
         default:
-            throw new IllegalStateException("Cannot '" + name + "' to a non-numeric type");
+            throw new IllegalStateException("Cannot '" + name + "' against a non-numeric type");
         }
 
         addPushOp(primType, var);

@@ -87,7 +87,7 @@ class ClassInjector extends ClassLoader {
             // Replace duplicate name definition with a better exception.
             try {
                 loadClass(name);
-                throw new IllegalStateException("Class already defined: " + name);
+                throw new IllegalStateException("Class is already defined: " + name);
             } catch (ClassNotFoundException e2) {
             }
             throw e;
