@@ -3,6 +3,7 @@ Changelog
 
 v2.5.4
 ------
+* Switching on a string field now acts upon a stable local variable copy.
 * Added a method to insert code after a label.
 * Added switch methods which support enum and object cases.
 
