@@ -236,6 +236,8 @@ class ClassInjector extends ClassLoader {
     class Group extends ClassLoader {
         private volatile MethodHandles.Lookup mLookup;
 
+        private volatile WeakCache<String, Class<?>> mInstalled;
+
         // Accessed by ConstantsRegistry.
         Map<Class, Object> mConstants;
 
@@ -259,18 +261,52 @@ class ClassInjector extends ClassLoader {
             return lookup;
         }
 
-        @Override
-        public Class<?> loadClass(String name) throws ClassNotFoundException {
-            return ClassInjector.this.loadClass(name);
+        boolean installClass(Class<?> clazz) {
+            WeakCache<String, Class<?>> installed = mInstalled;
+
+            if (installed == null) {
+                synchronized (this) {
+                    installed = mInstalled;
+                    if (installed == null) {
+                        mInstalled = installed = new WeakCache<>();
+                    }
+                }
+            }
+
+            String name = clazz.getName();
+
+            synchronized (installed) {
+                Class<?> existing = installed.put(name, clazz);
+                if (existing == null) {
+                    return true;
+                }
+                if (existing == clazz) {
+                    return false;
+                }
+                installed.put(name, existing); // restore the original entry
+                throw new IllegalStateException();
+            }
         }
 
         @Override
         protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
-            return ClassInjector.this.loadClass(name);
+            Class<?> clazz = tryFindInstalled(name);
+            return clazz == null ? ClassInjector.this.loadClass(name) : clazz;
         }
 
         private Class<?> tryFindClass(String name) {
-            return findLoadedClass(name);
+            Class<?> clazz = tryFindInstalled(name);
+            return clazz == null ? findLoadedClass(name) : clazz;
+        }
+
+        private Class<?> tryFindInstalled(String name) {
+            WeakCache<String, Class<?>> installed = mInstalled;
+            if (installed == null) {
+                return null;
+            }
+            synchronized (installed) {
+                return installed.get(name);
+            }
         }
 
         private Class<?> define(String name, byte[] b) {

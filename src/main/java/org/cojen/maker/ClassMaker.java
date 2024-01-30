@@ -340,6 +340,21 @@ public interface ClassMaker extends Maker {
     ClassLoader classLoader();
 
     /**
+     * Directly install a dependent class into the class loader used by the finished class.
+     * This is necessary when the given class cannot be found by the normal hierarchical class
+     * loading technique.
+     *
+     * <p>Note: When installed, the given class is held by a weak reference, to facilitate
+     * unloading. If the installed class can be unloaded before finishing the new class, a
+     * {@link java.lang.ref.Reference#reachabilityFence reachability fence} might be required.
+     *
+     * @return true if installed, or else false if the class was already installed
+     * @throws IllegalStateException if this maker was begun with a lookup object, or if the
+     * class loader already refers to a different class with the same name
+     */
+    boolean installClass(Class<?> clazz);
+
+    /**
      * Returns the set of methods which would need to be implemented by this class in order for
      * it to be non-abstract. Each method in the set is represented by a simple signature.
      *

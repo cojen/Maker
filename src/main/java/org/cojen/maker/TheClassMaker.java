@@ -532,6 +532,14 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
     }
 
     @Override
+    public boolean installClass(Class<?> clazz) {
+        if (mLookup != null) {
+            throw new IllegalStateException();
+        }
+        return mInjectorGroup.installClass(clazz);
+    }
+
+    @Override
     public Set<String> unimplementedMethods() {
         Set<String> unimplemented = null;
         var methodSet = new HashSet<Type.Method>();

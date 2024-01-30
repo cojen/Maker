@@ -1,6 +1,10 @@
 Changelog
 =========
 
+v2.5.5
+------
+* Added a feature to directly install classes into the class loader used by generated classes.
+
 v2.5.4 (2024-01-24)
 ------
 * Switching on a string field now acts upon a stable local variable copy.
