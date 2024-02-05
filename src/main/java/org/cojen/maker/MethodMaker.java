@@ -133,6 +133,7 @@ public interface MethodMaker extends Maker {
     /**
      * Returns the name of this method.
      */
+    @Override
     String name();
 
     /**

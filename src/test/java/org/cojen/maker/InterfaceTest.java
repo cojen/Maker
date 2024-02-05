@@ -44,6 +44,8 @@ public class InterfaceTest {
             mm.return_(mm.invoke("test1", mm.param(0)).add(1));
 
             iface = cm.finish();
+
+            assertEquals(cm.name(), iface.getName());
         }
 
         ClassMaker cm = ClassMaker.begin().public_().implement(iface);

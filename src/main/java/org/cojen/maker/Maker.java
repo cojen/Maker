@@ -23,6 +23,11 @@ package org.cojen.maker;
  */
 public interface Maker {
     /**
+     * Returns the name of the item being made.
+     */
+    String name();
+
+    /**
      * Switch this item to be public.
      *
      * @return this

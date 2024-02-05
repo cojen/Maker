@@ -126,6 +126,13 @@ public interface ClassMaker extends Maker {
     ClassMaker another(String className);
 
     /**
+     * Returns the tentative name of the class being made. If {@link #finishHidden
+     * finishHidden} is called, then the actual class name will differ.
+     */
+    @Override
+    String name();
+
+    /**
      * Switch this class to be public. Classes are package-private by default.
      *
      * @return this

@@ -106,6 +106,8 @@ public class HiddenTest {
         mm.return_(mm.param(0).add(2));
 
         cHidden = cm.finishHidden().lookupClass();
+
+        assertNotEquals(cm.name(), cHidden.getName());
     }
 
     private static Class<?> cHidden;

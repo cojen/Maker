@@ -48,6 +48,8 @@ public class ExternalTest {
             cm = cm.another(name);
         }
 
+        assertEquals(name, cm.name());
+
         cm.public_().addConstructor().public_();
 
         MethodMaker mm = cm.addMethod(String.class, "test").public_();

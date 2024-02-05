@@ -40,6 +40,9 @@ public class ExplicitTest {
         ClassMaker cm1 = ClassMaker.beginExplicit("org.cojen.maker.E1", null, null);
         ClassMaker cm2 = ClassMaker.beginExplicit("org.cojen.maker.E1", null, null);
 
+        assertEquals("org.cojen.maker.E1", cm1.name());
+        assertEquals("org.cojen.maker.E1", cm2.name());
+
         assertEquals("org.cojen.maker.E1", cm1.finish().getName());
 
         ClassMaker cm3 = ClassMaker.beginExplicit("org.cojen.maker.E1", null, null);
