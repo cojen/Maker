@@ -153,8 +153,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                 }
                 doReturn();
             } else if (mLastOp == null) {
-                throw new IllegalStateException
-                    ("End reached without returning: " + mMethod.returnType().name());
+                throw finishFail("End reached without returning: " + mMethod.returnType().name());
             }
         }
 
@@ -179,7 +178,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             opCount = flow.mOpCount;
             maxLocals = flow.nextSlot();
             if (maxLocals >= 65536) {
-                throw new IllegalStateException("Too many local variables");
+                throw finishFail("Too many local variables");
             }
         }
 
@@ -189,8 +188,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             while (it.hasNext()) {
                 Handler h = it.next();
                 if (!h.mEndLab.isPositioned()) {
-                    throw new IllegalStateException
-                        ("Unpositioned exception handler end label in method: " + name());
+                    throw finishFail("Unpositioned exception handler end label");
                 }
                 if (!h.mHandlerLab.mVisited) {
                     it.remove();
@@ -241,8 +239,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             }
 
             if (mUnpositionedLabels != 0) {
-                throw new IllegalStateException("Unpositioned labels in method: " + 
-                                                name() + ": " + mUnpositionedLabels);
+                throw finishFail("Unpositioned labels in method: " + mUnpositionedLabels);
             }
 
             if (mFinished >= 0) {
@@ -268,12 +265,11 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         mStack = null;
 
         if (mThisVar instanceof InitThisVar && mThisVar.smCode() == SM_UNINIT_THIS) {
-            throw new IllegalStateException("Super or this constructor is never invoked");
+            throw finishFail("Super or this constructor is never invoked");
         }
 
         if (flowsThroughEnd(lastAppendedOp)) {
-            throw new IllegalStateException
-                ("End reached without returning: " + mMethod.returnType().name());
+            throw finishFail("End reached without returning");
         }
 
         var codeAttr = new Attribute.Code
@@ -303,6 +299,10 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         addAttribute(codeAttr);
 
         mFinished = 1;
+    }
+
+    private IllegalStateException finishFail(String message) {
+        throw new IllegalStateException(message + " (in \"" + name() + "\" method)");
     }
 
     /**

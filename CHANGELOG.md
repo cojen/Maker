@@ -5,6 +5,7 @@ v2.5.5
 ------
 * Added a feature to directly install classes into the class loader used by generated classes.
 * Added a method to obtain the ClassMaker name.
+* Improved exception messages when a method cannot be finished.
 
 v2.5.4 (2024-01-24)
 ------
