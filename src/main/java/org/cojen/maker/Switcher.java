@@ -157,12 +157,9 @@ public final class Switcher {
                                        Label defaultLabel, Object[] keys, Label... labels)
     {
         if (keys.length <= 2) {
-            if (keys.length == 0) {
-                mm.var(Objects.class).invoke("requireNonNull", condition);
-            } else {
-                for (int i=0; i<keys.length; i++) {
-                    check(exact, condition, keys[i], labels[i]);
-                }
+            mm.var(Objects.class).invoke("requireNonNull", condition);
+            for (int i=0; i<keys.length; i++) {
+                check(exact, condition, keys[i], labels[i]);
             }
             defaultLabel.goto_();
             return;
@@ -239,19 +236,22 @@ public final class Switcher {
     }
 
     private static void check(boolean exact, Variable condition, Object key, Label label) {
-        if (exact) {
-            MethodMaker mm = condition.methodMaker();
-            if (key instanceof Variable) {
-                if (!(key instanceof TheMethodMaker.ConstantVar cv)) {
-                    throw new IllegalArgumentException("Case isn't a constant");
-                }
-                key = ((TheMethodMaker) mm).var(Object.class).setConstant(cv);
-            } else {
-                key = mm.var(Object.class).setExact(key);
+        MethodMaker mm = condition.methodMaker();
+
+        Variable keyVar;
+
+        if (!exact) {
+            keyVar = mm.var(key.getClass()).set(key);
+        } else if (key instanceof Variable) {
+            if (!(key instanceof TheMethodMaker.ConstantVar cv)) {
+                throw new IllegalArgumentException("Case isn't a constant");
             }
+            keyVar = ((TheMethodMaker) mm).var(Object.class).setConstant(cv);
+        } else {
+            keyVar = mm.var(Object.class).setExact(key);
         }
 
-        condition.invoke("equals", key).ifTrue(label);
+        keyVar.invoke("equals", condition).ifTrue(label);
     }
 
     /**
