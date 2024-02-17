@@ -302,7 +302,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     }
 
     private IllegalStateException finishFail(String message) {
-        throw new IllegalStateException(message + " (in \"" + name() + "\" method)");
+        throw new IllegalStateException(message + " (method: \"" + name() + "\")");
     }
 
     /**
