@@ -184,7 +184,12 @@ loadScripts(document, 'script');</script>
 <h3>insert</h3>
 <div class="member-signature"><span class="return-type"><a href="Label.html" title="interface in org.cojen.maker">Label</a></span>&nbsp;<span class="element-name">insert</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Runnable.html" title="class or interface in java.lang" class="external-link">Runnable</a>&nbsp;body)</span></div>
 <div class="block">Insert a body of code immediately after this positioned label, and return a new label
- which is positioned after the end of the inserted code body.</div>
+ which is positioned after the end of the inserted code body.
+
+ <p>If the label is positioned within a block of code which has already been guarded by a
+ <a href="MethodMaker.html#finally_(org.cojen.maker.Label,java.lang.Runnable)"><code>finally</code></a> handler, the inserted code won't be fully guarded.
+ If it branches out of the guarded range or if it returns from the method, the handler
+ won't run. If the code throws an exception, the handler will still run.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>body</code> - called to generate the body of the inserted code</dd>

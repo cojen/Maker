@@ -44,6 +44,11 @@ public interface Label {
      * Insert a body of code immediately after this positioned label, and return a new label
      * which is positioned after the end of the inserted code body.
      *
+     * <p>If the label is positioned within a block of code which has already been guarded by a
+     * {@link MethodMaker#finally_ finally} handler, the inserted code won't be fully guarded.
+     * If it branches out of the guarded range or if it returns from the method, the handler
+     * won't run. If the code throws an exception, the handler will still run.
+     *
      * @param body called to generate the body of the inserted code
      * @return a label positioned at the end of the inserted code body
      * @throws IllegalStateException if label is unpositioned
