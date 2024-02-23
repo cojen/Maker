@@ -145,6 +145,7 @@ public class ExceptionTest {
             fail();
         } catch (IllegalStateException e) {
             assertTrue(e.getMessage().contains("handler"));
+            assertTrue(e.getMessage().contains("run"));
         }
     }
 

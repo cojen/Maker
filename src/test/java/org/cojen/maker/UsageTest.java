@@ -252,6 +252,7 @@ public class UsageTest {
             fail();
         } catch (IllegalStateException e) {
             check(e, "Code limit");
+            check(e, "test");
         }
     }
 

@@ -315,6 +315,7 @@ public class TypeTest {
             fail();
         } catch (IllegalStateException e) {
             assertTrue(e.getMessage().startsWith("Unsupported"));
+            assertTrue(e.getMessage().contains("test"));
         }
 
         cm = ClassMaker.begin().public_();

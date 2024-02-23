@@ -1785,8 +1785,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             tiny: {
                 switch (var.mType.stackMapCode()) {
                 default:
-                    throw new IllegalStateException
-                        ("Unsupported variable type: " + var.mType.name());
+                    throw finishFail("Unsupported variable type: " + var.mType.name());
                 case SM_INT:
                     if (slot <= 3) {
                         op = ILOAD_0;
@@ -1937,7 +1936,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         tiny: {
             switch (var.mType.stackMapCode()) {
             default:
-                throw new IllegalStateException("Unsupported variable type: " + var.mType.name());
+                throw finishFail("Unsupported variable type: " + var.mType.name());
             case SM_INT:
                 if (slot <= 3) {
                     op = ISTORE_0;
@@ -1999,7 +1998,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         if (stackPop > 0) {
             int newSize = mStackSize - stackPop;
             if (newSize < 0) {
-                throw new IllegalStateException("Stack is empty");
+                throw finishFail("Stack is empty");
             }
             mStackSize = newSize;
         }
@@ -2038,7 +2037,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         int newLen = Math.max(mCode.length + require, mCode.length << 1);
         newLen = Math.min(newLen, MAX_CODE_LENGTH);
         if (newLen <= mCode.length) {
-            throw new IllegalStateException("Code limit reached");
+            throw finishFail("Code limit reached");
         }
         mCode = Arrays.copyOf(mCode, newLen);
     }
@@ -3039,7 +3038,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                         break;
                     }
                     if (next instanceof HandlerLab) {
-                        throw new IllegalStateException("Code flows into an exception handler");
+                        throw finishFail("Code flows into an exception handler");
                     }
 
                     if (mRemoved == op) {
@@ -3465,7 +3464,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         void appendTo(TheMethodMaker m) {
             int newSize = m.mStackSize - 1;
             if (newSize < 0) {
-                throw new IllegalStateException("Stack is empty");
+                throw finishFail("Stack is empty");
             }
             m.mStackSize = newSize;
             super.appendTo(m);
@@ -5492,7 +5491,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
         void ready() {
             if (mSmCode != SM_UNINIT_THIS) {
-                throw new IllegalStateException("Super or this constructor invoked multiple times");
+                throw finishFail("Super or this constructor invoked multiple times");
             }
             mSmCode = super.smCode();
         }
