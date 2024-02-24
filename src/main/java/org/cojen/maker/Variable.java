@@ -114,6 +114,7 @@ public interface Variable {
      * @return this variable
      * @throws IllegalStateException if this variable cannot be modified, or if it's not
      * compatible with the value type
+     * @see ClassMaker#beginExternal
      */
     Variable setExact(Object value);
 
