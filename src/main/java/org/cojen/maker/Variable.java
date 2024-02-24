@@ -113,8 +113,8 @@ public interface Variable {
      * @param value exact object instance to assign
      * @return this variable
      * @throws IllegalStateException if this variable cannot be modified, or if it's not
-     * compatible with the value type
-     * @see ClassMaker#beginExternal
+     * compatible with the value type, or if the class being made is {@link
+     * ClassMaker#beginExternal external}
      */
     Variable setExact(Object value);
 
