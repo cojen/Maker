@@ -5844,9 +5844,6 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
         @Override
         void push() {
-            ConstantPool.C_Field fieldRef = mFieldRef;
-            Type.Field field = fieldRef.mField;
-
             byte op;
             int stackPop;
             if (mInstance == null) {
@@ -5858,7 +5855,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                 stackPop = 1;
             }
 
-            addOp(new FieldOp(op, stackPop, fieldRef));
+            addOp(new FieldOp(op, stackPop, mFieldRef));
         }
 
         @Override
@@ -5882,9 +5879,6 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         private void addFinishStoreFieldOp() {
-            ConstantPool.C_Field fieldRef = mFieldRef;
-            Type.Field field = fieldRef.mField;
-
             byte op;
             int stackPop;
             if (mInstance == null) {
@@ -5895,7 +5889,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                 stackPop = 2;
             }
 
-            addOp(new FieldOp(op, stackPop, fieldRef));
+            addOp(new FieldOp(op, stackPop, mFieldRef));
         }
 
         @Override

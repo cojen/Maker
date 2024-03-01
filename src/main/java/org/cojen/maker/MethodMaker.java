@@ -36,9 +36,9 @@ public interface MethodMaker extends Maker {
      * Begin defining a standalone method, defined in the same nest as the lookup class.
      *
      * @param lookup define the method using this lookup object
-     * @param retType a class or name; can be null if method returns void
+     * @param retType a class or name; can be null if the method returns void
      * @param name method name; use null or "_" if unnamed
-     * @param paramTypes classes or names; can be null if method accepts no parameters
+     * @param paramTypes classes or names; can be null if the method accepts no parameters
      * @throws IllegalArgumentException if a type is unsupported
      * @see #finish
      */
@@ -304,7 +304,7 @@ public interface MethodMaker extends Maker {
     /**
      * Generates a return void statement.
      *
-     * @throws IllegalStateException if method cannot return void
+     * @throws IllegalStateException if this method cannot return void
      */
     void return_();
 
@@ -313,7 +313,7 @@ public interface MethodMaker extends Maker {
      *
      * @param value {@link Variable} or constant
      * @throws IllegalArgumentException if the value isn't a variable or a supported constant
-     * @throws IllegalStateException if method must return void
+     * @throws IllegalStateException if this method must return void
      */
     void return_(Object value);
 
@@ -321,7 +321,7 @@ public interface MethodMaker extends Maker {
      * Access a static or instance field in the enclosing object of this method.
      *
      * @param name field name
-     * @throws IllegalStateException if field isn't found
+     * @throws IllegalStateException if the field isn't found
      */
     Field field(String name);
 
@@ -333,7 +333,7 @@ public interface MethodMaker extends Maker {
      * @param values {@link Variable Variables} or constants
      * @return the result of the method, which is null if void
      * @throws IllegalArgumentException if a value isn't a variable or a supported constant
-     * @throws IllegalStateException if method isn't found
+     * @throws IllegalStateException if the method isn't found
      * @see Variable#invoke Variable.invoke
      */
     Variable invoke(String name, Object... values);
@@ -346,8 +346,8 @@ public interface MethodMaker extends Maker {
     }
 
     /**
-     * Invoke a super class constructor method on the enclosing object of this method, from
-     * within a constructor.
+     * Invoke a {@code super} class constructor method on the enclosing object of this method,
+     * from within a constructor.
      *
      * @param values {@link Variable Variables} or constants
      * @throws IllegalArgumentException if a value isn't a variable or a supported constant
@@ -364,8 +364,8 @@ public interface MethodMaker extends Maker {
     }
 
     /**
-     * Invoke a this constructor method on the enclosing object of this method, from within a
-     * constructor.
+     * Invoke a {@code this} constructor method on the enclosing object of this method, from
+     * within a constructor.
      *
      * @param values {@link Variable Variables} or constants
      * @throws IllegalArgumentException if a value isn't a variable or a supported constant
@@ -402,8 +402,8 @@ public interface MethodMaker extends Maker {
     }
 
     /**
-     * Allocate a new object. If type is an ordinary object, a matching constructor is
-     * invoked. If type is an array, no constructor is invoked, and the given values represent
+     * Allocate a new object. If type is an ordinary object, a matching constructor is invoked.
+     * If type is an array, then no constructor is invoked, and the given values represent
      * array dimension sizes.
      *
      * @param type class name or {@link Class} instance
@@ -411,7 +411,7 @@ public interface MethodMaker extends Maker {
      * @return the new object
      * @throws IllegalArgumentException if the type is unsupported, or if a value isn't a
      * variable or a supported constant
-     * @throws IllegalStateException if constructor isn't found
+     * @throws IllegalStateException if the constructor isn't found
      */
     Variable new_(Object type, Object... values);
 

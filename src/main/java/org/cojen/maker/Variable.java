@@ -808,7 +808,7 @@ public interface Variable {
      * Access a static or instance field from the object referred to by this variable.
      *
      * @param name field name
-     * @throws IllegalStateException if field isn't found
+     * @throws IllegalStateException if the field isn't found
      */
     Field field(String name);
 
@@ -819,7 +819,7 @@ public interface Variable {
      * @param values {@link Variable Variables} or constants
      * @return the result of the method, which is null if void
      * @throws IllegalArgumentException if a value isn't a variable or a supported constant
-     * @throws IllegalStateException if method isn't found
+     * @throws IllegalStateException if the method isn't found
      */
     Variable invoke(String name, Object... values);
 
@@ -842,7 +842,7 @@ public interface Variable {
      * @return the result of the method, which is null if void
      * @throws IllegalArgumentException if a type is unsupported, or if a value isn't a
      * variable or a supported constant
-     * @throws IllegalStateException if method isn't found
+     * @throws IllegalStateException if the method isn't found
      */
     Variable invoke(Object returnType, String name, Object[] types, Object... values);
 
@@ -864,7 +864,7 @@ public interface Variable {
      * type, and returnType can be null
      * @param types method parameter types; can be null if none
      * @throws IllegalArgumentException if a type is unsupported
-     * @throws IllegalStateException if method isn't found
+     * @throws IllegalStateException if the method isn't found
      */
     Variable methodHandle(Object returnType, String name, Object... types);
 
