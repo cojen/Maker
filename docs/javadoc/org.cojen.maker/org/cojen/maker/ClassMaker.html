@@ -622,6 +622,7 @@ extends <a href="Maker.html" title="interface in org.cojen.maker">Maker</a></spa
 <dt>Returns:</dt>
 <dd>this</dd>
 <dt>Throws:</dt>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if the type is unsupported</dd>
 <dd><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/IllegalStateException.html" title="class or interface in java.lang" class="external-link">IllegalStateException</a></code> - if already assigned</dd>
 </dl>
 </section>
@@ -637,6 +638,8 @@ extends <a href="Maker.html" title="interface in org.cojen.maker">Maker</a></spa
 <dd><code>iface</code> - non-null type, specified by a Class or a String, etc.</dd>
 <dt>Returns:</dt>
 <dd>this</dd>
+<dt>Throws:</dt>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if the type is unsupported</dd>
 </dl>
 </section>
 </li>
@@ -666,6 +669,8 @@ extends <a href="Maker.html" title="interface in org.cojen.maker">Maker</a></spa
 <dd><code>subclass</code> - non-null type, specified by a Class or a String, etc.</dd>
 <dt>Returns:</dt>
 <dd>this</dd>
+<dt>Throws:</dt>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if the type is unsupported</dd>
 </dl>
 </section>
 </li>
@@ -679,6 +684,7 @@ extends <a href="Maker.html" title="interface in org.cojen.maker">Maker</a></spa
 <dt>Parameters:</dt>
 <dd><code>type</code> - a class or name</dd>
 <dt>Throws:</dt>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if the type is unsupported</dd>
 <dd><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/IllegalStateException.html" title="class or interface in java.lang" class="external-link">IllegalStateException</a></code> - if field is already defined</dd>
 </dl>
 </section>
@@ -694,6 +700,8 @@ extends <a href="Maker.html" title="interface in org.cojen.maker">Maker</a></spa
 <dt>Parameters:</dt>
 <dd><code>retType</code> - a class or name; can be null if method returns void</dd>
 <dd><code>paramTypes</code> - classes or names; can be null if method accepts no parameters</dd>
+<dt>Throws:</dt>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if a type is unsupported</dd>
 </dl>
 </section>
 </li>
@@ -717,6 +725,8 @@ extends <a href="Maker.html" title="interface in org.cojen.maker">Maker</a></spa
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>paramTypes</code> - classes or names; can be null if constructor accepts no parameters</dd>
+<dt>Throws:</dt>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if a type is unsupported</dd>
 </dl>
 </section>
 </li>

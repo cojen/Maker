@@ -156,7 +156,7 @@ loadScripts(document, 'script');</script>
 <dt>Returns:</dt>
 <dd>the constant value, or the result of the method, which is null if void</dd>
 <dt>Throws:</dt>
-<dd><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if not given a variable or a constant</dd>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if the type is unsupported</dd>
 </dl>
 </section>
 </li>
@@ -178,7 +178,8 @@ loadScripts(document, 'script');</script>
 <dt>Returns:</dt>
 <dd>the result of the method, which is null if void</dd>
 <dt>Throws:</dt>
-<dd><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if not given a variable or a constant</dd>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if a type is unsupported, or if a value isn't a
+ variable or a supported constant</dd>
 <dd><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/IllegalStateException.html" title="class or interface in java.lang" class="external-link">IllegalStateException</a></code> - if this is a condy bootstrap</dd>
 </dl>
 </section>

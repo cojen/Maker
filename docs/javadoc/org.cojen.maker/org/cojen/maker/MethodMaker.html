@@ -387,6 +387,8 @@ extends <a href="Maker.html" title="interface in org.cojen.maker">Maker</a></spa
 <dd><code>retType</code> - a class or name; can be null if method returns void</dd>
 <dd><code>name</code> - method name; use null or "_" if unnamed</dd>
 <dd><code>paramTypes</code> - classes or names; can be null if method accepts no parameters</dd>
+<dt>Throws:</dt>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if a type is unsupported</dd>
 <dt>See Also:</dt>
 <dd>
 <ul class="tag-list">
@@ -727,7 +729,7 @@ extends <a href="Maker.html" title="interface in org.cojen.maker">Maker</a></spa
 <dt>Parameters:</dt>
 <dd><code>value</code> - <a href="Variable.html" title="interface in org.cojen.maker"><code>Variable</code></a> or constant</dd>
 <dt>Throws:</dt>
-<dd><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if not given a variable or a constant</dd>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if the value isn't a variable or a supported constant</dd>
 <dd><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/IllegalStateException.html" title="class or interface in java.lang" class="external-link">IllegalStateException</a></code> - if method must return void</dd>
 </dl>
 </section>
@@ -759,7 +761,7 @@ extends <a href="Maker.html" title="interface in org.cojen.maker">Maker</a></spa
 <dt>Returns:</dt>
 <dd>the result of the method, which is null if void</dd>
 <dt>Throws:</dt>
-<dd><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if not given a variable or a constant</dd>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if a value isn't a variable or a supported constant</dd>
 <dd><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/IllegalStateException.html" title="class or interface in java.lang" class="external-link">IllegalStateException</a></code> - if method isn't found</dd>
 <dt>See Also:</dt>
 <dd>
@@ -780,7 +782,7 @@ extends <a href="Maker.html" title="interface in org.cojen.maker">Maker</a></spa
 <dt>Parameters:</dt>
 <dd><code>values</code> - <a href="Variable.html" title="interface in org.cojen.maker"><code>Variables</code></a> or constants</dd>
 <dt>Throws:</dt>
-<dd><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if not given a variable or a constant</dd>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if a value isn't a variable or a supported constant</dd>
 <dd><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/IllegalStateException.html" title="class or interface in java.lang" class="external-link">IllegalStateException</a></code> - if not defining a constructor, or if a matching
  constructor isn't found</dd>
 </dl>
@@ -796,7 +798,7 @@ extends <a href="Maker.html" title="interface in org.cojen.maker">Maker</a></spa
 <dt>Parameters:</dt>
 <dd><code>values</code> - <a href="Variable.html" title="interface in org.cojen.maker"><code>Variables</code></a> or constants</dd>
 <dt>Throws:</dt>
-<dd><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if not given a variable or a constant</dd>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if a value isn't a variable or a supported constant</dd>
 <dd><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/IllegalStateException.html" title="class or interface in java.lang" class="external-link">IllegalStateException</a></code> - if not defining a constructor, or if a matching
  constructor isn't found</dd>
 </dl>
@@ -815,7 +817,7 @@ extends <a href="Maker.html" title="interface in org.cojen.maker">Maker</a></spa
 <dt>Returns:</dt>
 <dd>the result of the method, which is null if void</dd>
 <dt>Throws:</dt>
-<dd><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if not given a variable or a constant</dd>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if a value isn't a variable or a supported constant</dd>
 <dd><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/IllegalStateException.html" title="class or interface in java.lang" class="external-link">IllegalStateException</a></code> - if defining an external class and the handle isn't truly
  <code>Constable</code></dd>
 </dl>
@@ -836,7 +838,8 @@ extends <a href="Maker.html" title="interface in org.cojen.maker">Maker</a></spa
 <dt>Returns:</dt>
 <dd>the new object</dd>
 <dt>Throws:</dt>
-<dd><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if the type is unsupported</dd>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if the type is unsupported, or if a value isn't a
+ variable or a supported constant</dd>
 <dd><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/IllegalStateException.html" title="class or interface in java.lang" class="external-link">IllegalStateException</a></code> - if constructor isn't found</dd>
 </dl>
 </section>
@@ -855,6 +858,7 @@ extends <a href="Maker.html" title="interface in org.cojen.maker">Maker</a></spa
 <dt>Returns:</dt>
 <dd>a variable which references the exception instance</dd>
 <dt>Throws:</dt>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if the type is unsupported</dd>
 <dd><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/IllegalStateException.html" title="class or interface in java.lang" class="external-link">IllegalStateException</a></code> - if start is unpositioned</dd>
 </dl>
 </section>
@@ -875,7 +879,7 @@ extends <a href="Maker.html" title="interface in org.cojen.maker">Maker</a></spa
 <dt>Returns:</dt>
 <dd>a variable which references the exception instance</dd>
 <dt>Throws:</dt>
-<dd><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if no types are given</dd>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if a type is unsupported, or if no types are given</dd>
 <dd><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/IllegalStateException.html" title="class or interface in java.lang" class="external-link">IllegalStateException</a></code> - if start is unpositioned</dd>
 </dl>
 </section>
@@ -893,6 +897,7 @@ extends <a href="Maker.html" title="interface in org.cojen.maker">Maker</a></spa
 <dd><code>type</code> - exception type to catch; pass null to catch anything</dd>
 <dd><code>handler</code> - receives a variable which references the exception instance</dd>
 <dt>Throws:</dt>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if the type is unsupported</dd>
 <dd><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/IllegalStateException.html" title="class or interface in java.lang" class="external-link">IllegalStateException</a></code> - if start is unpositioned</dd>
 </dl>
 </section>
@@ -925,7 +930,7 @@ extends <a href="Maker.html" title="interface in org.cojen.maker">Maker</a></spa
 <dt>Returns:</dt>
 <dd>the result in a new <code>String</code> variable</dd>
 <dt>Throws:</dt>
-<dd><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if not given a variable or a constant</dd>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if a value isn't a variable or a supported constant</dd>
 </dl>
 </section>
 </li>
@@ -950,8 +955,8 @@ extends <a href="Maker.html" title="interface in org.cojen.maker">Maker</a></spa
 <dt>Returns:</dt>
 <dd>a pseudo field which accesses the variable</dd>
 <dt>Throws:</dt>
-<dd><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if not given a variable or a constant, or if the number
- of values doesn't match the number of coordinates</dd>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if a value isn't a variable or a supported constant, or
+ if the number of values doesn't match the number of coordinates</dd>
 <dd><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/IllegalStateException.html" title="class or interface in java.lang" class="external-link">IllegalStateException</a></code> - if defining an external class and the handle isn't truly
  <code>Constable</code></dd>
 </dl>
