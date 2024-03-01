@@ -291,7 +291,7 @@ public interface ClassMaker extends Maker {
      * Add a constructor to this class.
      *
      * @param type defines the parameter types
-     * @throws IllegalArgumentException if return type isn't void
+     * @throws IllegalArgumentException if the return type isn't void
      */
     default MethodMaker addConstructor(MethodType type) {
         if (type.returnType() != void.class) {
@@ -340,10 +340,10 @@ public interface ClassMaker extends Maker {
     ClassMaker sourceFile(String fileName);
 
     /**
-     * Returns an opaque type object which represents this class as an array.
+     * Returns an opaque type object which represents the class being made as an array.
      *
      * @param dimensions must be at least 1
-     * @throws IllegalArgumentException if dimensions is out of bounds
+     * @throws IllegalArgumentException if the given dimensions is less than 1 or greater than 255
      */
     Object arrayType(int dimensions);
 

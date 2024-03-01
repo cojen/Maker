@@ -27,7 +27,7 @@ public interface Label {
      * Sets the position of the label at the location of the next code instruction.
      *
      * @return this label
-     * @throws IllegalStateException if label is already positioned
+     * @throws IllegalStateException if this label is already positioned
      */
     Label here();
 
@@ -51,7 +51,7 @@ public interface Label {
      *
      * @param body called to generate the body of the inserted code
      * @return a label positioned at the end of the inserted code body
-     * @throws IllegalStateException if label is unpositioned
+     * @throws IllegalStateException if this label is unpositioned
      */
     Label insert(Runnable body);
 

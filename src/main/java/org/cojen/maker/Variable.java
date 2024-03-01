@@ -463,7 +463,7 @@ public interface Variable {
      *
      * @param defaultLabel required
      * @throws IllegalArgumentException if the number of cases and labels don't match
-     * @throws IllegalStateException if this type cannot be automatically cast to an int
+     * @throws IllegalStateException if this variable cannot be automatically cast to an int
      */
     void switch_(Label defaultLabel, int[] cases, Label... labels);
 
@@ -473,7 +473,7 @@ public interface Variable {
      *
      * @param defaultLabel required
      * @throws IllegalArgumentException if the number of cases and labels don't match
-     * @throws IllegalStateException if this type isn't a String
+     * @throws IllegalStateException if this variable isn't a String
      */
     void switch_(Label defaultLabel, String[] cases, Label... labels);
 
@@ -484,7 +484,7 @@ public interface Variable {
      * @param defaultLabel required
      * @throws IllegalArgumentException if the number of cases and labels don't match, or if
      * a case type doesn't match this variable's type
-     * @throws IllegalStateException if this type isn't an Enum
+     * @throws IllegalStateException if this variable isn't an Enum
      */
     void switch_(Label defaultLabel, Enum<?>[] cases, Label... labels);
 
@@ -510,7 +510,7 @@ public interface Variable {
      *
      * @param value a {@link Variable} or a constant
      * @throws IllegalArgumentException if the value isn't a variable or a supported constant
-     * @throws IllegalStateException if this variable doesn't support the operation, or if
+     * @throws IllegalStateException if this variable doesn't support the operation, or if the
      * value is incompatible
      */
     void inc(Object value);
@@ -522,7 +522,7 @@ public interface Variable {
      * @param value a {@link Variable} or a constant
      * @return the result in a new variable, with the same type as this one
      * @throws IllegalArgumentException if the value isn't a variable or a supported constant
-     * @throws IllegalStateException if this variable doesn't support the operation, or if
+     * @throws IllegalStateException if this variable doesn't support the operation, or if the
      * value is incompatible
      */
     Variable add(Object value);
@@ -534,7 +534,7 @@ public interface Variable {
      * @param value a {@link Variable} or a constant
      * @return the result in a new variable, with the same type as this one
      * @throws IllegalArgumentException if the value isn't a variable or a supported constant
-     * @throws IllegalStateException if this variable doesn't support the operation, or if
+     * @throws IllegalStateException if this variable doesn't support the operation, or if the
      * value is incompatible
      */
     Variable sub(Object value);
@@ -546,7 +546,7 @@ public interface Variable {
      * @param value a {@link Variable} or a constant
      * @return the result in a new variable, with the same type as this one
      * @throws IllegalArgumentException if the value isn't a variable or a supported constant
-     * @throws IllegalStateException if this variable doesn't support the operation, or if
+     * @throws IllegalStateException if this variable doesn't support the operation, or if the
      * value is incompatible
      */
     Variable mul(Object value);
@@ -558,7 +558,7 @@ public interface Variable {
      * @param value a {@link Variable} or a constant
      * @return the result in a new variable, with the same type as this one
      * @throws IllegalArgumentException if the value isn't a variable or a supported constant
-     * @throws IllegalStateException if this variable doesn't support the operation, or if
+     * @throws IllegalStateException if this variable doesn't support the operation, or if the
      * value is incompatible
      */
     Variable div(Object value);
@@ -570,7 +570,7 @@ public interface Variable {
      * @param value a {@link Variable} or a constant
      * @return the result in a new variable, with the same type as this one
      * @throws IllegalArgumentException if the value isn't a variable or a supported constant
-     * @throws IllegalStateException if this variable doesn't support the operation, or if
+     * @throws IllegalStateException if this variable doesn't support the operation, or if the
      * value is incompatible
      */
     Variable rem(Object value);
@@ -676,7 +676,7 @@ public interface Variable {
      * @param value a {@link Variable} or a constant
      * @return the result in a new variable, with the same type as this one
      * @throws IllegalArgumentException if the value isn't a variable or a supported constant
-     * @throws IllegalStateException if this variable doesn't support the operation, or if
+     * @throws IllegalStateException if this variable doesn't support the operation, or if the
      * value is incompatible
      */
     Variable and(Object value);
@@ -688,7 +688,7 @@ public interface Variable {
      * @param value a {@link Variable} or a constant
      * @return the result in a new variable, with the same type as this one
      * @throws IllegalArgumentException if the value isn't a variable or a supported constant
-     * @throws IllegalStateException if this variable doesn't support the operation, or if
+     * @throws IllegalStateException if this variable doesn't support the operation, or if the
      * value is incompatible
      */
     Variable or(Object value);
@@ -700,7 +700,7 @@ public interface Variable {
      * @param value a {@link Variable} or a constant
      * @return the result in a new variable, with the same type as this one
      * @throws IllegalArgumentException if the value isn't a variable or a supported constant
-     * @throws IllegalStateException if this variable doesn't support the operation, or if
+     * @throws IllegalStateException if this variable doesn't support the operation, or if the
      * value is incompatible
      */
     Variable xor(Object value);
@@ -712,7 +712,7 @@ public interface Variable {
      * @param value a {@link Variable} or a constant
      * @return the result in a new variable, with the same type as this one
      * @throws IllegalArgumentException if the value isn't a variable or a supported constant
-     * @throws IllegalStateException if this variable doesn't support the operation, or if
+     * @throws IllegalStateException if this variable doesn't support the operation, or if the
      * value is incompatible
      */
     Variable shl(Object value);
@@ -724,7 +724,7 @@ public interface Variable {
      * @param value a {@link Variable} or a constant
      * @return the result in a new variable, with the same type as this one
      * @throws IllegalArgumentException if the value isn't a variable or a supported constant
-     * @throws IllegalStateException if this variable doesn't support the operation, or if
+     * @throws IllegalStateException if this variable doesn't support the operation, or if the
      * value is incompatible
      */
     Variable shr(Object value);
@@ -736,7 +736,7 @@ public interface Variable {
      * @param value a {@link Variable} or a constant
      * @return the result in a new variable, with the same type as this one
      * @throws IllegalArgumentException if the value isn't a variable or a supported constant
-     * @throws IllegalStateException if this variable doesn't support the operation, or if
+     * @throws IllegalStateException if this variable doesn't support the operation, or if the
      * value is incompatible
      */
     Variable ushr(Object value);
@@ -778,7 +778,7 @@ public interface Variable {
      * Access the length of this array.
      *
      * @return the result in a new int variable
-     * @throws IllegalStateException if not an array type
+     * @throws IllegalStateException if this variable isn't an array type
      */
     Variable alength();
 
@@ -788,7 +788,7 @@ public interface Variable {
      * @param index a {@link Variable} or a constant
      * @return the result in a new variable
      * @throws IllegalArgumentException if the index isn't a variable or a supported constant
-     * @throws IllegalStateException if not an array type
+     * @throws IllegalStateException if this variable isn't an array type
      */
     Variable aget(Object index);
 
@@ -799,7 +799,7 @@ public interface Variable {
      * @param value a {@link Variable} or a constant
      * @throws IllegalArgumentException if the index or value isn't a variable or a supported
      * constant
-     * @throws IllegalStateException if not an array type, or if type doesn't match
+     * @throws IllegalStateException if this variable isn't an array type
      * @see #set
      */
     void aset(Object index, Object value);
@@ -918,7 +918,7 @@ public interface Variable {
     /**
      * Throw the exception object referred to by this variable.
      *
-     * @throws IllegalStateException if not an exception type
+     * @throws IllegalStateException if this variable isn't an exception type
      */
     void throw_();
 

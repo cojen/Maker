@@ -221,6 +221,7 @@ public interface MethodMaker extends Maker {
      *
      * @param type a class or class name
      * @return this
+     * @throws IllegalArgumentException if the type is unsupported
      */
     MethodMaker throws_(Object type);
 
@@ -346,8 +347,8 @@ public interface MethodMaker extends Maker {
     }
 
     /**
-     * Invoke a {@code super} class constructor method on the enclosing object of this method,
-     * from within a constructor.
+     * Invoke a {@code super} constructor method on the enclosing object of this method, from
+     * within a constructor.
      *
      * @param values {@link Variable Variables} or constants
      * @throws IllegalArgumentException if a value isn't a variable or a supported constant
@@ -402,9 +403,9 @@ public interface MethodMaker extends Maker {
     }
 
     /**
-     * Allocate a new object. If type is an ordinary object, a matching constructor is invoked.
-     * If type is an array, then no constructor is invoked, and the given values represent
-     * array dimension sizes.
+     * Allocate a new object. If the type is an ordinary object, a matching constructor is
+     * invoked. If the type is an array, then no constructor is invoked, and the given values
+     * represent array dimension sizes.
      *
      * @param type class name or {@link Class} instance
      * @param values {@link Variable Variables} or constants
@@ -429,7 +430,7 @@ public interface MethodMaker extends Maker {
      * @param type exception type to catch; pass null to catch anything
      * @return a variable which references the exception instance
      * @throws IllegalArgumentException if the type is unsupported
-     * @throws IllegalStateException if start is unpositioned
+     * @throws IllegalStateException if the start label is unpositioned
      */
     Variable catch_(Label tryStart, Label tryEnd, Object type);
 
@@ -442,7 +443,7 @@ public interface MethodMaker extends Maker {
      * @param types exception types to catch; pass null to catch anything
      * @return a variable which references the exception instance
      * @throws IllegalArgumentException if a type is unsupported, or if no types are given
-     * @throws IllegalStateException if start is unpositioned
+     * @throws IllegalStateException if the start label is unpositioned
      */
     Variable catch_(Label tryStart, Label tryEnd, Object... types);
 
@@ -453,7 +454,7 @@ public interface MethodMaker extends Maker {
      * @param type exception type to catch; pass null to catch anything
      * @param handler receives a variable which references the exception instance
      * @throws IllegalArgumentException if the type is unsupported
-     * @throws IllegalStateException if start is unpositioned
+     * @throws IllegalStateException if the start label is unpositioned
      */
     void catch_(Label tryStart, Object type, Consumer<Variable> handler);
 
@@ -462,7 +463,7 @@ public interface MethodMaker extends Maker {
      * start label and here.
      *
      * @param handler called for each exit path to generate handler code
-     * @throws IllegalStateException if start is unpositioned
+     * @throws IllegalStateException if the start label is unpositioned
      */
     void finally_(Label tryStart, Runnable handler);
 
@@ -523,7 +524,7 @@ public interface MethodMaker extends Maker {
      *
      * @param className simple class name; pass null to use default
      * @throws IllegalArgumentException if not given a simple class name
-     * @throws IllegalStateException if enclosing class or method is finished
+     * @throws IllegalStateException if the enclosing class or method is finished
      */
     ClassMaker addInnerClass(String className);
 
