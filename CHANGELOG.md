@@ -1,7 +1,7 @@
 Changelog
 =========
 
-v2.5.5
+v2.5.5 (2024-03-01)
 ------
 * Added a feature to directly install classes into the class loader used by generated classes.
 * Added a method to obtain the ClassMaker name.
