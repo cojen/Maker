@@ -208,6 +208,7 @@ public interface ClassMaker extends Maker {
      *
      * @param superClass non-null type, specified by a Class or a String, etc.
      * @return this
+     * @throws IllegalArgumentException if the type is unsupported
      * @throws IllegalStateException if already assigned
      */
     ClassMaker extend(Object superClass);
@@ -217,6 +218,7 @@ public interface ClassMaker extends Maker {
      * times to implement more interfaces.
      *
      * @param iface non-null type, specified by a Class or a String, etc.
+     * @throws IllegalArgumentException if the type is unsupported
      * @return this
      */
     ClassMaker implement(Object iface);
@@ -232,6 +234,7 @@ public interface ClassMaker extends Maker {
      *
      * @param subclass non-null type, specified by a Class or a String, etc.
      * @return this
+     * @throws IllegalArgumentException if the type is unsupported
      */
     ClassMaker permitSubclass(Object subclass);
 
@@ -239,6 +242,7 @@ public interface ClassMaker extends Maker {
      * Add a field to the class.
      *
      * @param type a class or name
+     * @throws IllegalArgumentException if the type is unsupported
      * @throws IllegalStateException if field is already defined
      */
     FieldMaker addField(Object type, String name);
@@ -248,6 +252,7 @@ public interface ClassMaker extends Maker {
      *
      * @param retType a class or name; can be null if method returns void
      * @param paramTypes classes or names; can be null if method accepts no parameters
+     * @throws IllegalArgumentException if a type is unsupported
      */
     MethodMaker addMethod(Object retType, String name, Object... paramTypes);
 
@@ -271,6 +276,7 @@ public interface ClassMaker extends Maker {
      * Add a constructor to this class.
      *
      * @param paramTypes classes or names; can be null if constructor accepts no parameters
+     * @throws IllegalArgumentException if a type is unsupported
      */
     MethodMaker addConstructor(Object... paramTypes);
 

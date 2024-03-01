@@ -39,6 +39,7 @@ public interface MethodMaker extends Maker {
      * @param retType a class or name; can be null if method returns void
      * @param name method name; use null or "_" if unnamed
      * @param paramTypes classes or names; can be null if method accepts no parameters
+     * @throws IllegalArgumentException if a type is unsupported
      * @see #finish
      */
     static MethodMaker begin(MethodHandles.Lookup lookup,
@@ -311,7 +312,7 @@ public interface MethodMaker extends Maker {
      * Generates a statement which returns a variable or a constant.
      *
      * @param value {@link Variable} or constant
-     * @throws IllegalArgumentException if not given a variable or a constant
+     * @throws IllegalArgumentException if the value isn't a variable or a supported constant
      * @throws IllegalStateException if method must return void
      */
     void return_(Object value);
@@ -331,7 +332,7 @@ public interface MethodMaker extends Maker {
      * enclosing class
      * @param values {@link Variable Variables} or constants
      * @return the result of the method, which is null if void
-     * @throws IllegalArgumentException if not given a variable or a constant
+     * @throws IllegalArgumentException if a value isn't a variable or a supported constant
      * @throws IllegalStateException if method isn't found
      * @see Variable#invoke Variable.invoke
      */
@@ -349,7 +350,7 @@ public interface MethodMaker extends Maker {
      * within a constructor.
      *
      * @param values {@link Variable Variables} or constants
-     * @throws IllegalArgumentException if not given a variable or a constant
+     * @throws IllegalArgumentException if a value isn't a variable or a supported constant
      * @throws IllegalStateException if not defining a constructor, or if a matching
      * constructor isn't found
      */
@@ -367,7 +368,7 @@ public interface MethodMaker extends Maker {
      * constructor.
      *
      * @param values {@link Variable Variables} or constants
-     * @throws IllegalArgumentException if not given a variable or a constant
+     * @throws IllegalArgumentException if a value isn't a variable or a supported constant
      * @throws IllegalStateException if not defining a constructor, or if a matching
      * constructor isn't found
      */
@@ -387,7 +388,7 @@ public interface MethodMaker extends Maker {
      * @param handle runtime method handle
      * @param values {@link Variable Variables} or constants
      * @return the result of the method, which is null if void
-     * @throws IllegalArgumentException if not given a variable or a constant
+     * @throws IllegalArgumentException if a value isn't a variable or a supported constant
      * @throws IllegalStateException if defining an external class and the handle isn't truly
      * {@code Constable}
      */
@@ -408,7 +409,8 @@ public interface MethodMaker extends Maker {
      * @param type class name or {@link Class} instance
      * @param values {@link Variable Variables} or constants
      * @return the new object
-     * @throws IllegalArgumentException if the type is unsupported
+     * @throws IllegalArgumentException if the type is unsupported, or if a value isn't a
+     * variable or a supported constant
      * @throws IllegalStateException if constructor isn't found
      */
     Variable new_(Object type, Object... values);
@@ -426,6 +428,7 @@ public interface MethodMaker extends Maker {
      *
      * @param type exception type to catch; pass null to catch anything
      * @return a variable which references the exception instance
+     * @throws IllegalArgumentException if the type is unsupported
      * @throws IllegalStateException if start is unpositioned
      */
     Variable catch_(Label tryStart, Label tryEnd, Object type);
@@ -438,7 +441,7 @@ public interface MethodMaker extends Maker {
      *
      * @param types exception types to catch; pass null to catch anything
      * @return a variable which references the exception instance
-     * @throws IllegalArgumentException if no types are given
+     * @throws IllegalArgumentException if a type is unsupported, or if no types are given
      * @throws IllegalStateException if start is unpositioned
      */
     Variable catch_(Label tryStart, Label tryEnd, Object... types);
@@ -449,6 +452,7 @@ public interface MethodMaker extends Maker {
      *
      * @param type exception type to catch; pass null to catch anything
      * @param handler receives a variable which references the exception instance
+     * @throws IllegalArgumentException if the type is unsupported
      * @throws IllegalStateException if start is unpositioned
      */
     void catch_(Label tryStart, Object type, Consumer<Variable> handler);
@@ -469,7 +473,7 @@ public interface MethodMaker extends Maker {
      *
      * @param values {@link Variable Variables} or constants
      * @return the result in a new {@code String} variable
-     * @throws IllegalArgumentException if not given a variable or a constant
+     * @throws IllegalArgumentException if a value isn't a variable or a supported constant
      */
     Variable concat(Object... values);
 
@@ -490,8 +494,8 @@ public interface MethodMaker extends Maker {
      * @param handle runtime variable handle
      * @param values {@link Variable Variables} or constants for each coordinate
      * @return a pseudo field which accesses the variable
-     * @throws IllegalArgumentException if not given a variable or a constant, or if the number
-     * of values doesn't match the number of coordinates
+     * @throws IllegalArgumentException if a value isn't a variable or a supported constant, or
+     * if the number of values doesn't match the number of coordinates
      * @throws IllegalStateException if defining an external class and the handle isn't truly
      * {@code Constable}
      */

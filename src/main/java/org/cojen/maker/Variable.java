@@ -98,7 +98,7 @@ public interface Variable {
      *
      * @param value a {@link Variable} or a constant
      * @return this variable
-     * @throws IllegalArgumentException if not given a variable or a constant
+     * @throws IllegalArgumentException if the value isn't a variable or a supported constant
      * @throws IllegalStateException if this variable cannot be modified, or if it's not
      * compatible with the value type
      */
@@ -198,7 +198,7 @@ public interface Variable {
      * doesn't need to be positioned yet.
      *
      * @param value a {@link Variable} or a constant
-     * @throws IllegalArgumentException if not given a variable or a constant
+     * @throws IllegalArgumentException if the value isn't a variable or a supported constant
      */
     void ifEq(Object value, Label label);
 
@@ -208,6 +208,7 @@ public interface Variable {
      *
      * @param value a {@link Variable} or a constant
      * @param then called to generate the body of the "then" case
+     * @throws IllegalArgumentException if the value isn't a variable or a supported constant
      */
     default void ifEq(Object value, Runnable then) {
         Label endLabel = methodMaker().label();
@@ -223,6 +224,7 @@ public interface Variable {
      * @param value a {@link Variable} or a constant
      * @param then called to generate the body of the "then" case
      * @param else_ called to generate the body of the "else" case
+     * @throws IllegalArgumentException if the value isn't a variable or a supported constant
      */
     default void ifEq(Object value, Runnable then, Runnable else_) {
         MethodMaker mm = methodMaker();
@@ -240,7 +242,7 @@ public interface Variable {
      * label doesn't need to be positioned yet.
      *
      * @param value a {@link Variable} or a constant
-     * @throws IllegalArgumentException if not given a variable or a constant
+     * @throws IllegalArgumentException if the value isn't a variable or a supported constant
      */
     void ifNe(Object value, Label label);
 
@@ -250,6 +252,7 @@ public interface Variable {
      *
      * @param value a {@link Variable} or a constant
      * @param then called to generate the body of the "then" case
+     * @throws IllegalArgumentException if the value isn't a variable or a supported constant
      */
     default void ifNe(Object value, Runnable then) {
         Label endLabel = methodMaker().label();
@@ -265,6 +268,7 @@ public interface Variable {
      * @param value a {@link Variable} or a constant
      * @param then called to generate the body of the "then" case
      * @param else_ called to generate the body of the "else" case
+     * @throws IllegalArgumentException if the value isn't a variable or a supported constant
      */
     default void ifNe(Object value, Runnable then, Runnable else_) {
         MethodMaker mm = methodMaker();
@@ -282,7 +286,7 @@ public interface Variable {
      * doesn't need to be positioned yet.
      *
      * @param value a {@link Variable} or a constant
-     * @throws IllegalArgumentException if not given a variable or a constant
+     * @throws IllegalArgumentException if the value isn't a variable or a supported constant
      */
     void ifLt(Object value, Label label);
 
@@ -292,6 +296,7 @@ public interface Variable {
      *
      * @param value a {@link Variable} or a constant
      * @param then called to generate the body of the "then" case
+     * @throws IllegalArgumentException if the value isn't a variable or a supported constant
      */
     default void ifLt(Object value, Runnable then) {
         Label endLabel = methodMaker().label();
@@ -307,6 +312,7 @@ public interface Variable {
      * @param value a {@link Variable} or a constant
      * @param then called to generate the body of the "then" case
      * @param else_ called to generate the body of the "else" case
+     * @throws IllegalArgumentException if the value isn't a variable or a supported constant
      */
     default void ifLt(Object value, Runnable then, Runnable else_) {
         MethodMaker mm = methodMaker();
@@ -324,7 +330,7 @@ public interface Variable {
      * constant. The label doesn't need to be positioned yet.
      *
      * @param value a {@link Variable} or a constant
-     * @throws IllegalArgumentException if not given a variable or a constant
+     * @throws IllegalArgumentException if the value isn't a variable or a supported constant
      */
     void ifGe(Object value, Label label);
 
@@ -334,6 +340,7 @@ public interface Variable {
      *
      * @param value a {@link Variable} or a constant
      * @param then called to generate the body of the "then" case
+     * @throws IllegalArgumentException if the value isn't a variable or a supported constant
      */
     default void ifGe(Object value, Runnable then) {
         Label endLabel = methodMaker().label();
@@ -349,6 +356,7 @@ public interface Variable {
      * @param value a {@link Variable} or a constant
      * @param then called to generate the body of the "then" case
      * @param else_ called to generate the body of the "else" case
+     * @throws IllegalArgumentException if the value isn't a variable or a supported constant
      */
     default void ifGe(Object value, Runnable then, Runnable else_) {
         MethodMaker mm = methodMaker();
@@ -366,7 +374,7 @@ public interface Variable {
      * label doesn't need to be positioned yet.
      *
      * @param value a {@link Variable} or a constant
-     * @throws IllegalArgumentException if not given a variable or a constant
+     * @throws IllegalArgumentException if the value isn't a variable or a supported constant
      */
     void ifGt(Object value, Label label);
 
@@ -376,6 +384,7 @@ public interface Variable {
      *
      * @param value a {@link Variable} or a constant
      * @param then called to generate the body of the "then" case
+     * @throws IllegalArgumentException if the value isn't a variable or a supported constant
      */
     default void ifGt(Object value, Runnable then) {
         Label endLabel = methodMaker().label();
@@ -391,6 +400,7 @@ public interface Variable {
      * @param value a {@link Variable} or a constant
      * @param then called to generate the body of the "then" case
      * @param else_ called to generate the body of the "else" case
+     * @throws IllegalArgumentException if the value isn't a variable or a supported constant
      */
     default void ifGt(Object value, Runnable then, Runnable else_) {
         MethodMaker mm = methodMaker();
@@ -408,7 +418,7 @@ public interface Variable {
      * constant. The label doesn't need to be positioned yet.
      *
      * @param value a {@link Variable} or a constant
-     * @throws IllegalArgumentException if not given a variable or a constant
+     * @throws IllegalArgumentException if the value isn't a variable or a supported constant
      */
     void ifLe(Object value, Label label);
 
@@ -418,6 +428,7 @@ public interface Variable {
      *
      * @param value a {@link Variable} or a constant
      * @param then called to generate the body of the "then" case
+     * @throws IllegalArgumentException if the value isn't a variable or a supported constant
      */
     default void ifLe(Object value, Runnable then) {
         Label endLabel = methodMaker().label();
@@ -433,6 +444,7 @@ public interface Variable {
      * @param value a {@link Variable} or a constant
      * @param then called to generate the body of the "then" case
      * @param else_ called to generate the body of the "else" case
+     * @throws IllegalArgumentException if the value isn't a variable or a supported constant
      */
     default void ifLe(Object value, Runnable then, Runnable else_) {
         MethodMaker mm = methodMaker();
@@ -497,7 +509,7 @@ public interface Variable {
      * this variable.
      *
      * @param value a {@link Variable} or a constant
-     * @throws IllegalArgumentException if not given a variable or a constant
+     * @throws IllegalArgumentException if the value isn't a variable or a supported constant
      * @throws IllegalStateException if this variable doesn't support the operation, or if
      * value is incompatible
      */
@@ -509,7 +521,7 @@ public interface Variable {
      *
      * @param value a {@link Variable} or a constant
      * @return the result in a new variable, with the same type as this one
-     * @throws IllegalArgumentException if not given a variable or a constant
+     * @throws IllegalArgumentException if the value isn't a variable or a supported constant
      * @throws IllegalStateException if this variable doesn't support the operation, or if
      * value is incompatible
      */
@@ -521,7 +533,7 @@ public interface Variable {
      *
      * @param value a {@link Variable} or a constant
      * @return the result in a new variable, with the same type as this one
-     * @throws IllegalArgumentException if not given a variable or a constant
+     * @throws IllegalArgumentException if the value isn't a variable or a supported constant
      * @throws IllegalStateException if this variable doesn't support the operation, or if
      * value is incompatible
      */
@@ -533,7 +545,7 @@ public interface Variable {
      *
      * @param value a {@link Variable} or a constant
      * @return the result in a new variable, with the same type as this one
-     * @throws IllegalArgumentException if not given a variable or a constant
+     * @throws IllegalArgumentException if the value isn't a variable or a supported constant
      * @throws IllegalStateException if this variable doesn't support the operation, or if
      * value is incompatible
      */
@@ -545,7 +557,7 @@ public interface Variable {
      *
      * @param value a {@link Variable} or a constant
      * @return the result in a new variable, with the same type as this one
-     * @throws IllegalArgumentException if not given a variable or a constant
+     * @throws IllegalArgumentException if the value isn't a variable or a supported constant
      * @throws IllegalStateException if this variable doesn't support the operation, or if
      * value is incompatible
      */
@@ -557,7 +569,7 @@ public interface Variable {
      *
      * @param value a {@link Variable} or a constant
      * @return the result in a new variable, with the same type as this one
-     * @throws IllegalArgumentException if not given a variable or a constant
+     * @throws IllegalArgumentException if the value isn't a variable or a supported constant
      * @throws IllegalStateException if this variable doesn't support the operation, or if
      * value is incompatible
      */
@@ -569,7 +581,7 @@ public interface Variable {
      *
      * @param value a {@link Variable} or a constant
      * @return the result in a new boolean variable
-     * @throws IllegalArgumentException if not given a variable or a constant
+     * @throws IllegalArgumentException if the value isn't a variable or a supported constant
      * @see #ifEq
      */
     Variable eq(Object value);
@@ -580,7 +592,7 @@ public interface Variable {
      *
      * @param value a {@link Variable} or a constant
      * @return the result in a new boolean variable
-     * @throws IllegalArgumentException if not given a variable or a constant
+     * @throws IllegalArgumentException if the value isn't a variable or a supported constant
      * @see #ifNe
      */
     Variable ne(Object value);
@@ -591,7 +603,7 @@ public interface Variable {
      *
      * @param value a {@link Variable} or a constant
      * @return the result in a new boolean variable
-     * @throws IllegalArgumentException if not given a variable or a constant
+     * @throws IllegalArgumentException if the value isn't a variable or a supported constant
      * @see #ifLt
      */
     Variable lt(Object value);
@@ -602,7 +614,7 @@ public interface Variable {
      *
      * @param value a {@link Variable} or a constant
      * @return the result in a new boolean variable
-     * @throws IllegalArgumentException if not given a variable or a constant
+     * @throws IllegalArgumentException if the value isn't a variable or a supported constant
      * @see #ifGe
      */
     Variable ge(Object value);
@@ -613,7 +625,7 @@ public interface Variable {
      *
      * @param value a {@link Variable} or a constant
      * @return the result in a new boolean variable
-     * @throws IllegalArgumentException if not given a variable or a constant
+     * @throws IllegalArgumentException if the value isn't a variable or a supported constant
      * @see #ifGt
      */
     Variable gt(Object value);
@@ -624,7 +636,7 @@ public interface Variable {
      *
      * @param value a {@link Variable} or a constant
      * @return the result in a new boolean variable
-     * @throws IllegalArgumentException if not given a variable or a constant
+     * @throws IllegalArgumentException if the value isn't a variable or a supported constant
      * @see #ifLe
      */
     Variable le(Object value);
@@ -635,6 +647,7 @@ public interface Variable {
      *
      * @param type class or interface
      * @return the result in a new boolean variable
+     * @throws IllegalArgumentException if the type is unsupported
      */
     Variable instanceOf(Object type);
 
@@ -644,6 +657,7 @@ public interface Variable {
      *
      * @param type class or interface
      * @return the result in a new variable
+     * @throws IllegalArgumentException if the type is unsupported
      */
     Variable cast(Object type);
 
@@ -661,7 +675,7 @@ public interface Variable {
      *
      * @param value a {@link Variable} or a constant
      * @return the result in a new variable, with the same type as this one
-     * @throws IllegalArgumentException if not given a variable or a constant
+     * @throws IllegalArgumentException if the value isn't a variable or a supported constant
      * @throws IllegalStateException if this variable doesn't support the operation, or if
      * value is incompatible
      */
@@ -673,7 +687,7 @@ public interface Variable {
      *
      * @param value a {@link Variable} or a constant
      * @return the result in a new variable, with the same type as this one
-     * @throws IllegalArgumentException if not given a variable or a constant
+     * @throws IllegalArgumentException if the value isn't a variable or a supported constant
      * @throws IllegalStateException if this variable doesn't support the operation, or if
      * value is incompatible
      */
@@ -685,7 +699,7 @@ public interface Variable {
      *
      * @param value a {@link Variable} or a constant
      * @return the result in a new variable, with the same type as this one
-     * @throws IllegalArgumentException if not given a variable or a constant
+     * @throws IllegalArgumentException if the value isn't a variable or a supported constant
      * @throws IllegalStateException if this variable doesn't support the operation, or if
      * value is incompatible
      */
@@ -697,7 +711,7 @@ public interface Variable {
      *
      * @param value a {@link Variable} or a constant
      * @return the result in a new variable, with the same type as this one
-     * @throws IllegalArgumentException if not given a variable or a constant
+     * @throws IllegalArgumentException if the value isn't a variable or a supported constant
      * @throws IllegalStateException if this variable doesn't support the operation, or if
      * value is incompatible
      */
@@ -709,7 +723,7 @@ public interface Variable {
      *
      * @param value a {@link Variable} or a constant
      * @return the result in a new variable, with the same type as this one
-     * @throws IllegalArgumentException if not given a variable or a constant
+     * @throws IllegalArgumentException if the value isn't a variable or a supported constant
      * @throws IllegalStateException if this variable doesn't support the operation, or if
      * value is incompatible
      */
@@ -721,7 +735,7 @@ public interface Variable {
      *
      * @param value a {@link Variable} or a constant
      * @return the result in a new variable, with the same type as this one
-     * @throws IllegalArgumentException if not given a variable or a constant
+     * @throws IllegalArgumentException if the value isn't a variable or a supported constant
      * @throws IllegalStateException if this variable doesn't support the operation, or if
      * value is incompatible
      */
@@ -773,6 +787,7 @@ public interface Variable {
      *
      * @param index a {@link Variable} or a constant
      * @return the result in a new variable
+     * @throws IllegalArgumentException if the index isn't a variable or a supported constant
      * @throws IllegalStateException if not an array type
      */
     Variable aget(Object index);
@@ -782,7 +797,8 @@ public interface Variable {
      *
      * @param index a {@link Variable} or a constant
      * @param value a {@link Variable} or a constant
-     * @throws IllegalArgumentException if not given a variable or a constant
+     * @throws IllegalArgumentException if the index or value isn't a variable or a supported
+     * constant
      * @throws IllegalStateException if not an array type, or if type doesn't match
      * @see #set
      */
@@ -802,7 +818,7 @@ public interface Variable {
      * @param name method name
      * @param values {@link Variable Variables} or constants
      * @return the result of the method, which is null if void
-     * @throws IllegalArgumentException if not given a variable or a constant
+     * @throws IllegalArgumentException if a value isn't a variable or a supported constant
      * @throws IllegalStateException if method isn't found
      */
     Variable invoke(String name, Object... values);
@@ -824,7 +840,8 @@ public interface Variable {
      * to infer the actual type from the corresponding value
      * @param values {@link Variable Variables} or constants
      * @return the result of the method, which is null if void
-     * @throws IllegalArgumentException if not given a variable or a constant
+     * @throws IllegalArgumentException if a type is unsupported, or if a value isn't a
+     * variable or a supported constant
      * @throws IllegalStateException if method isn't found
      */
     Variable invoke(Object returnType, String name, Object[] types, Object... values);
@@ -846,7 +863,7 @@ public interface Variable {
      * @param name method name; can be {@code ".new"} to construct an instance of this variable
      * type, and returnType can be null
      * @param types method parameter types; can be null if none
-     * @throws IllegalArgumentException if not given a supported type object
+     * @throws IllegalArgumentException if a type is unsupported
      * @throws IllegalStateException if method isn't found
      */
     Variable methodHandle(Object returnType, String name, Object... types);
@@ -865,6 +882,7 @@ public interface Variable {
      * @param name bootstrap method name
      * @param args constants which are passed to the bootstrap method, not including the
      * first three standard arguments: {@code (Lookup caller, String name, MethodType type)}
+     * @throws IllegalArgumentException if an argument isn't a supported constant
      * @see java.lang.invoke
      */
     Bootstrap indy(String name, Object... args);
@@ -885,6 +903,7 @@ public interface Variable {
      * @param name bootstrap method name
      * @param args constants which are passed to the bootstrap method, not including the
      * first three standard arguments: {@code (Lookup caller, String name, Class type)}
+     * @throws IllegalArgumentException if an argument isn't a supported constant
      * @see java.lang.invoke
      */
     Bootstrap condy(String name, Object... args);
