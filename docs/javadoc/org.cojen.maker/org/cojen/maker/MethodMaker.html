@@ -230,8 +230,8 @@ extends <a href="Maker.html" title="interface in org.cojen.maker">Maker</a></spa
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#invokeSuperConstructor(java.lang.Object...)" class="member-name-link">invokeSuperConstructor</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>...&nbsp;values)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
-<div class="block">Invoke a <code>super</code> class constructor method on the enclosing object of this method,
- from within a constructor.</div>
+<div class="block">Invoke a <code>super</code> constructor method on the enclosing object of this method, from
+ within a constructor.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>void</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#invokeThisConstructor(java.lang.Object...)" class="member-name-link">invokeThisConstructor</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>...&nbsp;values)</code></div>
@@ -576,6 +576,8 @@ extends <a href="Maker.html" title="interface in org.cojen.maker">Maker</a></spa
 <dd><code>type</code> - a class or class name</dd>
 <dt>Returns:</dt>
 <dd>this</dd>
+<dt>Throws:</dt>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if the type is unsupported</dd>
 </dl>
 </section>
 </li>
@@ -776,8 +778,8 @@ extends <a href="Maker.html" title="interface in org.cojen.maker">Maker</a></spa
 <section class="detail" id="invokeSuperConstructor(java.lang.Object...)">
 <h3>invokeSuperConstructor</h3>
 <div class="member-signature"><span class="return-type">void</span>&nbsp;<span class="element-name">invokeSuperConstructor</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>...&nbsp;values)</span></div>
-<div class="block">Invoke a <code>super</code> class constructor method on the enclosing object of this method,
- from within a constructor.</div>
+<div class="block">Invoke a <code>super</code> constructor method on the enclosing object of this method, from
+ within a constructor.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>values</code> - <a href="Variable.html" title="interface in org.cojen.maker"><code>Variables</code></a> or constants</dd>
@@ -828,9 +830,9 @@ extends <a href="Maker.html" title="interface in org.cojen.maker">Maker</a></spa
 <h3>new_</h3>
 <div class="member-signature"><span class="return-type"><a href="Variable.html" title="interface in org.cojen.maker">Variable</a></span>&nbsp;<span class="element-name">new_</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>&nbsp;type,
  <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>...&nbsp;values)</span></div>
-<div class="block">Allocate a new object. If type is an ordinary object, a matching constructor is invoked.
- If type is an array, then no constructor is invoked, and the given values represent
- array dimension sizes.</div>
+<div class="block">Allocate a new object. If the type is an ordinary object, a matching constructor is
+ invoked. If the type is an array, then no constructor is invoked, and the given values
+ represent array dimension sizes.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>type</code> - class name or <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Class.html" title="class or interface in java.lang" class="external-link"><code>Class</code></a> instance</dd>
@@ -859,7 +861,7 @@ extends <a href="Maker.html" title="interface in org.cojen.maker">Maker</a></spa
 <dd>a variable which references the exception instance</dd>
 <dt>Throws:</dt>
 <dd><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if the type is unsupported</dd>
-<dd><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/IllegalStateException.html" title="class or interface in java.lang" class="external-link">IllegalStateException</a></code> - if start is unpositioned</dd>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/IllegalStateException.html" title="class or interface in java.lang" class="external-link">IllegalStateException</a></code> - if the start label is unpositioned</dd>
 </dl>
 </section>
 </li>
@@ -880,7 +882,7 @@ extends <a href="Maker.html" title="interface in org.cojen.maker">Maker</a></spa
 <dd>a variable which references the exception instance</dd>
 <dt>Throws:</dt>
 <dd><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if a type is unsupported, or if no types are given</dd>
-<dd><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/IllegalStateException.html" title="class or interface in java.lang" class="external-link">IllegalStateException</a></code> - if start is unpositioned</dd>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/IllegalStateException.html" title="class or interface in java.lang" class="external-link">IllegalStateException</a></code> - if the start label is unpositioned</dd>
 </dl>
 </section>
 </li>
@@ -898,7 +900,7 @@ extends <a href="Maker.html" title="interface in org.cojen.maker">Maker</a></spa
 <dd><code>handler</code> - receives a variable which references the exception instance</dd>
 <dt>Throws:</dt>
 <dd><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if the type is unsupported</dd>
-<dd><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/IllegalStateException.html" title="class or interface in java.lang" class="external-link">IllegalStateException</a></code> - if start is unpositioned</dd>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/IllegalStateException.html" title="class or interface in java.lang" class="external-link">IllegalStateException</a></code> - if the start label is unpositioned</dd>
 </dl>
 </section>
 </li>
@@ -913,7 +915,7 @@ extends <a href="Maker.html" title="interface in org.cojen.maker">Maker</a></spa
 <dt>Parameters:</dt>
 <dd><code>handler</code> - called for each exit path to generate handler code</dd>
 <dt>Throws:</dt>
-<dd><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/IllegalStateException.html" title="class or interface in java.lang" class="external-link">IllegalStateException</a></code> - if start is unpositioned</dd>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/IllegalStateException.html" title="class or interface in java.lang" class="external-link">IllegalStateException</a></code> - if the start label is unpositioned</dd>
 </dl>
 </section>
 </li>
@@ -984,7 +986,7 @@ extends <a href="Maker.html" title="interface in org.cojen.maker">Maker</a></spa
 <dd><code>className</code> - simple class name; pass null to use default</dd>
 <dt>Throws:</dt>
 <dd><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if not given a simple class name</dd>
-<dd><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/IllegalStateException.html" title="class or interface in java.lang" class="external-link">IllegalStateException</a></code> - if enclosing class or method is finished</dd>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/IllegalStateException.html" title="class or interface in java.lang" class="external-link">IllegalStateException</a></code> - if the enclosing class or method is finished</dd>
 </dl>
 </section>
 </li>
