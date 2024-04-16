@@ -1,6 +1,10 @@
 Changelog
 =========
 
+v2.5.6
+------
+* Fixed a bug which could write corrupt UTF-8 strings which had any non-ASCII characters.
+
 v2.5.5 (2024-03-01)
 ------
 * Added a feature to directly install classes into the class loader used by generated classes.

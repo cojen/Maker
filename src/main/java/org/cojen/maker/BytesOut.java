@@ -136,11 +136,11 @@ final class BytesOut {
             if (c < 0x80 && c != 0) {
                 mBuffer[mSize++] = (byte) c;
             } else if (c < 0x800) {
-                strictEnsureCapacity(2);
+                ensureCapacityNoFlush(2);
                 mBuffer[mSize++] = (byte) (0xc0 | (c >> 6));
                 mBuffer[mSize++] = (byte) (0x80 | (c & 0x3f));
             } else {
-                strictEnsureCapacity(3);
+                ensureCapacityNoFlush(3);
                 mBuffer[mSize++] = (byte) (0xe0 | (c >> 12));
                 mBuffer[mSize++] = (byte) (0x80 | ((c >> 6) & 0x3f));
                 mBuffer[mSize++] = (byte) (0x80 | (c & 0x3f));
@@ -197,15 +197,27 @@ final class BytesOut {
         return Arrays.copyOf(mBuffer, mSize);
     }
 
+    /**
+     * @param amt must not be more than the minimum buffer size (8)
+     */
     private void ensureCapacity(int amt) throws IOException {
         if (mSize + amt > mBuffer.length) {
             flushOrExpand(amt);
         }
     }
 
+    /**
+     * @param amt can be any amount
+     */
     private void strictEnsureCapacity(int amt) throws IOException {
         if (mSize + amt > mBuffer.length) {
             flushAndExpand(amt);
+        }
+    }
+
+    private void ensureCapacityNoFlush(int amt) {
+        if (mSize + amt > mBuffer.length) {
+            expand(amt);
         }
     }
 

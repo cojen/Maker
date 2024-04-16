@@ -109,6 +109,24 @@ public class BytesOutTest {
     }
 
     @Test
+    public void writeOverflow4() throws Exception {
+        var bout = new ByteArrayOutputStream();
+        var out = new BytesOut(bout, 8);
+
+        var str = "hello\u1000";
+        out.writeUTF(str);
+
+        out.flush();
+        byte[] result = bout.toByteArray();
+
+        var bout2 = new ByteArrayOutputStream();
+        var dout = new DataOutputStream(bout2);
+        dout.writeUTF(str);
+        byte[] expect = bout2.toByteArray();
+        assertArrayEquals(expect, result);
+    }
+
+    @Test
     public void writeExpand() throws Exception {
         var out = new BytesOut(null, 5);
         out.writeInt(1234567890);
@@ -124,5 +142,16 @@ public class BytesOutTest {
         byte[] expect = bout.toByteArray();
 
         assertArrayEquals(expect, result);
+    }
+
+    @Test
+    public void checkUTF() throws Exception {
+        assertEquals(0, BytesOut.checkUTF(UsageTest.makeString(65535, 'a')));
+        assertEquals(0, BytesOut.checkUTF(UsageTest.makeString(32767, '\u0100') + 'a'));
+        assertEquals(0, BytesOut.checkUTF(UsageTest.makeString(21844, '\u1000') + "abc"));
+
+        assertEquals(65536, BytesOut.checkUTF(UsageTest.makeString(65536, 'a')));
+        assertEquals(65536, BytesOut.checkUTF(UsageTest.makeString(32767, '\u0100') + "ab"));
+        assertEquals(65536, BytesOut.checkUTF(UsageTest.makeString(21845, '\u1000') + 'a'));
     }
 }

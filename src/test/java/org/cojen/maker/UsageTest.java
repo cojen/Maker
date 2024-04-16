@@ -717,7 +717,7 @@ public class UsageTest {
         }
     }
 
-    private static String makeString(int length, char c) {
+    static String makeString(int length, char c) {
         var b = new StringBuilder(length);
         for (int i=0; i<length; i++) {
             b.append(c);
