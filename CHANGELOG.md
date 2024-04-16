@@ -1,9 +1,10 @@
 Changelog
 =========
 
-v2.5.6
+v2.5.6 (2024-04-16)
 ------
-* Fixed a bug which could write corrupt UTF-8 strings which had any non-ASCII characters.
+* Fixed a bug when calling ClassMaker.finishTo which could write corrupt UTF-8 strings which
+  had any non-ASCII characters.
 
 v2.5.5 (2024-03-01)
 ------
