@@ -279,19 +279,42 @@ abstract class Attribute extends Attributed {
         }
 
         void add(int offset, int number) {
-            if (offset < 65536 && number < 65536 && mLength < 65535) {
+            if (offset >= 65536 || number >= 65536 || mLength >= 65535) {
+                return;
+            }
+
+            if (mLength > 0) {
+                int lastEntry = mTable[mLength - 1];
+                int lastOffset = lastEntry >>> 16;
+
+                if (offset == lastOffset) {
+                    // Replace the last line number entry.
+                    mTable[mLength - 1] = encodeEntry(offset, number);
+                    return;
+                }
+
+                if (offset > lastOffset && number == (lastEntry & 0xffff)) {
+                    // No need to create another entry when the line number didn't change.
+                    return;
+                }
+
                 if (mLength >= mTable.length) {
                     mTable = Arrays.copyOf(mTable, mTable.length << 1);
                 }
-                mTable[mLength++] = (offset << 16) | (number & 0xffff);
             }
+
+            mTable[mLength++] = encodeEntry(offset, number);
+        }
+
+        private static int encodeEntry(int offset, int number) {
+            return (offset << 16) | (number & 0xffff);
         }
 
         /**
-         * @return false if table is empty now
+         * @return false if table is empty
          */
-        boolean finish(int offset) {
-            if (mLength > 0 && (mTable[mLength - 1] >>> 16) >= offset) {
+        boolean finish(int codeLen) {
+            if (mLength > 0 && (mTable[mLength - 1] >>> 16) >= codeLen) {
                 mLength--;
             }
             return mLength != 0;

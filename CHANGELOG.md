@@ -1,6 +1,10 @@
 Changelog
 =========
 
+v2.5.7
+------
+* Automatically prune redundant line number table entries.
+
 v2.5.6 (2024-04-16)
 ------
 * Fixed a bug when calling ClassMaker.finishTo which could write corrupt UTF-8 strings which

@@ -62,8 +62,6 @@ public class Compiler extends MiniCBaseVisitor<Object> {
     private Variable scanner;
     private Scope scope;
 
-    private int lastLineNum;
-
     public Compiler() {
     }
 
@@ -83,8 +81,6 @@ public class Compiler extends MiniCBaseVisitor<Object> {
 
         scanner = mm.var(Scanner.class).set(null);
         scope = new Scope(null);
-
-        lastLineNum = 0;
 
         try {
             visit(ctx);
@@ -106,11 +102,7 @@ public class Compiler extends MiniCBaseVisitor<Object> {
 
     private void lineNum(ParserRuleContext ctx) {
         if (debug) {
-            int lineNum = ctx.getStart().getLine();
-            if (lineNum != lastLineNum) {
-                lastLineNum = lineNum;
-                mm.lineNum(lineNum);
-            }
+            mm.lineNum(ctx.getStart().getLine());
         }
     }
 
