@@ -775,6 +775,40 @@ public interface Variable {
     Variable unbox();
 
     /**
+     * Returns a boxed object type for this variable. If the type already represents a boxed
+     * primitive type, it's simply returned as is. Null is returned in all other cases.
+     *
+     * @see #classType
+     */
+    Class<?> boxedType();
+
+    /**
+     * Returns a boxed object type for the given type. If the type already represents a boxed
+     * primitive type, it's simply returned as is. Null is returned in all other cases.
+     */
+    static Class<?> boxedType(Class<?> clazz) {
+        Type boxed = Type.from(clazz).box();
+        return boxed.unbox() != null ? boxed.clazz() : null;
+    }
+
+    /**
+     * Returns an unboxed primitive type for this variable. If the type is already primitive,
+     * it's simply returned as is. Null is returned in all other cases.
+     *
+     * @see #classType
+     */
+    Class<?> unboxedType();
+
+    /**
+     * Returns an unboxed primitive type for the given type. If the type is already primitive,
+     * it's simply returned as is. Null is returned in all other cases.
+     */
+    static Class<?> unboxedType(Class<?> clazz) {
+        Type unboxed = Type.from(clazz).unbox();
+        return unboxed != null ? unboxed.clazz() : null;
+    }
+
+    /**
      * Access the length of this array.
      *
      * @return the result in a new int variable

@@ -1023,6 +1023,32 @@ public class ConvertTest {
     }
 
     @Test
+    public void boxedTypes() throws Exception {
+        assertEquals(Integer.class, Variable.boxedType(int.class));
+        assertEquals(Void.class, Variable.boxedType(void.class));
+        assertEquals(null, Variable.boxedType(String.class));
+        assertEquals(Integer.class, Variable.boxedType(Integer.class));
+
+        assertEquals(Long.class, mm.var(long.class).boxedType());
+        assertEquals(Void.class, mm.var(void.class).boxedType());
+        assertEquals(null, mm.var(int[].class).boxedType());
+        assertEquals(Float.class, mm.var(Float.class).boxedType());
+    }
+
+    @Test
+    public void unboxedTypes() throws Exception {
+        assertEquals(int.class, Variable.unboxedType(Integer.class));
+        assertEquals(void.class, Variable.unboxedType(Void.class));
+        assertEquals(null, Variable.unboxedType(String.class));
+        assertEquals(int.class, Variable.unboxedType(int.class));
+
+        assertEquals(long.class, mm.var(Long.class).unboxedType());
+        assertEquals(void.class, mm.var(Void.class).unboxedType());
+        assertEquals(null, mm.var(Integer[].class).unboxedType());
+        assertEquals(float.class, mm.var(float.class).unboxedType());
+    }
+
+    @Test
     public void convertField() throws Exception {
         // Storing to an instance field pushes an instance to the stack. If a conversion is
         // applied for an object which could be null, then this creates StackMapTable entries

@@ -4865,6 +4865,18 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
+        public Class<?> boxedType() {
+            Type boxed = type().box();
+            return boxed.unbox() != null ? boxed.clazz() : null;
+        }
+
+        @Override
+        public Class<?> unboxedType() {
+            Type unboxed = type().unbox();
+            return unboxed != null ? unboxed.clazz() : null;
+        }
+
+        @Override
         public LocalVar alength() {
             arrayCheck();
             push();

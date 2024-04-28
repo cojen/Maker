@@ -1,6 +1,10 @@
 Changelog
 =========
 
+v2.5.7
+------
+* Added more methods for working with boxed primitive types.
+
 v2.5.6 (2024-04-16)
 ------
 * Fixed a bug when calling ClassMaker.finishTo which could write corrupt UTF-8 strings which
