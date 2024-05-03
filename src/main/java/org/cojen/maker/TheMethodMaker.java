@@ -3913,7 +3913,17 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                 return next;
             }
 
-            return super.flow(flow, prev);
+            int slot = mVar.mSlot;
+
+            if (slot < 0) {
+                throw mVar.methodMaker().finishFail
+                    ("Accessing an unassigned variable: type=" + mVar.type().name() +
+                     ", name=" + mVar.name());
+            }
+
+            flow.mVarUsage.set(slot);
+
+            return mNext;
         }
     }
 
@@ -5196,7 +5206,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
-        public MethodMaker methodMaker() {
+        public TheMethodMaker methodMaker() {
             return TheMethodMaker.this;
         }
     }

@@ -314,7 +314,7 @@ public class TypeTest {
             cm.finish();
             fail();
         } catch (IllegalStateException e) {
-            assertTrue(e.getMessage().startsWith("Unsupported"));
+            assertTrue(e.getMessage().contains("unassigned"));
             assertTrue(e.getMessage().contains("test"));
         }
 

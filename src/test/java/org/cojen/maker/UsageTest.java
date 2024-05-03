@@ -647,17 +647,18 @@ public class UsageTest {
     }
 
     @Test
-    public void verifyError() throws Exception {
+    public void unassigned() throws Exception {
         mClassMaker = ClassMaker.begin(null, MethodHandles.lookup());
 
         MethodMaker mm = mClassMaker.addMethod(int.class, "test").public_().static_();
-        mm.return_(mm.var(int.class));
+        mm.return_(mm.var(int.class).name("foo"));
 
         try {
-            var clazz = mClassMaker.finishHidden().lookupClass();
-            clazz.getMethod("test").invoke(null);
+            mClassMaker.finishHidden();
             fail();
-        } catch (VerifyError e) {
+        } catch (IllegalStateException e) {
+            check(e, "unassigned variable");
+            check(e, "foo");
         }
     }
 

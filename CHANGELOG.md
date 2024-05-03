@@ -4,6 +4,7 @@ Changelog
 v2.5.7
 ------
 * Added more methods for working with boxed primitive types.
+* Detect simple cases when a variable is accessed without having been assigned.
 
 v2.5.6 (2024-04-16)
 ------
