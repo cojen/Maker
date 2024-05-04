@@ -310,7 +310,7 @@ public class TypeTest {
         var v = mm.param(0);
 
         try {
-            mm.param(0).invoke("getClass");
+            v.invoke("getClass");
             cm.finish();
             fail();
         } catch (IllegalStateException e) {
