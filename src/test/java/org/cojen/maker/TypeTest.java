@@ -305,16 +305,16 @@ public class TypeTest {
     @Test
     public void voidType() throws Exception {
         ClassMaker cm = ClassMaker.begin().public_();
-        MethodMaker mm = cm.addMethod(void.class, "test").public_().static_();
+        MethodMaker mm = cm.addMethod(void.class, "test", void.class).public_().static_();
 
-        var v = mm.var(void.class);
+        var v = mm.param(0);
 
         try {
-            v.invoke("getClass");
+            mm.param(0).invoke("getClass");
             cm.finish();
             fail();
         } catch (IllegalStateException e) {
-            assertTrue(e.getMessage().contains("unassigned"));
+            assertTrue(e.getMessage().startsWith("Unsupported"));
             assertTrue(e.getMessage().contains("test"));
         }
 

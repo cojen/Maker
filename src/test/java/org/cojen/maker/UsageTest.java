@@ -647,6 +647,32 @@ public class UsageTest {
     }
 
     @Test
+    public void verifyError() throws Exception {
+        mClassMaker = ClassMaker.begin(null, MethodHandles.lookup());
+
+        MethodMaker mm = mClassMaker.addMethod(int.class, "test").public_().static_();
+
+        var v1 = mm.var(int.class);
+
+        Label start = mm.label().here();
+        //v1.set(1);
+        Label done = mm.label().goto_();
+        mm.catch_(start, Throwable.class, ex -> {
+            v1.set(2);
+        });
+
+        done.here();
+        mm.return_(v1); // v1 isn't guaranteed to have been assigned
+
+        try {
+            var clazz = mClassMaker.finishHidden().lookupClass();
+            clazz.getMethod("test").invoke(null);
+            fail();
+        } catch (VerifyError e) {
+        }
+    }
+
+    @Test
     public void unassigned() throws Exception {
         mClassMaker = ClassMaker.begin(null, MethodHandles.lookup());
 
