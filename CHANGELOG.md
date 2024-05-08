@@ -1,7 +1,7 @@
 Changelog
 =========
 
-v2.5.7
+v2.5.7 (2024-05-07)
 ------
 * Detect simple cases when a variable is accessed without having been assigned, preventing a
   VerifyError. Instead, an IllegalStateException is thrown when the class is finished.
