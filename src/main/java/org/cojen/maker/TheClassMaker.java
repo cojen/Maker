@@ -724,7 +724,7 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
         }
 
         if (DEBUG) {
-            DebugWriter.write(name(), bytes);
+            DebugWriter.write(this, bytes);
         }
 
         return bytes;

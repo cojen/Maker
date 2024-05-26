@@ -1,6 +1,10 @@
 Changelog
 =========
 
+v2.5.8
+------
+* When the debug option is enabled, the list of unimplemented methods is also printed.
+
 v2.5.7 (2024-05-07)
 ------
 * Detect simple cases when a variable is accessed without having been assigned, preventing a

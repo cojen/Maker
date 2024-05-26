@@ -19,6 +19,10 @@ package org.cojen.maker;
 import java.io.File;
 import java.io.FileOutputStream;
 
+import java.lang.reflect.Modifier;
+
+import java.util.Set;
+
 /**
  * Only used when TheClassMaker.DEBUG is true.
  *
@@ -31,13 +35,25 @@ class DebugWriter {
         return counter++;
     }
 
-    static void write(String className, byte[] bytes) {
+    static void write(TheClassMaker cm, byte[] bytes) {
+        String className = cm.name();
         File file = new File("ClassMaker/" + className + '(' + next() + ").class");
         try {
             File tempDir = new File(System.getProperty("java.io.tmpdir"));
             file = new File(tempDir, file.getPath());
             file.getParentFile().mkdirs();
-            System.out.println("ClassMaker writing to " + file);
+
+            var msg = new StringBuilder("ClassMaker writing to ").append(file);
+
+            if (Modifier.isAbstract(cm.mModifiers)) {
+                Set<String> unimplemented = cm.unimplementedMethods();
+                if (!unimplemented.isEmpty()) {
+                    msg.append("; unimplemented methods: ").append(unimplemented);
+                }
+            }
+
+            System.out.println(msg);
+
             try (var out = new FileOutputStream(file)) {
                 out.write(bytes);
             }
