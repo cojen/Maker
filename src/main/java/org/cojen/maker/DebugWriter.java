@@ -45,7 +45,7 @@ class DebugWriter {
 
             var msg = new StringBuilder("ClassMaker writing to ").append(file);
 
-            if (Modifier.isAbstract(cm.mModifiers)) {
+            if (!Modifier.isAbstract(cm.mModifiers)) {
                 Set<String> unimplemented = cm.unimplementedMethods();
                 if (!unimplemented.isEmpty()) {
                     msg.append("; unimplemented methods: ").append(unimplemented);
