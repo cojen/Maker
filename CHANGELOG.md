@@ -4,6 +4,9 @@ Changelog
 v2.5.8
 ------
 * When the debug option is enabled, the list of unimplemented methods is also printed.
+* When the debug option is enabled and a variable is accessed without having been assigned, an
+  IllegalStateException is logged, allowing the broken class file to be written such that it
+  can be examined in detail.
 
 v2.5.7 (2024-05-07)
 ------

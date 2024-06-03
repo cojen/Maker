@@ -302,7 +302,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     }
 
     private IllegalStateException finishFail(String message) {
-        throw new IllegalStateException(message + " (method: \"" + name() + "\")");
+        return new IllegalStateException(message + " (method: \"" + name() + "\")");
     }
 
     /**
@@ -3916,9 +3916,20 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             int slot = mVar.mSlot;
 
             if (slot < 0) {
-                throw mVar.methodMaker().finishFail
+                IllegalStateException ex = mVar.methodMaker().finishFail
                     ("Accessing an unassigned variable: type=" + mVar.type().name() +
                      ", name=" + mVar.name());
+
+                if (TheClassMaker.DEBUG) {
+                    // Log the exception and allow the class to be defined, but it will produce
+                    // a VerifyError. The DebugWriter will write a file in order for the class
+                    // to be examined in detail.
+                    Thread t = Thread.currentThread();
+                    t.getUncaughtExceptionHandler().uncaughtException(t, ex);
+                    return mNext;
+                }
+
+                throw ex;
             }
 
             flow.mVarUsage.set(slot);
