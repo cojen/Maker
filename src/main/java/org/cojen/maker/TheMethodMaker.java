@@ -3921,11 +3921,10 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                      ", name=" + mVar.name());
 
                 if (TheClassMaker.DEBUG) {
-                    // Log the exception and allow the class to be defined, but it will produce
-                    // a VerifyError. The DebugWriter will write a file in order for the class
-                    // to be examined in detail.
-                    Thread t = Thread.currentThread();
-                    t.getUncaughtExceptionHandler().uncaughtException(t, ex);
+                    // Print the exception and allow the class to be defined, but it will
+                    // produce a VerifyError. The DebugWriter will write a file in order for
+                    // the class to be examined in detail.
+                    ex.printStackTrace(System.out);
                     return mNext;
                 }
 
