@@ -1,7 +1,7 @@
 Changelog
 =========
 
-v2.5.8
+v2.5.8 (2024-06-07)
 ------
 * When the debug option is enabled, the list of unimplemented methods is also printed.
 * When the debug option is enabled and a variable is accessed without having been assigned, an
