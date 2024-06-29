@@ -1,6 +1,11 @@
 Changelog
 =========
 
+v2.5.9
+------
+* Hidden classes aren't renamed when finished anymore, because it would leave a lingering
+  useless constant pool entry.
+
 v2.5.8 (2024-06-07)
 ------
 * When the debug option is enabled, the list of unimplemented methods is also printed.

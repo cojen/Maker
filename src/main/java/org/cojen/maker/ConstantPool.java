@@ -430,10 +430,6 @@ class ConstantPool {
             super(7, name);
             mType = type;
         }
-
-        void rename(C_UTF8 name) {
-            mValue = name;
-        }
     }
 
     static final class C_NameAndType extends Constant {

@@ -594,7 +594,7 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
 
     @Override
     public Class<?> finish() {
-        byte[] bytes = finishBytes(false);
+        byte[] bytes = doFinishBytes();
 
         Class clazz;
         if (mLookup == null) {
@@ -675,9 +675,7 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
             };
         }
 
-        String originalName = name();
-
-        byte[] bytes = finishBytes(true);
+        byte[] bytes = doFinishBytes();
 
         MethodHandles.Lookup result;
         try {
@@ -691,7 +689,7 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
         } catch (Exception e) {
             throw toUnchecked(e);
         } finally {
-            mInjector.unreserve(originalName);
+            mInjector.unreserve(name());
         }
 
         ConstantsRegistry.finish(this, lookup, result.lookupClass());
@@ -704,17 +702,17 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
         noExactConstants();
         String name = name();
         try {
-            return finishBytes(false);
+            return doFinishBytes();
         } finally {
             mInjector.unreserve(name);
         }
     }
 
-    private byte[] finishBytes(boolean hidden) {
+    private byte[] doFinishBytes() {
         byte[] bytes;
         try {
             var out = new BytesOut(null, 1000);
-            finishTo(out, hidden);
+            finishTo(out);
             bytes = out.toByteArray();
         } catch (IOException e) {
             // Not expected.
@@ -736,7 +734,7 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
         String name = name();
         try {
             var bout = new BytesOut(out, 1000);
-            finishTo(bout, false);
+            finishTo(bout);
             bout.flush();
         } finally {
             mConstants = null;
@@ -747,7 +745,7 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
     /**
      * @param hidden when true, rename the class
      */
-    private void finishTo(BytesOut out, boolean hidden) throws IOException {
+    private void finishTo(BytesOut out) throws IOException {
         checkFinished();
 
         // Ensure that mSuperClass has been assigned.
@@ -772,16 +770,6 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
         if (mMethods != null) {
             for (TheMethodMaker method : mMethods) {
                 method.doFinish();
-            }
-        }
-
-        if (hidden) {
-            // Clean up the generated class name. It will be given a unique name by the
-            // defineHiddenClass.
-            String name = mThisClass.mValue.mValue;
-            int ix = name.lastIndexOf('-');
-            if (ix > 0) {
-                mThisClass.rename(mConstants.addUTF8(name.substring(0, ix)));
             }
         }
 
