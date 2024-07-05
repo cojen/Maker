@@ -105,7 +105,7 @@ public interface Variable {
     Variable set(Object value);
 
     /**
-     * Assign an exact object instance this variable, supported only when the class is built
+     * Assign an exact object instance to this variable, supported only when the class is built
      * dynamically instead of loaded from a file. At runtime, the object instance provided here
      * is exactly the same as referenced by the generated class. For simple constants, the
      * regular set method is preferred.
