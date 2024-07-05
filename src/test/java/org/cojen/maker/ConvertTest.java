@@ -969,6 +969,42 @@ public class ConvertTest {
             fail();
         } catch (IllegalStateException e) {
         }
+
+        try {
+            mm.var(float.class).set(Integer.MAX_VALUE);
+            fail();
+        } catch (IllegalStateException e) {
+        }
+
+        try {
+            mm.var(float.class).set(Long.MAX_VALUE);
+            fail();
+        } catch (IllegalStateException e) {
+        }
+
+        try {
+            mm.var(double.class).set(Long.MAX_VALUE);
+            fail();
+        } catch (IllegalStateException e) {
+        }
+
+        try {
+            mm.var(int.class).set(0x1p31f);
+            fail();
+        } catch (IllegalStateException e) {
+        }
+
+        try {
+            mm.var(long.class).set(0x1p63f);
+            fail();
+        } catch (IllegalStateException e) {
+        }
+
+        try {
+            mm.var(long.class).set(0x1p63);
+            fail();
+        } catch (IllegalStateException e) {
+        }
     }
 
     @Test

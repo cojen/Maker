@@ -2188,7 +2188,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                         break;
                     case T_FLOAT:
                         float fv = (float) v;
-                        if ((int) fv == v) {
+                        if ((int) fv == v && v != Integer.MAX_VALUE) {
                             value = fv;
                             constantType = FLOAT;
                         }
@@ -2238,14 +2238,14 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                         break;
                     case T_FLOAT:
                         float fv = (float) v;
-                        if ((long) fv == v) {
+                        if ((long) fv == v && v != Long.MAX_VALUE) {
                             value = fv;
                             constantType = FLOAT;
                         }
                         break;
                     case T_DOUBLE:
                         double dv = (double) v;
-                        if ((long) dv == v) {
+                        if ((long) dv == v && v != Long.MAX_VALUE) {
                             value = dv;
                             constantType = DOUBLE;
                         }
@@ -2280,14 +2280,14 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                         break;
                     case T_INT:
                         int iv = (int) v;
-                        if ((float) iv == v) {
+                        if ((float) iv == v && v != 0x1p31f) {
                             value = iv;
                             constantType = INT;
                         }
                         break;
                     case T_LONG:
                         long lv = (long) v;
-                        if ((float) lv == v) {
+                        if ((float) lv == v && v != 0x1p63f) {
                             value = lv;
                             constantType = LONG;
                         }
@@ -2340,7 +2340,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                         break;
                     case T_LONG:
                         long lv = (long) v;
-                        if ((double) lv == v) {
+                        if ((double) lv == v && v != 0x1p63) {
                             value = lv;
                             constantType = LONG;
                         }
