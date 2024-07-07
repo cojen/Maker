@@ -1,7 +1,7 @@
 Changelog
 =========
 
-v2.5.9
+v2.5.9 (2024-07-07)
 ------
 * Stricter conversion checks when setting a primitive variable to a constant.
 * Hidden classes aren't renamed when finished anymore, because it would leave a lingering
