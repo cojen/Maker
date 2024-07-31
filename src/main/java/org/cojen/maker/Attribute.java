@@ -708,4 +708,29 @@ abstract class Attribute extends Attributed {
             }
         }
     }
+
+    static class LoadableDescriptors extends Attribute {
+        private final LinkedHashMap<Type, ConstantPool.C_UTF8> mDescriptors;
+
+        LoadableDescriptors(ConstantPool cp) {
+            super(cp, "LoadableDescriptors");
+            mDescriptors = new LinkedHashMap<>();
+        }
+
+        void add(Type type) {
+            mDescriptors.computeIfAbsent(type, t -> mConstants.addUTF8(t.descriptor()));
+        }
+
+        @Override
+        int length() {
+            return 2 + mDescriptors.size() * 2;
+        }
+
+        void writeDataTo(BytesOut out) throws IOException {
+            out.writeShort(mDescriptors.size());
+            for (ConstantPool.C_UTF8 desc : mDescriptors.values()) {
+                out.writeShort(desc.mIndex);
+            }
+        }
+    }
 }

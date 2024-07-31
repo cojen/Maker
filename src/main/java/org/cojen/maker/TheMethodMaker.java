@@ -404,7 +404,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
     @Override
     public MethodMaker abstract_() {
-        mModifiers = Modifiers.toAbstract(mModifiers);
+        mModifiers = Modifiers.toAbstractMethod(mModifiers);
         return this;
     }
 

@@ -333,6 +333,20 @@ public interface ClassMaker extends Maker {
     ClassMaker addInnerClass(String className);
 
     /**
+     * Indicate that this class is defining a value class.
+     *
+     * @return this
+     * @see #addLoadableType
+     */
+    ClassMaker valueClass();
+
+    /**
+     * Indicate that the given type should be loaded early, which is a useful feature for the
+     * fields of {@link #valueClass value classes}.
+     */
+    void addLoadableType(Object type);
+
+    /**
      * Set the source file of this class file by adding a source file attribute.
      *
      * @return this

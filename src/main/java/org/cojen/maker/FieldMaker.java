@@ -65,6 +65,14 @@ public interface FieldMaker extends Maker {
     FieldMaker final_();
 
     /**
+     * Switch this field to be strict and final. Fields are nomn-strict and non-final by
+     * default.
+     *
+     * @return this
+     */
+    FieldMaker strict();
+
+    /**
      * Switch this field to be volatile. Fields are non-volatile by default.
      *
      * @return this

@@ -59,7 +59,7 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
 
     private ConstantPool.C_Class mSuperClass;
 
-    int mModifiers;
+    int mModifiers = Modifiers.ACC_IDENTITY;
 
     private Set<ConstantPool.C_Class> mInterfaces;
     private LinkedHashMap<String, TheFieldMaker> mFields;
@@ -72,6 +72,8 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
     private Attribute.ConstantList mNestMembers;
 
     private Attribute.InnerClasses mInnerClasses;
+
+    private Attribute.LoadableDescriptors mLoadableDescriptors;
 
     private Set<ConstantPool.C_Class> mPermittedSubclasses;
 
@@ -186,7 +188,7 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
     @Override
     public ClassMaker abstract_() {
         checkFinished();
-        mModifiers = Modifiers.toAbstract(mModifiers);
+        mModifiers = Modifiers.toAbstractClass(mModifiers);
         return this;
     }
 
@@ -503,6 +505,25 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
     }
 
     @Override
+    public ClassMaker valueClass() {
+        checkFinished();
+        mModifiers = Modifiers.toValueClass(mModifiers);
+        return this;
+    }
+
+    @Override
+    public void addLoadableType(Object type) {
+        Type tType = typeFrom(type);
+
+        if (mLoadableDescriptors == null) {
+            mLoadableDescriptors = new Attribute.LoadableDescriptors(mConstants);
+            addAttribute(mLoadableDescriptors);
+        }
+
+        mLoadableDescriptors.add(tType);
+    }
+
+    @Override
     public AnnotationMaker addAnnotation(Object annotationType, boolean visible) {
         return addAnnotation(new TheAnnotationMaker(this, annotationType), visible);
     }
@@ -752,6 +773,10 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
         superClass();
 
         int version = 0x0000_003d; // Java 17.
+
+        if (Modifiers.isValueClass(mModifiers)) {
+            version = 0xffff_0043; // Java 23, Valhalla EA
+        }
 
         if (mRecordCtors != null) {
             TheMethodMaker.doFinish(mRecordCtors);

@@ -70,6 +70,13 @@ final class TheFieldMaker extends ClassMember implements FieldMaker, Typed {
     }
 
     @Override
+    public FieldMaker strict() {
+        mModifiers = Modifiers.toStrict(mModifiers);
+        mField.toFinal();
+        return this;
+    }
+
+    @Override
     public FieldMaker volatile_() {
         mModifiers = Modifiers.toVolatile(mModifiers);
         return this;
