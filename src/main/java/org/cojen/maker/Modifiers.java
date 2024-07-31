@@ -128,6 +128,6 @@ class Modifiers {
 
     // For classes.
     static boolean isValueClass(int bitmask) {
-        return (bitmask & (Modifier.INTERFACE | ACC_IDENTITY)) == 0;
+        return (bitmask & (Modifier.INTERFACE | ACC_IDENTITY | 0x8000)) == 0;
     }
 }
