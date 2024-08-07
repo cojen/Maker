@@ -101,12 +101,27 @@ public interface FieldMaker extends Maker {
     /**
      * Set an initial constant value for this field. The allowed constants are the same as
      * those allowed by the {@link Variable#set Variable.set} method. Complex constants can be
-     * assigned using a {@link ClassMaker#addClinit static initializer}.
+     * assigned using {@link #initExact initExact} or a {@link ClassMaker#addClinit static
+     * initializer}.
      *
      * @return this
-     * @throws IllegalStateException if not a static field
-     * @throws IllegalArgumentException if the value type is unsupported, or if it's not
+     * @throws IllegalArgumentException if the value isn't a supported constant
+     * @throws IllegalStateException if not a static field, or if the value type isn't
      * compatible with the field type
      */
     FieldMaker init(Object value);
+
+    /**
+     * Set an exact initial constant value for this field, supported only when the class is
+     * built dynamically instead of loaded from a file. At runtime, the object instance
+     * provided here is exactly the same as referenced by the generated class. For simple
+     * constants, the regular init method is preferred.
+     *
+     * @return this
+     * @throws IllegalStateException if not a static field, or if the value isn't compatible
+     * with the field type, or if the class being made is {@link ClassMaker#beginExternal
+     * external}
+     * @see Variable#setExact
+     */
+    FieldMaker initExact(Object value);
 }
