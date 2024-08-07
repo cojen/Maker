@@ -1,8 +1,8 @@
 Changelog
 =========
 
-v2.5.10
-------
+v2.5.10 (2024-08-07)
+-------
 * Added a convenience method for initializing static fields to complex constants.
 
 v2.5.9 (2024-07-07)
