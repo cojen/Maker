@@ -242,6 +242,40 @@ public class FieldTest {
     }
 
     @Test
+    public void initExact() throws Exception {
+        try {
+            ClassMaker.beginExternal("xxx")
+                .addField(Object.class, "f0").private_().static_().final_().initExact(this);
+            fail();
+        } catch (IllegalStateException e) {
+            assertTrue(e.getMessage().contains("external"));
+        }
+
+        ClassMaker cm = ClassMaker.begin().public_();
+
+        try {
+            cm.addField(int.class, "f1").private_().final_().initExact(1);
+            fail();
+        } catch (IllegalStateException e) {
+            assertTrue(e.getMessage().contains("Not static"));
+        }
+
+        try {
+            cm.addField(int.class, "f2").private_().static_().final_().initExact(1);
+            fail();
+        } catch (IllegalStateException e) {
+            assertTrue(e.getMessage().contains("Mismatched"));
+        }
+
+        cm.addField(Object.class, "f3").private_().static_().final_().initExact(this);
+
+        MethodMaker mm = cm.addMethod(Object.class, "test").public_().static_();
+        mm.return_(mm.field("f3"));
+
+        assertEquals(this, cm.finish().getMethod("test").invoke(null));
+    }
+
+    @Test
     public void extraModifiers() throws Exception {
         ClassMaker cm = ClassMaker.begin().public_();
         cm.addField(int.class, "f1").public_().transient_();

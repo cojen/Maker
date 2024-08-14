@@ -195,4 +195,15 @@ final class TheFieldMaker extends ClassMember implements FieldMaker, Typed {
         addAttribute(new Attribute.Constant(mConstants, "ConstantValue", constant));
         return this;
     }
+
+    @Override
+    public FieldMaker initExact(Object value) {
+        if (!Modifier.isStatic(mModifiers)) {
+            throw new IllegalStateException("Not static");
+        }
+
+        classMaker().addClinit().field(mField.name()).setExact(value);
+
+        return this;
+    }
 }
