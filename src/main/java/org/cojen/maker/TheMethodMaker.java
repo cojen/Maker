@@ -4259,9 +4259,13 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                 push(typeCmp);
                 addPushOp(typeCmp, value);
             } else {
+                Type knownValueType = null;
+
                 if (value instanceof Number num) {
+                    Type valueType = Type.from(value.getClass());
+
                     if (num.longValue() == 0 && num.doubleValue() == 0
-                        && (Type.from(value.getClass()).unboxTypeCode() != T_OBJECT))
+                        && (valueType.unboxTypeCode() != T_OBJECT))
                     {
                         Type unbox = type().unbox();
                         if (unbox != null) {
@@ -4274,6 +4278,8 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                             }
                         }
                     }
+
+                    knownValueType = valueType.unbox();
                 } else if (value instanceof Boolean) {
                     Type unbox = type().unbox();
                     bool: if (unbox == BOOLEAN) {
@@ -4289,18 +4295,30 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                         addBranchOp(zeroOp, 1, label);
                         return;
                     }
+
+                    knownValueType = BOOLEAN;
+                } else if (value instanceof Character) {
+                    knownValueType = CHAR;
                 }
 
-                // Need to push value first to get the type, then swap around.
-                Op savepoint = mLastOp;
-                Type valueType = addPushOp(null, value);
-                typeCmp = comparisonType(valueType, eq);
-                Op end = mLastOp;
-                Op rest = rollback(savepoint);
-                push(typeCmp);
-                mLastOp.mNext = rest;
-                mLastOp = end;
-                addConversionOp(valueType, typeCmp);
+                if (knownValueType != null) {
+                    // The value is a known constant type, which might need to be converted to
+                    // a common comparison type.
+                    typeCmp = comparisonType(knownValueType, eq);
+                    push(typeCmp);
+                    addPushOp(typeCmp, value);
+                } else {
+                    // Need to push the value first to get the type, then swap around.
+                    Op savepoint = mLastOp;
+                    Type valueType = addPushOp(null, value);
+                    typeCmp = comparisonType(valueType, eq);
+                    Op end = mLastOp;
+                    Op rest = rollback(savepoint);
+                    push(typeCmp);
+                    mLastOp.mNext = rest;
+                    mLastOp = end;
+                    addConversionOp(valueType, typeCmp);
+                }
             }
 
             byte cmpOp;
