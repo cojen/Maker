@@ -330,6 +330,13 @@ public class CondyTest {
         } catch (IllegalStateException e) {
             assertTrue(e.getMessage().startsWith("Unmodifiable"));
         }
+
+        try {
+            v1.dec(1);
+            fail();
+        } catch (IllegalStateException e) {
+            assertTrue(e.getMessage().startsWith("Unmodifiable"));
+        }
     }
 
     @Test

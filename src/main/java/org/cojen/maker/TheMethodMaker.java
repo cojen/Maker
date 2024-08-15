@@ -5346,6 +5346,22 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
+        public void dec(Object value) {
+            if (mType == INT
+                && (value instanceof Long || value instanceof Integer
+                    || value instanceof Byte || value instanceof Short))
+            {
+                long amount = -((Number) value).longValue();
+                if (-32768 <= amount && amount < 32768) {
+                    addOp(new IncOp(this, (int) amount));
+                    return;
+                }
+            }
+
+            set(sub(value));
+        }
+
+        @Override
         public BaseFieldVar field(String name) {
             return TheMethodMaker.this.field(this, name);
         }
@@ -5454,6 +5470,11 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
         @Override
         public void inc(Object value) {
+            throw new IllegalStateException("Unmodifiable variable");
+        }
+
+        @Override
+        public void dec(Object value) {
             throw new IllegalStateException("Unmodifiable variable");
         }
 
@@ -5594,6 +5615,11 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
+        public void dec(Object value) {
+            throw new IllegalStateException("Unmodifiable variable");
+        }
+
+        @Override
         public FieldVar field(String name) {
             return TheMethodMaker.this.field(type(), name);
         }
@@ -5634,6 +5660,11 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         @Override
         public void inc(Object value) {
             set(add(value));
+        }
+
+        @Override
+        public void dec(Object value) {
+            set(sub(value));
         }
 
         @Override

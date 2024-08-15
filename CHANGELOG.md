@@ -3,6 +3,7 @@ Changelog
 
 v2.5.11
 -------
+* Added a variable decrement method.
 * Avoid generating a conversion instruction when comparing against a constant primitive value.
 
 v2.5.10 (2024-08-07)

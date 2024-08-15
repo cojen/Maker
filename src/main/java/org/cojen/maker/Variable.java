@@ -505,8 +505,8 @@ public interface Variable {
     void switch_(Label defaultLabel, Object[] cases, Label... labels);
 
     /**
-     * Add this variable with another variable or a constant, and assign the result back to
-     * this variable.
+     * Increment this variable with another variable or a constant, and assign the result back
+     * to this variable.
      *
      * @param value a {@link Variable} or a constant
      * @throws IllegalArgumentException if the value isn't a variable or a supported constant
@@ -514,6 +514,17 @@ public interface Variable {
      * value is incompatible
      */
     void inc(Object value);
+
+    /**
+     * Decrement this variable with another variable or a constant, and assign the result back
+     * to this variable.
+     *
+     * @param value a {@link Variable} or a constant
+     * @throws IllegalArgumentException if the value isn't a variable or a supported constant
+     * @throws IllegalStateException if this variable doesn't support the operation, or if the
+     * value is incompatible
+     */
+    void dec(Object value);
 
     /**
      * Add this variable with another variable or a constant, and assign the result to a new
