@@ -1220,7 +1220,8 @@ abstract class BaseType implements Type, Typed {
         }
 
         @Override
-        Set<Method> findMethods(String methodName, BaseType[] params, int inherit, int staticAllowed,
+        Set<Method> findMethods(String methodName, BaseType[] params,
+                                int inherit, int staticAllowed,
                                 BaseType specificReturnType, BaseType[] specificParamTypes)
         {
             return superType().findMethods(methodName, params, inherit, staticAllowed,
@@ -1535,7 +1536,8 @@ abstract class BaseType implements Type, Typed {
         }
 
         @Override
-        Set<Method> findMethods(String methodName, BaseType[] params, int inherit, int staticAllowed,
+        Set<Method> findMethods(String methodName, BaseType[] params,
+                                int inherit, int staticAllowed,
                                 BaseType specificReturnType, BaseType[] specificParamTypes)
         {
             BaseType type = this;
