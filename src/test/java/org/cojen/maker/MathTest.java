@@ -400,11 +400,25 @@ public class MathTest {
         v2.inc(-100_000L);
         mm.var(Assert.class).invoke("assertEquals", 999_910_001, v2.get());
 
-        var v3 = mm.var(int.class).set(1);
-        mm.var(Assert.class).invoke("assertEquals", ~1, v3.com());
+        var v3 = mm.var(int.class).set(0);
+        v3.dec(1);
+        v3.dec(10_000);
+        v3.dec(1_000_000_000);
+        v3.dec(-100_000);
+        mm.var(Assert.class).invoke("assertEquals", -999_910_001, v3.get());
 
-        var v4 = mm.var(boolean.class).set(true);
-        mm.var(Assert.class).invoke("assertEquals", false, v4.not());
+        var v4 = mm.var(long.class).set(0);
+        v4.dec(1);
+        v4.dec(10_000);
+        v4.dec(1_000_000_000);
+        v4.dec(-100_000L);
+        mm.var(Assert.class).invoke("assertEquals", -999_910_001, v4.get());
+
+        var v5 = mm.var(int.class).set(1);
+        mm.var(Assert.class).invoke("assertEquals", ~1, v5.com());
+
+        var v6 = mm.var(boolean.class).set(true);
+        mm.var(Assert.class).invoke("assertEquals", false, v6.not());
 
         cm.finish().getMethod("run").invoke(null);
     }

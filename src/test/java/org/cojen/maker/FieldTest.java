@@ -129,6 +129,8 @@ public class FieldTest {
 
         num1Var.inc(10);
         assertVar.invoke("assertEquals", 10, num1Var.getVolatile());
+        num1Var.dec(3);
+        assertVar.invoke("assertEquals", 7, num1Var.getVolatile());
         num1Var.setVolatile(20);
         assertVar.invoke("assertEquals", 20, num1Var.getPlain());
 
@@ -505,6 +507,12 @@ public class FieldTest {
 
         try {
             mm.super_().inc(1);
+            fail();
+        } catch (IllegalStateException e) {
+        }
+
+        try {
+            mm.super_().dec(1);
             fail();
         } catch (IllegalStateException e) {
         }

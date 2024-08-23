@@ -202,6 +202,18 @@ public class BranchTest {
             l8.here();
         }
 
+        {
+            var v1 = mm.var(char.class).set('a');
+            Label l1 = mm.label();
+            v1.ifEq('a', l1);
+            assertVar.invoke("fail");
+            l1.here();
+            Label l2 = mm.label();
+            v1.ifNe('b', l2);
+            assertVar.invoke("fail");
+            l2.here();
+        }
+
         var clazz = cm.finish();
         clazz.getMethod("run").invoke(null);
     }
