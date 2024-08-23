@@ -17,7 +17,7 @@
 package org.cojen.maker;
 
 /**
- * Describes class which is being made, or an existing class, or a primitive type.
+ * Describes a class which is being made, or describes an existing class or primitive type.
  *
  * @author Brian S. O'Neill
  */
