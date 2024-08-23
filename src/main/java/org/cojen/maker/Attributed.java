@@ -71,7 +71,7 @@ abstract class Attributed {
                     if (value instanceof String str) {
                         constant = cp.addUTF8(str);
                     } else if (value instanceof Class clazz) {
-                        constant = cp.addClass(Type.from(clazz));
+                        constant = cp.addClass(BaseType.from(clazz));
                     } else if (value instanceof Typed typed) {
                         constant = cp.addClass(typed.type());
                     } else if (value instanceof Number) {
@@ -161,9 +161,9 @@ abstract class Attributed {
             return str;
         }
 
-        Type type;
+        BaseType type;
         if (component instanceof Class clazz) {
-            type = Type.from(clazz);
+            type = BaseType.from(clazz);
         } else if (component instanceof Typed typed) {
             type = typed.type();
         } else {

@@ -57,6 +57,6 @@ public interface Bootstrap {
      * @hidden
      */
     default Variable invoke(Object returnType, String name, Object[] types) {
-        return invoke(returnType, name, types, Type.NO_ARGS);
+        return invoke(returnType, name, types, BaseType.NO_ARGS);
     }
 }

@@ -24,15 +24,15 @@ import java.lang.reflect.Modifier;
  * @author Brian S O'Neill
  */
 final class TheFieldMaker extends ClassMember implements FieldMaker, Typed {
-    private final Type.Field mField;
+    private final BaseType.Field mField;
 
-    TheFieldMaker(TheClassMaker classMaker, Type.Field field) {
+    TheFieldMaker(TheClassMaker classMaker, BaseType.Field field) {
         super(classMaker, field.name(), field.type().descriptor());
         mField = field;
     }
 
     @Override
-    public Type type() {
+    public BaseType type() {
         return mField.type();
     }
 
@@ -112,49 +112,49 @@ final class TheFieldMaker extends ClassMember implements FieldMaker, Typed {
 
             nonInt: {
                 switch (mField.type().typeCode()) {
-                case Type.T_BOOLEAN:
+                case BaseType.T_BOOLEAN:
                     if (value instanceof Boolean b) {
                         ivalue = b ? 1 : 0;
                         break nonInt;
                     }
                     break;
-                case Type.T_BYTE:
+                case BaseType.T_BYTE:
                     if (value instanceof Byte) {
                         ivalue = (byte) value;
                         break nonInt;
                     }
                     break;
-                case Type.T_CHAR:
+                case BaseType.T_CHAR:
                     if (value instanceof Character) {
                         ivalue = (char) value;
                         break nonInt;
                     }
                     break;
-                case Type.T_SHORT:
+                case BaseType.T_SHORT:
                     if (value instanceof Short) {
                         ivalue = (short) value;
                         break nonInt;
                     }
                     break;
-                case Type.T_INT:
+                case BaseType.T_INT:
                     if (value instanceof Integer) {
                         ivalue = (int) value;
                         break nonInt;
                     }
                     break;
-                case Type.T_FLOAT:
+                case BaseType.T_FLOAT:
                     if (value instanceof Float) {
                         constant = mConstants.addFloat((float) value);
                         break addConstant;
                     }
                     break;
-                case Type.T_LONG:
+                case BaseType.T_LONG:
                     if (value instanceof Long || value instanceof Integer) {
                         constant = mConstants.addLong(((Number) value).longValue());
                         break addConstant;
                     }
                     break;
-                case Type.T_DOUBLE:
+                case BaseType.T_DOUBLE:
                     if (value instanceof Double || value instanceof Integer) {
                         constant = mConstants.addDouble(((Number) value).doubleValue());
                         break addConstant;
@@ -165,7 +165,7 @@ final class TheFieldMaker extends ClassMember implements FieldMaker, Typed {
                         // Fields are null by default.
                         return this;
                     }
-                    if (value instanceof String str && mField.type() == Type.from(String.class)) {
+                    if (value instanceof String str && mField.type() == BaseType.from(String.class)) {
                         constant = mConstants.addString(str);
                         break addConstant;
                     }

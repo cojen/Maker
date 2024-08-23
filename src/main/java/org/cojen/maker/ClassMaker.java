@@ -260,7 +260,7 @@ public interface ClassMaker extends Maker {
      * @hidden
      */
     default MethodMaker addMethod(Object retType, String name) {
-        return addMethod(retType, name, Type.NO_ARGS);
+        return addMethod(retType, name, BaseType.NO_ARGS);
     }
 
     /**
@@ -284,7 +284,7 @@ public interface ClassMaker extends Maker {
      * @hidden
      */
     default MethodMaker addConstructor() {
-        return addConstructor(Type.NO_ARGS);
+        return addConstructor(BaseType.NO_ARGS);
     }
 
     /**

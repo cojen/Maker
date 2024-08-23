@@ -43,7 +43,7 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * @author Brian S O'Neill
  */
-abstract class Type {
+abstract class BaseType {
     // Note: These codes match those used by the stack map table attribute.
     static final int
         SM_TOP = 0,
@@ -69,7 +69,7 @@ abstract class Type {
         T_DOUBLE = 9,
         T_OBJECT = 10;
 
-    static final Type
+    static final BaseType
         BOOLEAN = new Primitive(SM_INT, T_BOOLEAN),
         BYTE = new Primitive(SM_INT, T_BYTE),
         SHORT = new Primitive(SM_INT, T_SHORT),
@@ -94,11 +94,11 @@ abstract class Type {
     /**
      * Called when making a new class.
      */
-    static Type begin(ClassLoader loader, TheClassMaker maker, String name) {
+    static BaseType begin(ClassLoader loader, TheClassMaker maker, String name) {
         return new NewClazz(loader, maker, name);
     }
 
-    static Type from(ClassLoader loader, Object type) {
+    static BaseType from(ClassLoader loader, Object type) {
         if (type instanceof Class clazz) {
             return from(clazz);
         } else if (type instanceof Typed typed) {
@@ -119,13 +119,13 @@ abstract class Type {
     /**
      * @param type class name, primitive type, or type descriptor
      */
-    static Type from(ClassLoader loader, String type) {
-        ConcurrentHashMap<Object, Type> cache = cache(loader);
-        Type t = cache.get(type);
+    static BaseType from(ClassLoader loader, String type) {
+        ConcurrentHashMap<Object, BaseType> cache = cache(loader);
+        BaseType t = cache.get(type);
         return t != null ? t : cachePut(cache, type, find(loader, type));
     }
 
-    private static Type find(ClassLoader loader, String type) {
+    private static BaseType find(ClassLoader loader, String type) {
         type = type.trim();
 
         switch (type) {
@@ -180,13 +180,13 @@ abstract class Type {
         return new Clazz(loader, name, null, null);
     }
 
-    static Type from(Class type) {
-        ConcurrentHashMap<Object, Type> cache = cache(type.getClassLoader());
-        Type t = cache.get(type);
+    static BaseType from(Class type) {
+        ConcurrentHashMap<Object, BaseType> cache = cache(type.getClassLoader());
+        BaseType t = cache.get(type);
         return t != null ? t : cachePut(cache, type, find(type));
     }
 
-    private static Type find(Class type) {
+    private static BaseType find(Class type) {
         if (type.isPrimitive()) {
             if (type == int.class) {
                 return INT;
@@ -223,7 +223,7 @@ abstract class Type {
         return new Clazz(type);
     }
 
-    static String makeDescriptor(Type returnType, List<Type> paramTypes) {
+    static String makeDescriptor(BaseType returnType, List<BaseType> paramTypes) {
         var b = new StringBuilder().append('(');
         for (var type : paramTypes) {
             b.append(type.descriptor());
@@ -231,7 +231,7 @@ abstract class Type {
         return b.append(')').append(returnType.descriptor()).toString();
     }
 
-    static String makeDescriptor(Type returnType, Type[] paramTypes) {
+    static String makeDescriptor(BaseType returnType, BaseType[] paramTypes) {
         var b = new StringBuilder().append('(');
         for (var type : paramTypes) {
             b.append(type.descriptor());
@@ -264,14 +264,14 @@ abstract class Type {
     /**
      * @return null if not an array
      */
-    abstract Type elementType();
+    abstract BaseType elementType();
 
     /**
      * @return 0 if not an array
      */
     final int dimensions() {
         int dims = 0;
-        for (Type type = elementType(); type != null; type = type.elementType()) {
+        for (BaseType type = elementType(); type != null; type = type.elementType()) {
             dims++;
         }
         return dims;
@@ -280,7 +280,7 @@ abstract class Type {
     /**
      * Returns the type as an array or adds a dimension if already an array.
      */
-    final Type asArray() {
+    final BaseType asArray() {
         return new Array(this);
     }
 
@@ -309,25 +309,25 @@ abstract class Type {
     /**
      * Returns an object type for a primitive type.
      */
-    abstract Type box();
+    abstract BaseType box();
 
     /**
      * Returns a primitive type for an object type. Returns null if not applicable.
      */
-    abstract Type unbox();
+    abstract BaseType unbox();
 
     /**
      * @return T_* or T_OBJECT
      */
     final int unboxTypeCode() {
-        Type t = unbox();
+        BaseType t = unbox();
         return t == null ? T_OBJECT : t.typeCode();
     }
 
     /**
      * Returns true if assignment is allowed without any conversion.
      */
-    abstract boolean isAssignableFrom(Type other);
+    abstract boolean isAssignableFrom(BaseType other);
 
     /**
      * Checks if a type can be converted without losing information. Lower codes have a cheaper
@@ -345,7 +345,7 @@ abstract class Type {
      *
      * @return conversion code, which is max value if disallowed
      */
-    final int canConvertTo(Type to) {
+    final int canConvertTo(BaseType to) {
         if (this.equals(to)) {
             return 0;
         }
@@ -383,7 +383,7 @@ abstract class Type {
                 return Integer.MAX_VALUE;
             }
 
-            Type toUnboxed = to.unbox();
+            BaseType toUnboxed = to.unbox();
             if (toUnboxed != null) {
                 int code = this.canConvertTo(toUnboxed);
                 if (code != Integer.MAX_VALUE) {
@@ -406,7 +406,7 @@ abstract class Type {
             return 0;
         }
 
-        Type thisUnboxed, toUnboxed;
+        BaseType thisUnboxed, toUnboxed;
         if ((thisUnboxed = this.unbox()) == null || (toUnboxed = to.unbox()) == null) {
             return Integer.MAX_VALUE;
         }
@@ -438,7 +438,7 @@ abstract class Type {
     /**
      * Returns the nearest parent type which isn't hidden.
      */
-    Type nonHiddenBase() {
+    BaseType nonHiddenBase() {
         return this;
     }
 
@@ -452,14 +452,14 @@ abstract class Type {
     /**
      * Returns null if not applicable or unknown.
      */
-    Type superType() {
+    BaseType superType() {
         return null;
     }
 
     /**
      * Returns the set of all interfaces, or null if not applicable or unknown.
      */
-    Set<Type> interfaces() {
+    Set<BaseType> interfaces() {
         return null;
     }
 
@@ -488,7 +488,7 @@ abstract class Type {
      * Tries to find a field in this type or in a super type.
      */
     final Field findField(String name) {
-        Type type = this;
+        BaseType type = this;
         do {
             Field field = type.fields().get(name);
             if (field != null) {
@@ -501,11 +501,11 @@ abstract class Type {
     /**
      * @throws IllegalStateException if type cannot have fields or if a conflict exists
      */
-    Field defineField(int flags, Type type, String name) {
+    Field defineField(int flags, BaseType type, String name) {
         throw new IllegalStateException();
     }
 
-    Field inventField(int flags, Type type, String name) {
+    Field inventField(int flags, BaseType type, String name) {
         throw new IllegalStateException();
     }
 
@@ -527,8 +527,8 @@ abstract class Type {
      * @param specificParamTypes optional
      * @return all matching results
      */
-    Set<Method> findMethods(String methodName, Type[] params, int inherit, int staticAllowed,
-                            Type specificReturnType, Type[] specificParamTypes)
+    Set<Method> findMethods(String methodName, BaseType[] params, int inherit, int staticAllowed,
+                            BaseType specificReturnType, BaseType[] specificParamTypes)
     {
         return Collections.emptySet();
     }
@@ -538,8 +538,8 @@ abstract class Type {
      *
      * @throws IllegalStateException if not exactly one matching method is found
      */
-    final Method findMethod(String methodName, Type[] params, int inherit, int staticAllowed,
-                            Type specificReturnType, Type[] specificParamTypes)
+    final Method findMethod(String methodName, BaseType[] params, int inherit, int staticAllowed,
+                            BaseType specificReturnType, BaseType[] specificParamTypes)
     {
         Set<Method> candidates = findMethods
             (methodName, params, inherit, staticAllowed, specificReturnType, specificParamTypes);
@@ -549,11 +549,11 @@ abstract class Type {
 
             // Check if a signature polymorphic method should be invented.
             if (!method.isStatic() && method.isVarargs()) {
-                Type[] paramTypes;
+                BaseType[] paramTypes;
                 if (possiblySignaturePolymorphic(methodName)
                     && (paramTypes = verifyTypes(params, specificParamTypes)) != null)
                 {
-                    Type returnType = specificReturnType != null
+                    BaseType returnType = specificReturnType != null
                         ? specificReturnType : method.returnType();
                     method = inventMethod(0, returnType, methodName, paramTypes);
                 }
@@ -568,7 +568,7 @@ abstract class Type {
                 candidates = findMethods(methodName, params, -1, -1, null, null);
                 if (candidates.size() == 1) {
                     Method method = candidates.iterator().next();
-                    Type[] paramTypes;
+                    BaseType[] paramTypes;
                     if (method != null && method.isVarargs()
                         && (paramTypes = verifyTypes(params, specificParamTypes)) != null)
                     {
@@ -586,7 +586,7 @@ abstract class Type {
             .append(name()).append('.').append(methodName)
             .append(". Remaining candidates: ");
         int amt = 0;
-        for (Type.Method m : candidates) {
+        for (BaseType.Method m : candidates) {
             if (amt > 0) {
                 b.append(", ");
             }
@@ -607,7 +607,7 @@ abstract class Type {
      * Verifies that the param types can be assigned by the specific types (if provided).
      * Returns null if assignment isn't allowed, or else return the actual param types to use.
      */
-    private static Type[] verifyTypes(Type[] params, Type[] specificParamTypes) {
+    private static BaseType[] verifyTypes(BaseType[] params, BaseType[] specificParamTypes) {
         if (specificParamTypes != null && params.length == specificParamTypes.length) {
             for (int i=0; i<specificParamTypes.length; i++) {
                 if (!specificParamTypes[i].isAssignableFrom(params[i])) {
@@ -622,11 +622,11 @@ abstract class Type {
     /**
      * @throws IllegalStateException if type cannot have methods or if a conflict exists
      */
-    Method defineMethod(int flags, Type returnType, String name, Type... paramTypes) {
+    Method defineMethod(int flags, BaseType returnType, String name, BaseType... paramTypes) {
         throw new IllegalStateException();
     }
 
-    Method inventMethod(int flags, Type returnType, String name, Type... paramTypes) {
+    Method inventMethod(int flags, BaseType returnType, String name, BaseType... paramTypes) {
         throw new IllegalStateException();
     }
 
@@ -634,12 +634,12 @@ abstract class Type {
      * Finds a common catch type, modifying the map as a side effect. New lists are added into
      * the map, and some map entries might be removed. Each list is the hierarchy for the type.
      */
-    static Type commonCatchType(Map<Type, List<Type>> catchMap) {
+    static BaseType commonCatchType(Map<BaseType, List<BaseType>> catchMap) {
         // For each catch type, fill up a list with the corresponding class hierarchy.
 
         int minPos = Integer.MIN_VALUE;
         for (var entry : catchMap.entrySet()) {
-            var list = new ArrayList<Type>();
+            var list = new ArrayList<BaseType>();
             var catchType = entry.getKey();
             do {
                 list.add(catchType);
@@ -652,17 +652,17 @@ abstract class Type {
         // given level, then that's a common type. Keep going to a lower level to find a more
         // specific common type.
 
-        Type commonType = null;
+        BaseType commonType = null;
 
         for (int pos = -1; pos >= minPos; pos--) {
-            Iterator<Map.Entry<Type, List<Type>>> it = catchMap.entrySet().iterator();
+            Iterator<Map.Entry<BaseType, List<BaseType>>> it = catchMap.entrySet().iterator();
 
-            List<Type> list = it.next().getValue();
-            Type levelType = list.get(list.size() + pos);
+            List<BaseType> list = it.next().getValue();
+            BaseType levelType = list.get(list.size() + pos);
 
             while (it.hasNext()) {
                 list = it.next().getValue();
-                Type type = list.get(list.size() + pos);
+                BaseType type = list.get(list.size() + pos);
                 if (!levelType.equals(type)) {
                     return commonType;
                 }
@@ -674,9 +674,9 @@ abstract class Type {
         // This point is reached when the common type is a specific catch type. All the other
         // catch types are subclasses, and so they don't need to be caught.
 
-        Iterator<Type> it = catchMap.keySet().iterator();
+        Iterator<BaseType> it = catchMap.keySet().iterator();
         while (it.hasNext()) {
-            Type type = it.next();
+            BaseType type = it.next();
             if (type != commonType) {
                 it.remove();
             }
@@ -687,7 +687,7 @@ abstract class Type {
 
     @Override
     public String toString() {
-        return "Type {name=" + name() + ", descriptor=" + descriptor() +
+        return "BaseType {name=" + name() + ", descriptor=" + descriptor() +
             ", isPrimitive=" + isPrimitive() + ", isInterface=" + isInterface() +
             ", isArray=" + isArray() + ", elementType=" + toString(elementType()) +
             ", stackMapCode=" + stackMapCode() + ", typeCode=" + typeCode() +
@@ -695,7 +695,7 @@ abstract class Type {
             '}';
     }
 
-    private String toString(Type type) {
+    private String toString(BaseType type) {
         return type == null ? null : type.name();
     }
 
@@ -712,8 +712,8 @@ abstract class Type {
             mName = name;
         }
 
-        final Type enclosingType() {
-            return Type.this;
+        final BaseType enclosingType() {
+            return BaseType.this;
         }
 
         final boolean isPrivate() {
@@ -755,15 +755,15 @@ abstract class Type {
     }
 
     final class Field extends Member {
-        private final Type mType;
+        private final BaseType mType;
 
-        Field(int flags, Type type, String name) {
+        Field(int flags, BaseType type, String name) {
             super(flags, name);
             Objects.requireNonNull(type);
             mType = type;
         }
 
-        Type type() {
+        BaseType type() {
             return mType;
         }
 
@@ -784,14 +784,14 @@ abstract class Type {
     }
 
     final class Method extends Member {
-        private final Type mReturnType;
-        private final Type[] mParamTypes;
+        private final BaseType mReturnType;
+        private final BaseType[] mParamTypes;
 
         private int mHash;
 
         private volatile String mDesc;
 
-        Method(int flags, Type returnType, String name, Type... paramTypes) {
+        Method(int flags, BaseType returnType, String name, BaseType... paramTypes) {
             super(flags, name);
             Objects.requireNonNull(returnType);
             Objects.requireNonNull(paramTypes);
@@ -815,11 +815,11 @@ abstract class Type {
             mFlags |= FLAG_VARARGS;
         }
 
-        Type returnType() {
+        BaseType returnType() {
             return mReturnType;
         }
 
-        Type[] paramTypes() {
+        BaseType[] paramTypes() {
             return mParamTypes;
         }
 
@@ -847,7 +847,7 @@ abstract class Type {
          * hidden, then this method is simply returned.
          */
         Method tryNonHidden() {
-            final Type type = enclosingType();
+            final BaseType type = enclosingType();
 
             if (!type.isHidden()) {
                 return this;
@@ -859,14 +859,14 @@ abstract class Type {
 
             final var key = new MethodKey(returnType(), name(), paramTypes());
 
-            for (Type s = type.superType(); s != null; s = s.superType()) {
+            for (BaseType s = type.superType(); s != null; s = s.superType()) {
                 Method parent = s.methods().get(key);
                 if (parent != null && parent.allowHiddenOverride()) {
                     return parent;
                 }
             }
 
-            for (Type iface : type.interfaces()) {
+            for (BaseType iface : type.interfaces()) {
                 Method parent = iface.methods().get(key);
                 if (parent != null && parent.allowHiddenOverride()) {
                     return parent;
@@ -932,11 +932,11 @@ abstract class Type {
     }
 
     static final class MethodKey {
-        final Type returnType;
+        final BaseType returnType;
         final String name;
-        final Type[] paramTypes;
+        final BaseType[] paramTypes;
 
-        MethodKey(Type returnType, String name, Type... paramTypes) {
+        MethodKey(BaseType returnType, String name, BaseType... paramTypes) {
             this.returnType = returnType;
             this.name = name;
             this.paramTypes = paramTypes;
@@ -956,12 +956,12 @@ abstract class Type {
         }
     }
 
-    private static final WeakHashMap<ClassLoader, SoftReference<ConcurrentHashMap<Object, Type>>>
+    private static final WeakHashMap<ClassLoader, SoftReference<ConcurrentHashMap<Object, BaseType>>>
         cCacheMap = new WeakHashMap<>();
 
-    private static synchronized ConcurrentHashMap<Object, Type> cache(ClassLoader loader) {
-        SoftReference<ConcurrentHashMap<Object, Type>> cacheRef = cCacheMap.get(loader);
-        ConcurrentHashMap<Object, Type> cache;
+    private static synchronized ConcurrentHashMap<Object, BaseType> cache(ClassLoader loader) {
+        SoftReference<ConcurrentHashMap<Object, BaseType>> cacheRef = cCacheMap.get(loader);
+        ConcurrentHashMap<Object, BaseType> cache;
         if (cacheRef == null || (cache = cacheRef.get()) == null) {
             cache = new ConcurrentHashMap<>();
             cCacheMap.put(loader, new SoftReference<>(cache));
@@ -969,8 +969,8 @@ abstract class Type {
         return cache;
     }
 
-    private static Type cachePut(ConcurrentHashMap<Object, Type> cache, Object key, Type type) {
-        Type existing = cache.putIfAbsent(key, type);
+    private static BaseType cachePut(ConcurrentHashMap<Object, BaseType> cache, Object key, BaseType type) {
+        BaseType existing = cache.putIfAbsent(key, type);
         return existing == null ? type : existing;
     }
 
@@ -980,9 +980,9 @@ abstract class Type {
         cCacheMap.clear();
     }
 
-    private static final class Primitive extends Type {
+    private static final class Primitive extends BaseType {
         private final int mStackMapCode, mTypeCode;
-        private volatile SoftReference<Type> mBoxRef;
+        private volatile SoftReference<BaseType> mBoxRef;
 
         private Primitive(int stackMapCode, int typeCode) {
             mStackMapCode = stackMapCode;
@@ -1005,7 +1005,7 @@ abstract class Type {
         }
 
         @Override
-        Type elementType() {
+        BaseType elementType() {
             return null;
         }
 
@@ -1050,9 +1050,9 @@ abstract class Type {
         }
 
         @Override
-        Type box() {
-            SoftReference<Type> boxRef = mBoxRef;
-            Type box;
+        BaseType box() {
+            SoftReference<BaseType> boxRef = mBoxRef;
+            BaseType box;
 
             if (boxRef == null || (box = boxRef.get()) == null) {
                 synchronized (this) {
@@ -1079,12 +1079,12 @@ abstract class Type {
         }
 
         @Override
-        Type unbox() {
+        BaseType unbox() {
             return this;
         }
 
         @Override
-        boolean isAssignableFrom(Type other) {
+        boolean isAssignableFrom(BaseType other) {
             return this.equals(other);
         }
 
@@ -1114,7 +1114,7 @@ abstract class Type {
         }
     }
 
-    private static abstract class Obj extends Type {
+    private static abstract class Obj extends BaseType {
         @Override
         final boolean isPrimitive() {
             return false;
@@ -1131,7 +1131,7 @@ abstract class Type {
         }
 
         @Override
-        final Type box() {
+        final BaseType box() {
             return this;
         }
     }
@@ -1150,7 +1150,7 @@ abstract class Type {
         }
 
         @Override
-        Type elementType() {
+        BaseType elementType() {
             return null;
         }
 
@@ -1170,12 +1170,12 @@ abstract class Type {
         }
 
         @Override
-        Type unbox() {
+        BaseType unbox() {
             return null;
         }
 
         @Override
-        boolean isAssignableFrom(Type other) {
+        boolean isAssignableFrom(BaseType other) {
             return this.equals(other);
         }
 
@@ -1186,14 +1186,14 @@ abstract class Type {
     }
 
     private static final class Array extends Obj {
-        private final Type mElementType;
+        private final BaseType mElementType;
 
         private volatile String mName;
         private volatile String mDesc;
 
         private volatile Class mClass;
 
-        private Array(Type elementType) {
+        private Array(BaseType elementType) {
             mElementType = elementType;
         }
 
@@ -1208,7 +1208,7 @@ abstract class Type {
         }
 
         @Override
-        Type elementType() {
+        BaseType elementType() {
             return mElementType;
         }
 
@@ -1231,12 +1231,12 @@ abstract class Type {
         }
 
         @Override
-        Type unbox() {
+        BaseType unbox() {
             return null;
         }
 
         @Override
-        boolean isAssignableFrom(Type other) {
+        boolean isAssignableFrom(BaseType other) {
             return other == Null.THE || this.equals(other) ||
                 (other.isArray() && elementType().isAssignableFrom(other.elementType()));
         }
@@ -1254,13 +1254,13 @@ abstract class Type {
         }
 
         @Override
-        Type superType() {
+        BaseType superType() {
             return from(Object.class);
         }
 
         @Override
-        Set<Method> findMethods(String methodName, Type[] params, int inherit, int staticAllowed,
-                                Type specificReturnType, Type[] specificParamTypes)
+        Set<Method> findMethods(String methodName, BaseType[] params, int inherit, int staticAllowed,
+                                BaseType specificReturnType, BaseType[] specificParamTypes)
         {
             return superType().findMethods(methodName, params, inherit, staticAllowed,
                                            specificReturnType, specificParamTypes);
@@ -1285,8 +1285,8 @@ abstract class Type {
         private volatile String mDesc;
         protected volatile Boolean mIsInterface;
 
-        protected volatile Type mSuperType;
-        protected volatile Set<Type> mInterfaces;
+        protected volatile BaseType mSuperType;
+        protected volatile Set<BaseType> mInterfaces;
 
         private volatile ConcurrentHashMap<String, Field> mFields;
 
@@ -1326,7 +1326,7 @@ abstract class Type {
         }
 
         @Override
-        final Type elementType() {
+        final BaseType elementType() {
             return null;
         }
 
@@ -1354,12 +1354,12 @@ abstract class Type {
         }
 
         @Override
-        Type unbox() {
+        BaseType unbox() {
             return null;
         }
 
         @Override
-        boolean isAssignableFrom(Type other) {
+        boolean isAssignableFrom(BaseType other) {
             if (other == Null.THE || this.equals(other)) {
                 return true;
             }
@@ -1379,14 +1379,14 @@ abstract class Type {
                 return true;
             }
 
-            Type otherSuperType = other.superType();
+            BaseType otherSuperType = other.superType();
             if (otherSuperType != null && isAssignableFrom(otherSuperType)) {
                 return true;
             }
 
-            Set<Type> interfaces = other.interfaces();
+            Set<BaseType> interfaces = other.interfaces();
             if (interfaces != null) {
-                for (Type iface : interfaces) {
+                for (BaseType iface : interfaces) {
                     if (isAssignableFrom(iface)) {
                         return true;
                     }
@@ -1416,21 +1416,21 @@ abstract class Type {
         }
 
         @Override
-        Type nonHiddenBase() {
+        BaseType nonHiddenBase() {
             Class clazz = clazz();
             return (clazz == null || !clazz.isHidden()) ? this : findNonHiddenBase(clazz);
         }
 
-        private static Type findNonHiddenBase(Class clazz) {
+        private static BaseType findNonHiddenBase(Class clazz) {
             do {
                 clazz = clazz.getSuperclass();
             } while (clazz.isHidden());
-            return Type.from(clazz);
+            return BaseType.from(clazz);
         }
 
         @Override
-        Type superType() {
-            Type superType = mSuperType;
+        BaseType superType() {
+            BaseType superType = mSuperType;
             if (superType == null) {
                 Class clazz = clazz();
                 if (clazz != null) {
@@ -1450,15 +1450,15 @@ abstract class Type {
         }
 
         @Override
-        Set<Type> interfaces() {
-            Set<Type> interfaces = mInterfaces;
+        Set<BaseType> interfaces() {
+            Set<BaseType> interfaces = mInterfaces;
             if (interfaces == null) {
                 synchronized (this) {
                     interfaces = mInterfaces;
                     if (interfaces == null) {
                         Class clazz = clazz();
                         if (clazz != null) {
-                            Set<Type> all = allInterfaces(null, clazz);
+                            Set<BaseType> all = allInterfaces(null, clazz);
                             interfaces = all == null ? Collections.emptySet() : all;
                             mInterfaces = interfaces;
                         }
@@ -1468,7 +1468,7 @@ abstract class Type {
             return interfaces;
         }
 
-        private static Set<Type> allInterfaces(Set<Type> all, Class clazz) {
+        private static Set<BaseType> allInterfaces(Set<BaseType> all, Class clazz) {
             Class[] interfaces = clazz.getInterfaces();
 
             if (interfaces != null && interfaces.length != 0) {
@@ -1476,7 +1476,7 @@ abstract class Type {
                     all = new LinkedHashSet<>(1);
                 }
                 for (Class iface : interfaces) {
-                    all.add(Type.from(iface));
+                    all.add(BaseType.from(iface));
                 }
                 for (Class iface : interfaces) {
                     all = allInterfaces(all, iface);
@@ -1506,16 +1506,16 @@ abstract class Type {
         }
 
         @Override
-        Field defineField(int flags, Type type, String name) {
+        Field defineField(int flags, BaseType type, String name) {
             return defineField(false, flags, type, name);
         }
 
         @Override
-        Field inventField(int flags, Type type, String name) {
+        Field inventField(int flags, BaseType type, String name) {
             return defineField(true, flags, type, name);
         }
 
-        private Field defineField(boolean invent, int flags, Type type, String name) {
+        private Field defineField(boolean invent, int flags, BaseType type, String name) {
             var field = new Field(flags, type, name);
 
             Field existing;
@@ -1551,7 +1551,7 @@ abstract class Type {
                 for (var field : clazz.getDeclaredFields()) {
                     int flags = field.getModifiers();
                     String name = field.getName();
-                    Type type = from(field.getType());
+                    BaseType type = from(field.getType());
                     fields.put(name, new Field(flags, type, name));
                 }
             }
@@ -1574,10 +1574,10 @@ abstract class Type {
         }
 
         @Override
-        Set<Method> findMethods(String methodName, Type[] params, int inherit, int staticAllowed,
-                                Type specificReturnType, Type[] specificParamTypes)
+        Set<Method> findMethods(String methodName, BaseType[] params, int inherit, int staticAllowed,
+                                BaseType specificReturnType, BaseType[] specificParamTypes)
         {
-            Type type = this;
+            BaseType type = this;
 
             if (inherit > 0) {
                 type = type.superType();
@@ -1629,10 +1629,10 @@ abstract class Type {
             }
         }
 
-        private static Set<Method> doFindMethods(Type type, String methodName,
-                                                 Type[] params, int inherit, int staticAllowed,
-                                                 Type specificReturnType,
-                                                 Type[] specificParamTypes)
+        private static Set<Method> doFindMethods(BaseType type, String methodName,
+                                                 BaseType[] params, int inherit, int staticAllowed,
+                                                 BaseType specificReturnType,
+                                                 BaseType[] specificParamTypes)
         {
             if (methodName.equals("<clinit>")) {
                 // Can't be invoked.
@@ -1643,7 +1643,7 @@ abstract class Type {
             addMethods(methods, type, methodName, params, staticAllowed);
 
             if (inherit >= 0) {
-                Type superType = type.superType();
+                BaseType superType = type.superType();
                 while (superType != null) {
                     addMethods(methods, superType, methodName, params, staticAllowed);
                     superType = superType.superType();
@@ -1651,9 +1651,9 @@ abstract class Type {
             }
 
             if (inherit == 0) {
-                Set<Type> interfaces = type.interfaces();
+                Set<BaseType> interfaces = type.interfaces();
                 if (interfaces != null) {
-                    for (Type iface : interfaces) {
+                    for (BaseType iface : interfaces) {
                         addMethods(methods, iface, methodName, params, staticAllowed);
                     }
                 }
@@ -1712,8 +1712,8 @@ abstract class Type {
             return methods;
         }
 
-        private static void addMethods(Set<Method> methods, Type type, String methodName,
-                                       Type[] params, int staticAllowed)
+        private static void addMethods(Set<Method> methods, BaseType type, String methodName,
+                                       BaseType[] params, int staticAllowed)
         {
             outer: for (Method m : type.methods().values()) {
                 if (!m.name().equals(methodName)) {
@@ -1728,7 +1728,7 @@ abstract class Type {
                     continue;
                 }
 
-                Type[] actualParams = m.paramTypes();
+                BaseType[] actualParams = m.paramTypes();
 
                 if (!m.isVarargs()) {
                     if (actualParams.length != params.length) {
@@ -1745,10 +1745,10 @@ abstract class Type {
                         continue;
                     }
 
-                    Type varType = actualParams[actualParams.length - 1].elementType();
+                    BaseType varType = actualParams[actualParams.length - 1].elementType();
 
                     for (int i=0; i<params.length; i++) {
-                        Type actual = (i < actualParams.length - 1) ? actualParams[i] : varType;
+                        BaseType actual = (i < actualParams.length - 1) ? actualParams[i] : varType;
                         if (params[i].canConvertTo(actual) == Integer.MAX_VALUE) {
                             if (i == actualParams.length - 1) {
                                 if (params[i].canConvertTo(actualParams[i]) != Integer.MAX_VALUE) {
@@ -1766,17 +1766,17 @@ abstract class Type {
         }
 
         @Override
-        Method defineMethod(int flags, Type returnType, String name, Type... paramTypes) {
+        Method defineMethod(int flags, BaseType returnType, String name, BaseType... paramTypes) {
             return defineMethod(false, flags, returnType, name, paramTypes);
         }
 
         @Override
-        Method inventMethod(int flags, Type returnType, String name, Type... paramTypes) {
+        Method inventMethod(int flags, BaseType returnType, String name, BaseType... paramTypes) {
             return defineMethod(true, flags, returnType, name, paramTypes);
         }
 
         private Method defineMethod(boolean invent, int flags,
-                                    Type returnType, String name, Type... paramTypes)
+                                    BaseType returnType, String name, BaseType... paramTypes)
         {
             var key = new MethodKey(returnType, name, paramTypes);
             var method = new Method(flags, returnType, name, paramTypes);
@@ -1824,12 +1824,12 @@ abstract class Type {
         }
 
         private void addMethod(Map<MethodKey, Method> methods,
-                               String name, Executable method, Type returnType)
+                               String name, Executable method, BaseType returnType)
         {
             int flags = method.getModifiers();
 
             Class<?>[] params = method.getParameterTypes();
-            var paramTypes = new Type[params.length];
+            var paramTypes = new BaseType[params.length];
             for (int i=0; i<params.length; i++) {
                 paramTypes[i] = from(params[i]);
             }
@@ -1853,17 +1853,17 @@ abstract class Type {
          * Composite key used to cache the results of doFindMethods.
          */
         private static final class FindKey {
-            final Type[] params;
+            final BaseType[] params;
             final int inherit;
             final int staticAllowed;
-            final Type specificReturnType;
-            final Type[] specificParamTypes;
+            final BaseType specificReturnType;
+            final BaseType[] specificParamTypes;
 
             final int hash;
 
-            FindKey(Type[] params, int inherit, int staticAllowed,
-                    Type specificReturnType,
-                    Type[] specificParamTypes)
+            FindKey(BaseType[] params, int inherit, int staticAllowed,
+                    BaseType specificReturnType,
+                    BaseType[] specificParamTypes)
             {
                 this.params = params;
                 this.inherit = inherit;
@@ -1898,15 +1898,15 @@ abstract class Type {
     }
 
     private static final class JavaLang extends Clazz {
-        private volatile Type mUnbox;
+        private volatile BaseType mUnbox;
 
         JavaLang(Class clazz) {
             super(clazz);
         }
 
         @Override
-        Type unbox() {
-            Type unbox = mUnbox;
+        BaseType unbox() {
+            BaseType unbox = mUnbox;
 
             if (unbox == null) {
                 switch (name().substring(10)) {
@@ -1953,8 +1953,8 @@ abstract class Type {
         }
 
         @Override
-        Type superType() {
-            Type superType = mSuperType;
+        BaseType superType() {
+            BaseType superType = mSuperType;
             if (superType == null) {
                 mSuperType = superType = maker().superType();
             }
@@ -1962,8 +1962,8 @@ abstract class Type {
         }
 
         @Override
-        Set<Type> interfaces() {
-            Set<Type> interfaces = mInterfaces;
+        Set<BaseType> interfaces() {
+            Set<BaseType> interfaces = mInterfaces;
             if (interfaces == null) {
                 synchronized (this) {
                     interfaces = mInterfaces;

@@ -88,7 +88,7 @@ class TheAnnotationMaker implements AnnotationMaker {
         } else if (value instanceof Boolean b) {
             return new ConstElement('Z', cp.addInteger(b ? 1 : 0));
         } else if (value instanceof Enum ev) {
-            return new EnumElement(cp.addUTF8(Type.from(ev.getDeclaringClass()).descriptor()),
+            return new EnumElement(cp.addUTF8(BaseType.from(ev.getDeclaringClass()).descriptor()),
                                    cp.addUTF8(ev.name()));
         } else if (value.getClass().isArray()) {
             int length = Array.getLength(value);
@@ -111,7 +111,7 @@ class TheAnnotationMaker implements AnnotationMaker {
         } else if (value instanceof Double num) {
             return new ConstElement('D', cp.addDouble(num));
         } else if (value instanceof Class clazz) {
-            return new ConstElement('c', cp.addUTF8(Type.from(clazz).descriptor()));
+            return new ConstElement('c', cp.addUTF8(BaseType.from(clazz).descriptor()));
         } else if (value instanceof Character c) {
             return new ConstElement('C', cp.addInteger(c.charValue()));
         } else if (value instanceof Byte num) {

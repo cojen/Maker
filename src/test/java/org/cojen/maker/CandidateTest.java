@@ -31,13 +31,13 @@ public class CandidateTest {
 
     @Test
     public void arrayCompare() {
-        var obj = Type.from(Object.class);
-        var str = Type.from(String.class);
-        var num = Type.from(Number.class);
+        var obj = BaseType.from(Object.class);
+        var str = BaseType.from(String.class);
+        var num = BaseType.from(Number.class);
 
-        var objArray = Type.from(Object[].class);
-        var strArray = Type.from(String[].class);
-        var numArray = Type.from(Number[].class);
+        var objArray = BaseType.from(Object[].class);
+        var strArray = BaseType.from(String[].class);
+        var numArray = BaseType.from(Number[].class);
 
         assertEquals(-1, Candidate.compare(strArray, objArray, obj));
         assertEquals(1, Candidate.compare(strArray, obj, objArray));

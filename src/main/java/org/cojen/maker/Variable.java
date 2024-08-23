@@ -798,7 +798,7 @@ public interface Variable {
      * primitive type, it's simply returned as is. Null is returned in all other cases.
      */
     static Class<?> boxedType(Class<?> clazz) {
-        Type boxed = Type.from(clazz).box();
+        BaseType boxed = BaseType.from(clazz).box();
         return boxed.unbox() != null ? boxed.clazz() : null;
     }
 
@@ -815,7 +815,7 @@ public interface Variable {
      * it's simply returned as is. Null is returned in all other cases.
      */
     static Class<?> unboxedType(Class<?> clazz) {
-        Type unboxed = Type.from(clazz).unbox();
+        BaseType unboxed = BaseType.from(clazz).unbox();
         return unboxed != null ? unboxed.clazz() : null;
     }
 
@@ -872,7 +872,7 @@ public interface Variable {
      * @hidden
      */
     default Variable invoke(String name) {
-        return invoke(name, Type.NO_ARGS);
+        return invoke(name, BaseType.NO_ARGS);
     }
 
     /**
@@ -895,7 +895,7 @@ public interface Variable {
      * @hidden
      */
     default Variable invoke(Object returnType, String name, Object[] types) {
-        return invoke(returnType, name, types, Type.NO_ARGS);
+        return invoke(returnType, name, types, BaseType.NO_ARGS);
     }
 
     /**
@@ -917,7 +917,7 @@ public interface Variable {
      * @hidden
      */
     default Variable methodHandle(Object returnType, String name) {
-        return methodHandle(returnType, name, Type.NO_ARGS);
+        return methodHandle(returnType, name, BaseType.NO_ARGS);
     }
 
     /**
@@ -936,7 +936,7 @@ public interface Variable {
      * @hidden
      */
     default Bootstrap indy(String name) {
-        return indy(name, Type.NO_ARGS);
+        return indy(name, BaseType.NO_ARGS);
     }
 
     /**
@@ -957,7 +957,7 @@ public interface Variable {
      * @hidden
      */
     default Bootstrap condy(String name) {
-        return condy(name, Type.NO_ARGS);
+        return condy(name, BaseType.NO_ARGS);
     }
 
     /**

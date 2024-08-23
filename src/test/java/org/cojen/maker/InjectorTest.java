@@ -81,7 +81,7 @@ public class InjectorTest {
         }
 
         parent = null; // help GC
-        Type.clearCaches();
+        BaseType.clearCaches();
 
         for (int i=0; i<10; i++) {
             // More reliable check than calling isEmpty due to apparent race conditions when

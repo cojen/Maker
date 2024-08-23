@@ -52,7 +52,7 @@ public interface MethodMaker extends Maker {
      * @hidden
      */
     static MethodMaker begin(MethodHandles.Lookup lookup, Object retType, String name) {
-        return begin(lookup, retType, name, Type.NO_ARGS);
+        return begin(lookup, retType, name, BaseType.NO_ARGS);
     }
 
     /**
@@ -81,13 +81,13 @@ public interface MethodMaker extends Maker {
         ClassLoader loader = lookupClass.getClassLoader();
         TheClassMaker cm = TheClassMaker.begin(false, className, true, loader, null, lookup);
 
-        Type.Method method = cm.defineMethod(retType, mname, paramTypes);
+        BaseType.Method method = cm.defineMethod(retType, mname, paramTypes);
 
         final MethodType mtype;
         if (type != null) {
             mtype = type;
         } else {
-            Type[] ptypes = method.paramTypes();
+            BaseType[] ptypes = method.paramTypes();
             var pclasses = new Class[ptypes.length];
             for (int i=0; i<pclasses.length; i++) {
                 pclasses[i] = classFor(ptypes[i]);
@@ -123,7 +123,7 @@ public interface MethodMaker extends Maker {
         return mm;
     }
 
-    private static Class<?> classFor(Type type) {
+    private static Class<?> classFor(BaseType type) {
         Class<?> clazz = type.clazz();
         if (clazz == null) {
             throw new IllegalStateException("Unknown type: " + type.name());
@@ -343,7 +343,7 @@ public interface MethodMaker extends Maker {
      * @hidden
      */
     default Variable invoke(String name) {
-        return invoke(name, Type.NO_ARGS);
+        return invoke(name, BaseType.NO_ARGS);
     }
 
     /**
@@ -361,7 +361,7 @@ public interface MethodMaker extends Maker {
      * @hidden
      */
     default void invokeSuperConstructor() {
-        invokeSuperConstructor(Type.NO_ARGS);
+        invokeSuperConstructor(BaseType.NO_ARGS);
     }
 
     /**
@@ -379,7 +379,7 @@ public interface MethodMaker extends Maker {
      * @hidden
      */
     default void invokeThisConstructor() {
-        invokeThisConstructor(Type.NO_ARGS);
+        invokeThisConstructor(BaseType.NO_ARGS);
     }
 
     /**
@@ -399,7 +399,7 @@ public interface MethodMaker extends Maker {
      * @hidden
      */
     default Variable invoke(MethodHandle handle) {
-        return invoke(handle, Type.NO_ARGS);
+        return invoke(handle, BaseType.NO_ARGS);
     }
 
     /**
@@ -420,7 +420,7 @@ public interface MethodMaker extends Maker {
      * @hidden
      */
     default Variable new_(Object type) {
-        return new_(type, Type.NO_ARGS);
+        return new_(type, BaseType.NO_ARGS);
     }
 
     /**
@@ -506,7 +506,7 @@ public interface MethodMaker extends Maker {
      * @hidden
      */
     default Field access(VarHandle handle) {
-        return access(handle, Type.NO_ARGS);
+        return access(handle, BaseType.NO_ARGS);
     }
 
     /**
