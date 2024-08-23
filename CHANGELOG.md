@@ -1,6 +1,10 @@
 Changelog
 =========
 
+v2.6.0
+------
+* Added a Type interface for explicitly representing types.
+
 v2.5.11
 -------
 * Added a variable decrement method.

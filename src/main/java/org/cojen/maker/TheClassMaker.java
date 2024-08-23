@@ -516,19 +516,15 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
     }
 
     @Override
-    public Object arrayType(int dimensions) {
+    public Type arrayType(int dimensions) {
         if (dimensions < 1 || dimensions > 255) {
             throw new IllegalArgumentException();
         }
-
-        BaseType type = type();
+        Type type = type();
         do {
             type = type.asArray();
         } while (--dimensions > 0);
-
-        final BaseType fType = type;
-
-        return (Typed) () -> fType;
+        return type;
     }
 
     @Override

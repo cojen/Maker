@@ -163,8 +163,8 @@ class ConstantPool {
             for (int i=0; i<params.length; i++) {
                 params[i] = BaseType.from(mtype.parameterType(i));
             }
-            ref = addMethod(decl.inventMethod
-                            (kind == REF_invokeStatic ? BaseType.FLAG_STATIC : 0, ret, name, params));
+            int flags = kind == REF_invokeStatic ? BaseType.FLAG_STATIC : 0;
+            ref = addMethod(decl.inventMethod(flags, ret, name, params));
             break;
         }
 

@@ -43,7 +43,7 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * @author Brian S O'Neill
  */
-abstract class BaseType {
+abstract class BaseType implements Type, Typed {
     // Note: These codes match those used by the stack map table attribute.
     static final int
         SM_TOP = 0,
@@ -239,37 +239,21 @@ abstract class BaseType {
         return b.append(')').append(returnType.descriptor()).toString();
     }
 
-    /**
-     * Returns true if type is an int, boolean, double, etc.
-     */
-    abstract boolean isPrimitive();
+    @Override
+    public BaseType type() {
+        return this;
+    }
 
-    /**
-     * Returns true if type is an array, an interface, or a class.
-     */
-    final boolean isObject() {
+    @Override
+    public final boolean isObject() {
         return !isPrimitive();
     }
 
-    /**
-     * Returns true if type is known to be an interface.
-     */
-    abstract boolean isInterface();
+    @Override
+    public abstract BaseType elementType();
 
-    /**
-     * Returns true if type is an array and has no methods.
-     */
-    abstract boolean isArray();
-
-    /**
-     * @return null if not an array
-     */
-    abstract BaseType elementType();
-
-    /**
-     * @return 0 if not an array
-     */
-    final int dimensions() {
+    @Override
+    public final int dimensions() {
         int dims = 0;
         for (BaseType type = elementType(); type != null; type = type.elementType()) {
             dims++;
@@ -277,10 +261,8 @@ abstract class BaseType {
         return dims;
     }
 
-    /**
-     * Returns the type as an array or adds a dimension if already an array.
-     */
-    final BaseType asArray() {
+    @Override
+    public final BaseType asArray() {
         return new Array(this);
     }
 
@@ -296,25 +278,11 @@ abstract class BaseType {
      */
     abstract int typeCode();
 
-    /**
-     * Returns the type in Java syntax.
-     */
-    abstract String name();
+    @Override
+    public abstract BaseType box();
 
-    /**
-     * Returns a class file type descriptor.
-     */
-    abstract String descriptor();
-
-    /**
-     * Returns an object type for a primitive type.
-     */
-    abstract BaseType box();
-
-    /**
-     * Returns a primitive type for an object type. Returns null if not applicable.
-     */
-    abstract BaseType unbox();
+    @Override
+    public abstract BaseType unbox();
 
     /**
      * @return T_* or T_OBJECT
@@ -423,10 +391,10 @@ abstract class BaseType {
         return code;
     }
 
-    /**
-     * Returns null if no matching class is found.
-     */
-    abstract Class clazz();
+    @Override
+    public ClassMaker makerType() {
+        return null;
+    }
 
     /**
      * If true is returned, then clazz isn't null.
@@ -440,13 +408,6 @@ abstract class BaseType {
      */
     BaseType nonHiddenBase() {
         return this;
-    }
-
-    /**
-     * Returns null if class already exists.
-     */
-    ClassMaker maker() {
-        return null;
     }
 
     /**
@@ -598,7 +559,7 @@ abstract class BaseType {
     }
 
     private boolean possiblySignaturePolymorphic(String methodName) {
-        Class clazz = clazz();
+        Class clazz = classType();
         return (clazz == MethodHandle.class && !methodName.equals("invokeWithArguments"))
             || clazz == VarHandle.class;
     }
@@ -686,8 +647,8 @@ abstract class BaseType {
     }
 
     @Override
-    public String toString() {
-        return "BaseType {name=" + name() + ", descriptor=" + descriptor() +
+    public final String toString() {
+        return "Type {name=" + name() + ", descriptor=" + descriptor() +
             ", isPrimitive=" + isPrimitive() + ", isInterface=" + isInterface() +
             ", isArray=" + isArray() + ", elementType=" + toString(elementType()) +
             ", stackMapCode=" + stackMapCode() + ", typeCode=" + typeCode() +
@@ -990,22 +951,22 @@ abstract class BaseType {
         }
 
         @Override
-        boolean isPrimitive() {
+        public boolean isPrimitive() {
             return true;
         }
 
         @Override
-        boolean isInterface() {
+        public boolean isInterface() {
             return false;
         }
 
         @Override
-        boolean isArray() {
+        public boolean isArray() {
             return false;
         }
 
         @Override
-        BaseType elementType() {
+        public BaseType elementType() {
             return null;
         }
 
@@ -1020,7 +981,7 @@ abstract class BaseType {
         }
 
         @Override
-        String name() {
+        public String name() {
             return switch (mTypeCode) {
                 default -> "void";
                 case T_BOOLEAN -> "boolean";
@@ -1035,7 +996,7 @@ abstract class BaseType {
         }
 
         @Override
-        String descriptor() {
+        public String descriptor() {
             return switch (mTypeCode) {
                 default -> "V";
                 case T_BOOLEAN -> "Z";
@@ -1050,7 +1011,7 @@ abstract class BaseType {
         }
 
         @Override
-        BaseType box() {
+        public BaseType box() {
             SoftReference<BaseType> boxRef = mBoxRef;
             BaseType box;
 
@@ -1079,7 +1040,7 @@ abstract class BaseType {
         }
 
         @Override
-        BaseType unbox() {
+        public BaseType unbox() {
             return this;
         }
 
@@ -1089,7 +1050,7 @@ abstract class BaseType {
         }
 
         @Override
-        Class clazz() {
+        public Class<?> classType() {
             return switch (mTypeCode) {
                 default -> void.class;
                 case T_BOOLEAN -> boolean.class;
@@ -1116,7 +1077,7 @@ abstract class BaseType {
 
     private static abstract class Obj extends BaseType {
         @Override
-        final boolean isPrimitive() {
+        public final boolean isPrimitive() {
             return false;
         }
 
@@ -1131,7 +1092,7 @@ abstract class BaseType {
         }
 
         @Override
-        final BaseType box() {
+        public final BaseType box() {
             return this;
         }
     }
@@ -1140,17 +1101,17 @@ abstract class BaseType {
         static final Null THE = new Null();
 
         @Override
-        boolean isInterface() {
+        public boolean isInterface() {
             return false;
         }
 
         @Override
-        boolean isArray() {
+        public boolean isArray() {
             return false;
         }
 
         @Override
-        BaseType elementType() {
+        public BaseType elementType() {
             return null;
         }
 
@@ -1160,17 +1121,17 @@ abstract class BaseType {
         }
 
         @Override
-        String name() {
+        public String name() {
             return Object.class.getName();
         }
 
         @Override
-        String descriptor() {
+        public String descriptor() {
             return Object.class.descriptorString();
         }
 
         @Override
-        BaseType unbox() {
+        public BaseType unbox() {
             return null;
         }
 
@@ -1180,7 +1141,7 @@ abstract class BaseType {
         }
 
         @Override
-        Class clazz() {
+        public Class<?> classType() {
             return null;
         }
     }
@@ -1198,22 +1159,22 @@ abstract class BaseType {
         }
 
         @Override
-        boolean isInterface() {
+        public boolean isInterface() {
             return false;
         }
 
         @Override
-        boolean isArray() {
+        public boolean isArray() {
             return true;
         }
 
         @Override
-        BaseType elementType() {
+        public BaseType elementType() {
             return mElementType;
         }
 
         @Override
-        String name() {
+        public String name() {
             String name = mName;
             if (name == null) {
                 mName = name = mElementType.name() + "[]";
@@ -1222,7 +1183,7 @@ abstract class BaseType {
         }
 
         @Override
-        String descriptor() {
+        public String descriptor() {
             String desc = mDesc;
             if (desc == null) {
                 mDesc = desc = '[' + mElementType.descriptor();
@@ -1231,7 +1192,7 @@ abstract class BaseType {
         }
 
         @Override
-        BaseType unbox() {
+        public BaseType unbox() {
             return null;
         }
 
@@ -1242,10 +1203,10 @@ abstract class BaseType {
         }
 
         @Override
-        Class clazz() {
+        public Class<?> classType() {
             Class clazz = mClass;
             if (clazz == null) {
-                Class element = mElementType.clazz();
+                Class element = mElementType.classType();
                 if (element != null) {
                     mClass = clazz = java.lang.reflect.Array.newInstance(element, 0).getClass();
                 }
@@ -1311,27 +1272,27 @@ abstract class BaseType {
         }
 
         @Override
-        final boolean isInterface() {
+        public final boolean isInterface() {
             Boolean is = mIsInterface;
             if (is == null) {
-                Class clazz = clazz();
+                Class clazz = classType();
                 mIsInterface = is = clazz != null && clazz.isInterface();
             }
             return is;
         }
 
         @Override
-        final boolean isArray() {
+        public final boolean isArray() {
             return false;
         }
 
         @Override
-        final BaseType elementType() {
+        public final BaseType elementType() {
             return null;
         }
 
         @Override
-        final String name() {
+        public final String name() {
             String name = mName;
             if (name == null) {
                 String desc = mDesc;
@@ -1345,7 +1306,7 @@ abstract class BaseType {
         }
 
         @Override
-        final String descriptor() {
+        public final String descriptor() {
             String desc = mDesc;
             if (desc == null) {
                 mDesc = desc = 'L' + mName.replace('.', '/') + ';';
@@ -1354,7 +1315,7 @@ abstract class BaseType {
         }
 
         @Override
-        BaseType unbox() {
+        public BaseType unbox() {
             return null;
         }
 
@@ -1364,8 +1325,8 @@ abstract class BaseType {
                 return true;
             }
 
-            Class<?> thisClass = clazz();
-            Class<?> otherClass = other.clazz();
+            Class<?> thisClass = classType();
+            Class<?> otherClass = other.classType();
 
             if (thisClass != null && otherClass != null) {
                 return thisClass.isAssignableFrom(otherClass);
@@ -1397,7 +1358,7 @@ abstract class BaseType {
         }
 
         @Override
-        Class clazz() {
+        public Class<?> classType() {
             Class clazz = mClass;
             if (clazz == null) {
                 try {
@@ -1411,13 +1372,13 @@ abstract class BaseType {
 
         @Override
         boolean isHidden() {
-            Class clazz = clazz();
+            Class clazz = classType();
             return clazz != null && clazz.isHidden();
         }
 
         @Override
         BaseType nonHiddenBase() {
-            Class clazz = clazz();
+            Class clazz = classType();
             return (clazz == null || !clazz.isHidden()) ? this : findNonHiddenBase(clazz);
         }
 
@@ -1432,7 +1393,7 @@ abstract class BaseType {
         BaseType superType() {
             BaseType superType = mSuperType;
             if (superType == null) {
-                Class clazz = clazz();
+                Class clazz = classType();
                 if (clazz != null) {
                     clazz = clazz.getSuperclass();
                     assign: {
@@ -1456,7 +1417,7 @@ abstract class BaseType {
                 synchronized (this) {
                     interfaces = mInterfaces;
                     if (interfaces == null) {
-                        Class clazz = clazz();
+                        Class clazz = classType();
                         if (clazz != null) {
                             Set<BaseType> all = allInterfaces(null, clazz);
                             interfaces = all == null ? Collections.emptySet() : all;
@@ -1546,7 +1507,7 @@ abstract class BaseType {
         private Map<String, Field> initFields() {
             var fields = new ConcurrentHashMap<String, Field>();
 
-            Class clazz = clazz();
+            Class clazz = classType();
             if (clazz != null) {
                 for (var field : clazz.getDeclaredFields()) {
                     int flags = field.getModifiers();
@@ -1810,7 +1771,7 @@ abstract class BaseType {
         private Map<MethodKey, Method> initMethods() {
             var methods = new ConcurrentHashMap<MethodKey, Method>();
 
-            Class clazz = clazz();
+            Class clazz = classType();
             if (clazz != null) {
                 for (var method : clazz.getDeclaredMethods()) {
                     addMethod(methods, method.getName(), method, from(method.getReturnType()));
@@ -1905,7 +1866,7 @@ abstract class BaseType {
         }
 
         @Override
-        BaseType unbox() {
+        public BaseType unbox() {
             BaseType unbox = mUnbox;
 
             if (unbox == null) {
@@ -1941,14 +1902,14 @@ abstract class BaseType {
         }
 
         @Override
-        Class clazz() {
+        public Class<?> classType() {
             // It doesn't exist yet, so don't try loading it. Doing so causes the ClassLoader
             // to allocate a lock object, and it might never be reclaimed.
             return null;
         }
 
         @Override
-        TheClassMaker maker() {
+        public TheClassMaker makerType() {
             return mMakerRef.get();
         }
 
@@ -1956,7 +1917,7 @@ abstract class BaseType {
         BaseType superType() {
             BaseType superType = mSuperType;
             if (superType == null) {
-                mSuperType = superType = maker().superType();
+                mSuperType = superType = makerType().superType();
             }
             return superType;
         }
@@ -1968,7 +1929,7 @@ abstract class BaseType {
                 synchronized (this) {
                     interfaces = mInterfaces;
                     if (interfaces == null) {
-                        mInterfaces = interfaces = maker().allInterfaces();
+                        mInterfaces = interfaces = makerType().allInterfaces();
                     }
                 }
             }

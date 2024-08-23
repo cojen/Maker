@@ -126,6 +126,11 @@ public interface ClassMaker extends Maker {
     ClassMaker another(String className);
 
     /**
+     * Returns the type of this class being made.
+     */
+    Type type();
+
+    /**
      * Returns the tentative name of the class being made. If {@link #finishHidden
      * finishHidden} is called, then the actual class name will differ.
      */
@@ -340,12 +345,12 @@ public interface ClassMaker extends Maker {
     ClassMaker sourceFile(String fileName);
 
     /**
-     * Returns an opaque type object which represents the class being made as an array.
+     * Returns a type object which represents the class being made as an array.
      *
      * @param dimensions must be at least 1
      * @throws IllegalArgumentException if the given dimensions is less than 1 or greater than 255
      */
-    Object arrayType(int dimensions);
+    Type arrayType(int dimensions);
 
     /**
      * Returns the class loader that the finished class will be loaded into.

@@ -124,7 +124,7 @@ public interface MethodMaker extends Maker {
     }
 
     private static Class<?> classFor(BaseType type) {
-        Class<?> clazz = type.clazz();
+        Class<?> clazz = type.classType();
         if (clazz == null) {
             throw new IllegalStateException("Unknown type: " + type.name());
         }

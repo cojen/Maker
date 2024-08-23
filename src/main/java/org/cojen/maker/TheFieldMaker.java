@@ -165,7 +165,9 @@ final class TheFieldMaker extends ClassMember implements FieldMaker, Typed {
                         // Fields are null by default.
                         return this;
                     }
-                    if (value instanceof String str && mField.type() == BaseType.from(String.class)) {
+                    if (value instanceof String str &&
+                        mField.type() == BaseType.from(String.class))
+                    {
                         constant = mConstants.addString(str);
                         break addConstant;
                     }

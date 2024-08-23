@@ -31,16 +31,25 @@ import java.lang.invoke.MethodType;
  */
 public interface Variable {
     /**
+     * Returns the type of this variable.
+     */
+    Type type();
+
+    /**
      * Returns the type of this variable, if bound to an existing class. Null is returned if
      * bound to a class which is being made.
      */
-    Class<?> classType();
+    default Class<?> classType() {
+        return type().classType();
+    }
 
     /**
      * Returns the type of this variable, if bound to a class which is being made. Null is
      * returned if bound to an existing class.
      */
-    ClassMaker makerType();
+    default ClassMaker makerType() {
+        return type().makerType();
+    }
 
     /**
      * Returns the name of this variable, which is null if unnamed.
@@ -799,7 +808,7 @@ public interface Variable {
      */
     static Class<?> boxedType(Class<?> clazz) {
         BaseType boxed = BaseType.from(clazz).box();
-        return boxed.unbox() != null ? boxed.clazz() : null;
+        return boxed.unbox() != null ? boxed.classType() : null;
     }
 
     /**
@@ -816,7 +825,7 @@ public interface Variable {
      */
     static Class<?> unboxedType(Class<?> clazz) {
         BaseType unboxed = BaseType.from(clazz).unbox();
-        return unboxed != null ? unboxed.clazz() : null;
+        return unboxed != null ? unboxed.classType() : null;
     }
 
     /**
