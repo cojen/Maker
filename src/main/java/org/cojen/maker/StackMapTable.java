@@ -21,7 +21,7 @@ import java.io.IOException;
 import java.util.Arrays;
 
 /**
- * The wonderful StackMapTable attribute!
+ * Builds the StackMapTable attribute.
  *
  * @author Brian S O'Neill
  */
@@ -35,7 +35,7 @@ class StackMapTable extends Attribute {
      * @param initCodes can be null
      */
     StackMapTable(ConstantPool cp, int[] initCodes) {
-        super(cp, "StackMapTable");
+        super(cp); // set the name later; see finish()
         mInitFrame = new Frame(Integer.MIN_VALUE, initCodes, null);
     }
 
@@ -84,6 +84,9 @@ class StackMapTable extends Attribute {
         if (mFirstFrame == null) {
             return false;
         }
+
+        // Lazily set the name such that it's added to the ConstantPool only when needed.
+        name("StackMapTable");
 
         var out = new BytesOut(null, mNumFrames * 4);
 
