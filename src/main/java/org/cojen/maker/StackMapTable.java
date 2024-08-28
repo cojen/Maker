@@ -26,7 +26,6 @@ import java.util.Arrays;
  * @author Brian S O'Neill
  */
 class StackMapTable extends Attribute {
-    private final Frame mInitFrame;
     private Frame mFirstFrame, mLastFrame;
     private int mNumFrames;
     private BytesOut mFinished;
@@ -34,9 +33,8 @@ class StackMapTable extends Attribute {
     /**
      * @param initCodes can be null
      */
-    StackMapTable(ConstantPool cp, int[] initCodes) {
+    StackMapTable(ConstantPool cp) {
         super(cp); // set the name later; see finish()
-        mInitFrame = new Frame(Integer.MIN_VALUE, initCodes, null);
     }
 
     /**
@@ -80,7 +78,7 @@ class StackMapTable extends Attribute {
     /**
      * @return false if table is empty and should not be written
      */
-    boolean finish() {
+    boolean finish(TheMethodMaker.ParamVar[] params) {
         if (mFirstFrame == null) {
             return false;
         }
@@ -88,11 +86,26 @@ class StackMapTable extends Attribute {
         // Lazily set the name such that it's added to the ConstantPool only when needed.
         name("StackMapTable");
 
+        // Make the initial frame to represent the method parameters.
+        Frame prev;
+        {
+            int[] initCodes;
+            if (params.length == 0) {
+                initCodes = null;
+            } else {
+                initCodes = new int[params.length];
+                for (int i=0; i<initCodes.length; i++) {
+                    initCodes[i] = params[i].smCodeInit();
+                }
+            }
+
+            prev = new Frame(Integer.MIN_VALUE, initCodes, null);
+        }
+
         var out = new BytesOut(null, mNumFrames * 4);
 
         try {
             out.writeShort(mNumFrames);
-            Frame prev = mInitFrame;
             Frame frame = mFirstFrame;
             do {
                 frame.writeTo(prev, out);
