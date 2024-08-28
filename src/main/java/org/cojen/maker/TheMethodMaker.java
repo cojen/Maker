@@ -198,22 +198,9 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
         mVars = varList.toArray(new LocalVar[varList.size()]);
 
-        // Prepare the StackMapTable.
-        {
-            Arrays.sort(mVars); // sort by slot
+        Arrays.sort(mVars); // sort by slot, as required by Lab.appendTo
 
-            int[] initCodes;
-            if (mParams.length == 0) {
-                initCodes = null;
-            } else {
-                initCodes = new int[mParams.length];
-                for (int i=0; i<initCodes.length; i++) {
-                    initCodes[i] = mParams[i].smCode();
-                }
-            }
-
-            mStackMapTable = new StackMapTable(mConstants, initCodes);
-        }
+        mStackMapTable = new StackMapTable(mConstants);
 
         mCode = new byte[Math.min(MAX_CODE_LENGTH, opCount * 2)];
         mStack = new LocalVar[8];
@@ -257,7 +244,6 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             new Flow(varList, varUsage).run(mFirstOp);
         }
 
-        mParams = null;
         mFirstOp = null;
         mLastOp = null;
         mReturnLabel = null;
@@ -277,10 +263,12 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
         mExceptionHandlers = null;
 
-        if (mStackMapTable.finish()) {
+        if (mStackMapTable.finish(mParams)) {
             codeAttr.addAttribute(mStackMapTable);
             mStackMapTable = null;
         }
+
+        mParams = null;
 
         if (mLineNumberTable != null && mLineNumberTable.finish(mCodeLen)) {
             codeAttr.addAttribute(mLineNumberTable);
@@ -5378,6 +5366,13 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             mIndex = index;
         }
 
+        /**
+         * Needed for StackMapTable. Returns the SM code at the start of the method.
+         */
+        int smCodeInit() {
+            return smCode();
+        }
+
         @Override
         public LocalVar name(String name) {
             super.name(name);
@@ -5558,6 +5553,11 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         @Override
         int smCode() {
             return mSmCode;
+        }
+
+        @Override
+        int smCodeInit() {
+            return SM_UNINIT_THIS;
         }
 
         void ready() {

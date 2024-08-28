@@ -30,11 +30,24 @@ import java.util.List;
  * @author Brian S O'Neill
  */
 abstract class Attribute extends Attributed {
-    final ConstantPool.C_UTF8 mAttrName;
+    private ConstantPool.C_UTF8 mAttrName;
 
     Attribute(ConstantPool cp, String name) {
         super(cp);
-        mAttrName = name == null ? null : cp.addUTF8(name);
+        if (name != null) {
+            mAttrName = cp.addUTF8(name);
+        }
+    }
+
+    Attribute(ConstantPool cp) {
+        super(cp);
+    }
+
+    /**
+     * @param name cannot be null
+     */
+    void name(String name) {
+        mAttrName = mConstants.addUTF8(name);
     }
 
     /**
