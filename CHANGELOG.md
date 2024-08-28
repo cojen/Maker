@@ -9,6 +9,7 @@ v2.5.11
 -------
 * Added a variable decrement method.
 * Avoid generating a conversion instruction when comparing against a constant primitive value.
+* Reduce constant pool pollution when the StackMapTable attribute isn't needed.
 
 v2.5.10 (2024-08-07)
 -------
