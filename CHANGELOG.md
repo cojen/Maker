@@ -5,7 +5,7 @@ v2.6.0
 ------
 * Added a Type interface for explicitly representing types.
 
-v2.5.11
+v2.5.11 (2024-09-07)
 -------
 * Added a variable decrement method.
 * Avoid generating a conversion instruction when comparing against a constant primitive value.
