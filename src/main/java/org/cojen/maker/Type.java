@@ -136,4 +136,25 @@ public interface Type {
      * Returns a primitive type for an object type, or else returns null if not applicable.
      */
     Type unbox();
+
+    /**
+     * Returns true if this type has any annotations.
+     */
+    boolean isAnnotated();
+
+    /**
+     * Returns a new type instance which supports annotations. If this type is already
+     * annotatable, then the new instance will have a copy of all the annotations added so far.
+     */
+    Type annotatable();
+
+    /**
+     * Add an annotation to this type, if it's annotatable.
+     *
+     * @param annotationType name or class which refers to an annotation interface
+     * @param visible true if annotation is visible at runtime
+     * @throws IllegalStateException if this type isn't annotatable
+     * @throws IllegalArgumentException if the annotation type is unsupported
+     */
+    AnnotationMaker addAnnotation(Object annotationType, boolean visible);
 }

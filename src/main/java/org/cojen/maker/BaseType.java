@@ -292,6 +292,21 @@ abstract class BaseType implements Type, Typed {
         return t == null ? T_OBJECT : t.typeCode();
     }
 
+    @Override
+    public final boolean isAnnotated() {
+        return false;
+    }
+
+    @Override
+    public final Type annotatable() {
+        return new AnnotatableType(this);
+    }
+
+    @Override
+    public final AnnotationMaker addAnnotation(Object annotationType, boolean visible) {
+        throw new IllegalStateException();
+    }
+
     /**
      * Returns true if assignment is allowed without any conversion.
      */
@@ -930,7 +945,9 @@ abstract class BaseType implements Type, Typed {
         return cache;
     }
 
-    private static BaseType cachePut(ConcurrentHashMap<Object, BaseType> cache, Object key, BaseType type) {
+    private static BaseType cachePut(ConcurrentHashMap<Object, BaseType> cache,
+                                     Object key, BaseType type)
+    {
         BaseType existing = cache.putIfAbsent(key, type);
         return existing == null ? type : existing;
     }
