@@ -240,7 +240,7 @@ abstract class BaseType implements Type, Typed {
     }
 
     @Override
-    public BaseType type() {
+    public final BaseType type() {
         return this;
     }
 
@@ -262,7 +262,7 @@ abstract class BaseType implements Type, Typed {
     }
 
     @Override
-    public final BaseType asArray() {
+    public BaseType asArray() {
         return new Array(this);
     }
 
@@ -293,17 +293,17 @@ abstract class BaseType implements Type, Typed {
     }
 
     @Override
-    public final boolean isAnnotated() {
+    public boolean isAnnotated() {
         return false;
     }
 
     @Override
-    public final Type annotatable() {
+    public Type annotatable() {
         return new AnnotatableType(this);
     }
 
     @Override
-    public final AnnotationMaker addAnnotation(Object annotationType, boolean visible) {
+    public AnnotationMaker addAnnotation(Object annotationType, boolean visible) {
         throw new IllegalStateException();
     }
 

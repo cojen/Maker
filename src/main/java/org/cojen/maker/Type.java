@@ -123,17 +123,22 @@ public interface Type {
 
     /**
      * Returns this type as an array, or else adds a dimension if this type is already an
-     * array.
+     * array. If this type is annotatable, then the returned instance will also be annotatable,
+     * but it won't initially have any annotations.
      */
     Type asArray();
 
     /**
-     * Returns an object type for a primitive type, or else returns this type.
+     * Returns an object type for a primitive type, or else returns this type. If this type is
+     * annotatable, then the returned instance will also be annotatable, and it will have a
+     * copy of all the annotations added so far.
      */
     Type box();
 
     /**
-     * Returns a primitive type for an object type, or else returns null if not applicable.
+     * Returns a primitive type for an object type, or else returns null if not applicable. If
+     * this type is annotatable, then the returned instance will also be annotatable, and it
+     * will have a copy of all the annotations added so far.
      */
     Type unbox();
 

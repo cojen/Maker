@@ -16,8 +16,6 @@
 
 package org.cojen.maker;
 
-import java.lang.reflect.Array;
-
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Objects;
@@ -27,9 +25,8 @@ import java.util.Objects;
  *
  * @author Brian S. O'Neill
  */
-final class AnnotatableType implements Type, Typed {
+final class AnnotatableType extends BaseType {
     private final BaseType mBase;
-
     private final ArrayList<AnnMaker> mAnnotations;
 
     AnnotatableType(BaseType base) {
@@ -40,11 +37,6 @@ final class AnnotatableType implements Type, Typed {
     private AnnotatableType(BaseType base, AnnotatableType at) {
         mBase = base;
         mAnnotations = new ArrayList<>(at.mAnnotations);
-    }
-
-    @Override
-    public BaseType type() {
-        return mBase;
     }
 
     @Override
@@ -73,11 +65,6 @@ final class AnnotatableType implements Type, Typed {
     }
 
     @Override
-    public boolean isObject() {
-        return mBase.isObject();
-    }
-
-    @Override
     public boolean isInterface() {
         return mBase.isInterface();
     }
@@ -88,28 +75,23 @@ final class AnnotatableType implements Type, Typed {
     }
 
     @Override
-    public Type elementType() {
+    public BaseType elementType() {
         return mBase.elementType();
     }
 
     @Override
-    public int dimensions() {
-        return mBase.dimensions();
+    public BaseType asArray() {
+        return new AnnotatableType(super.asArray());
     }
 
     @Override
-    public Type asArray() {
-        return new AnnotatableType(mBase.asArray(), this);
-    }
-
-    @Override
-    public Type box() {
+    public BaseType box() {
         // Always return a new instance because this type isn't immutable.
         return new AnnotatableType(mBase.box(), this);
     }
 
     @Override
-    public Type unbox() {
+    public BaseType unbox() {
         BaseType unboxed = mBase.unbox();
         // When possible, always return a new instance because this type isn't immutable.
         return unboxed == null ? null : new AnnotatableType(unboxed, this);
@@ -142,6 +124,21 @@ final class AnnotatableType implements Type, Typed {
         return this == obj || obj instanceof AnnotatableType other
             && mBase.equals(other.mBase)
             && mAnnotations.equals(other.mAnnotations);
+    }
+
+    @Override
+    boolean isAssignableFrom(BaseType other) {
+        return mBase.isAssignableFrom(other);
+    }
+
+    @Override
+    int stackMapCode() {
+        return mBase.stackMapCode();
+    }
+
+    @Override
+    int typeCode() {
+        return mBase.typeCode();
     }
 
     private static final class AnnMaker implements AnnotationMaker {
@@ -181,9 +178,9 @@ final class AnnotatableType implements Type, Typed {
             {
                 // Okay.
             } else if (clazz.isArray()) {
-                int length = Array.getLength(value);
+                int length = java.lang.reflect.Array.getLength(value);
                 for (int i=0; i<length; i++) {
-                    consume(parent, Array.get(value, i));
+                    consume(parent, java.lang.reflect.Array.get(value, i));
                 }
             } else if (value instanceof AnnMaker am) {
                 if (am.mParent != parent) {
