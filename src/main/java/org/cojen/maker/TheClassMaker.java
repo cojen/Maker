@@ -256,8 +256,13 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
         if (mInterfaces == null) {
             mInterfaces = new LinkedHashSet<>(4);
         }
-        mInterfaces.add(mConstants.addClass(typeFrom(iface)));
+        BaseType type = typeFrom(iface);
+        mInterfaces.add(mConstants.addClass(type));
         type().resetInherited();
+        if (type.isAnnotated()) {
+            type.applyAnnotations
+                (this, new TypeAnnotationMaker.Target2(0x10, mInterfaces.size() - 1));
+        }
         return this;
     }
 

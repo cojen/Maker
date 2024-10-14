@@ -16,6 +16,8 @@
 
 package org.cojen.maker;
 
+import java.lang.annotation.*;
+
 import java.lang.reflect.*;
 
 import java.util.*;
@@ -31,6 +33,16 @@ import static org.junit.Assert.*;
 public class TypeAnnotationsTest {
     public static void main(String[] args) throws Exception {
         org.junit.runner.JUnitCore.main(TypeAnnotationsTest.class.getName());
+    }
+
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.TYPE_USE)
+    public @interface Ann {
+        String message() default "";
+
+        int value() default 0;
+
+        Class<?> clazz() default Object.class;
     }
 
     @Test
@@ -67,5 +79,32 @@ public class TypeAnnotationsTest {
 
         var ann = (Ann) at.getAnnotation(Ann.class);
         assertEquals("hello", ann.message());
+    }
+
+    @Test
+    public void implementInterfaces() {
+        ClassMaker cm = ClassMaker.begin().public_();
+
+        Type iface1 = Type.from(List.class).annotatable();
+        iface1.addAnnotation(Ann.class, true).put("value", 123);
+
+        Type iface2 = Type.from(Map.class).annotatable();
+        iface2.addAnnotation(Ann.class, true).put("clazz", String.class);
+
+        cm.implement(iface1).implement(iface2);
+
+        Class<?> clazz = cm.finish();
+
+        AnnotatedType[] types = clazz.getAnnotatedInterfaces();
+
+        assertEquals(2, types.length);
+
+        assertEquals(List.class, types[0].getType());
+        var ann = (Ann) types[0].getAnnotation(Ann.class);
+        assertEquals(123, ann.value());
+
+        assertEquals(Map.class, types[1].getType());
+        ann = (Ann) types[1].getAnnotation(Ann.class);
+        assertEquals(String.class, ann.clazz());
     }
 }
