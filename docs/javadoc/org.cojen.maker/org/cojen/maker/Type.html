@@ -86,6 +86,7 @@ loadScripts(document, 'script');</script>
 <li><a href="#isAnnotated()" tabindex="0">isAnnotated()</a></li>
 <li><a href="#annotatable()" tabindex="0">annotatable()</a></li>
 <li><a href="#addAnnotation(java.lang.Object,boolean)" tabindex="0">addAnnotation(Object, boolean)</a></li>
+<li><a href="#freeze()" tabindex="0">freeze()</a></li>
 </ol>
 </li>
 </ol>
@@ -158,74 +159,79 @@ loadScripts(document, 'script');</script>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Returns the element type of this array type, or else null if this type isn't an array.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab1"><code>static <a href="Type.html" title="interface in org.cojen.maker">Type</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab1"><code><a href="#from(java.lang.Class)" class="member-name-link">from</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/23/docs/api/java.base/java/lang/Class.html" title="class or interface in java.lang" class="external-link">Class</a>&lt;?&gt;&nbsp;clazz)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab1">
-<div class="block">Return a Type corresponding to the given Class.</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#freeze()" class="member-name-link">freeze</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="block">Prevent adding more annotations to this type.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab1"><code>static <a href="Type.html" title="interface in org.cojen.maker">Type</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab1"><code><a href="#from(java.lang.Object)" class="member-name-link">from</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/23/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>&nbsp;obj)</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1"><code><a href="#from(java.lang.Class)" class="member-name-link">from</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/23/docs/api/java.base/java/lang/Class.html" title="class or interface in java.lang" class="external-link">Class</a>&lt;?&gt;&nbsp;clazz)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab1">
-<div class="block">Return a Type corresponding to the given object parameter.</div>
+<div class="block">Return a Type corresponding to the given Class.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab1"><code>static <a href="Type.html" title="interface in org.cojen.maker">Type</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab1"><code><a href="#from(java.lang.Object,java.lang.ClassLoader)" class="member-name-link">from</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/23/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>&nbsp;obj,
- <a href="https://docs.oracle.com/en/java/javase/23/docs/api/java.base/java/lang/ClassLoader.html" title="class or interface in java.lang" class="external-link">ClassLoader</a>&nbsp;loader)</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1"><code><a href="#from(java.lang.Object)" class="member-name-link">from</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/23/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>&nbsp;obj)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab1">
+<div class="block">Return a Type corresponding to the given object parameter.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1"><code>static <a href="Type.html" title="interface in org.cojen.maker">Type</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1"><code><a href="#from(java.lang.Object,java.lang.ClassLoader)" class="member-name-link">from</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/23/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>&nbsp;obj,
+ <a href="https://docs.oracle.com/en/java/javase/23/docs/api/java.base/java/lang/ClassLoader.html" title="class or interface in java.lang" class="external-link">ClassLoader</a>&nbsp;loader)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1">
 <div class="block">Return a Type corresponding to the given object parameter, as found by the given
  ClassLoader.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab1"><code>static <a href="Type.html" title="interface in org.cojen.maker">Type</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab1"><code><a href="#from(java.lang.String)" class="member-name-link">from</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/23/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;str)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab1">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1"><code>static <a href="Type.html" title="interface in org.cojen.maker">Type</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1"><code><a href="#from(java.lang.String)" class="member-name-link">from</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/23/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;str)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1">
 <div class="block">Return a Type corresponding to the given class name or type descriptor.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab1"><code>static <a href="Type.html" title="interface in org.cojen.maker">Type</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab1"><code><a href="#from(java.lang.String,java.lang.ClassLoader)" class="member-name-link">from</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/23/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;str,
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1"><code>static <a href="Type.html" title="interface in org.cojen.maker">Type</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1"><code><a href="#from(java.lang.String,java.lang.ClassLoader)" class="member-name-link">from</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/23/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;str,
  <a href="https://docs.oracle.com/en/java/javase/23/docs/api/java.base/java/lang/ClassLoader.html" title="class or interface in java.lang" class="external-link">ClassLoader</a>&nbsp;loader)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab1">
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1">
 <div class="block">Return a Type corresponding to the given class name or type descriptor, as found by the
  given ClassLoader.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>boolean</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#isAnnotated()" class="member-name-link">isAnnotated</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>boolean</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#isAnnotated()" class="member-name-link">isAnnotated</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Returns true if this type has any annotations.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>boolean</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#isArray()" class="member-name-link">isArray</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>boolean</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#isArray()" class="member-name-link">isArray</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Returns true if this type is an array.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>boolean</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#isInterface()" class="member-name-link">isInterface</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>boolean</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#isInterface()" class="member-name-link">isInterface</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Returns true if this type is known to be an interface.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>boolean</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#isObject()" class="member-name-link">isObject</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>boolean</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#isObject()" class="member-name-link">isObject</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Returns true if this type is an array, an interface, or a class.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>boolean</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#isPrimitive()" class="member-name-link">isPrimitive</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>boolean</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#isPrimitive()" class="member-name-link">isPrimitive</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Returns true if this type is an int, boolean, double, etc.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="ClassMaker.html" title="interface in org.cojen.maker">ClassMaker</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#makerType()" class="member-name-link">makerType</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="ClassMaker.html" title="interface in org.cojen.maker">ClassMaker</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#makerType()" class="member-name-link">makerType</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Returns tke ClassMaker corresponding to this type, or else null if this type represents
  an existing class.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="https://docs.oracle.com/en/java/javase/23/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#name()" class="member-name-link">name</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="https://docs.oracle.com/en/java/javase/23/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#name()" class="member-name-link">name</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Returns the name of this type in Java syntax.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="Type.html" title="interface in org.cojen.maker">Type</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#unbox()" class="member-name-link">unbox</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="Type.html" title="interface in org.cojen.maker">Type</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#unbox()" class="member-name-link">unbox</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Returns a primitive type for an object type, or else returns null if not applicable.</div>
 </div>
 </div>
@@ -407,7 +413,8 @@ loadScripts(document, 'script');</script>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="return-type"><a href="Type.html" title="interface in org.cojen.maker">Type</a></span>&nbsp;<span class="element-name">asArray</span>()</div>
 <div class="block">Returns this type as an array, or else adds a dimension if this type is already an
- array.</div>
+ array. If this type is annotatable, then the returned instance will also be annotatable,
+ but it won't initially have any annotations.</div>
 </div>
 </section>
 </li>
@@ -416,7 +423,9 @@ loadScripts(document, 'script');</script>
 <h3>box</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="return-type"><a href="Type.html" title="interface in org.cojen.maker">Type</a></span>&nbsp;<span class="element-name">box</span>()</div>
-<div class="block">Returns an object type for a primitive type, or else returns this type.</div>
+<div class="block">Returns an object type for a primitive type, or else returns this type. If this type is
+ annotatable, then the returned instance will also be annotatable, and it will have a
+ copy of all the annotations added so far.</div>
 </div>
 </section>
 </li>
@@ -425,7 +434,9 @@ loadScripts(document, 'script');</script>
 <h3>unbox</h3>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="return-type"><a href="Type.html" title="interface in org.cojen.maker">Type</a></span>&nbsp;<span class="element-name">unbox</span>()</div>
-<div class="block">Returns a primitive type for an object type, or else returns null if not applicable.</div>
+<div class="block">Returns a primitive type for an object type, or else returns null if not applicable. If
+ this type is annotatable, then the returned instance will also be annotatable, and it
+ will have a copy of all the annotations added so far.</div>
 </div>
 </section>
 </li>
@@ -454,15 +465,26 @@ loadScripts(document, 'script');</script>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="return-type"><a href="AnnotationMaker.html" title="interface in org.cojen.maker">AnnotationMaker</a></span>&nbsp;<span class="element-name">addAnnotation</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/23/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>&nbsp;annotationType,
  boolean&nbsp;visible)</span></div>
-<div class="block">Add an annotation to this type, if it's annotatable.</div>
+<div class="block">Add an annotation to this type, if it's annotatable. Once this type has been used, it
+ becomes <a href="#freeze()"><code>frozen</code></a> and no more annotations can be added. Instead, call the
+ <a href="#annotatable()"><code>annotatable</code></a> method to obtain a new instance.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>annotationType</code> - name or class which refers to an annotation interface</dd>
 <dd><code>visible</code> - true if annotation is visible at runtime</dd>
 <dt>Throws:</dt>
-<dd><code><a href="https://docs.oracle.com/en/java/javase/23/docs/api/java.base/java/lang/IllegalStateException.html" title="class or interface in java.lang" class="external-link">IllegalStateException</a></code> - if this type isn't annotatable</dd>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/23/docs/api/java.base/java/lang/IllegalStateException.html" title="class or interface in java.lang" class="external-link">IllegalStateException</a></code> - if this type isn't annotatable or it's frozen</dd>
 <dd><code><a href="https://docs.oracle.com/en/java/javase/23/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if the annotation type is unsupported</dd>
 </dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="freeze()">
+<h3>freeze</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="return-type">void</span>&nbsp;<span class="element-name">freeze</span>()</div>
+<div class="block">Prevent adding more annotations to this type.</div>
 </div>
 </section>
 </li>
