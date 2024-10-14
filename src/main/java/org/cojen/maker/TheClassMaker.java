@@ -228,8 +228,12 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
     }
 
     private void doExtend(Object superClass) {
-        mSuperClass = mConstants.addClass(typeFrom(superClass));
+        BaseType superType = typeFrom(superClass);
+        mSuperClass = mConstants.addClass(superType);
         type().resetInherited();
+        if (superType.isAnnotated()) {
+            superType.applyAnnotations(this, new TypeAnnotationMaker.Target2(0x10, 65535));
+        }
     }
 
     ConstantPool.C_Class superClass() {
@@ -504,7 +508,7 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
 
     @Override
     public AnnotationMaker addAnnotation(Object annotationType, boolean visible) {
-        return addAnnotation(new TheAnnotationMaker(this, annotationType), visible);
+        return addAnnotationMaker(new TheAnnotationMaker(this, annotationType), visible);
     }
 
     @Override

@@ -18,6 +18,7 @@ package org.cojen.maker;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -29,6 +30,8 @@ final class AnnotatableType extends BaseType {
     private final BaseType mBase;
     private final ArrayList<AnnMaker> mAnnotations;
 
+    private boolean mFrozen;
+
     AnnotatableType(BaseType base) {
         mBase = base;
         mAnnotations = new ArrayList<>();
@@ -36,7 +39,9 @@ final class AnnotatableType extends BaseType {
 
     private AnnotatableType(BaseType base, AnnotatableType at) {
         mBase = base;
-        mAnnotations = new ArrayList<>(at.mAnnotations);
+        synchronized (at) {
+            mAnnotations = new ArrayList<>(at.mAnnotations);
+        }
     }
 
     @Override
@@ -98,7 +103,7 @@ final class AnnotatableType extends BaseType {
     }
 
     @Override
-    public boolean isAnnotated() {
+    public synchronized boolean isAnnotated() {
         return !mAnnotations.isEmpty();
     }
 
@@ -108,19 +113,32 @@ final class AnnotatableType extends BaseType {
     }
 
     @Override
-    public AnnotationMaker addAnnotation(Object annotationType, boolean visible) {
+    public synchronized AnnotationMaker addAnnotation(Object annotationType, boolean visible) {
+        if (mFrozen) {
+            throw new IllegalStateException("Type is frozen");
+        }
         var am = new AnnMaker(annotationType, visible);
         mAnnotations.add(am);
         return am;
     }
 
     @Override
-    public int hashCode() {
+    public synchronized void freeze() {
+        if (!mFrozen) {
+            mFrozen = true;
+            for (AnnMaker am : mAnnotations) {
+                am.freeze();
+            }
+        }
+    }
+
+    @Override
+    public synchronized int hashCode() {
         return mBase.hashCode() * 31 + mAnnotations.hashCode();
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public synchronized boolean equals(Object obj) {
         return this == obj || obj instanceof AnnotatableType other
             && mBase.equals(other.mBase)
             && mAnnotations.equals(other.mAnnotations);
@@ -141,12 +159,36 @@ final class AnnotatableType extends BaseType {
         return mBase.typeCode();
     }
 
+    @Override
+    void applyAnnotations(TheClassMaker classMaker, TypeAnnotationMaker.Target target) {
+        applyAnnotations(classMaker, classMaker, target);
+    }
+
+    @Override
+    void applyAnnotations(ClassMember member, TypeAnnotationMaker.Target target) {
+        applyAnnotations(member, member.mClassMaker, target);
+    }
+
+    private void applyAnnotations(Attributed dest, TheClassMaker classMaker,
+                                  TypeAnnotationMaker.Target target)
+    {
+        freeze();
+
+        for (AnnMaker am : mAnnotations) {
+            TypeAnnotationMaker tam = dest.addTypeAnnotationMaker
+                (new TypeAnnotationMaker(classMaker, am.mType, target), am.mVisible);
+            am.apply(tam);
+        }
+    }
+
     private static final class AnnMaker implements AnnotationMaker {
         private final Object mType;
         private final boolean mVisible;
         private final LinkedHashMap<String, Object> mValues;
 
         private AnnMaker mParent;
+
+        private boolean mFrozen;
 
         AnnMaker(Object type, boolean visible) {
             Objects.requireNonNull(type);
@@ -162,7 +204,10 @@ final class AnnotatableType extends BaseType {
         }
 
         @Override
-        public void put(String name, Object value) {
+        public synchronized void put(String name, Object value) {
+            if (mFrozen) {
+                throw new IllegalStateException("Type is frozen");
+            }
             if (mValues.containsKey(name)) {
                 throw new IllegalStateException();
             }
@@ -170,9 +215,9 @@ final class AnnotatableType extends BaseType {
         }
 
         private static Object consume(AnnMaker parent, Object value) {
-            Class<?> clazz = value.getClass();
+            Class<?> clazz = value.getClass(), unboxed;
 
-            if (Variable.unboxedType(clazz).isPrimitive() ||
+            if (((unboxed = Variable.unboxedType(clazz)) != null && unboxed.isPrimitive()) ||
                 value instanceof String || value instanceof Enum || value instanceof Class ||
                 value instanceof Typed)
             {
@@ -195,14 +240,17 @@ final class AnnotatableType extends BaseType {
         }
 
         @Override
-        public AnnotationMaker newAnnotation(Object annotationType) {
+        public synchronized AnnotationMaker newAnnotation(Object annotationType) {
+            if (mFrozen) {
+                throw new IllegalStateException("Type is frozen");
+            }
             var am = new AnnMaker(annotationType, mVisible);
             am.mParent = this;
             return am;
         }
 
         @Override
-        public int hashCode() {
+        public synchronized int hashCode() {
             int hash = mType.hashCode();
             hash *= (mVisible ? 31 : 63);
             hash = hash * 31 + mValues.hashCode();
@@ -213,10 +261,33 @@ final class AnnotatableType extends BaseType {
         }
 
         @Override
-        public boolean equals(Object obj) {
+        public synchronized boolean equals(Object obj) {
             return this == obj || obj instanceof AnnMaker other
                 && mType.equals(other.mType) && mVisible == other.mVisible
                 && mValues.equals(other.mValues) && Objects.equals(mParent, other.mParent);
+        }
+
+        private synchronized void freeze() {
+            if (!mFrozen) {
+                mFrozen = true;
+                for (Object value : mValues.values()) {
+                    if (value instanceof AnnMaker am) {
+                        am.freeze();
+                    }
+                }
+            }
+        }
+
+        private void apply(AnnotationMaker dest) {
+            for (Map.Entry<String, Object> e : mValues.entrySet()) {
+                Object value = e.getValue();
+                if (value instanceof AnnMaker am) {
+                    AnnotationMaker newAm = dest.newAnnotation(value);
+                    am.apply(newAm);
+                    value = newAm;
+                }
+                dest.put(e.getKey(), value);
+            }
         }
     }
 }

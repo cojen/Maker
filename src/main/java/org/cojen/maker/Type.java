@@ -154,12 +154,19 @@ public interface Type {
     Type annotatable();
 
     /**
-     * Add an annotation to this type, if it's annotatable.
+     * Add an annotation to this type, if it's annotatable. Once this type has been used, it
+     * becomes {@link freeze frozen} and no more annotations can be added. Instead, call the
+     * {@link annotatable annotatable} method to obtain a new instance.
      *
      * @param annotationType name or class which refers to an annotation interface
      * @param visible true if annotation is visible at runtime
-     * @throws IllegalStateException if this type isn't annotatable
+     * @throws IllegalStateException if this type isn't annotatable or it's frozen
      * @throws IllegalArgumentException if the annotation type is unsupported
      */
     AnnotationMaker addAnnotation(Object annotationType, boolean visible);
+
+    /**
+     * Prevent adding more annotations to this type.
+     */
+    void freeze();
 }

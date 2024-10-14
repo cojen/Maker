@@ -307,6 +307,16 @@ abstract class BaseType implements Type, Typed {
         throw new IllegalStateException();
     }
 
+    @Override
+    public void freeze() {
+    }
+
+    void applyAnnotations(TheClassMaker classMaker, TypeAnnotationMaker.Target target) {
+    }
+
+    void applyAnnotations(ClassMember member, TypeAnnotationMaker.Target target) {
+    }
+
     /**
      * Returns true if assignment is allowed without any conversion.
      */
@@ -932,7 +942,7 @@ abstract class BaseType implements Type, Typed {
         }
     }
 
-    private static final WeakHashMap<ClassLoader, SoftReference<ConcurrentHashMap<Object, BaseType>>>
+    private static final Map<ClassLoader, SoftReference<ConcurrentHashMap<Object, BaseType>>>
         cCacheMap = new WeakHashMap<>();
 
     private static synchronized ConcurrentHashMap<Object, BaseType> cache(ClassLoader loader) {

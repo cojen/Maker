@@ -534,7 +534,11 @@ abstract class Attribute extends Attributed {
 
     static class Annotations extends ListAttribute<TheAnnotationMaker> {
         Annotations(ConstantPool cp, boolean visible) {
-            super(cp, visible ? "RuntimeVisibleAnnotations" : "RuntimeInvisibleAnnotations");
+            this(cp, visible ? "RuntimeVisibleAnnotations" : "RuntimeInvisibleAnnotations");
+        }
+
+        Annotations(ConstantPool cp, String name) {
+            super(cp, name);
         }
 
         void add(TheAnnotationMaker am) {
@@ -558,6 +562,13 @@ abstract class Attribute extends Attributed {
         @Override
         protected void writeEntryTo(BytesOut out, TheAnnotationMaker am) throws IOException {
             am.writeTo(out);
+        }
+    }
+
+    static class TypeAnnotations extends Annotations {
+        TypeAnnotations(ConstantPool cp, boolean visible) {
+            super(cp, visible ? "RuntimeVisibleTypeAnnotations"
+                  : "RuntimeInvisibleTypeAnnotations");
         }
     }
 

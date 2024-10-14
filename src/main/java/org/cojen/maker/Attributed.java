@@ -21,6 +21,7 @@ import java.lang.module.ModuleDescriptor;
 import java.io.IOException;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -112,7 +113,7 @@ abstract class Attributed {
         }
     }
 
-    TheAnnotationMaker addAnnotation(TheAnnotationMaker am, boolean visible) {
+    TheAnnotationMaker addAnnotationMaker(TheAnnotationMaker am, boolean visible) {
         if (mAnnotationSets == null) {
             mAnnotationSets = new Attribute.Annotations[2];
         }
@@ -125,6 +126,23 @@ abstract class Attributed {
         }
         annotations.add(am);
         return am;
+    }
+
+    TypeAnnotationMaker addTypeAnnotationMaker(TypeAnnotationMaker tam, boolean visible) {
+        if (mAnnotationSets == null) {
+            mAnnotationSets = new Attribute.Annotations[4];
+        } else if (mAnnotationSets.length < 4) {
+            mAnnotationSets = Arrays.copyOfRange(mAnnotationSets, 0, 4);
+        }
+        int which = visible ? 2 : 3;
+        Attribute.Annotations annotations = mAnnotationSets[which];
+        if (annotations == null) {
+            annotations = new Attribute.TypeAnnotations(mConstants, visible);
+            addAttribute(annotations);
+            mAnnotationSets[which] = annotations;
+        }
+        annotations.add(tam);
+        return tam;
     }
 
     public void addSignature(Object... components) {
