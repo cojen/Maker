@@ -317,4 +317,38 @@ public class TypeAnnotationsTest {
         Ann ann = at.getAnnotation(Ann.class);
         assertEquals(555, ann.value());
     }
+
+    @Test
+    public void arrays() throws Exception {
+        Type type = Type.from(int.class).annotatable();
+        type.addAnnotation(Ann.class, true).put("message", "hi");
+        type = type.asArray();
+        type.addAnnotation(Ann.class, true).put("value", 123);
+        type = type.asArray();
+        type.addAnnotation(Sub.class, true).put("state", -10);
+
+        ClassMaker cm = ClassMaker.begin().public_();
+
+        MethodMaker mm = cm.addMethod(type, "test").public_().static_();
+        mm.return_(null);
+
+        Class<?> clazz = cm.finish();
+
+        Method m = clazz.getMethod("test");
+
+        AnnotatedType at = m.getAnnotatedReturnType();
+        assertEquals(int[][].class, at.getType());
+        Sub sub = at.getAnnotation(Sub.class);
+        assertEquals(-10, sub.state());
+
+        at = ((AnnotatedArrayType) at).getAnnotatedGenericComponentType();
+        assertEquals(int[].class, at.getType());
+        Ann ann = at.getAnnotation(Ann.class);
+        assertEquals(123, ann.value());
+
+        at = ((AnnotatedArrayType) at).getAnnotatedGenericComponentType();
+        assertEquals(int.class, at.getType());
+        ann = at.getAnnotation(Ann.class);
+        assertEquals("hi", ann.message());
+    }
 }

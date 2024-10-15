@@ -44,7 +44,7 @@ final class TypeAnnotationMaker extends TheAnnotationMaker {
         super.writeTo(out);
     }
 
-    static abstract sealed class Target {
+    static abstract sealed class Target implements Cloneable {
         private final int mType;
         private byte[] mPath;
         private int mPathLength;
@@ -52,6 +52,16 @@ final class TypeAnnotationMaker extends TheAnnotationMaker {
         Target(int type) {
             mType = type;
             mPath = new byte[8];
+        }
+
+        Target copy() {
+            try {
+                var copy = (Target) clone();
+                copy.mPath = mPath.clone();
+                return copy;
+            } catch (CloneNotSupportedException e) {
+                throw new AssertionError();
+            }
         }
 
         /**
@@ -92,7 +102,7 @@ final class TypeAnnotationMaker extends TheAnnotationMaker {
         */
 
         private Target add(int kind, int index) {
-            if (mPathLength >= 255) {
+            if (mPathLength >= 510) {
                 throw new IllegalStateException();
             }
             if (mPathLength >= mPath.length) {
@@ -110,7 +120,7 @@ final class TypeAnnotationMaker extends TheAnnotationMaker {
         final void writeTo(BytesOut out) throws IOException {
             out.writeByte(mType);
             doWriteTo(out);
-            out.writeByte(mPathLength);
+            out.writeByte(mPathLength / 2);
             out.write(mPath, 0, mPathLength);
         }
 
@@ -219,6 +229,13 @@ final class TypeAnnotationMaker extends TheAnnotationMaker {
     static final class Target4 extends Target {
         Target4(int type) {
             super(type);
+        }
+
+        @Override
+        Target copy() {
+            var copy = (Target4) super.copy();
+            // Any arrays need to be cloned too.
+            throw null;
         }
 
         @Override

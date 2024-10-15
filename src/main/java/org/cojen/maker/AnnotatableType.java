@@ -191,12 +191,32 @@ final class AnnotatableType extends BaseType {
     void applyAnnotations(Attributed dest, TheClassMaker classMaker,
                           TypeAnnotationMaker.Target target)
     {
-        freeze();
+        applyAnnotations(this, dest, classMaker, target);
+    }
 
-        for (AnnMaker am : mAnnotations) {
-            TypeAnnotationMaker tam = dest.addTypeAnnotationMaker
-                (new TypeAnnotationMaker(classMaker, am.mType, target), am.mVisible);
-            am.apply(tam);
+    private static void applyAnnotations(AnnotatableType at,
+                                         Attributed dest, TheClassMaker classMaker,
+                                         TypeAnnotationMaker.Target target)
+    {
+        while (true) {
+            at.freeze();
+
+            for (AnnMaker am : at.mAnnotations) {
+                TypeAnnotationMaker tam = dest.addTypeAnnotationMaker
+                    (new TypeAnnotationMaker(classMaker, am.mType, target), am.mVisible);
+                am.apply(tam);
+            }
+
+            BaseType elementType = at.elementType();
+
+            if (elementType == null || !(elementType instanceof AnnotatableType)) {
+                break;
+            }
+
+            at = (AnnotatableType) elementType;
+
+            target = target.copy();
+            target.addArrayType();
         }
     }
 
@@ -302,11 +322,10 @@ final class AnnotatableType extends BaseType {
         }
 
         private static Object consume(AnnMaker parent, Object value) {
-            Class<?> clazz = value.getClass(), unboxed;
+            Class<?> clazz = value.getClass();
 
-            if (((unboxed = Variable.unboxedType(clazz)) != null && unboxed.isPrimitive()) ||
-                value instanceof String || value instanceof Enum || value instanceof Class ||
-                value instanceof Typed)
+            if (Variable.unboxedType(clazz) != null || value instanceof String ||
+                value instanceof Enum || value instanceof Class || value instanceof Typed)
             {
                 // Okay.
             } else if (clazz.isArray()) {
