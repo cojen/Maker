@@ -4,6 +4,9 @@ Changelog
 v2.6.0
 ------
 * Added a Type interface for explicitly representing types.
+* Added support for type use annotations. They're not supported when the target is in the body
+  of a method, because they're not accessible via reflection anyhow. They're not supported for
+  generic types either, because generic types aren't currently supported at all.
 
 v2.5.11 (2024-09-07)
 -------
