@@ -111,14 +111,14 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         super(classMaker, method.name(), method.descriptor());
         mMethod = method;
 
-        if (method.returnType().isAnnotated()) {
+        if (method.returnType().isAnnotatable()) {
             method.returnType().applyAnnotations(this, new TypeAnnotationMaker.Target0(0x14));
         }
 
         BaseType[] paramTypes = method.paramTypes();
         for (int i=0; i<paramTypes.length; i++) {
             BaseType paramType = paramTypes[i];
-            if (paramType.isAnnotated()) {
+            if (paramType.isAnnotatable()) {
                 paramType.applyAnnotations(this, new TypeAnnotationMaker.Target1(0x16, i));
             }
         }
@@ -428,6 +428,26 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     }
 
     @Override
+    public MethodMaker receiverType(Type type) {
+        BaseType receiverType = mClassMaker.typeFrom(type);
+
+        if (Modifier.isStatic(mModifiers)) {
+            throw new IllegalStateException("Not an instance method");
+        }
+        if (mParams != null) {
+            throw new IllegalStateException("Parameters have been accessed");
+        }
+
+        initParams(receiverType);
+
+        if (receiverType.isAnnotatable()) {
+            receiverType.applyAnnotations(this, new TypeAnnotationMaker.Target0(0x15));
+        }
+
+        return this;
+    }
+
+    @Override
     public MethodMaker varargs() {
         BaseType[] params = mMethod.paramTypes();
         if (params.length == 0 || !params[params.length - 1].isArray()) {
@@ -446,7 +466,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
         BaseType thrownType = mClassMaker.typeFrom(type);
         mExceptionsThrown.add(mConstants.addClass(thrownType));
-        if (thrownType.isAnnotated()) {
+        if (thrownType.isAnnotatable()) {
             thrownType.applyAnnotations
                 (this, new TypeAnnotationMaker.Target2(0x17, mExceptionsThrown.size() - 1));
         }
@@ -565,12 +585,20 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     }
 
     private void initParams() {
+        initParams(null);
+    }
+
+    private void initParams(BaseType thisType) {
         int count = mMethod.paramTypes().length;
         int slot = 0;
 
         if (!Modifier.isStatic(mModifiers)) {
-            BaseType type = mClassMaker.type();
-            mThisVar = "<init>".equals(name()) ? new InitThisVar(type) : new ParamVar(type, 0);
+            if (thisType == null) {
+                thisType = mClassMaker.type();
+            }
+            mThisVar = "<init>".equals(name())
+                ? new InitThisVar(thisType)
+                : new ParamVar(thisType, 0);
             mThisVar.mSlot = 0;
             count++;
             slot = 1;

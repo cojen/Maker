@@ -143,11 +143,6 @@ public interface Type {
     Type unbox();
 
     /**
-     * Returns true if this type has any annotations.
-     */
-    boolean isAnnotated();
-
-    /**
      * Returns a new type instance which supports annotations. If this type is already
      * annotatable, then the new instance will have a copy of all the annotations added so far.
      */

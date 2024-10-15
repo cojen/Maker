@@ -231,7 +231,7 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
         BaseType superType = typeFrom(superClass);
         mSuperClass = mConstants.addClass(superType);
         type().resetInherited();
-        if (superType.isAnnotated()) {
+        if (superType.isAnnotatable()) {
             superType.applyAnnotations(this, new TypeAnnotationMaker.Target2(0x10, 65535));
         }
     }
@@ -259,7 +259,7 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
         BaseType type = typeFrom(iface);
         mInterfaces.add(mConstants.addClass(type));
         type().resetInherited();
-        if (type.isAnnotated()) {
+        if (type.isAnnotatable()) {
             type.applyAnnotations
                 (this, new TypeAnnotationMaker.Target2(0x10, mInterfaces.size() - 1));
         }
@@ -331,7 +331,7 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
         var fm = new TheFieldMaker(this, type().defineField(0, tType, name));
         mFields.put(name, fm);
 
-        if (tType.isAnnotated()) {
+        if (tType.isAnnotatable()) {
             tType.applyAnnotations(fm, new TypeAnnotationMaker.Target0(0x13));
         }
 
@@ -944,7 +944,7 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
                 for (TheFieldMaker fm : fields.values()) {
                     Attribute.Record.Entry entry = recordAttr.add(fm);
                     paramTypes[i++] = fm;
-                    if (fm.type().isAnnotated()) {
+                    if (fm.type().isAnnotatable()) {
                         fm.type().applyAnnotations
                             (entry, cm, new TypeAnnotationMaker.Target0(0x13));
                     }

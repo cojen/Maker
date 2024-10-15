@@ -35,7 +35,7 @@ final class AnnotatableType extends BaseType {
 
     AnnotatableType(BaseType base) {
         mBase = base;
-        mAnnotations = new ArrayList<>();
+        mAnnotations = new ArrayList<>(1);
     }
 
     private AnnotatableType(BaseType base, AnnotatableType at) {
@@ -43,6 +43,11 @@ final class AnnotatableType extends BaseType {
         synchronized (at) {
             mAnnotations = new ArrayList<>(at.mAnnotations);
         }
+    }
+
+    private AnnotatableType(BaseType base, ArrayList<AnnMaker> annotations) {
+        mBase = base;
+        mAnnotations = annotations;
     }
 
     @Override
@@ -92,39 +97,27 @@ final class AnnotatableType extends BaseType {
 
     @Override
     public BaseType box() {
-        BaseType boxed = mBase.box();
-
-        if (boxed == mBase) {
-            // Can only return this instance if it's immutable/frozen.
-            synchronized (this) {
-                if (mFrozen) {
-                    return this;
-                }
-            }
-        }
-
-        return new AnnotatableType(boxed, this);
+        return withBaseType(mBase.box());
     }
 
     @Override
     public BaseType unbox() {
         BaseType unboxed = mBase.unbox();
-
-        if (unboxed == mBase) {
-            // Can only return this instance if it's immutable/frozen.
-            synchronized (this) {
-                if (mFrozen) {
-                    return this;
-                }
-            }
-        }
-
-        return unboxed == null ? null : new AnnotatableType(unboxed, this);
+        return unboxed == null ? null : withBaseType(unboxed);
     }
 
-    @Override
-    public synchronized boolean isAnnotated() {
-        return !mAnnotations.isEmpty();
+    private synchronized AnnotatableType withBaseType(BaseType base) {
+        if (!mFrozen) {
+            return new AnnotatableType(base, this);
+        } else if (base == mBase) {
+            // Can only return this instance if it's immutable/frozen.
+            return this;
+        } else {
+            // No need to copy the array when frozen.
+            var at = new AnnotatableType(base, mAnnotations);
+            at.mFrozen = true;
+            return at;
+        }
     }
 
     @Override
@@ -150,6 +143,11 @@ final class AnnotatableType extends BaseType {
                 am.freeze();
             }
         }
+    }
+
+    @Override
+    boolean isAnnotatable() {
+        return true;
     }
 
     @Override

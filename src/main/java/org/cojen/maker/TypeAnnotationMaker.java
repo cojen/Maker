@@ -64,26 +64,32 @@ final class TypeAnnotationMaker extends TheAnnotationMaker {
         /**
          * Add path kind 1: Annotation is deeper in a nested type.
          */
+        /* Not supported. 
         final Target addNestedType() {
             return add(1, 0);
         }
+        */
 
         /**
          * Add path kind 2: Annotation is on the bound of a wildcard type argument of a
          * parameterized type.
          */
+        /* Not supported.
         final Target addWildcardType() {
             return add(2, 0);
         }
+        */
 
         /**
          * Add path kind 3: Annotation is on a type argument of a parameterized type.
          *
          * @param index which type argument of a parameterized type is annotated
          */
+        /* Not supported.
         final Target addParameterizedType(int index) {
             return add(3, index);
         }
+        */
 
         private Target add(int kind, int index) {
             if (mPathLength >= 255) {

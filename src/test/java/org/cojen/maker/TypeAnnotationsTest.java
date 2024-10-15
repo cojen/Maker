@@ -250,4 +250,71 @@ public class TypeAnnotationsTest {
         Ann ann = exAnns[1].getAnnotation(Ann.class);
         assertEquals("hello", ann.message());
     }
+
+    @Test
+    public void receiverType() throws Exception {
+        ClassMaker cm = ClassMaker.begin().public_();
+
+        MethodMaker mm = cm.addMethod(Object.class, "test", int.class).public_();
+
+        Type t1 = cm.type().annotatable();
+        t1.addAnnotation(Ann.class, true).put("value", 999);
+
+        mm.receiverType(t1);
+
+        mm.return_(mm.this_());
+
+        try {
+            mm.receiverType(t1);
+            fail();
+        } catch (IllegalStateException e) {
+            assertTrue(e.getMessage().contains("Parameters have been accessed"));
+        }
+
+        try {
+            cm.addMethod(null, "foo").static_().receiverType(t1);
+            fail();
+        } catch (IllegalStateException e) {
+            assertTrue(e.getMessage().contains("Not an instance method"));
+        }
+
+        Class<?> clazz = cm.finish();
+
+        Method m = clazz.getMethod("test", int.class);
+
+        AnnotatedType at = m.getAnnotatedReceiverType();
+
+        assertEquals(clazz, at.getType());
+
+        Ann ann = at.getAnnotation(Ann.class);
+        assertEquals(999, ann.value());
+    }
+
+    @Test
+    public void ctorReceiverType() throws Exception {
+        ClassMaker outer = ClassMaker.begin().public_();
+
+        ClassMaker inner = outer.addInnerClass("Inner");
+
+        MethodMaker ctor = inner.addConstructor(outer).public_();
+
+        Type t1 = outer.type().annotatable();
+        t1.addAnnotation(Ann.class, true).put("value", 555);
+
+        ctor.receiverType(t1);
+
+        ctor.invokeSuperConstructor();
+
+        Class<?> outerClass = outer.finish();
+        Class<?> innerClass = inner.finish();
+
+        Constructor c = innerClass.getConstructor(outerClass);
+
+        AnnotatedType at = c.getAnnotatedReceiverType();
+
+        assertEquals(outerClass, at.getType());
+
+        Ann ann = at.getAnnotation(Ann.class);
+        assertEquals(555, ann.value());
+    }
 }

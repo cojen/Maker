@@ -161,6 +161,7 @@ public interface MethodMaker extends Maker {
     /**
      * Switch this method to be static. Methods are non-static by default.
      *
+     * @throws IllegalStateException if {@link #this_ this} or any parameters have been accessed
      * @return this
      */
     MethodMaker static_();
@@ -207,6 +208,17 @@ public interface MethodMaker extends Maker {
      * @return this
      */
     MethodMaker bridge();
+
+    /**
+     * Define a receiver type for the sole purpose of annotating the implicit {@link #this_
+     * this} parameter.
+     *
+     * @param type must be the same as {@code this} type
+     * @throws IllegalStateException if not an instance method, or if {@code this} or any
+     * parameters have been accessed
+     * @return this MethodMaker
+     */
+    MethodMaker receiverType(Type type);
 
     /**
      * Indicate that this method supports a variable number of arguments.

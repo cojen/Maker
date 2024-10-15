@@ -293,11 +293,6 @@ abstract class BaseType implements Type, Typed {
     }
 
     @Override
-    public boolean isAnnotated() {
-        return false;
-    }
-
-    @Override
     public Type annotatable() {
         return new AnnotatableType(this);
     }
@@ -309,6 +304,13 @@ abstract class BaseType implements Type, Typed {
 
     @Override
     public void freeze() {
+    }
+
+    /**
+     * Returns true if this type might have annotations added to it.
+     */
+    boolean isAnnotatable() {
+        return false;
     }
 
     void applyAnnotations(TheClassMaker classMaker, TypeAnnotationMaker.Target target) {
