@@ -21,6 +21,7 @@ import java.lang.module.ModuleDescriptor;
 import java.io.IOException;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -71,7 +72,7 @@ abstract class Attributed {
                     if (value instanceof String str) {
                         constant = cp.addUTF8(str);
                     } else if (value instanceof Class clazz) {
-                        constant = cp.addClass(Type.from(clazz));
+                        constant = cp.addClass(BaseType.from(clazz));
                     } else if (value instanceof Typed typed) {
                         constant = cp.addClass(typed.type());
                     } else if (value instanceof Number) {
@@ -112,7 +113,7 @@ abstract class Attributed {
         }
     }
 
-    TheAnnotationMaker addAnnotation(TheAnnotationMaker am, boolean visible) {
+    TheAnnotationMaker addAnnotationMaker(TheAnnotationMaker am, boolean visible) {
         if (mAnnotationSets == null) {
             mAnnotationSets = new Attribute.Annotations[2];
         }
@@ -125,6 +126,23 @@ abstract class Attributed {
         }
         annotations.add(am);
         return am;
+    }
+
+    TypeAnnotationMaker addTypeAnnotationMaker(TypeAnnotationMaker tam, boolean visible) {
+        if (mAnnotationSets == null) {
+            mAnnotationSets = new Attribute.Annotations[4];
+        } else if (mAnnotationSets.length < 4) {
+            mAnnotationSets = Arrays.copyOfRange(mAnnotationSets, 0, 4);
+        }
+        int which = visible ? 2 : 3;
+        Attribute.Annotations annotations = mAnnotationSets[which];
+        if (annotations == null) {
+            annotations = new Attribute.TypeAnnotations(mConstants, visible);
+            addAttribute(annotations);
+            mAnnotationSets[which] = annotations;
+        }
+        annotations.add(tam);
+        return tam;
     }
 
     public void addSignature(Object... components) {
@@ -161,9 +179,9 @@ abstract class Attributed {
             return str;
         }
 
-        Type type;
+        BaseType type;
         if (component instanceof Class clazz) {
-            type = Type.from(clazz);
+            type = BaseType.from(clazz);
         } else if (component instanceof Typed typed) {
             type = typed.type();
         } else {

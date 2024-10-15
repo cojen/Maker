@@ -31,16 +31,25 @@ import java.lang.invoke.MethodType;
  */
 public interface Variable {
     /**
+     * Returns the type of this variable.
+     */
+    Type type();
+
+    /**
      * Returns the type of this variable, if bound to an existing class. Null is returned if
      * bound to a class which is being made.
      */
-    Class<?> classType();
+    default Class<?> classType() {
+        return type().classType();
+    }
 
     /**
      * Returns the type of this variable, if bound to a class which is being made. Null is
      * returned if bound to an existing class.
      */
-    ClassMaker makerType();
+    default ClassMaker makerType() {
+        return type().makerType();
+    }
 
     /**
      * Returns the name of this variable, which is null if unnamed.
@@ -798,8 +807,8 @@ public interface Variable {
      * primitive type, it's simply returned as is. Null is returned in all other cases.
      */
     static Class<?> boxedType(Class<?> clazz) {
-        Type boxed = Type.from(clazz).box();
-        return boxed.unbox() != null ? boxed.clazz() : null;
+        BaseType boxed = BaseType.from(clazz).box();
+        return boxed.unbox() != null ? boxed.classType() : null;
     }
 
     /**
@@ -815,8 +824,8 @@ public interface Variable {
      * it's simply returned as is. Null is returned in all other cases.
      */
     static Class<?> unboxedType(Class<?> clazz) {
-        Type unboxed = Type.from(clazz).unbox();
-        return unboxed != null ? unboxed.clazz() : null;
+        BaseType unboxed = BaseType.from(clazz).unbox();
+        return unboxed != null ? unboxed.classType() : null;
     }
 
     /**
@@ -872,7 +881,7 @@ public interface Variable {
      * @hidden
      */
     default Variable invoke(String name) {
-        return invoke(name, Type.NO_ARGS);
+        return invoke(name, BaseType.NO_ARGS);
     }
 
     /**
@@ -895,7 +904,7 @@ public interface Variable {
      * @hidden
      */
     default Variable invoke(Object returnType, String name, Object[] types) {
-        return invoke(returnType, name, types, Type.NO_ARGS);
+        return invoke(returnType, name, types, BaseType.NO_ARGS);
     }
 
     /**
@@ -917,7 +926,7 @@ public interface Variable {
      * @hidden
      */
     default Variable methodHandle(Object returnType, String name) {
-        return methodHandle(returnType, name, Type.NO_ARGS);
+        return methodHandle(returnType, name, BaseType.NO_ARGS);
     }
 
     /**
@@ -936,7 +945,7 @@ public interface Variable {
      * @hidden
      */
     default Bootstrap indy(String name) {
-        return indy(name, Type.NO_ARGS);
+        return indy(name, BaseType.NO_ARGS);
     }
 
     /**
@@ -957,7 +966,7 @@ public interface Variable {
      * @hidden
      */
     default Bootstrap condy(String name) {
-        return condy(name, Type.NO_ARGS);
+        return condy(name, BaseType.NO_ARGS);
     }
 
     /**

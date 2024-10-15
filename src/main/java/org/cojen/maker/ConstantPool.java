@@ -88,7 +88,7 @@ class ConstantPool {
     /**
      * @param type can be a class, an interface, or an array
      */
-    C_Class addClass(Type type) {
+    C_Class addClass(BaseType type) {
         if (!type.isObject()) {
             throw new IllegalArgumentException(type.name());
         }
@@ -102,7 +102,7 @@ class ConstantPool {
         return addConstant(new C_Class(addUTF8(name.replace('.', '/')), null));
     }
 
-    private C_Class doAddClass(Type type) {
+    private C_Class doAddClass(BaseType type) {
         String name = type.isArray() ? type.descriptor() : type.name().replace('.', '/');
         return addConstant(new C_Class(addUTF8(name), type));
     }
@@ -115,13 +115,13 @@ class ConstantPool {
         return addConstant(new C_String(tag, addUTF8(value)));
     }
 
-    C_Field addField(Type.Field field) {
+    C_Field addField(BaseType.Field field) {
         C_Class clazz = addClass(field.enclosingType());
         C_NameAndType nameAndType = addNameAndType(field.name(), field.type().descriptor());
         return addConstant(new C_Field(clazz, nameAndType, field));
     }
 
-    C_Method addMethod(Type.Method method) {
+    C_Method addMethod(BaseType.Method method) {
         int tag = method.enclosingType().isInterface() ? 11 : 10;
         C_Class clazz = addClass(method.enclosingType());
         C_NameAndType nameAndType = addNameAndType(method.name(), method.descriptor());
@@ -134,7 +134,7 @@ class ConstantPool {
 
     C_MethodHandle addMethodHandle(MethodHandleInfo info) {
         final int kind = info.getReferenceKind();
-        final Type decl = Type.from(info.getDeclaringClass());
+        final BaseType decl = BaseType.from(info.getDeclaringClass());
         final MethodType mtype = info.getMethodType();
         final String name = info.getName();
 
@@ -146,25 +146,25 @@ class ConstantPool {
 
         case REF_getField: case REF_getStatic:
             ref = addField(decl.inventField
-                           (kind == REF_getStatic ? Type.FLAG_STATIC : 0,
-                            Type.from(mtype.returnType()), name));
+                           (kind == REF_getStatic ? BaseType.FLAG_STATIC : 0,
+                            BaseType.from(mtype.returnType()), name));
             break;
 
         case REF_putField: case REF_putStatic:
             ref = addField(decl.inventField
-                           (kind == REF_putStatic ? Type.FLAG_STATIC : 0,
-                            Type.from(mtype.lastParameterType()), name));
+                           (kind == REF_putStatic ? BaseType.FLAG_STATIC : 0,
+                            BaseType.from(mtype.lastParameterType()), name));
             break;
 
         case REF_invokeVirtual: case REF_newInvokeSpecial:
         case REF_invokeStatic: case REF_invokeSpecial: case REF_invokeInterface:
-            Type ret = Type.from(mtype.returnType());
-            Type[] params = new Type[mtype.parameterCount()];
+            BaseType ret = BaseType.from(mtype.returnType());
+            BaseType[] params = new BaseType[mtype.parameterCount()];
             for (int i=0; i<params.length; i++) {
-                params[i] = Type.from(mtype.parameterType(i));
+                params[i] = BaseType.from(mtype.parameterType(i));
             }
-            ref = addMethod(decl.inventMethod
-                            (kind == REF_invokeStatic ? Type.FLAG_STATIC : 0, ret, name, params));
+            int flags = kind == REF_invokeStatic ? BaseType.FLAG_STATIC : 0;
+            ref = addMethod(decl.inventMethod(flags, ret, name, params));
             break;
         }
 
@@ -180,11 +180,11 @@ class ConstantPool {
         return addConstant(new C_Dynamic(18, bootstrapIndex, nameAndType));
     }
 
-    C_Dynamic addDynamicConstant(int bootstrapIndex, String name, Type type) {
+    C_Dynamic addDynamicConstant(int bootstrapIndex, String name, BaseType type) {
         return addDynamicConstant(bootstrapIndex, addNameAndType(name, type.descriptor()));
     }
 
-    C_Dynamic addDynamicConstant(int bootstrapIndex, C_UTF8 name, Type type) {
+    C_Dynamic addDynamicConstant(int bootstrapIndex, C_UTF8 name, BaseType type) {
         return addDynamicConstant(bootstrapIndex, addNameAndType(name, addUTF8(type.descriptor())));
     }
 
@@ -197,9 +197,9 @@ class ConstantPool {
             return addString(str);
         } else if (value instanceof Class clazz) {
             if (!clazz.isHidden() && !clazz.isPrimitive()) {
-                return doAddClass(Type.from(clazz));
+                return doAddClass(BaseType.from(clazz));
             }
-        } else if (value instanceof Type type) {
+        } else if (value instanceof BaseType type) {
             if (!type.isHidden() && type.isObject()) {
                 return doAddClass(type);
             }
@@ -424,9 +424,9 @@ class ConstantPool {
     }
 
     static final class C_Class extends C_String {
-        final Type mType;
+        final BaseType mType;
 
-        C_Class(C_UTF8 name, Type type) {
+        C_Class(C_UTF8 name, BaseType type) {
             super(7, name);
             mType = type;
         }
@@ -492,18 +492,18 @@ class ConstantPool {
     }
 
     static final class C_Field extends C_MemberRef {
-        final Type.Field mField;
+        final BaseType.Field mField;
 
-        C_Field(C_Class clazz, C_NameAndType nameAndType, Type.Field field) {
+        C_Field(C_Class clazz, C_NameAndType nameAndType, BaseType.Field field) {
             super(9, clazz, nameAndType);
             mField = field;
         }
     }
 
     static final class C_Method extends C_MemberRef {
-        final Type.Method mMethod;
+        final BaseType.Method mMethod;
 
-        C_Method(int tag, C_Class clazz, C_NameAndType nameAndType, Type.Method method) {
+        C_Method(int tag, C_Class clazz, C_NameAndType nameAndType, BaseType.Method method) {
             super(tag, clazz, nameAndType);
             mMethod = method;
         }

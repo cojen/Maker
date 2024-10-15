@@ -52,14 +52,14 @@ abstract class ConstableSupport {
      * @param value expected to be a custom Constable or ConstantDesc
      */
     static TheMethodMaker.ConstantVar toConstantVar(TheMethodMaker mm, Object value) {
-        Type type;
+        BaseType type;
         ConstantPool.Constant constant;
 
         if (value instanceof MethodTypeDesc desc) {
-            type = Type.from(MethodType.class);
+            type = BaseType.from(MethodType.class);
             constant = mm.mConstants.addMethodType(desc.descriptorString());
         } else if (value instanceof DirectMethodHandleDesc desc) {
-            type = Type.from(MethodHandle.class);
+            type = BaseType.from(MethodHandle.class);
             constant = addMethodHandle(mm, desc);
         } else if (value instanceof DynamicConstantDesc desc) {
             type = mm.mClassMaker.typeFrom(desc.constantType().descriptorString());
@@ -80,7 +80,7 @@ abstract class ConstableSupport {
                 (mm.mClassMaker.addBootstrapMethod(bootHandle, bootConstants),
                  desc.constantName(), type);
         } else if (value instanceof ClassDesc desc) {
-            type = Type.from(Class.class);
+            type = BaseType.from(Class.class);
             constant = mm.addLoadableConstant
                 (type, mm.mClassMaker.typeFrom(desc.descriptorString()));
         } else if (value instanceof Constable c) {
@@ -103,7 +103,7 @@ abstract class ConstableSupport {
         final TheClassMaker cm = mm.mClassMaker;
 
         final int refKind = mdesc.refKind();
-        final Type owner = cm.typeFrom(mdesc.owner().descriptorString());
+        final BaseType owner = cm.typeFrom(mdesc.owner().descriptorString());
         final MethodTypeDesc mtype = mdesc.invocationType();
         final String name = mdesc.methodName();
 
@@ -114,34 +114,34 @@ abstract class ConstableSupport {
             throw new AssertionError();
 
         case REF_getField: case REF_getStatic:
-            Type type = cm.typeFrom(mtype.returnType().descriptorString());
+            BaseType type = cm.typeFrom(mtype.returnType().descriptorString());
             ref = cp.addField(owner.inventField
-                              (refKind == REF_getStatic ? Type.FLAG_STATIC : 0, type, name));
+                              (refKind == REF_getStatic ? BaseType.FLAG_STATIC : 0, type, name));
             break;
 
         case REF_putField: case REF_putStatic:
             type = cm.typeFrom(mtype.parameterType(0).descriptorString());
             ref = cp.addField(owner.inventField
-                              (refKind == REF_putStatic ? Type.FLAG_STATIC : 0, type, name));
+                              (refKind == REF_putStatic ? BaseType.FLAG_STATIC : 0, type, name));
             break;
 
         case REF_invokeVirtual: case REF_newInvokeSpecial:
         case REF_invokeStatic: case REF_invokeSpecial: case REF_invokeInterface:
-            Type ret;
+            BaseType ret;
             int drop;
             if (mdesc.kind() == DirectMethodHandleDesc.Kind.CONSTRUCTOR) {
-                ret = Type.VOID;
+                ret = BaseType.VOID;
                 drop = 0;
             } else {
                 ret = cm.typeFrom(mtype.returnType().descriptorString());
                 drop = refKind == REF_invokeStatic ? 0 : 1;
             }
-            Type[] params = new Type[mtype.parameterCount() - drop];
+            BaseType[] params = new BaseType[mtype.parameterCount() - drop];
             for (int i=0; i<params.length; i++) {
                 params[i] = cm.typeFrom(mtype.parameterType(i + drop).descriptorString());
             }
             ref = cp.addMethod(owner.inventMethod
-                               (refKind == REF_invokeStatic ? Type.FLAG_STATIC : 0,
+                               (refKind == REF_invokeStatic ? BaseType.FLAG_STATIC : 0,
                                 ret, name, params));
             break;
         }
@@ -158,16 +158,16 @@ abstract class ConstableSupport {
      *
      * @param value expected to be ConstantDesc
      */
-    static Type toConstantDescType(TheMethodMaker mm, Object value) {
+    static BaseType toConstantDescType(TheMethodMaker mm, Object value) {
         if (value instanceof ConstantDesc) {
             if (value instanceof MethodTypeDesc) {
-                return Type.from(MethodType.class);
+                return BaseType.from(MethodType.class);
             } else if (value instanceof DirectMethodHandleDesc) {
-                return Type.from(MethodHandle.class);
+                return BaseType.from(MethodHandle.class);
             } else if (value instanceof DynamicConstantDesc desc) {
                 return mm.mClassMaker.typeFrom(desc.constantType().descriptorString());
             } else if (value instanceof ClassDesc) {
-                return Type.from(Class.class);
+                return BaseType.from(Class.class);
             }
         }
             

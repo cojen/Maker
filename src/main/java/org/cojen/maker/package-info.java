@@ -40,6 +40,7 @@
  * The following kinds of types are supported:
  *
  * <ul>
+ * <li>{@link Type} — An explicit type object.
  * <li>{@link java.lang.Class Class} — Examples: {@code int.class}, {@code String.class}, {@code int[].class}, etc.
  * <li>{@link java.lang.String String} — Fully qualified class name or descriptor: {@code "int"}, {@code "java.lang.String"}, {@code "int[]"}, {@code "I"}, {@code "Ljava/lang/String;"}, {@code "[I"}, etc.
  * <li>{@link ClassMaker} — Specifies the class being made.

@@ -24,6 +24,11 @@ package org.cojen.maker;
  */
 public interface FieldMaker extends Maker {
     /**
+     * Returns the type of this field being made.
+     */
+    Type type();
+
+    /**
      * Returns the name of this field.
      */
     @Override

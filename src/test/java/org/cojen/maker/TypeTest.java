@@ -45,29 +45,29 @@ public class TypeTest {
 
         {
             var cm = (TheClassMaker) ClassMaker.begin(null).extend(ArrayList.class);
-            Type type = cm.type();
+            BaseType type = cm.type();
 
-            assertFalse(type.isAssignableFrom(Type.from(int.class)));
-            assertTrue(Type.from(ArrayList.class).isAssignableFrom(type));
-            assertTrue(Type.from(Object.class).isAssignableFrom(type));
+            assertFalse(type.isAssignableFrom(BaseType.from(int.class)));
+            assertTrue(BaseType.from(ArrayList.class).isAssignableFrom(type));
+            assertTrue(BaseType.from(Object.class).isAssignableFrom(type));
         }
 
         {
             var cm = (TheClassMaker) ClassMaker.begin(null)
                 .implement(List.class).implement(Serializable.class);
-            Type type = cm.type();
+            BaseType type = cm.type();
 
-            assertTrue(Type.from(List.class).isAssignableFrom(type));
-            assertTrue(Type.from(Serializable.class).isAssignableFrom(type));
-            assertFalse(Type.from(String.class).isAssignableFrom(type));
+            assertTrue(BaseType.from(List.class).isAssignableFrom(type));
+            assertTrue(BaseType.from(Serializable.class).isAssignableFrom(type));
+            assertFalse(BaseType.from(String.class).isAssignableFrom(type));
         }
 
         {
             var cm1 = (TheClassMaker) ClassMaker.begin();
-            Type type1 = cm1.type();
+            BaseType type1 = cm1.type();
 
             var loader = new URLClassLoader(new URL[0]);
-            Type type2 = Type.begin(loader, cm1, cm1.name());
+            BaseType type2 = BaseType.begin(loader, cm1, cm1.name());
 
             assertNotSame(type1, type2);
             assertEquals(type1, type2);
@@ -87,64 +87,76 @@ public class TypeTest {
             "void", "V"
         };
         for (int i=0; i<prims.length; i+=2) {
-            Type type = i < 10 ? Type.from(loader, prims[i]) : Type.from(loader, (Object) prims[i]);
+            Type type = i < 10 ? Type.from(prims[i], loader) : Type.from((Object) prims[i], loader);
             assertEquals(prims[i], type.name());
             assertTrue(type.isPrimitive());
             assertEquals(type, type.unbox());
             assertEquals(prims[i + 1], type.descriptor());
             assertEquals(type, type.box().unbox());
 
-            verifyNonObject(type);
+            verifyNonObject((BaseType) type);
 
             // Find by descriptor.
-            assertEquals(type, Type.from(loader, prims[i + 1]));
+            assertEquals(type, Type.from(prims[i + 1]));
         }
 
         {
-            Type type = Type.Null.THE;
+            BaseType type = BaseType.Null.THE;
             assertEquals("java.lang.Object", type.name());
             assertEquals("Ljava/lang/Object;", type.descriptor());
             assertFalse(type.isPrimitive());
             assertNull(type.unbox());
             assertEquals(type, type.box());
-            assertNull(type.clazz());
+            assertNull(type.classType());
             assertFalse(type.isInterface());
             assertFalse(type.isArray());
             assertNull(type.elementType());
-            assertEquals(Type.SM_NULL, type.stackMapCode());
-            assertFalse(type.isAssignableFrom(Type.from(Object.class)));
+            assertEquals(BaseType.SM_NULL, type.stackMapCode());
+            assertFalse(type.isAssignableFrom(BaseType.from(Object.class)));
         }
 
         try {
-            Type.from(loader, "");
+            Type.from("");
+            fail();
+        } catch (IllegalArgumentException e) {
+        }
+
+        try {
+            Type.from("", loader);
+            fail();
+        } catch (IllegalArgumentException e) {
+        }
+
+        try {
+            Type.from(this);
             fail();
         } catch (IllegalArgumentException e) {
         }
 
         {
-            Type type = Type.from(loader, "abc.Foo[]");
+            BaseType type = BaseType.from(loader, "abc.Foo[]");
             assertEquals("abc.Foo[]", type.name());
             assertEquals("[Labc/Foo;", type.descriptor());
             assertFalse(type.isPrimitive());
             assertNull(type.unbox());
             assertTrue(type.isArray());
             assertFalse(type.isInterface());
-            assertNull(type.clazz());
+            assertNull(type.classType());
 
             // Find by descriptor.
-            assertEquals(type, Type.from(loader, "[Labc/Foo;"));
-            assertEquals(type, Type.from(loader, "[Labc/Foo"));
+            assertEquals(type, BaseType.from(loader, "[Labc/Foo;"));
+            assertEquals(type, BaseType.from(loader, "[Labc/Foo"));
         }
 
         {
-            Type type = Type.from(loader, "java/lang.Void");
+            Type type = Type.from("java/lang.Void", loader);
             assertEquals("java.lang.Void", type.name());
             assertEquals("Ljava/lang/Void;", type.descriptor());
             assertEquals(Type.from(void.class), type.unbox());
         }
 
         {
-            Type type = Type.from(loader, "java.lang.FakeClass");
+            BaseType type = BaseType.from(loader, "java.lang.FakeClass");
             assertEquals("java.lang.FakeClass", type.name());
             assertEquals("Ljava/lang/FakeClass;", type.descriptor());
             assertFalse(type.isInterface());
@@ -152,38 +164,38 @@ public class TypeTest {
         }
 
         {
-            Type type = Type.from(loader, "Foo;");
+            BaseType type = BaseType.from(loader, "Foo;");
             assertEquals("Foo", type.name());
             assertEquals("LFoo;", type.descriptor());
         }
 
         {
-            Type type = Type.from(loader, "Labc/Foo");
+            BaseType type = BaseType.from(loader, "Labc/Foo");
             assertEquals("abc.Foo", type.name());
             assertEquals("Labc/Foo;", type.descriptor());
         }
 
         {
-            Type type = Type.from(loader, "LFoo");
+            BaseType type = BaseType.from(loader, "LFoo");
             assertEquals("LFoo", type.name());
             assertEquals("LLFoo;", type.descriptor());
         }
 
         {
-            Type type = Type.from(loader, "java.util.List");
-            assertEquals(List.class, type.clazz());
+            BaseType type = BaseType.from(loader, "java.util.List");
+            assertEquals(List.class, type.classType());
         }
 
         {
-            Type type = Type.from(loader, "java.lang.String[]");
-            assertEquals(String[].class, type.clazz());
+            BaseType type = BaseType.from(loader, "java.lang.String[]");
+            assertEquals(String[].class, type.classType());
             for (int i=0; i<2; i++) {
                 assertEquals("java.lang.String[]", type.name());
             }
         }
     }
 
-    private static void verifyNonObject(Type type) {
+    private static void verifyNonObject(BaseType type) {
         assertFalse(type.isArray());
         assertNull(type.elementType());
         assertFalse(type.isInterface());
@@ -215,10 +227,10 @@ public class TypeTest {
         } catch (IllegalStateException e) {
         }
 
-        assertTrue(type.findMethods("x", new Type[0], 0, 0, null, null).isEmpty());
+        assertTrue(type.findMethods("x", new BaseType[0], 0, 0, null, null).isEmpty());
 
         assertTrue(type.isAssignableFrom(type));
-        Type object = Type.from(Object.class);
+        BaseType object = BaseType.from(Object.class);
         assertFalse(type.isAssignableFrom(object));
         
         assertFalse(object.isAssignableFrom(type));
@@ -226,8 +238,7 @@ public class TypeTest {
 
     @Test
     public void setType() throws Exception {
-        // Test that a variable of type Class can be be assigned by a Type instance. This
-        // feature isn't actually used anywhere at the moment.
+        // Test that a variable of type Class can be be assigned by a Type instance.
 
         ClassMaker cm = ClassMaker.begin().public_();
         MethodMaker mm = cm.addMethod(Class[].class, "test").public_().static_();
@@ -255,13 +266,13 @@ public class TypeTest {
         ClassLoader loader = getClass().getClassLoader();
 
         try {
-            Type.from(loader, (String) null);
+            Type.from((String) null, loader);
             fail();
         } catch (NullPointerException e) {
         }
 
         try {
-            Type.from(loader, (Object) null);
+            Type.from((Object) null, loader);
             fail();
         } catch (NullPointerException e) {
         }
@@ -273,7 +284,7 @@ public class TypeTest {
         }
 
         try {
-            Type.from(loader, this);
+            Type.from(this, loader);
             fail();
         } catch (IllegalArgumentException e) {
             assertTrue(e.getMessage().startsWith("Unknown"));
@@ -347,19 +358,19 @@ public class TypeTest {
 
     @Test
     public void commonCatchType() throws Exception {
-        Type objType = Type.from(Object.class);
+        BaseType objType = BaseType.from(Object.class);
 
-        Type[] types = {
-            Type.from(RuntimeException.class),
-            Type.from(NullPointerException.class),
-            Type.from(IllegalArgumentException.class),
-            Type.from(IllegalFormatException.class),
-            Type.from(IOException.class),
-            Type.from(Exception.class),
-            Type.from(Error.class),
+        BaseType[] types = {
+            BaseType.from(RuntimeException.class),
+            BaseType.from(NullPointerException.class),
+            BaseType.from(IllegalArgumentException.class),
+            BaseType.from(IllegalFormatException.class),
+            BaseType.from(IOException.class),
+            BaseType.from(Exception.class),
+            BaseType.from(Error.class),
         };
 
-        var map = new HashMap<Type, List<Type>>();
+        var map = new HashMap<BaseType, List<BaseType>>();
 
         for (int i=0; i<types.length; i++) {
             for (int j=0; j<types.length; j++) {
@@ -368,7 +379,7 @@ public class TypeTest {
                 map.put(types[i], null);
                 map.put(types[j], null);
 
-                Type common = Type.commonCatchType(map);
+                BaseType common = BaseType.commonCatchType(map);
 
                 assertNotEquals(common, objType);
 
@@ -398,7 +409,7 @@ public class TypeTest {
                     map.put(types[j], null);
                     map.put(types[k], null);
 
-                    Type common = Type.commonCatchType(map);
+                    BaseType common = BaseType.commonCatchType(map);
 
                     assertNotEquals(common, objType);
 

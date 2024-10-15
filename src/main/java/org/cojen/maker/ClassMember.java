@@ -48,7 +48,7 @@ abstract class ClassMember extends Attributed implements Maker {
 
     @Override
     public AnnotationMaker addAnnotation(Object annotationType, boolean visible) {
-        return addAnnotation(new TheAnnotationMaker(mClassMaker, annotationType), visible);
+        return addAnnotationMaker(new TheAnnotationMaker(mClassMaker, annotationType), visible);
     }
 
     public String name() {

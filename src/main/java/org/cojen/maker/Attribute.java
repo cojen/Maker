@@ -164,6 +164,10 @@ abstract class Attribute extends Attributed {
             mEntries = (E[]) new Object[4];
         }
 
+        int size() {
+            return mSize;
+        }
+
         @Override
         int length() {
             return 2 + mSize * entryLength();
@@ -534,7 +538,11 @@ abstract class Attribute extends Attributed {
 
     static class Annotations extends ListAttribute<TheAnnotationMaker> {
         Annotations(ConstantPool cp, boolean visible) {
-            super(cp, visible ? "RuntimeVisibleAnnotations" : "RuntimeInvisibleAnnotations");
+            this(cp, visible ? "RuntimeVisibleAnnotations" : "RuntimeInvisibleAnnotations");
+        }
+
+        Annotations(ConstantPool cp, String name) {
+            super(cp, name);
         }
 
         void add(TheAnnotationMaker am) {
@@ -558,6 +566,13 @@ abstract class Attribute extends Attributed {
         @Override
         protected void writeEntryTo(BytesOut out, TheAnnotationMaker am) throws IOException {
             am.writeTo(out);
+        }
+    }
+
+    static class TypeAnnotations extends Annotations {
+        TypeAnnotations(ConstantPool cp, boolean visible) {
+            super(cp, visible ? "RuntimeVisibleTypeAnnotations"
+                  : "RuntimeInvisibleTypeAnnotations");
         }
     }
 
@@ -708,7 +723,7 @@ abstract class Attribute extends Attributed {
         protected void writeEntryTo(BytesOut out, Entry entry) throws IOException {
             out.writeShort(entry.mName.mIndex);
             out.writeShort(entry.mDescriptor.mIndex);
-            writeAttributesTo(out);
+            entry.writeAttributesTo(out);
         }
 
         static class Entry extends Attributed {

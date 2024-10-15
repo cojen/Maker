@@ -30,9 +30,9 @@ final class Candidate {
      * @param params actual types supplied to the invoke method
      * @return -1 if method a is better, 1 if b is better, or 0 if neither is strictly better
      */
-    public static int compare(Type[] params, Type.Method a, Type.Method b) {
-        Type[] aParams = a.paramTypes();
-        Type[] bParams = b.paramTypes();
+    public static int compare(BaseType[] params, BaseType.Method a, BaseType.Method b) {
+        BaseType[] aParams = a.paramTypes();
+        BaseType[] bParams = b.paramTypes();
 
         int best = 0;
 
@@ -62,7 +62,7 @@ final class Candidate {
         return best;
     }
 
-    public static int compare(Type param, Type aParam, Type bParam) {
+    public static int compare(BaseType param, BaseType aParam, BaseType bParam) {
         int aCost = param.canConvertTo(aParam);
         int bCost = param.canConvertTo(bParam);
 
@@ -104,9 +104,9 @@ final class Candidate {
         return Integer.compare(bSpec, aSpec);
     }
 
-    private static Type root(Type type) {
+    private static BaseType root(BaseType type) {
         while (true) {
-            Type next = type.elementType();
+            BaseType next = type.elementType();
             if (next == null) {
                 return type;
             }
@@ -114,7 +114,7 @@ final class Candidate {
         }
     }
 
-    private static int specialization(Type type) {
+    private static int specialization(BaseType type) {
         int spec = 0;
         while ((type = type.superType()) != null) {
             spec++;

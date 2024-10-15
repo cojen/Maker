@@ -114,7 +114,7 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
 
         className = injector.reserve(this, className, lookup == null);
 
-        mThisClass = mConstants.addClass(Type.begin(injector, this, className));
+        mThisClass = mConstants.addClass(BaseType.begin(injector, this, className));
     }
 
     private TheClassMaker(TheClassMaker from, String className) {
@@ -230,8 +230,12 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
     }
 
     private void doExtend(Object superClass) {
-        mSuperClass = mConstants.addClass(typeFrom(superClass));
+        BaseType superType = typeFrom(superClass);
+        mSuperClass = mConstants.addClass(superType);
         type().resetInherited();
+        if (superType.isAnnotatable()) {
+            superType.applyAnnotations(this, new TypeAnnotationMaker.Target2(0x10, 65535));
+        }
     }
 
     ConstantPool.C_Class superClass() {
@@ -243,7 +247,7 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
         return superClass;
     }
 
-    Type superType() {
+    BaseType superType() {
         return superClass().mType;
     }
 
@@ -254,8 +258,13 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
         if (mInterfaces == null) {
             mInterfaces = new LinkedHashSet<>(4);
         }
-        mInterfaces.add(mConstants.addClass(typeFrom(iface)));
+        BaseType type = typeFrom(iface);
+        mInterfaces.add(mConstants.addClass(type));
         type().resetInherited();
+        if (type.isAnnotatable()) {
+            type.applyAnnotations
+                (this, new TypeAnnotationMaker.Target2(0x10, mInterfaces.size() - 1));
+        }
         return this;
     }
 
@@ -280,21 +289,21 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
     /**
      * @return empty set if no interfaces
      */
-    Set<Type> allInterfaces() {
-        Set<Type> all = null;
+    Set<BaseType> allInterfaces() {
+        Set<BaseType> all = null;
 
         if (mInterfaces != null) {
             all = new LinkedHashSet<>(mInterfaces.size());
 
             for (ConstantPool.C_Class clazz : mInterfaces) {
-                Type type = clazz.mType;
+                BaseType type = clazz.mType;
                 all.add(type);
                 all.addAll(type.interfaces());
             }
         }
 
-        for (Type s = superType(); s != null; s = s.superType()) {
-            Set<Type> inherited = s.interfaces();
+        for (BaseType s = superType(); s != null; s = s.superType()) {
+            Set<BaseType> inherited = s.interfaces();
             if (inherited != null && !inherited.isEmpty()) {
                 if (all == null) {
                     all = new LinkedHashSet<>(inherited.size());
@@ -319,15 +328,19 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
             throw new IllegalStateException("Field is already defined: " + name);
         }
 
-        Type tType = typeFrom(type);
+        BaseType tType = typeFrom(type);
 
         var fm = new TheFieldMaker(this, type().defineField(0, tType, name));
         mFields.put(name, fm);
 
+        if (tType.isAnnotatable()) {
+            tType.applyAnnotations(fm, new TypeAnnotationMaker.Target0(0x13));
+        }
+
         return fm;
     }
 
-    TheFieldMaker addSyntheticField(Type type, String prefix) {
+    TheFieldMaker addSyntheticField(BaseType type, String prefix) {
         checkFinished();
 
         String name;
@@ -379,14 +392,14 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
         mMethods.add(mm);
     }
 
-    Type.Method defineMethod(Object retType, String name, Object... paramTypes) {
-        Type tRetType = retType == null ? Type.VOID : typeFrom(retType);
+    BaseType.Method defineMethod(Object retType, String name, Object... paramTypes) {
+        BaseType tRetType = retType == null ? BaseType.VOID : typeFrom(retType);
 
-        Type[] tParamTypes;
+        BaseType[] tParamTypes;
         if (paramTypes == null) {
-            tParamTypes = new Type[0];
+            tParamTypes = new BaseType[0];
         } else {
-            tParamTypes = new Type[paramTypes.length];
+            tParamTypes = new BaseType[paramTypes.length];
             for (int i=0; i<paramTypes.length; i++) {
                 tParamTypes[i] = typeFrom(paramTypes[i]);
             }
@@ -423,7 +436,7 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
         return addInnerClass(className, null);
     }
 
-    TheClassMaker addInnerClass(final String className, final Type.Method hostMethod) {
+    TheClassMaker addInnerClass(final String className, final BaseType.Method hostMethod) {
         TheClassMaker nestHost = nestHost(this);
 
         String prefix = name();
@@ -477,12 +490,12 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
         }
     }
 
-    private void setNestHost(Type nestHost) {
+    private void setNestHost(BaseType nestHost) {
         ConstantPool cp = mConstants;
         addAttribute(new Attribute.Constant(cp, "NestHost", cp.addClass(nestHost)));
     }
 
-    private synchronized void addNestMember(Type nestMember) {
+    private synchronized void addNestMember(BaseType nestMember) {
         if (mNestMembers == null) {
             mNestMembers = new Attribute.ConstantList(mConstants, "NestMembers");
             addAttribute(mNestMembers);
@@ -490,7 +503,7 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
         mNestMembers.add(mConstants.addClass(nestMember));
     }
 
-    private void setEnclosingMethod(Type hostType, Type.Method hostMethod) {
+    private void setEnclosingMethod(BaseType hostType, BaseType.Method hostMethod) {
         addAttribute(new Attribute.EnclosingMethod
                      (mConstants, mConstants.addClass(hostType),
                       mConstants.addNameAndType(hostMethod.name(), hostMethod.descriptor())));
@@ -525,7 +538,7 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
 
     @Override
     public AnnotationMaker addAnnotation(Object annotationType, boolean visible) {
-        return addAnnotation(new TheAnnotationMaker(this, annotationType), visible);
+        return addAnnotationMaker(new TheAnnotationMaker(this, annotationType), visible);
     }
 
     @Override
@@ -537,19 +550,15 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
     }
 
     @Override
-    public Object arrayType(int dimensions) {
+    public Type arrayType(int dimensions) {
         if (dimensions < 1 || dimensions > 255) {
             throw new IllegalArgumentException();
         }
-
         Type type = type();
         do {
             type = type.asArray();
         } while (--dimensions > 0);
-
-        final Type fType = type;
-
-        return (Typed) () -> fType;
+        return type;
     }
 
     @Override
@@ -568,11 +577,11 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
     @Override
     public Set<String> unimplementedMethods() {
         Set<String> unimplemented = null;
-        var methodSet = new HashSet<Type.Method>();
+        var methodSet = new HashSet<BaseType.Method>();
 
-        Type type = type();
+        BaseType type = type();
         do {
-            for (Type.Method method : type.methods().values()) {
+            for (BaseType.Method method : type.methods().values()) {
                 if (methodSet.add(method) && Modifier.isAbstract(method.mFlags)) {
                     if (unimplemented == null) {
                         unimplemented = new TreeSet<>();
@@ -583,16 +592,16 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
         } while ((type = type.superType()) != null);
 
         // Add all the default interface methods.
-        for (Type ifaceType : type().interfaces()) {
-            for (Type.Method method : ifaceType.methods().values()) {
+        for (BaseType ifaceType : type().interfaces()) {
+            for (BaseType.Method method : ifaceType.methods().values()) {
                 if ((method.mFlags & (Modifier.STATIC | Modifier.ABSTRACT)) == 0) {
                     methodSet.add(method);
                 }
             }
         }
 
-        for (Type ifaceType : type().interfaces()) {
-            for (Type.Method method : ifaceType.methods().values()) {
+        for (BaseType ifaceType : type().interfaces()) {
+            for (BaseType.Method method : ifaceType.methods().values()) {
                 if (Modifier.isAbstract(method.mFlags) && !methodSet.contains(method)) {
                     if (unimplemented == null) {
                         unimplemented = new TreeSet<>();
@@ -865,12 +874,12 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
     }
 
     @Override
-    public Type type() {
+    public BaseType type() {
         return mThisClass.mType;
     }
 
-    Type typeFrom(Object type) {
-        return Type.from(mInjector, type);
+    BaseType typeFrom(Object type) {
+        return BaseType.from(mInjector, type);
     }
 
     /**
@@ -958,8 +967,12 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
             {
                 int i = 0;
                 for (TheFieldMaker fm : fields.values()) {
-                    recordAttr.add(fm);
+                    Attribute.Record.Entry entry = recordAttr.add(fm);
                     paramTypes[i++] = fm;
+                    if (fm.type().isAnnotatable()) {
+                        fm.type().applyAnnotations
+                            (entry, cm, new TypeAnnotationMaker.Target0(0x13));
+                    }
                 }
             }
 
@@ -991,25 +1004,25 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
 
             if (cm.mMethods != null) {
                 for (TheMethodMaker mm : cm.mMethods) {
-                    Type.Method m = mm.mMethod;
+                    BaseType.Method m = mm.mMethod;
                     String name = m.name();
 
                     switch (name) {
                     case "equals":
-                        if (m.returnType() == Type.BOOLEAN && m.paramTypes().length == 1
-                            && m.paramTypes()[0] == Type.from(Object.class))
+                        if (m.returnType() == BaseType.BOOLEAN && m.paramTypes().length == 1
+                            && m.paramTypes()[0] == BaseType.from(Object.class))
                         {
                             toAdd &= ~1;
                         }
                         continue;
                     case "hashCode":
-                        if (m.returnType() == Type.INT && m.paramTypes().length == 0) {
+                        if (m.returnType() == BaseType.INT && m.paramTypes().length == 0) {
                             toAdd &= ~2;
                         }
                         continue;
                     case "toString":
                         if (m.paramTypes().length == 0
-                            && m.returnType() == Type.from(String.class))
+                            && m.returnType() == BaseType.from(String.class))
                         {
                             toAdd &= ~4;
                         }
