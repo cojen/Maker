@@ -209,7 +209,7 @@ final class AnnotatableType extends BaseType {
 
             BaseType elementType = at.elementType();
 
-            if (elementType == null || !(elementType instanceof AnnotatableType)) {
+            if (!(elementType instanceof AnnotatableType)) {
                 break;
             }
 
