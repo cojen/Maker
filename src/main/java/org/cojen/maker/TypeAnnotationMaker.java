@@ -44,7 +44,7 @@ final class TypeAnnotationMaker extends TheAnnotationMaker {
         super.writeTo(out);
     }
 
-    static abstract class Target {
+    static abstract sealed class Target {
         private final int mType;
         private byte[] mPath;
         private int mPathLength;
@@ -114,7 +114,7 @@ final class TypeAnnotationMaker extends TheAnnotationMaker {
     }
 
     /**
-     * Corresponds to target_type 0x13, 0x14, and 0x15: empty_target
+     * Corresponds to target_type 0x13, 0x14, and 0x15: empty_target.
      */
     static final class Target0 extends Target {
         Target0(int type) {
@@ -183,6 +183,7 @@ final class TypeAnnotationMaker extends TheAnnotationMaker {
     /**
      * Corresponds to target_type 0x47, 0x48, 0x49, 0x4a, and 0x4b: type_argument_target.
      */
+    /* Not supported.
     static final class Target3 extends Target {
         private final int mOffset, mIndex;
 
@@ -203,10 +204,12 @@ final class TypeAnnotationMaker extends TheAnnotationMaker {
             out.writeByte(mIndex);
         }
     }
+    */
 
     /**
      * Corresponds to target_type 0x40 and 0x41: localvar_target
      */
+    /* Not supported.
     static final class Target4 extends Target {
         Target4(int type) {
             super(type);
@@ -214,14 +217,13 @@ final class TypeAnnotationMaker extends TheAnnotationMaker {
 
         @Override
         int doLength() {
-            // FIXME: localvar_target
             throw null;
         }
 
         @Override
         void doWriteTo(BytesOut out) throws IOException {
-            // FIXME: localvar_target
             throw null;
         }
     }
+    */
 }

@@ -92,14 +92,33 @@ final class AnnotatableType extends BaseType {
 
     @Override
     public BaseType box() {
-        // Always return a new instance because this type isn't immutable.
-        return new AnnotatableType(mBase.box(), this);
+        BaseType boxed = mBase.box();
+
+        if (boxed == mBase) {
+            // Can only return this instance if it's immutable/frozen.
+            synchronized (this) {
+                if (mFrozen) {
+                    return this;
+                }
+            }
+        }
+
+        return new AnnotatableType(boxed, this);
     }
 
     @Override
     public BaseType unbox() {
         BaseType unboxed = mBase.unbox();
-        // When possible, always return a new instance because this type isn't immutable.
+
+        if (unboxed == mBase) {
+            // Can only return this instance if it's immutable/frozen.
+            synchronized (this) {
+                if (mFrozen) {
+                    return this;
+                }
+            }
+        }
+
         return unboxed == null ? null : new AnnotatableType(unboxed, this);
     }
 
@@ -352,7 +371,7 @@ final class AnnotatableType extends BaseType {
             for (Map.Entry<String, Object> e : mValues.entrySet()) {
                 Object value = e.getValue();
                 if (value instanceof AnnMaker am) {
-                    AnnotationMaker newAm = dest.newAnnotation(value);
+                    AnnotationMaker newAm = dest.newAnnotation(am.mType);
                     am.apply(newAm);
                     value = newAm;
                 }

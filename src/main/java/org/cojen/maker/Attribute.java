@@ -164,6 +164,10 @@ abstract class Attribute extends Attributed {
             mEntries = (E[]) new Object[4];
         }
 
+        int size() {
+            return mSize;
+        }
+
         @Override
         int length() {
             return 2 + mSize * entryLength();

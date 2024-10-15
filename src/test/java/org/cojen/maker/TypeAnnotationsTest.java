@@ -16,6 +16,8 @@
 
 package org.cojen.maker;
 
+import java.io.IOException;
+
 import java.lang.annotation.*;
 
 import java.lang.reflect.*;
@@ -49,6 +51,13 @@ public class TypeAnnotationsTest {
         RoundingMode mode() default RoundingMode.UNNECESSARY;
 
         String[] array() default {""};
+
+        Sub sub() default @Sub;
+    }
+
+    @Retention(RetentionPolicy.RUNTIME)
+    public @interface Sub {
+        int state() default 0;
     }
 
     @Test
@@ -95,7 +104,7 @@ public class TypeAnnotationsTest {
 
         assertEquals(ArrayList.class, at.getType());
 
-        var ann = (Ann) at.getAnnotation(Ann.class);
+        Ann ann = at.getAnnotation(Ann.class);
         assertEquals("hello", ann.message());
     }
 
@@ -118,11 +127,11 @@ public class TypeAnnotationsTest {
         assertEquals(2, types.length);
 
         assertEquals(List.class, types[0].getType());
-        var ann = (Ann) types[0].getAnnotation(Ann.class);
+        Ann ann = types[0].getAnnotation(Ann.class);
         assertEquals(123, ann.value());
 
         assertEquals(Map.class, types[1].getType());
-        ann = (Ann) types[1].getAnnotation(Ann.class);
+        ann = types[1].getAnnotation(Ann.class);
         assertEquals(String.class, ann.clazz());
     }
 
@@ -143,7 +152,7 @@ public class TypeAnnotationsTest {
 
         assertEquals(String.class, at.getType());
 
-        var ann = (Ann) at.getAnnotation(Ann.class);
+        Ann ann = at.getAnnotation(Ann.class);
         assertEquals(RoundingMode.UP, ann.mode());
         assertEquals(List.class, ann.clazz());
     }
@@ -171,7 +180,74 @@ public class TypeAnnotationsTest {
 
         assertEquals(String.class, at.getType());
 
-        var ann = (Ann) at.getAnnotation(Ann.class);
+        Ann ann = at.getAnnotation(Ann.class);
         assertArrayEquals(new String[] {"hello", "world"}, ann.array());
+    }
+
+    @Test
+    public void returnTypeAndParams() throws Exception {
+        ClassMaker cm = ClassMaker.begin().public_();
+
+        Type t1 = Type.from(String.class).annotatable();
+        t1.addAnnotation(Ann.class, true);
+
+        Type t2 = Type.from(int.class).annotatable();
+        AnnotationMaker am = t2.addAnnotation(Ann.class, true);
+        AnnotationMaker sub = am.newAnnotation(Sub.class);
+        sub.put("state", 123);
+        am.put("sub", sub);
+
+        MethodMaker mm = cm.addMethod(t1, "test", t1, t2, float.class).public_().static_();
+        mm.return_(mm.concat(mm.param(0), mm.param(1), mm.param(2)));
+
+        Class<?> clazz = cm.finish();
+
+        Method m = clazz.getMethod("test", String.class, int.class, float.class);
+
+        AnnotatedType retType = m.getAnnotatedReturnType();
+        assertEquals(String.class, retType.getType());
+        assertNotNull(retType.getAnnotation(Ann.class));
+
+        AnnotatedType[] paramAnns = m.getAnnotatedParameterTypes();
+        assertEquals(3, paramAnns.length);
+
+        assertEquals(String.class, paramAnns[0].getType());
+        assertNotNull(paramAnns[0].getAnnotation(Ann.class));
+
+        assertEquals(int.class, paramAnns[1].getType());
+        Ann ann = paramAnns[1].getAnnotation(Ann.class);
+        assertEquals(123, ann.sub().state());
+
+        assertEquals(float.class, paramAnns[2].getType());
+        assertEquals(0, paramAnns[2].getAnnotations().length);
+        assertEquals(0, paramAnns[2].getDeclaredAnnotations().length);
+    }
+
+    @Test
+    public void throwsException() throws Exception {
+        ClassMaker cm = ClassMaker.begin().public_();
+
+        Type t1 = Type.from(IllegalStateException.class).annotatable();
+        t1.addAnnotation(Ann.class, true);
+
+        Type t2 = Type.from(IOException.class).annotatable();
+        t2.addAnnotation(Ann.class, true).put("message", "hello");
+
+        MethodMaker mm = cm.addMethod(null, "test").public_().static_();
+        mm.throws_(t1).throws_(t2);
+
+        Class<?> clazz = cm.finish();
+
+        Method m = clazz.getMethod("test");
+
+        AnnotatedType[] exAnns = m.getAnnotatedExceptionTypes();
+        assertEquals(2, exAnns.length);
+
+        assertEquals(IllegalStateException.class, exAnns[0].getType());
+        assertNotNull(exAnns[0].getAnnotation(Ann.class));
+
+        assertEquals(IOException.class, exAnns[1].getType());
+        Ann ann = exAnns[1].getAnnotation(Ann.class);
+        assertEquals("hello", ann.message());
     }
 }

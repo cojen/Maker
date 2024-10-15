@@ -110,6 +110,18 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     TheMethodMaker(TheClassMaker classMaker, BaseType.Method method) {
         super(classMaker, method.name(), method.descriptor());
         mMethod = method;
+
+        if (method.returnType().isAnnotated()) {
+            method.returnType().applyAnnotations(this, new TypeAnnotationMaker.Target0(0x14));
+        }
+
+        BaseType[] paramTypes = method.paramTypes();
+        for (int i=0; i<paramTypes.length; i++) {
+            BaseType paramType = paramTypes[i];
+            if (paramType.isAnnotated()) {
+                paramType.applyAnnotations(this, new TypeAnnotationMaker.Target1(0x16, i));
+            }
+        }
     }
 
     /**
@@ -432,7 +444,12 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             mExceptionsThrown = new Attribute.ConstantList(mConstants, "Exceptions");
             addAttribute(mExceptionsThrown);
         }
-        mExceptionsThrown.add(mConstants.addClass(mClassMaker.typeFrom(type)));
+        BaseType thrownType = mClassMaker.typeFrom(type);
+        mExceptionsThrown.add(mConstants.addClass(thrownType));
+        if (thrownType.isAnnotated()) {
+            thrownType.applyAnnotations
+                (this, new TypeAnnotationMaker.Target2(0x17, mExceptionsThrown.size() - 1));
+        }
         return this;
     }
 
