@@ -78,6 +78,7 @@ loadScripts(document, 'script');</script>
 <li><a href="#native_()" tabindex="0">native_()</a></li>
 <li><a href="#synthetic()" tabindex="0">synthetic()</a></li>
 <li><a href="#bridge()" tabindex="0">bridge()</a></li>
+<li><a href="#receiverType(org.cojen.maker.Type)" tabindex="0">receiverType(Type)</a></li>
 <li><a href="#varargs()" tabindex="0">varargs()</a></li>
 <li><a href="#throws_(java.lang.Object)" tabindex="0">throws_(Object)</a></li>
 <li><a href="#override()" tabindex="0">override()</a></li>
@@ -334,59 +335,64 @@ extends <a href="Maker.html" title="interface in org.cojen.maker">Maker</a></spa
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Switch this method to be public.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#return_()" class="member-name-link">return_</a>()</code></div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="MethodMaker.html" title="interface in org.cojen.maker">MethodMaker</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#receiverType(org.cojen.maker.Type)" class="member-name-link">receiverType</a><wbr>(<a href="Type.html" title="interface in org.cojen.maker">Type</a>&nbsp;type)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
-<div class="block">Generates a return void statement.</div>
+<div class="block">Define a receiver type for the sole purpose of annotating the implicit <a href="#this_()"><code>this</code></a> parameter.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#return_(java.lang.Object)" class="member-name-link">return_</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/23/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>&nbsp;value)</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#return_()" class="member-name-link">return_</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="block">Generates a return void statement.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#return_(java.lang.Object)" class="member-name-link">return_</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/23/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>&nbsp;value)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Generates a statement which returns a variable or a constant.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="MethodMaker.html" title="interface in org.cojen.maker">MethodMaker</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#signature(java.lang.Object...)" class="member-name-link">signature</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/23/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>...&nbsp;components)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="MethodMaker.html" title="interface in org.cojen.maker">MethodMaker</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#signature(java.lang.Object...)" class="member-name-link">signature</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/23/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>...&nbsp;components)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Define a signature for this member, which is a string for supporting generic types.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="MethodMaker.html" title="interface in org.cojen.maker">MethodMaker</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#static_()" class="member-name-link">static_</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="MethodMaker.html" title="interface in org.cojen.maker">MethodMaker</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#static_()" class="member-name-link">static_</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Switch this method to be static.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="Variable.html" title="interface in org.cojen.maker">Variable</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#super_()" class="member-name-link">super_</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="Variable.html" title="interface in org.cojen.maker">Variable</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#super_()" class="member-name-link">super_</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Returns a variable which is used for invoking superclass methods.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="MethodMaker.html" title="interface in org.cojen.maker">MethodMaker</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#synchronized_()" class="member-name-link">synchronized_</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="MethodMaker.html" title="interface in org.cojen.maker">MethodMaker</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#synchronized_()" class="member-name-link">synchronized_</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Switch this method to be synchronized.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="MethodMaker.html" title="interface in org.cojen.maker">MethodMaker</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#synthetic()" class="member-name-link">synthetic</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="MethodMaker.html" title="interface in org.cojen.maker">MethodMaker</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#synthetic()" class="member-name-link">synthetic</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Indicate that this method is synthetic.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="Variable.html" title="interface in org.cojen.maker">Variable</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#this_()" class="member-name-link">this_</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="Variable.html" title="interface in org.cojen.maker">Variable</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#this_()" class="member-name-link">this_</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Returns a variable which accesses the enclosing object of this method.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="MethodMaker.html" title="interface in org.cojen.maker">MethodMaker</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#throws_(java.lang.Object)" class="member-name-link">throws_</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/23/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>&nbsp;type)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="MethodMaker.html" title="interface in org.cojen.maker">MethodMaker</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#throws_(java.lang.Object)" class="member-name-link">throws_</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/23/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>&nbsp;type)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Declare that this method throws the given exception type.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="Variable.html" title="interface in org.cojen.maker">Variable</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#var(java.lang.Object)" class="member-name-link">var</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/23/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>&nbsp;type)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="Variable.html" title="interface in org.cojen.maker">Variable</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#var(java.lang.Object)" class="member-name-link">var</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/23/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>&nbsp;type)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Returns a new uninitialized variable with the given type.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="MethodMaker.html" title="interface in org.cojen.maker">MethodMaker</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#varargs()" class="member-name-link">varargs</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="MethodMaker.html" title="interface in org.cojen.maker">MethodMaker</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#varargs()" class="member-name-link">varargs</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Indicate that this method supports a variable number of arguments.</div>
 </div>
 </div>
@@ -525,6 +531,8 @@ extends <a href="Maker.html" title="interface in org.cojen.maker">Maker</a></spa
 <dd><code><a href="Maker.html#static_()">static_</a></code>&nbsp;in interface&nbsp;<code><a href="Maker.html" title="interface in org.cojen.maker">Maker</a></code></dd>
 <dt>Returns:</dt>
 <dd>this</dd>
+<dt>Throws:</dt>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/23/docs/api/java.base/java/lang/IllegalStateException.html" title="class or interface in java.lang" class="external-link">IllegalStateException</a></code> - if <a href="#this_()"><code>this</code></a> or any parameters have been accessed</dd>
 </dl>
 </div>
 </section>
@@ -608,6 +616,24 @@ extends <a href="Maker.html" title="interface in org.cojen.maker">Maker</a></spa
 <dl class="notes">
 <dt>Returns:</dt>
 <dd>this</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="receiverType(org.cojen.maker.Type)">
+<h3>receiverType</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="return-type"><a href="MethodMaker.html" title="interface in org.cojen.maker">MethodMaker</a></span>&nbsp;<span class="element-name">receiverType</span><wbr><span class="parameters">(<a href="Type.html" title="interface in org.cojen.maker">Type</a>&nbsp;type)</span></div>
+<div class="block">Define a receiver type for the sole purpose of annotating the implicit <a href="#this_()"><code>this</code></a> parameter.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>type</code> - must be the same as <code>this</code> type</dd>
+<dt>Returns:</dt>
+<dd>this MethodMaker</dd>
+<dt>Throws:</dt>
+<dd><code><a href="https://docs.oracle.com/en/java/javase/23/docs/api/java.base/java/lang/IllegalStateException.html" title="class or interface in java.lang" class="external-link">IllegalStateException</a></code> - if not an instance method, or if <code>this</code> or any
+ parameters have been accessed</dd>
 </dl>
 </div>
 </section>
