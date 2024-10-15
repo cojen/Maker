@@ -719,7 +719,7 @@ abstract class Attribute extends Attributed {
         protected void writeEntryTo(BytesOut out, Entry entry) throws IOException {
             out.writeShort(entry.mName.mIndex);
             out.writeShort(entry.mDescriptor.mIndex);
-            writeAttributesTo(out);
+            entry.writeAttributesTo(out);
         }
 
         static class Entry extends Attributed {

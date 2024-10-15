@@ -331,6 +331,10 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
         var fm = new TheFieldMaker(this, type().defineField(0, tType, name));
         mFields.put(name, fm);
 
+        if (tType.isAnnotated()) {
+            tType.applyAnnotations(fm, new TypeAnnotationMaker.Target0(0x13));
+        }
+
         return fm;
     }
 
@@ -938,8 +942,12 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
             {
                 int i = 0;
                 for (TheFieldMaker fm : fields.values()) {
-                    recordAttr.add(fm);
+                    Attribute.Record.Entry entry = recordAttr.add(fm);
                     paramTypes[i++] = fm;
+                    if (fm.type().isAnnotated()) {
+                        fm.type().applyAnnotations
+                            (entry, cm, new TypeAnnotationMaker.Target0(0x13));
+                    }
                 }
             }
 

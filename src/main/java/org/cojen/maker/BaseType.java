@@ -317,6 +317,11 @@ abstract class BaseType implements Type, Typed {
     void applyAnnotations(ClassMember member, TypeAnnotationMaker.Target target) {
     }
 
+    void applyAnnotations(Attributed dest, TheClassMaker classMaker,
+                          TypeAnnotationMaker.Target target)
+    {
+    }
+
     /**
      * Returns true if assignment is allowed without any conversion.
      */

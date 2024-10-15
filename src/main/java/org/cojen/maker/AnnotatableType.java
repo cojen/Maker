@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * 
@@ -169,8 +170,9 @@ final class AnnotatableType extends BaseType {
         applyAnnotations(member, member.mClassMaker, target);
     }
 
-    private void applyAnnotations(Attributed dest, TheClassMaker classMaker,
-                                  TypeAnnotationMaker.Target target)
+    @Override
+    void applyAnnotations(Attributed dest, TheClassMaker classMaker,
+                          TypeAnnotationMaker.Target target)
     {
         freeze();
 
@@ -179,6 +181,74 @@ final class AnnotatableType extends BaseType {
                 (new TypeAnnotationMaker(classMaker, am.mType, target), am.mVisible);
             am.apply(tam);
         }
+    }
+
+    @Override
+    boolean isHidden() {
+        return mBase.isHidden();
+    }
+
+    @Override
+    BaseType nonHiddenBase() {
+        return mBase.nonHiddenBase();
+    }
+
+    @Override
+    BaseType superType() {
+        return mBase.superType();
+    }
+
+    @Override
+    Set<BaseType> interfaces() {
+        return mBase.interfaces();
+    }
+
+    @Override
+    void resetInherited() {
+        mBase.resetInherited();
+    }
+
+    @Override
+    void toInterface() {
+        mBase.toInterface();
+    }
+
+    @Override
+    Map<String, Field> fields() {
+        return mBase.fields();
+    }
+
+    @Override
+    Field defineField(int flags, BaseType type, String name) {
+        return mBase.defineField(flags, type, name);
+    }
+
+    @Override
+    Field inventField(int flags, BaseType type, String name) {
+        return mBase.inventField(flags, type, name);
+    }
+
+    @Override
+    Map<MethodKey, Method> methods() {
+        return mBase.methods();
+    }
+
+    @Override
+    Set<Method> findMethods(String methodName, BaseType[] params, int inherit, int staticAllowed,
+                            BaseType specificReturnType, BaseType[] specificParamTypes)
+    {
+        return mBase.findMethods(methodName, params, inherit, staticAllowed,
+                                 specificReturnType, specificParamTypes);
+    }
+
+    @Override
+    Method defineMethod(int flags, BaseType returnType, String name, BaseType... paramTypes) {
+        return mBase.defineMethod(flags, returnType, name, paramTypes);
+    }
+
+    @Override
+    Method inventMethod(int flags, BaseType returnType, String name, BaseType... paramTypes) {
+        return mBase.inventMethod(flags, returnType, name, paramTypes);
     }
 
     private static final class AnnMaker implements AnnotationMaker {

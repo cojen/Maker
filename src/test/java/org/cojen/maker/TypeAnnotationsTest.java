@@ -20,6 +20,8 @@ import java.lang.annotation.*;
 
 import java.lang.reflect.*;
 
+import java.math.RoundingMode;
+
 import java.util.*;
 
 import org.junit.*;
@@ -43,6 +45,10 @@ public class TypeAnnotationsTest {
         int value() default 0;
 
         Class<?> clazz() default Object.class;
+
+        RoundingMode mode() default RoundingMode.UNNECESSARY;
+
+        String[] array() default {""};
     }
 
     @Test
@@ -61,6 +67,18 @@ public class TypeAnnotationsTest {
 
         AnnotationMaker am = ext.addAnnotation(Ann.class, true);
         am.put("message", "hello");
+
+        try {
+            am.put("message", "xxx");
+            fail();
+        } catch (IllegalStateException e) {
+        }
+
+        try {
+            am.put("value", this);
+            fail();
+        } catch (IllegalArgumentException e) {
+        }
 
         cm.extend(ext);
 
@@ -106,5 +124,54 @@ public class TypeAnnotationsTest {
         assertEquals(Map.class, types[1].getType());
         ann = (Ann) types[1].getAnnotation(Ann.class);
         assertEquals(String.class, ann.clazz());
+    }
+
+    @Test
+    public void fieldAnnotation() throws Exception {
+        ClassMaker cm = ClassMaker.begin().public_();
+
+        Type type = Type.from(String.class).annotatable();
+        AnnotationMaker am = type.addAnnotation(Ann.class, true);
+        am.put("mode", RoundingMode.UP);
+        am.put("clazz", Type.from(List.class));
+
+        cm.addField(type, "foo").public_().static_();
+
+        Class<?> clazz = cm.finish();
+
+        AnnotatedType at = clazz.getField("foo").getAnnotatedType();
+
+        assertEquals(String.class, at.getType());
+
+        var ann = (Ann) at.getAnnotation(Ann.class);
+        assertEquals(RoundingMode.UP, ann.mode());
+        assertEquals(List.class, ann.clazz());
+    }
+
+    @Test
+    public void recordComponent() throws Exception {
+        ClassMaker cm = ClassMaker.begin().public_();
+
+        Type type = Type.from(String.class).annotatable();
+        AnnotationMaker am = type.addAnnotation(Ann.class, true);
+        am.put("array", new String[] {"hello", "world"});
+
+        cm.addField(type, "foo").public_().static_();
+
+        cm.asRecord();
+
+        Class<?> clazz = cm.finish();
+
+        assertTrue(clazz.isRecord());
+
+        RecordComponent[] components = clazz.getRecordComponents();
+        assertEquals(1, components.length);
+        RecordComponent comp = components[0];
+        AnnotatedType at = comp.getAnnotatedType();
+
+        assertEquals(String.class, at.getType());
+
+        var ann = (Ann) at.getAnnotation(Ann.class);
+        assertArrayEquals(new String[] {"hello", "world"}, ann.array());
     }
 }
