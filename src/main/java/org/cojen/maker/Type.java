@@ -86,12 +86,6 @@ public interface Type {
     Class<?> classType();
 
     /**
-     * Returns tke ClassMaker corresponding to this type, or else null if this type represents
-     * an existing class.
-     */
-    ClassMaker makerType();
-
-    /**
      * Returns true if this type is an int, boolean, double, etc.
      */
     boolean isPrimitive();

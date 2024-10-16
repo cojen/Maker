@@ -66,11 +66,6 @@ final class AnnotatableType extends BaseType {
     }
 
     @Override
-    public ClassMaker makerType() {
-        return mBase.makerType();
-    }
-
-    @Override
     public boolean isPrimitive() {
         return mBase.isPrimitive();
     }
@@ -221,6 +216,11 @@ final class AnnotatableType extends BaseType {
             target = target.copy();
             target.addArrayType();
         }
+    }
+
+    @Override
+    ClassMaker makerType() {
+        return mBase.makerType();
     }
 
     @Override

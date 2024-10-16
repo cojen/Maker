@@ -47,9 +47,7 @@ public interface Variable {
      * Returns the type of this variable, if bound to a class which is being made. Null is
      * returned if bound to an existing class.
      */
-    default ClassMaker makerType() {
-        return type().makerType();
-    }
+    ClassMaker makerType();
 
     /**
      * Returns the name of this variable, which is null if unnamed.

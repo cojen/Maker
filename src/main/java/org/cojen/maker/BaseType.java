@@ -432,8 +432,7 @@ abstract class BaseType implements Type, Typed {
         return code;
     }
 
-    @Override
-    public ClassMaker makerType() {
+    ClassMaker makerType() {
         return null;
     }
 
@@ -1955,7 +1954,7 @@ abstract class BaseType implements Type, Typed {
         }
 
         @Override
-        public TheClassMaker makerType() {
+        TheClassMaker makerType() {
             return mMakerRef.get();
         }
 
