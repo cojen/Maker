@@ -86,6 +86,7 @@ loadScripts(document, 'script');</script>
 <li><a href="#annotatable()" tabindex="0">annotatable()</a></li>
 <li><a href="#addAnnotation(java.lang.Object,boolean)" tabindex="0">addAnnotation(Object, boolean)</a></li>
 <li><a href="#freeze()" tabindex="0">freeze()</a></li>
+<li><a href="#unannotated()" tabindex="0">unannotated()</a></li>
 </ol>
 </li>
 </ol>
@@ -224,8 +225,13 @@ loadScripts(document, 'script');</script>
 <div class="block">Returns the name of this type in Java syntax.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="Type.html" title="interface in org.cojen.maker">Type</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#unbox()" class="member-name-link">unbox</a>()</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#unannotated()" class="member-name-link">unannotated</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="block">Returns this type without any annotations.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="Type.html" title="interface in org.cojen.maker">Type</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#unbox()" class="member-name-link">unbox</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Returns a primitive type for an object type, or else returns null if not applicable.</div>
 </div>
 </div>
@@ -440,7 +446,10 @@ loadScripts(document, 'script');</script>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="return-type"><a href="Type.html" title="interface in org.cojen.maker">Type</a></span>&nbsp;<span class="element-name">annotatable</span>()</div>
 <div class="block">Returns a new type instance which supports annotations. If this type is already
- annotatable, then the new instance will have a copy of all the annotations added so far.</div>
+ annotatable, then the new instance will have a copy of all the annotations added so far.
+
+ <p>Note: The <code>hashCode</code> and <code>equals</code> methods ignore annotations because
+ annotations don't affect linkage rules.</div>
 </div>
 </section>
 </li>
@@ -470,6 +479,15 @@ loadScripts(document, 'script');</script>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="return-type">void</span>&nbsp;<span class="element-name">freeze</span>()</div>
 <div class="block">Prevent adding more annotations to this type.</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="unannotated()">
+<h3>unannotated</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="return-type"><a href="Type.html" title="interface in org.cojen.maker">Type</a></span>&nbsp;<span class="element-name">unannotated</span>()</div>
+<div class="block">Returns this type without any annotations.</div>
 </div>
 </section>
 </li>
