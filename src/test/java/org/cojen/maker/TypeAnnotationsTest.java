@@ -189,13 +189,20 @@ public class TypeAnnotationsTest {
         ClassMaker cm = ClassMaker.begin().public_();
 
         Type t1 = Type.from(String.class).annotatable();
-        t1.addAnnotation(Ann.class, true);
+        AnnotationMaker am1 = t1.addAnnotation(Ann.class, true);
 
         Type t2 = Type.from(int.class).annotatable();
         AnnotationMaker am = t2.addAnnotation(Ann.class, true);
         AnnotationMaker sub = am.newAnnotation(Sub.class);
         sub.put("state", 123);
         am.put("sub", sub);
+
+        try {
+            am1.put("sub", sub);
+            fail();
+        } catch (IllegalStateException e) {
+            // Sub annotation doesn't belong to am1.
+        }
 
         MethodMaker mm = cm.addMethod(t1, "test", t1, t2, float.class).public_().static_();
         mm.return_(mm.concat(mm.param(0), mm.param(1), mm.param(2)));
@@ -221,6 +228,20 @@ public class TypeAnnotationsTest {
         assertEquals(float.class, paramAnns[2].getType());
         assertEquals(0, paramAnns[2].getAnnotations().length);
         assertEquals(0, paramAnns[2].getDeclaredAnnotations().length);
+
+        try {
+            am.put("x", "y");
+            fail();
+        } catch (IllegalStateException e) {
+            assertTrue(e.getMessage().contains("frozen"));
+        }
+
+        try {
+            am.newAnnotation(Sub.class);
+            fail();
+        } catch (IllegalStateException e) {
+            assertTrue(e.getMessage().contains("frozen"));
+        }
     }
 
     @Test
@@ -377,5 +398,74 @@ public class TypeAnnotationsTest {
         assertEquals(t3, t1);
         assertEquals(t3, t2);
         assertEquals(t2.hashCode(), t3.hashCode());
+    }
+
+    @Test
+    public void boxUnbox() throws Exception {
+        assertNull(Type.from(String.class).annotatable().unbox());
+
+        Type t1 = Type.from(int.class).annotatable();
+        t1.addAnnotation(Ann.class, true).put("message", "hello");
+        t1 = t1.box();
+
+        Type t2 = Type.from(Long.class).annotatable();
+        t2.addAnnotation(Ann.class, true).put("value", 123);
+        t2 = t2.unbox();
+
+        {
+            ClassMaker cm = ClassMaker.begin().public_();
+
+            MethodMaker mm = cm.addMethod(String.class, "test", t1, t2).public_().static_();
+            mm.return_(mm.concat(mm.param(0), mm.param(1)));
+
+            Class<?> clazz = cm.finish();
+
+            Method m = clazz.getMethod("test", Integer.class, long.class);
+        
+            AnnotatedType[] paramAnns = m.getAnnotatedParameterTypes();
+            assertEquals(2, paramAnns.length);
+
+            assertEquals(Integer.class, paramAnns[0].getType());
+            assertEquals("hello", paramAnns[0].getAnnotation(Ann.class).message());
+
+            assertEquals(long.class, paramAnns[1].getType());
+            assertEquals(123, paramAnns[1].getAnnotation(Ann.class).value());
+
+            assertEquals("98", m.invoke(null, 9, 8L));
+        }
+
+        assertSame(t1, t1.box());
+
+        t2 = t2.box();
+
+        try {
+            t2.addAnnotation(Sub.class, true);
+            fail();
+        } catch (IllegalStateException e) {
+            assertTrue(e.getMessage().contains("frozen"));
+        }
+
+        t2 = t2.annotatable();
+        t2.addAnnotation(Sub.class, true);
+
+        {
+            ClassMaker cm = ClassMaker.begin().public_();
+
+            MethodMaker mm = cm.addMethod(Long.class, "test", t2).public_().static_();
+            mm.return_(mm.param(0));
+
+            Class<?> clazz = cm.finish();
+
+            Method m = clazz.getMethod("test", Long.class);
+        
+            AnnotatedType[] paramAnns = m.getAnnotatedParameterTypes();
+            assertEquals(1, paramAnns.length);
+
+            assertEquals(Long.class, paramAnns[0].getType());
+            assertEquals(123, paramAnns[0].getAnnotation(Ann.class).value());
+            assertNotNull(paramAnns[0].getAnnotation(Sub.class));
+
+            assertEquals(10L, m.invoke(null, 10L));
+        }
     }
 }
