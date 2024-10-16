@@ -145,6 +145,9 @@ public interface Type {
     /**
      * Returns a new type instance which supports annotations. If this type is already
      * annotatable, then the new instance will have a copy of all the annotations added so far.
+     *
+     * <p>Note: The {@code hashCode} and {@code equals} methods ignore annotations because
+     * annotations don't affect linkage rules.
      */
     Type annotatable();
 
@@ -164,4 +167,9 @@ public interface Type {
      * Prevent adding more annotations to this type.
      */
     void freeze();
+
+    /**
+     * Returns this type without any annotations.
+     */
+    Type unannotated();
 }

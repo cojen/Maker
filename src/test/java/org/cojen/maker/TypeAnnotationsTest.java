@@ -351,4 +351,31 @@ public class TypeAnnotationsTest {
         ann = at.getAnnotation(Ann.class);
         assertEquals("hi", ann.message());
     }
+
+    @Test
+    public void equalsAndHash() {
+        // The Type hashCode and equals methods must ignore annotations.
+
+        Type t1 = Type.from(String.class);
+        Type t2 = t1.annotatable();
+
+        assertEquals(t1, t2);
+        assertEquals(t2, t1);
+        assertEquals(t1.hashCode(), t2.hashCode());
+
+        t2.addAnnotation(Ann.class, true);
+
+        assertEquals(t1, t2);
+        assertEquals(t2, t1);
+        assertEquals(t1.hashCode(), t2.hashCode());
+
+        Type t3 = t2.annotatable();
+        t3.addAnnotation(Sub.class, true);
+
+        assertEquals(t1, t3);
+        assertEquals(t2, t3);
+        assertEquals(t3, t1);
+        assertEquals(t3, t2);
+        assertEquals(t2.hashCode(), t3.hashCode());
+    }
 }
