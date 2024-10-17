@@ -98,6 +98,15 @@ public class TypeAnnotationsTest {
             assertTrue(e.getMessage().contains("frozen"));
         }
 
+        // Test using the annotatable type for other things. It just invokes the various
+        // wrapper methods.
+        {
+            MethodMaker mm = cm.addMethod(null, "extra");
+            mm.field("modCount");
+            mm.invoke("size");
+            mm.new_(ext);
+        }
+
         Class<?> clazz = cm.finish();
 
         AnnotatedType at = clazz.getAnnotatedSuperclass();
@@ -466,6 +475,95 @@ public class TypeAnnotationsTest {
             assertNotNull(paramAnns[0].getAnnotation(Sub.class));
 
             assertEquals(10L, m.invoke(null, 10L));
+        }
+    }
+
+    @Test
+    public void usingVariable() throws Exception {
+        // Test using a variable as a type carrier.
+
+        ClassMaker cm = ClassMaker.begin().public_();
+
+        var ctor = cm.addConstructor().public_();
+        var subVar = ctor.var(Sub.class);
+        ctor.invokeSuperConstructor();
+
+        Type t1 = Type.from(String.class).annotatable();
+        AnnotationMaker am1 = t1.addAnnotation(Ann.class, true);
+
+        Type t2 = Type.from(int.class).annotatable();
+        AnnotationMaker am = t2.addAnnotation(Ann.class, true);
+        AnnotationMaker sub = am.newAnnotation(subVar); // <-- using a variable
+        sub.put("state", 123);
+        am.put("sub", sub);
+
+        MethodMaker mm = cm.addMethod(null, "test", t2).public_().static_();
+
+        {
+            Class<?> clazz = cm.finish();
+
+            Method m = clazz.getMethod("test", int.class);
+
+            AnnotatedType[] paramAnns = m.getAnnotatedParameterTypes();
+            assertEquals(1, paramAnns.length);
+
+            assertEquals(int.class, paramAnns[0].getType());
+            Ann ann = paramAnns[0].getAnnotation(Ann.class);
+            assertEquals(123, ann.sub().state());
+        }
+
+        // The type is usable for making another class.
+
+        cm = ClassMaker.begin().public_();
+        mm = cm.addMethod(null, "test2", t2).public_().static_();
+
+        {
+            Class<?> clazz = cm.finish();
+
+            Method m = clazz.getMethod("test2", int.class);
+
+            AnnotatedType[] paramAnns = m.getAnnotatedParameterTypes();
+            assertEquals(1, paramAnns.length);
+
+            assertEquals(int.class, paramAnns[0].getType());
+            Ann ann = paramAnns[0].getAnnotation(Ann.class);
+            assertEquals(123, ann.sub().state());
+        }
+    }
+
+    @Test
+    public void misc() {
+        assertTrue(Type.from(List.class).annotatable().isInterface());
+
+        var at = (AnnotatableType) Type.from(ArrayList.class).annotatable();
+        assertFalse(at.isInterface());
+        at.toInterface();
+        assertFalse(at.isInterface());
+        assertNull(at.makerType());
+        at.resetInherited();
+
+        var field = at.defineField(0, at, "xxx");
+
+        assertSame(field, at.defineField(0, at, "xxx"));
+        assertSame(field, at.inventField(0, at, "xxx"));
+
+        try {
+            at.defineField(BaseType.FLAG_STATIC, at, "xxx");
+            fail();
+        } catch (IllegalStateException e) {
+            assertTrue(e.getMessage().contains("field exists"));
+        }
+
+        var method = at.defineMethod(0, at, "xxx");
+
+        assertSame(method, at.defineMethod(0, at, "xxx"));
+        assertSame(method, at.inventMethod(0, at, "xxx"));
+
+        try {
+            at.defineMethod(BaseType.FLAG_STATIC, at, "xxx");
+            fail();
+        } catch (IllegalStateException e) {
+            assertTrue(e.getMessage().contains("method exists"));
         }
     }
 }
