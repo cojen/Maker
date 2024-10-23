@@ -1,7 +1,7 @@
 Changelog
 =========
 
-v2.6.0
+v2.6.0 (2024-10-23)
 ------
 * Added a Type interface for explicitly representing types.
 * Added support for type use annotations. They're not supported when the target is in the body
