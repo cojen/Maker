@@ -4127,6 +4127,11 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
+        public ClassMaker makerType() {
+            return type().makerType();
+        }
+
+        @Override
         public Variable clear() {
             BaseType type = type();
             if (type.isObject()) {

@@ -306,6 +306,15 @@ abstract class BaseType implements Type, Typed {
     public void freeze() {
     }
 
+    @Override
+    public BaseType unannotated() {
+        return this;
+    }
+
+    private static Object baseType(Object obj) {
+        return obj instanceof BaseType type ? type.unannotated() : obj;
+    }
+
     /**
      * Returns true if this type might have annotations added to it.
      */
@@ -423,8 +432,7 @@ abstract class BaseType implements Type, Typed {
         return code;
     }
 
-    @Override
-    public ClassMaker makerType() {
+    ClassMaker makerType() {
         return null;
     }
 
@@ -682,13 +690,13 @@ abstract class BaseType implements Type, Typed {
     public final String toString() {
         return "Type {name=" + name() + ", descriptor=" + descriptor() +
             ", isPrimitive=" + isPrimitive() + ", isInterface=" + isInterface() +
-            ", isArray=" + isArray() + ", elementType=" + toString(elementType()) +
+            ", isArray=" + isArray() + ", elementType=" + nameOf(elementType()) +
             ", stackMapCode=" + stackMapCode() + ", typeCode=" + typeCode() +
-            ", box=" + toString(box()) + ", unbox=" + toString(unbox()) +
+            ", box=" + nameOf(box()) + ", unbox=" + nameOf(unbox()) +
             '}';
     }
 
-    private String toString(BaseType type) {
+    private static String nameOf(BaseType type) {
         return type == null ? null : type.name();
     }
 
@@ -1100,7 +1108,8 @@ abstract class BaseType implements Type, Typed {
 
         @Override
         public boolean equals(Object obj) {
-            return obj instanceof Primitive other && mTypeCode == other.mTypeCode;
+            return obj == this || baseType(obj) instanceof Primitive other
+                && mTypeCode == other.mTypeCode;
         }
 
         @Override
@@ -1264,7 +1273,7 @@ abstract class BaseType implements Type, Typed {
 
         @Override
         public boolean equals(Object obj) {
-            return obj == this || obj instanceof Array other
+            return obj == this || baseType(obj) instanceof Array other
                 && mElementType.equals(other.mElementType);
         }
 
@@ -1837,7 +1846,7 @@ abstract class BaseType implements Type, Typed {
 
         @Override
         public boolean equals(Object obj) {
-            return obj == this || obj instanceof Clazz other
+            return obj == this || baseType(obj) instanceof Clazz other
                 && name().equals(other.name());
         }
 
@@ -1945,7 +1954,7 @@ abstract class BaseType implements Type, Typed {
         }
 
         @Override
-        public TheClassMaker makerType() {
+        TheClassMaker makerType() {
             return mMakerRef.get();
         }
 

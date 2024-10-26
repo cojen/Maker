@@ -66,11 +66,6 @@ final class AnnotatableType extends BaseType {
     }
 
     @Override
-    public ClassMaker makerType() {
-        return mBase.makerType();
-    }
-
-    @Override
     public boolean isPrimitive() {
         return mBase.isPrimitive();
     }
@@ -146,20 +141,23 @@ final class AnnotatableType extends BaseType {
     }
 
     @Override
+    public BaseType unannotated() {
+        return mBase;
+    }
+
+    @Override
     boolean isAnnotatable() {
         return true;
     }
 
     @Override
     public synchronized int hashCode() {
-        return mBase.hashCode() * 31 + mAnnotations.hashCode();
+        return mBase.hashCode();
     }
 
     @Override
     public synchronized boolean equals(Object obj) {
-        return this == obj || obj instanceof AnnotatableType other
-            && mBase.equals(other.mBase)
-            && mAnnotations.equals(other.mAnnotations);
+        return mBase.equals(obj);
     }
 
     @Override
@@ -218,6 +216,11 @@ final class AnnotatableType extends BaseType {
             target = target.copy();
             target.addArrayType();
         }
+    }
+
+    @Override
+    ClassMaker makerType() {
+        return mBase.makerType();
     }
 
     @Override
@@ -353,24 +356,6 @@ final class AnnotatableType extends BaseType {
             var am = new AnnMaker(annotationType, mVisible);
             am.mParent = this;
             return am;
-        }
-
-        @Override
-        public synchronized int hashCode() {
-            int hash = mType.hashCode();
-            hash *= (mVisible ? 31 : 63);
-            hash = hash * 31 + mValues.hashCode();
-            if (mParent != null) {
-                hash = hash * 31 + mParent.hashCode();
-            }
-            return hash;
-        }
-
-        @Override
-        public synchronized boolean equals(Object obj) {
-            return this == obj || obj instanceof AnnMaker other
-                && mType.equals(other.mType) && mVisible == other.mVisible
-                && mValues.equals(other.mValues) && Objects.equals(mParent, other.mParent);
         }
 
         private synchronized void freeze() {
