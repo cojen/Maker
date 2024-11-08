@@ -1,6 +1,10 @@
 Changelog
 =========
 
+v2.6.1
+------
+* Reduce the number of local variables used when performing basic stores into instance fields.
+
 v2.6.0 (2024-10-23)
 ------
 * Added a Type interface for explicitly representing types.
