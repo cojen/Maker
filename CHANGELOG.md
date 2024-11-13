@@ -3,6 +3,7 @@ Changelog
 
 v2.6.1
 ------
+* Added methods to obtain the return type and parameter types of a method being made.
 * Reduce the number of local variables used when performing basic stores into instance fields.
 
 v2.6.0 (2024-10-23)

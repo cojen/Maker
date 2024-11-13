@@ -138,6 +138,16 @@ public interface MethodMaker extends Maker {
     String name();
 
     /**
+     * Returns the return type of this method.
+     */
+    Type methodReturnType();
+
+    /**
+     * Returns the parameter types of this method.
+     */
+    Type[] methodParamTypes();
+
+    /**
      * Switch this method to be public. Methods are package-private by default.
      *
      * @return this
