@@ -68,8 +68,8 @@ loadScripts(document, 'script');</script>
 <li><a href="#begin(java.lang.invoke.MethodHandles.Lookup,java.lang.Object,java.lang.String,java.lang.Object...)" tabindex="0">begin(MethodHandles.Lookup, Object, String, Object...)</a></li>
 <li><a href="#begin(java.lang.invoke.MethodHandles.Lookup,java.lang.String,java.lang.invoke.MethodType)" tabindex="0">begin(MethodHandles.Lookup, String, MethodType)</a></li>
 <li><a href="#name()" tabindex="0">name()</a></li>
-<li><a href="#methodReturnType()" tabindex="0">methodReturnType()</a></li>
-<li><a href="#methodParamTypes()" tabindex="0">methodParamTypes()</a></li>
+<li><a href="#getReturnType()" tabindex="0">getReturnType()</a></li>
+<li><a href="#getParamTypes()" tabindex="0">getParamTypes()</a></li>
 <li><a href="#public_()" tabindex="0">public_()</a></li>
 <li><a href="#private_()" tabindex="0">private_()</a></li>
 <li><a href="#protected_()" tabindex="0">protected_()</a></li>
@@ -245,6 +245,16 @@ extends <a href="Maker.html" title="interface in org.cojen.maker">Maker</a></spa
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Finishes the definition of a standalone method.</div>
 </div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="Type.html" title="interface in org.cojen.maker">Type</a>[]</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#getParamTypes()" class="member-name-link">getParamTypes</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="block">Returns the parameter types of this method.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="Type.html" title="interface in org.cojen.maker">Type</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#getReturnType()" class="member-name-link">getReturnType</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="block">Returns the return type of this method.</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>void</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#goto_(org.cojen.maker.Label)" class="member-name-link">goto_</a><wbr>(<a href="Label.html" title="interface in org.cojen.maker">Label</a>&nbsp;label)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
@@ -284,16 +294,6 @@ extends <a href="Maker.html" title="interface in org.cojen.maker">Maker</a></spa
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#lineNum(int)" class="member-name-link">lineNum</a><wbr>(int&nbsp;num)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Define a line number to represent the location of the next code instruction.</div>
-</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="Type.html" title="interface in org.cojen.maker">Type</a>[]</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#methodParamTypes()" class="member-name-link">methodParamTypes</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
-<div class="block">Returns the parameter types of this method.</div>
-</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="Type.html" title="interface in org.cojen.maker">Type</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#methodReturnType()" class="member-name-link">methodReturnType</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
-<div class="block">Returns the return type of this method.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="https://docs.oracle.com/en/java/javase/23/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#name()" class="member-name-link">name</a>()</code></div>
@@ -488,19 +488,19 @@ extends <a href="Maker.html" title="interface in org.cojen.maker">Maker</a></spa
 </section>
 </li>
 <li>
-<section class="detail" id="methodReturnType()">
-<h3>methodReturnType</h3>
+<section class="detail" id="getReturnType()">
+<h3>getReturnType</h3>
 <div class="horizontal-scroll">
-<div class="member-signature"><span class="return-type"><a href="Type.html" title="interface in org.cojen.maker">Type</a></span>&nbsp;<span class="element-name">methodReturnType</span>()</div>
+<div class="member-signature"><span class="return-type"><a href="Type.html" title="interface in org.cojen.maker">Type</a></span>&nbsp;<span class="element-name">getReturnType</span>()</div>
 <div class="block">Returns the return type of this method.</div>
 </div>
 </section>
 </li>
 <li>
-<section class="detail" id="methodParamTypes()">
-<h3>methodParamTypes</h3>
+<section class="detail" id="getParamTypes()">
+<h3>getParamTypes</h3>
 <div class="horizontal-scroll">
-<div class="member-signature"><span class="return-type"><a href="Type.html" title="interface in org.cojen.maker">Type</a>[]</span>&nbsp;<span class="element-name">methodParamTypes</span>()</div>
+<div class="member-signature"><span class="return-type"><a href="Type.html" title="interface in org.cojen.maker">Type</a>[]</span>&nbsp;<span class="element-name">getParamTypes</span>()</div>
 <div class="block">Returns the parameter types of this method.</div>
 </div>
 </section>
