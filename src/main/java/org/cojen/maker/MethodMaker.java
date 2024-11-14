@@ -140,12 +140,12 @@ public interface MethodMaker extends Maker {
     /**
      * Returns the return type of this method.
      */
-    Type methodReturnType();
+    Type getReturnType();
 
     /**
      * Returns the parameter types of this method.
      */
-    Type[] methodParamTypes();
+    Type[] getParamTypes();
 
     /**
      * Switch this method to be public. Methods are package-private by default.

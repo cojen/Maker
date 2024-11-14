@@ -360,12 +360,12 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     }
 
     @Override
-    public Type methodReturnType() {
+    public Type getReturnType() {
         return mMethod.returnType();
     }
 
     @Override
-    public Type[] methodParamTypes() {
+    public Type[] getParamTypes() {
         return mMethod.paramTypes().clone();
     }
 
