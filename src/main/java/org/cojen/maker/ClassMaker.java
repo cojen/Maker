@@ -99,6 +99,17 @@ public interface ClassMaker extends Maker {
     }
 
     /**
+     * Begin defining a class with an explicitly specified name.
+     *
+     * @param className fully qualified class name
+     * @param lookup finish loading the class using this lookup object
+     */
+    static ClassMaker beginExplicit(String className, MethodHandles.Lookup lookup) {
+        ClassLoader loader = lookup.lookupClass().getClassLoader();
+        return TheClassMaker.begin(false, className, true, loader, null, lookup);
+    }
+
+    /**
      * Begin defining a class intended to be loaded from a file. The class name exactly matches
      * the one given, and {@link Variable#setExact setExact} is unsupported. All classes
      * defined from this maker will also be external.
