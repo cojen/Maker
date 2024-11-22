@@ -68,6 +68,18 @@ public class InstallTest {
         }
 
         {
+            ClassMaker cm = ClassMaker.begin(null, c1.getClassLoader()).public_();
+            assertTrue(cm.installClass(String.class));
+            assertTrue(cm.installClass(c1));
+
+            try {
+                cm.installClass(c2);
+                fail();
+            } catch (IllegalStateException e) {
+            }
+        }
+
+        {
             ClassMaker cm = ClassMaker.begin(null, c1.getClassLoader(), "key1").public_();
             assertTrue(cm.installClass(String.class));
             assertTrue(cm.installClass(c1));
