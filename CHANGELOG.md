@@ -1,7 +1,7 @@
 Changelog
 =========
 
-v2.6.1
+v2.6.1 (2024-11-23)
 ------
 * Added methods to obtain the return type and parameter types of a method being made.
 * Added a method to make a class into a Lookup with an explicit name.
