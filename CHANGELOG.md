@@ -1,6 +1,12 @@
 Changelog
 =========
 
+v2.6.1 (2024-11-23)
+------
+* Added methods to obtain the return type and parameter types of a method being made.
+* Added a method to make a class into a Lookup with an explicit name.
+* Reduce the number of local variables used when performing basic stores into instance fields.
+
 v2.6.0 (2024-10-23)
 ------
 * Added a Type interface for explicitly representing types.

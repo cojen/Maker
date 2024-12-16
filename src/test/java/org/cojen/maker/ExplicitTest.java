@@ -16,6 +16,8 @@
 
 package org.cojen.maker;
 
+import java.lang.invoke.MethodHandles;
+
 import org.junit.*;
 import static org.junit.Assert.*;
 
@@ -99,5 +101,9 @@ public class ExplicitTest {
 
         ClassMaker cm10 = cm8.another("org.cojen.maker.E2");
         assertEquals("org.cojen.maker.E2", cm10.finish().getName());
+
+        ClassMaker cm11 = ClassMaker.beginExplicit("org.cojen.maker.E3", MethodHandles.lookup());
+        Class clazz = cm11.finish();
+        assertSame(getClass().getModule(), clazz.getModule());
     }
 }

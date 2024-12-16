@@ -360,6 +360,16 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     }
 
     @Override
+    public Type getReturnType() {
+        return mMethod.returnType();
+    }
+
+    @Override
+    public Type[] getParamTypes() {
+        return mMethod.paramTypes().clone();
+    }
+
+    @Override
     public MethodMaker public_() {
         mModifiers = Modifiers.toPublic(mModifiers);
         return this;
@@ -2109,6 +2119,20 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     }
 
     /**
+     * @param replacement a new op which isn't in the linked list
+     */
+    private void replaceOp(Op prev, Op original, Op replacement) {
+        if (prev == null) {
+            mFirstOp = replacement;
+        } else {
+            prev.mNext = replacement;
+        }
+        if ((replacement.mNext = original.mNext) == null) {
+            mLastOp = replacement;
+        }
+    }
+
+    /**
      * @param savepoint was mLastOp
      * @return start of chain which was clipped off
      */
@@ -3028,6 +3052,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         // Bits are set for variables known to be available at the current flow position.
         BitSet mVarUsage;
 
+        // Is used to estimate the final code size.
         int mOpCount;
 
         private Op mRemoved;
@@ -3107,6 +3132,14 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             mRemoved = op;
             TheMethodMaker.this.removeOps(prev, next);
             mOpCount -= amt;
+        }
+
+        /**
+         * @param replacement a new op which isn't in the linked list
+         */
+        void replaceOp(Op prev, Op original, Op replacement) {
+            mRemoved = original;
+            TheMethodMaker.this.replaceOp(prev, original, replacement);
         }
 
         Op nextOpFor(Op op) {
@@ -4006,6 +4039,19 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                     // Removing 2 ops, but specify 1 because the push op won't be visited.
                     flow.removeOps(prev, this, next, 1);
                     return next;
+                }
+
+                // Check if storing a single-use variable into an instance field. If so, just
+                // push the instance field and swap it in place.
+                if (var.slotWidth() == 1) {
+                    Op nn = next.mNext;
+                    if (nn instanceof PushVarOp np && var == np.mVar && var.mPushCount == 1 &&
+                        nn.mNext instanceof FieldOp fp && fp.op() == Opcodes.PUTFIELD)
+                    {
+                        var.mPushCount = 0;
+                        flow.removeOps(prev, this, next, 1);
+                        flow.replaceOp(next, nn, new BytecodeOp(Opcodes.SWAP, 0));
+                    }
                 }
             }
 

@@ -43,6 +43,9 @@ public class MethodParametersTest {
 
         assertEquals("t1", mm.name());
         assertEquals(2, mm.paramCount());
+        assertEquals(Type.from(void.class), mm.getReturnType());
+        assertArrayEquals(new Type[] {Type.from(String.class), Type.from(long.class)},
+                          mm.getParamTypes());
 
         mm = cm.addMethod(null, "t2", String.class, long.class).public_().static_();
         mm.param(0).name("p1");
@@ -51,8 +54,13 @@ public class MethodParametersTest {
         assertEquals("t2", mm.name());
         assertEquals(2, mm.paramCount());
 
-        mm = cm.addMethod(null, "t3", String.class, long.class).public_().static_();
+        mm = cm.addMethod(int.class, "t3", String.class, long.class).public_().static_();
         mm.param(1).name("p2");
+        mm.return_(1);
+
+        assertEquals(Type.from(int.class), mm.getReturnType());
+        assertArrayEquals(new Type[] {Type.from(String.class), Type.from(long.class)},
+                          mm.getParamTypes());
 
         var clazz = cm.finish();
 
