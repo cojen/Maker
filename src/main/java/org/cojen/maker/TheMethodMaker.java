@@ -4027,37 +4027,32 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
         @Override
         Op flow(Flow flow, Op prev) {
-            // Look for store/push pair to the same variable and remove the pair. Just use the
-            // stack variable and avoid extra steps.
+            // If storing to a single-use variable, try to eliminate it.
 
-            Op next = mNext;
-            if (next instanceof PushVarOp push) {
-                LocalVar var = mVar;
-                if (var == push.mVar && var.mPushCount == 1) {
-                    var.mPushCount = 0;
-                    next = next.mNext;
+            if (mVar.mPushCount == 1 && mNext instanceof PushVarOp push) {
+                // If performing a store/push pair to the same variable, just remove the pair
+                // of operations and rely on the operand stack.
+                if (mVar == push.mVar) {
+                    mVar.mPushCount = 0;
+                    Op next = push.mNext;
                     // Removing 2 ops, but specify 1 because the push op won't be visited.
                     flow.removeOps(prev, this, next, 1);
                     return next;
                 }
 
-                // Check if storing a single-use variable into an instance field. If so, just
-                // push the instance field and swap it in place.
-                if (var.slotWidth() == 1) {
-                    Op nn = next.mNext;
-                    if (nn instanceof PushVarOp np && var == np.mVar && var.mPushCount == 1 &&
-                        nn.mNext instanceof FieldOp fp && fp.op() == Opcodes.PUTFIELD)
-                    {
-                        var.mPushCount = 0;
-                        flow.removeOps(prev, this, next, 1);
-                        flow.replaceOp(next, nn, new BytecodeOp(Opcodes.SWAP, 0));
-                    }
+                // Check if the variable can be eliminated by using a swap.
+                if (mVar.slotWidth() == 1 && push.mVar.slotWidth() == 1 &&
+                    push.mNext instanceof PushVarOp np && mVar == np.mVar)
+                {
+                    mVar.mPushCount = 0;
+                    flow.removeOps(prev, this, push, 1);
+                    flow.replaceOp(push, np, new BytecodeOp(Opcodes.SWAP, 0));
                 }
             }
 
             if (unusedVar()) {
                 // Won't actually store, but will pop. See appendTo method above.
-                return next;
+                return mNext;
             }
 
             return super.flow(flow, prev);

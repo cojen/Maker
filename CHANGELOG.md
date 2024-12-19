@@ -1,6 +1,11 @@
 Changelog
 =========
 
+v2.6.2
+------
+* Reduce the number of local variables used by using a swap in even more cases, not just stores
+  into instance fields.
+
 v2.6.1 (2024-11-23)
 ------
 * Added methods to obtain the return type and parameter types of a method being made.
