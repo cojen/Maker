@@ -146,7 +146,9 @@ public interface ClassMaker extends Maker {
      * finishHidden} is called, then the actual class name will differ.
      */
     @Override
-    String name();
+    default String name() {
+        return type().name();
+    }
 
     /**
      * Switch this class to be public. Classes are package-private by default.
@@ -361,7 +363,16 @@ public interface ClassMaker extends Maker {
      * @param dimensions must be at least 1
      * @throws IllegalArgumentException if the given dimensions is less than 1 or greater than 255
      */
-    Type arrayType(int dimensions);
+    default Type arrayType(int dimensions) {
+        if (dimensions < 1 || dimensions > 255) {
+            throw new IllegalArgumentException();
+        }
+        Type type = type();
+        do {
+            type = type.asArray();
+        } while (--dimensions > 0);
+        return type;
+    }
 
     /**
      * Returns the class loader that the finished class will be loaded into.

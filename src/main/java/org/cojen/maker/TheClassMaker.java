@@ -136,11 +136,6 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
     }
 
     @Override
-    public String name() {
-        return type().name();
-    }
-
-    @Override
     public ClassMaker public_() {
         checkFinished();
         mModifiers = Modifiers.toPublic(mModifiers);
@@ -526,18 +521,6 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
         ConstantPool cp = mConstants;
         addAttribute(new Attribute.Constant(cp, "SourceFile", cp.addUTF8(fileName)));
         return this;
-    }
-
-    @Override
-    public Type arrayType(int dimensions) {
-        if (dimensions < 1 || dimensions > 255) {
-            throw new IllegalArgumentException();
-        }
-        Type type = type();
-        do {
-            type = type.asArray();
-        } while (--dimensions > 0);
-        return type;
     }
 
     @Override
