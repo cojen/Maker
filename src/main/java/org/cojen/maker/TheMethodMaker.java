@@ -4027,6 +4027,11 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
         @Override
         Op flow(Flow flow, Op prev) {
+            if (unusedVar()) {
+                // Won't actually store, but will pop. See appendTo method above.
+                return mNext;
+            }
+
             // If storing to a single-use variable, try to eliminate it.
 
             if (mVar.mPushCount == 1 && mNext instanceof PushVarOp push) {
@@ -4047,12 +4052,8 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                     mVar.mPushCount = 0;
                     flow.removeOps(prev, this, push, 1);
                     flow.replaceOp(push, np, new BytecodeOp(Opcodes.SWAP, 0));
+                    return push;
                 }
-            }
-
-            if (unusedVar()) {
-                // Won't actually store, but will pop. See appendTo method above.
-                return mNext;
             }
 
             return super.flow(flow, prev);
