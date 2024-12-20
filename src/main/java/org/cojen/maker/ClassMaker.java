@@ -268,8 +268,8 @@ public interface ClassMaker extends Maker {
     /**
      * Add a method to this class.
      *
-     * @param retType a class or name; can be null if method returns void
-     * @param paramTypes classes or names; can be null if method accepts no parameters
+     * @param retType a class or name; can be null if the method returns void
+     * @param paramTypes classes or names
      * @throws IllegalArgumentException if a type is unsupported
      */
     MethodMaker addMethod(Object retType, String name, Object... paramTypes);
@@ -293,7 +293,7 @@ public interface ClassMaker extends Maker {
     /**
      * Add a constructor to this class.
      *
-     * @param paramTypes classes or names; can be null if constructor accepts no parameters
+     * @param paramTypes classes or names
      * @throws IllegalArgumentException if a type is unsupported
      */
     MethodMaker addConstructor(Object... paramTypes);

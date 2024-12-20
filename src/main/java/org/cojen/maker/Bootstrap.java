@@ -31,7 +31,7 @@ public interface Bootstrap {
      *
      * @param type constant type or method return type; can be null for void
      * @param name constant or method name
-     * @return the constant value, or the result of the method, which is null if void
+     * @return the constant value, or the result of the method, which is null if it's void
      * @throws IllegalArgumentException if the type is unsupported
      */
     default Variable invoke(Object type, String name) {
@@ -46,7 +46,7 @@ public interface Bootstrap {
      * @param types method parameter types; the entire array or individual elements can be null
      * to infer the actual type from the corresponding value
      * @param values variables or constants
-     * @return the result of the method, which is null if void
+     * @return the result of the method, which is null if it's void
      * @throws IllegalArgumentException if a type is unsupported, or if a value isn't a
      * variable or a supported constant
      * @throws IllegalStateException if this is a condy bootstrap
