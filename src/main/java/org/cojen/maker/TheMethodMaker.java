@@ -3994,7 +3994,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                     // produce a VerifyError. The DebugWriter will write a file in order for
                     // the class to be examined in detail.
                     ex.printStackTrace(System.out);
-                    return mNext;
+                    return super.flow(flow, prev);
                 }
 
                 throw ex;

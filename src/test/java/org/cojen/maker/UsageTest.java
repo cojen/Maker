@@ -679,12 +679,20 @@ public class UsageTest {
         MethodMaker mm = mClassMaker.addMethod(int.class, "test").public_().static_();
         mm.return_(mm.var(int.class).name("foo"));
 
-        try {
-            mClassMaker.finishHidden();
-            fail();
-        } catch (IllegalStateException e) {
-            check(e, "unassigned variable");
-            check(e, "foo");
+        if (!TheClassMaker.DEBUG) {
+            try {
+                mClassMaker.finishHidden();
+                fail();
+            } catch (IllegalStateException e) {
+                check(e, "unassigned variable");
+                check(e, "foo");
+            }
+        } else {
+            try {
+                mClassMaker.finishHidden();
+                fail();
+            } catch (VerifyError e) {
+            }
         }
     }
 
