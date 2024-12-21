@@ -5,6 +5,7 @@ v2.6.2
 ------
 * Reduce the number of local variables used by using a swap in even more cases, not just stores
   into instance fields.
+* Minor performance optimizations.
 
 v2.6.1 (2024-11-23)
 ------
