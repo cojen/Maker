@@ -243,10 +243,9 @@ class ConstantPool {
 
     @SuppressWarnings("unchecked")
     private <C extends Constant> C addConstant(C constant) {
-        Constant existing = mConstants.get(constant);
+        Constant existing = mConstants.putIfAbsent(constant, constant);
         if (existing == null) {
             constant.mIndex = mSize;
-            mConstants.put(constant, constant);
             mSize++;
         } else {
             constant = (C) existing;
