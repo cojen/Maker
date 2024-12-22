@@ -3047,7 +3047,6 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     final class Flow {
         // List of variables that have been visited and have a slot assigned.
         final List<LocalVar> mVarList;
-        final int mMinVars;
 
         // Bits are set for variables known to be available at the current flow position.
         BitSet mVarUsage;
@@ -3062,7 +3061,6 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
         Flow(List<LocalVar> varList, BitSet varUsage) {
             mVarList = varList;
-            mMinVars = varList.size();
             mVarUsage = varUsage;
         }
 
@@ -5023,17 +5021,16 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         private byte aloadOp() {
-            switch (arrayCheck().elementType().typeCode()) {
-            case T_BOOLEAN:
-            case T_BYTE:   return BALOAD;
-            case T_CHAR:   return CALOAD;
-            case T_SHORT:  return SALOAD;
-            case T_INT:    return IALOAD;
-            case T_FLOAT:  return FALOAD;
-            case T_LONG:   return LALOAD;
-            case T_DOUBLE: return DALOAD;
-            default:       return AALOAD;
-            }
+            return switch (arrayCheck().elementType().typeCode()) {
+                case T_BOOLEAN, T_BYTE -> BALOAD;
+                case T_CHAR -> CALOAD;
+                case T_SHORT -> SALOAD;
+                case T_INT -> IALOAD;
+                case T_FLOAT -> FALOAD;
+                case T_LONG -> LALOAD;
+                case T_DOUBLE -> DALOAD;
+                default -> AALOAD;
+            };
         }
 
         @Override
