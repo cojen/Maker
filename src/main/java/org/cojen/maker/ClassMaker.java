@@ -146,7 +146,9 @@ public interface ClassMaker extends Maker {
      * finishHidden} is called, then the actual class name will differ.
      */
     @Override
-    String name();
+    default String name() {
+        return type().name();
+    }
 
     /**
      * Switch this class to be public. Classes are package-private by default.
@@ -266,8 +268,8 @@ public interface ClassMaker extends Maker {
     /**
      * Add a method to this class.
      *
-     * @param retType a class or name; can be null if method returns void
-     * @param paramTypes classes or names; can be null if method accepts no parameters
+     * @param retType a class or name; can be null if the method returns void
+     * @param paramTypes classes or names
      * @throws IllegalArgumentException if a type is unsupported
      */
     MethodMaker addMethod(Object retType, String name, Object... paramTypes);
@@ -291,7 +293,7 @@ public interface ClassMaker extends Maker {
     /**
      * Add a constructor to this class.
      *
-     * @param paramTypes classes or names; can be null if constructor accepts no parameters
+     * @param paramTypes classes or names
      * @throws IllegalArgumentException if a type is unsupported
      */
     MethodMaker addConstructor(Object... paramTypes);
@@ -375,7 +377,16 @@ public interface ClassMaker extends Maker {
      * @param dimensions must be at least 1
      * @throws IllegalArgumentException if the given dimensions is less than 1 or greater than 255
      */
-    Type arrayType(int dimensions);
+    default Type arrayType(int dimensions) {
+        if (dimensions < 1 || dimensions > 255) {
+            throw new IllegalArgumentException();
+        }
+        Type type = type();
+        do {
+            type = type.asArray();
+        } while (--dimensions > 0);
+        return type;
+    }
 
     /**
      * Returns the class loader that the finished class will be loaded into.

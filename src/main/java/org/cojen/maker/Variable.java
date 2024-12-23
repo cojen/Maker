@@ -50,7 +50,7 @@ public interface Variable {
     ClassMaker makerType();
 
     /**
-     * Returns the name of this variable, which is null if unnamed.
+     * Returns the name of this variable, which is null if it's unnamed.
      */
     String name();
 
@@ -869,7 +869,7 @@ public interface Variable {
      *
      * @param name method name
      * @param values {@link Variable Variables} or constants
-     * @return the result of the method, which is null if void
+     * @return the result of the method, which is null if it's void
      * @throws IllegalArgumentException if a value isn't a variable or a supported constant
      * @throws IllegalStateException if the method isn't found
      */
@@ -891,7 +891,7 @@ public interface Variable {
      * @param types method parameter types; the entire array or individual elements can be null
      * to infer the actual type from the corresponding value
      * @param values {@link Variable Variables} or constants
-     * @return the result of the method, which is null if void
+     * @return the result of the method, which is null if it's void
      * @throws IllegalArgumentException if a type is unsupported, or if a value isn't a
      * variable or a supported constant
      * @throws IllegalStateException if the method isn't found
@@ -914,7 +914,7 @@ public interface Variable {
      * @param returnType method return type
      * @param name method name; can be {@code ".new"} to construct an instance of this variable
      * type, and returnType can be null
-     * @param types method parameter types; can be null if none
+     * @param types method parameter types
      * @throws IllegalArgumentException if a type is unsupported
      * @throws IllegalStateException if the method isn't found
      */

@@ -1,6 +1,13 @@
 Changelog
 =========
 
+v2.6.2 (2024-12-23)
+------
+* Fixed how the debug option allows broken class files to be written.
+* Reduce the number of local variables used by using a swap in even more cases, not just stores
+  into instance fields.
+* Minor performance optimizations.
+
 v2.6.1 (2024-11-23)
 ------
 * Added methods to obtain the return type and parameter types of a method being made.

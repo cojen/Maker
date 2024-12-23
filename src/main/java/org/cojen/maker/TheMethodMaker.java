@@ -3047,7 +3047,6 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     final class Flow {
         // List of variables that have been visited and have a slot assigned.
         final List<LocalVar> mVarList;
-        final int mMinVars;
 
         // Bits are set for variables known to be available at the current flow position.
         BitSet mVarUsage;
@@ -3062,7 +3061,6 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
         Flow(List<LocalVar> varList, BitSet varUsage) {
             mVarList = varList;
-            mMinVars = varList.size();
             mVarUsage = varUsage;
         }
 
@@ -3994,7 +3992,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                     // produce a VerifyError. The DebugWriter will write a file in order for
                     // the class to be examined in detail.
                     ex.printStackTrace(System.out);
-                    return mNext;
+                    return super.flow(flow, prev);
                 }
 
                 throw ex;
@@ -4027,37 +4025,33 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
         @Override
         Op flow(Flow flow, Op prev) {
-            // Look for store/push pair to the same variable and remove the pair. Just use the
-            // stack variable and avoid extra steps.
+            if (unusedVar()) {
+                // Won't actually store, but will pop. See appendTo method above.
+                return mNext;
+            }
 
-            Op next = mNext;
-            if (next instanceof PushVarOp push) {
-                LocalVar var = mVar;
-                if (var == push.mVar && var.mPushCount == 1) {
-                    var.mPushCount = 0;
-                    next = next.mNext;
+            // If storing to a single-use variable, try to eliminate it.
+
+            if (mVar.mPushCount == 1 && mNext instanceof PushVarOp push) {
+                // If performing a store/push pair to the same variable, just remove the pair
+                // of operations and rely on the operand stack.
+                if (mVar == push.mVar) {
+                    mVar.mPushCount = 0;
+                    Op next = push.mNext;
                     // Removing 2 ops, but specify 1 because the push op won't be visited.
                     flow.removeOps(prev, this, next, 1);
                     return next;
                 }
 
-                // Check if storing a single-use variable into an instance field. If so, just
-                // push the instance field and swap it in place.
-                if (var.slotWidth() == 1) {
-                    Op nn = next.mNext;
-                    if (nn instanceof PushVarOp np && var == np.mVar && var.mPushCount == 1 &&
-                        nn.mNext instanceof FieldOp fp && fp.op() == Opcodes.PUTFIELD)
-                    {
-                        var.mPushCount = 0;
-                        flow.removeOps(prev, this, next, 1);
-                        flow.replaceOp(next, nn, new BytecodeOp(Opcodes.SWAP, 0));
-                    }
+                // Check if the variable can be eliminated by using a swap.
+                if (mVar.slotWidth() == 1 && push.mVar.slotWidth() == 1 &&
+                    push.mNext instanceof PushVarOp np && mVar == np.mVar)
+                {
+                    mVar.mPushCount = 0;
+                    flow.removeOps(prev, this, push, 1);
+                    flow.replaceOp(push, np, new BytecodeOp(Opcodes.SWAP, 0));
+                    return push;
                 }
-            }
-
-            if (unusedVar()) {
-                // Won't actually store, but will pop. See appendTo method above.
-                return next;
             }
 
             return super.flow(flow, prev);
@@ -5027,17 +5021,16 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         private byte aloadOp() {
-            switch (arrayCheck().elementType().typeCode()) {
-            case T_BOOLEAN:
-            case T_BYTE:   return BALOAD;
-            case T_CHAR:   return CALOAD;
-            case T_SHORT:  return SALOAD;
-            case T_INT:    return IALOAD;
-            case T_FLOAT:  return FALOAD;
-            case T_LONG:   return LALOAD;
-            case T_DOUBLE: return DALOAD;
-            default:       return AALOAD;
-            }
+            return switch (arrayCheck().elementType().typeCode()) {
+                case T_BOOLEAN, T_BYTE -> BALOAD;
+                case T_CHAR -> CALOAD;
+                case T_SHORT -> SALOAD;
+                case T_INT -> IALOAD;
+                case T_FLOAT -> FALOAD;
+                case T_LONG -> LALOAD;
+                case T_DOUBLE -> DALOAD;
+                default -> AALOAD;
+            };
         }
 
         @Override

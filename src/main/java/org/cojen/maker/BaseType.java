@@ -1521,28 +1521,24 @@ abstract class BaseType implements Type, Typed {
         }
 
         private Field defineField(boolean invent, int flags, BaseType type, String name) {
-            var field = new Field(flags, type, name);
-
             Field existing;
             synchronized (this) {
                 Map<String, Field> fields = mFields;
                 if (fields == null) {
                     fields = initFields();
                 }
-                existing = fields.get(name);
+                if (invent) {
+                    existing = fields.get(name);
+                    return existing != null ? existing : new Field(flags, type, name);
+                }
+                var field = new Field(flags, type, name);
+                existing = fields.putIfAbsent(name, field);
+                if (existing == null) {
+                    return field;
+                }
                 if (field.equals(existing)) {
                     return existing;
                 }
-                if (existing == null) {
-                    if (!invent) {
-                        fields.put(name, field);
-                    }
-                    return field;
-                }
-            }
-
-            if (invent) {
-                return existing;
             }
 
             throw new IllegalStateException("Conflicting field exists: " + existing);
@@ -1785,7 +1781,6 @@ abstract class BaseType implements Type, Typed {
                                     BaseType returnType, String name, BaseType... paramTypes)
         {
             var key = new MethodKey(returnType, name, paramTypes);
-            var method = new Method(flags, returnType, name, paramTypes);
 
             Method existing;
             synchronized (this) {
@@ -1793,21 +1788,20 @@ abstract class BaseType implements Type, Typed {
                 if (methods == null) {
                     methods = initMethods();
                 }
-                existing = methods.get(key);
+                if (invent) {
+                    existing = methods.get(key);
+                    return existing != null ? existing
+                        : new Method(flags, returnType, name, paramTypes);
+                }
+                var method = new Method(flags, returnType, name, paramTypes);
+                existing = methods.putIfAbsent(key, method);
+                if (existing == null) {
+                    uncacheFindMethod(name);
+                    return method;
+                }
                 if (method.equals(existing)) {
                     return existing;
                 }
-                if (existing == null) {
-                    if (!invent) {
-                        methods.put(key, method);
-                        uncacheFindMethod(name);
-                    }
-                    return method;
-                }
-            }
-
-            if (invent) {
-                return existing;
             }
 
             throw new IllegalStateException("Conflicting method exists: " + existing);

@@ -38,7 +38,7 @@ public interface MethodMaker extends Maker {
      * @param lookup define the method using this lookup object
      * @param retType a class or name; can be null if the method returns void
      * @param name method name; use null or "_" if unnamed
-     * @param paramTypes classes or names; can be null if the method accepts no parameters
+     * @param paramTypes classes or names
      * @throws IllegalArgumentException if a type is unsupported
      * @see #finish
      */
@@ -354,7 +354,7 @@ public interface MethodMaker extends Maker {
      * @param name the method name
      * enclosing class
      * @param values {@link Variable Variables} or constants
-     * @return the result of the method, which is null if void
+     * @return the result of the method, which is null if it's void
      * @throws IllegalArgumentException if a value isn't a variable or a supported constant
      * @throws IllegalStateException if the method isn't found
      * @see Variable#invoke Variable.invoke
@@ -410,7 +410,7 @@ public interface MethodMaker extends Maker {
      *
      * @param handle runtime method handle
      * @param values {@link Variable Variables} or constants
-     * @return the result of the method, which is null if void
+     * @return the result of the method, which is null if it's void
      * @throws IllegalArgumentException if a value isn't a variable or a supported constant
      * @throws IllegalStateException if defining an external class and the handle isn't truly
      * {@code Constable}
