@@ -1,6 +1,10 @@
 Changelog
 =========
 
+v2.6.3
+------
+* Variables which are used once are never eliminated when they have a name.
+
 v2.6.2 (2024-12-23)
 ------
 * Fixed how the debug option allows broken class files to be written.

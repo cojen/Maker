@@ -4032,7 +4032,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
             // If storing to a single-use variable, try to eliminate it.
 
-            if (mVar.mPushCount == 1 && mNext instanceof PushVarOp push) {
+            if (mVar.mPushCount == 1 && mNext instanceof PushVarOp push && mVar.name() == null) {
                 // If performing a store/push pair to the same variable, just remove the pair
                 // of operations and rely on the operand stack.
                 if (mVar == push.mVar) {
