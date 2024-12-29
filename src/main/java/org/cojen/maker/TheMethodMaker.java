@@ -849,9 +849,11 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                     }
 
                     rollback(savepoint);
-                    
+
                     for (int i=0; i<args.length; i++) {
-                        addPushOp(actualTypes[i], args[i]);
+                        Object arg = args[i];
+                        adjustPushCount(arg, -1);
+                        addPushOp(actualTypes[i], arg);
                     }
                 }
             } else {
@@ -860,13 +862,17 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                 int firstLen = len - 1;
                 int i = 0;
                 for (; i < firstLen; i++) {
-                    addPushOp(actualTypes[i], args[i]);
+                    Object arg = args[i];
+                    adjustPushCount(arg, -1);
+                    addPushOp(actualTypes[i], arg);
                 }
 
                 var vararg = doNew(actualTypes[firstLen], new Object[] {args.length - i}, null);
 
                 for (; i<args.length; i++) {
-                    vararg.aset(i - firstLen, args[i]);
+                    Object arg = args[i];
+                    adjustPushCount(arg, -1);
+                    vararg.aset(i - firstLen, arg);
                 }
 
                 addPushOp(null, vararg);
