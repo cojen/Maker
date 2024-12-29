@@ -840,7 +840,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                 if (len != 0) {
                     check: {
                         for (int i=0; i<len; i++) {
-                            if (!actualTypes[i].equals(paramTypes[i])) {
+                            if (!actualTypes[i].isAssignableFrom(paramTypes[i])) {
                                 break check;
                             }
                         }
