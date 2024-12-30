@@ -278,6 +278,14 @@ abstract class BaseType implements Type, Typed {
      */
     abstract int typeCode();
 
+    int slotWidth() {
+        return switch (typeCode()) {
+            default -> 1;
+            case T_DOUBLE, T_LONG -> 2;
+            case T_VOID -> 0;
+        };
+    }
+
     @Override
     public abstract BaseType box();
 

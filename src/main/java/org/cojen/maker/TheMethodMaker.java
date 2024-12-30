@@ -3207,6 +3207,14 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         Op revisit(Flow flow, Op prev) {
             return flow(flow, prev);
         }
+
+        /**
+         * Returns true if the operation doesn't pop anything off the stack and only pushes a
+         * single slot to the stack.
+         */
+        boolean isSimplePush() {
+            return false;
+        }
     }
 
     class Lab extends Op implements Label {
@@ -3797,6 +3805,11 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                 m.stackPush(mFieldRef.mField.type());
             }
         }
+
+        @Override
+        boolean isSimplePush() {
+            return op() == GETSTATIC && mFieldRef.mField.type().slotWidth() == 1;
+        }
     }
 
     static final class InvokeOp extends BytecodeOp {
@@ -3816,6 +3829,14 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                 m.stackPush(returnType);
             }
         }
+
+        // Note: Is never called because method invocation always stores to a local variable.
+        /*
+        @Override
+        boolean isSimplePush() {
+            return stackPop() == 0 && mMethodRef.mMethod.returnType().slotWidth() == 1;
+        }
+        */
     }
 
     static final class InvokeInterfaceOp extends BytecodeOp {
@@ -3860,6 +3881,14 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                 m.stackPush(mReturnType);
             }
         }
+
+        // Note: Is never called because method invocation always stores to a local variable.
+        /*
+        @Override
+        boolean isSimplePush() {
+            return stackPop() == 0 && mReturnType.slotWidth() == 1;
+        }
+        */
     }
 
     /**
@@ -3898,6 +3927,11 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         void appendTo(TheMethodMaker m) {
             m.pushConstant(mValue, mType);
         }
+
+        @Override
+        boolean isSimplePush() {
+            return mType.slotWidth() == 1;
+        }
     }
 
     static final class ExplicitConstantOp extends ConstantOp {
@@ -3928,6 +3962,11 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                 m.appendShort(mResolved.mIndex);
                 m.stackPush(mResolved.mField.type());
             }
+        }
+
+        @Override
+        boolean isSimplePush() {
+            return (mResolved == null ? mType : mResolved.mField.type()).slotWidth() == 1;
         }
     }
 
@@ -4008,6 +4047,11 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
             return mNext;
         }
+
+        @Override
+        boolean isSimplePush() {
+            return mVar.slotWidth() == 1;
+        }
     }
 
     /**
@@ -4038,25 +4082,29 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
             // If storing to a single-use variable, try to eliminate it.
 
-            if (mVar.mPushCount == 1 && mNext instanceof PushVarOp push && mVar.name() == null) {
-                // If performing a store/push pair to the same variable, just remove the pair
-                // of operations and rely on the operand stack.
-                if (mVar == push.mVar) {
-                    mVar.mPushCount = 0;
-                    Op next = push.mNext;
-                    // Removing 2 ops, but specify 1 because the push op won't be visited.
-                    flow.removeOps(prev, this, next, 1);
-                    return next;
+            if (mVar.mPushCount == 1 && mVar.name() == null) {
+                Op next = mNext;
+
+                if (next instanceof PushVarOp push) {
+                    // If performing a store/push pair to the same variable, just remove the pair
+                    // of operations and rely on the operand stack.
+                    if (mVar == push.mVar) {
+                        mVar.mPushCount = 0;
+                        next = push.mNext;
+                        // Removing 2 ops, but specify 1 because the push op won't be visited.
+                        flow.removeOps(prev, this, next, 1);
+                        return next;
+                    }
                 }
 
                 // Check if the variable can be eliminated by using a swap.
-                if (mVar.slotWidth() == 1 && push.mVar.slotWidth() == 1 &&
-                    push.mNext instanceof PushVarOp np && mVar == np.mVar)
+                if (mVar.slotWidth() == 1 && next.isSimplePush() &&
+                    next.mNext instanceof PushVarOp np && mVar == np.mVar)
                 {
                     mVar.mPushCount = 0;
-                    flow.removeOps(prev, this, push, 1);
-                    flow.replaceOp(push, np, new BytecodeOp(Opcodes.SWAP, 0));
-                    return push;
+                    flow.removeOps(prev, this, next, 1);
+                    flow.replaceOp(next, np, new BytecodeOp(Opcodes.SWAP, 0));
+                    return next;
                 }
             }
 
@@ -5338,10 +5386,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         int slotWidth() {
-            return switch (mType.typeCode()) {
-                default -> 1;
-                case T_DOUBLE, T_LONG -> 2;
-            };
+            return mType.slotWidth();
         }
 
         /**
