@@ -16,7 +16,10 @@
 
 package org.cojen.maker;
 
+import java.lang.reflect.InvocationTargetException;
+
 import org.junit.*;
+import static org.junit.Assert.*;
 
 /**
  * Tests for special code reducing steps.
@@ -85,5 +88,24 @@ public class ReduceTest {
         mm.nop();
 
         cm.finish().getMethod("test").invoke(null);
+    }
+
+    @Test
+    public void preserveVariable() throws Exception {
+        // An unnecessary variable shouldn't be eliminated when it has a name.
+
+        ClassMaker cm = ClassMaker.begin().public_();
+
+        var mm = cm.addMethod(int.class, "test", String.class).public_().static_();
+        var h = mm.var(String.class).name("hello");
+        h.set(mm.param(0));
+        mm.return_(h.invoke("length"));
+
+        try {
+            cm.finish().getMethod("test", String.class).invoke(null, (String) null);
+            fail();
+        } catch (InvocationTargetException e) {
+            assertTrue(e.getCause().getMessage().contains("hello"));
+        }
     }
 }

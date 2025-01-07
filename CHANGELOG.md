@@ -1,11 +1,17 @@
 Changelog
 =========
 
+v2.6.3
+------
+* Variables which are used once are never eliminated when they have a name.
+* Reduce the number of local variables by using a swap against pushes of constants and static
+  fields.
+
 v2.6.2 (2024-12-23)
 ------
 * Fixed how the debug option allows broken class files to be written.
-* Reduce the number of local variables used by using a swap in even more cases, not just stores
-  into instance fields.
+* Reduce the number of local variables by using a swap in even more cases, not just stores into
+  instance fields.
 * Minor performance optimizations.
 
 v2.6.1 (2024-11-23)
