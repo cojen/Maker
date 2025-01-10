@@ -385,8 +385,9 @@ public interface ClassMaker extends Maker {
      * loading technique.
      *
      * <p>Note: When installed, the given class is held by a weak reference, to facilitate
-     * unloading. If the installed class can be unloaded before finishing the new class, a
-     * {@link java.lang.ref.Reference#reachabilityFence reachability fence} might be required.
+     * unloading. If the installed class isn't already referenced by this {@code ClassMaker}
+     * and it can be unloaded before finishing the new class, a {@link
+     * java.lang.ref.Reference#reachabilityFence reachability fence} might be required.
      *
      * @return true if installed, or else false if the class was already installed
      * @throws IllegalStateException if this maker was begun with a lookup object, or if the

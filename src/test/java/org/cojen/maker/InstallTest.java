@@ -18,6 +18,8 @@ package org.cojen.maker;
 
 import java.lang.invoke.MethodHandles;
 
+import java.lang.reflect.InvocationTargetException;
+
 import org.junit.*;
 import static org.junit.Assert.*;
 
@@ -120,6 +122,46 @@ public class InstallTest {
             cm.addConstructor().public_();
             cm.installClass(base);
             cm.finish().getConstructor().newInstance();
+        }
+    }
+
+    @Test
+    public void installPrimitive() throws Exception {
+        ClassMaker cm = ClassMaker.begin();
+        assertFalse(cm.installClass(int.class));
+        assertFalse(cm.installClass(int[].class));
+    }
+
+    @Test
+    public void installArray() throws Exception {
+        Class<?> ref;
+        {
+            ClassMaker cm = ClassMaker.begin("a.Bee", null, "key2").public_();
+            cm.addConstructor().public_();
+            ref = cm.finish();
+        }
+
+        ref = ref.arrayType();
+
+        // Doesn't work when installClass isn't called.
+        {
+            ClassMaker cm = ClassMaker.begin().public_();
+            cm.addMethod(Class.class, "test").public_().static_().return_(ref);
+            try {
+                cm.finish().getMethod("test").invoke(null);
+                fail();
+            } catch (InvocationTargetException e) {
+                Throwable cause = e.getCause();
+                assertTrue(cause instanceof NoClassDefFoundError);
+            }
+        }
+
+        // Should work when installClass is called.
+        {
+            ClassMaker cm = ClassMaker.begin().public_();
+            cm.addMethod(Class.class, "test").public_().static_().return_(ref);
+            cm.installClass(ref);
+            assertEquals(ref, cm.finish().getMethod("test").invoke(null));
         }
     }
 }

@@ -262,6 +262,18 @@ class ClassInjector extends ClassLoader {
         }
 
         boolean installClass(Class<?> clazz) {
+            while (true) {
+                Class<?> component = clazz.getComponentType();
+                if (component == null) {
+                    break;
+                }
+                clazz = component;
+            }
+
+            if (clazz.isPrimitive()) {
+                return false;
+            }
+
             WeakCache<String, Class<?>> installed = mInstalled;
 
             if (installed == null) {
