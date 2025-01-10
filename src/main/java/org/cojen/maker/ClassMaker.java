@@ -24,6 +24,8 @@ import java.lang.invoke.MethodType;
 
 import java.util.Set;
 
+import java.util.function.Predicate;
+
 /**
  * Allows new classes and interfaces to be defined dynamically.
  *
@@ -394,6 +396,20 @@ public interface ClassMaker extends Maker {
      * class loader already refers to a different class with the same name
      */
     boolean installClass(Class<?> clazz);
+
+    /**
+     * Directly installs all the classes that this {@code ClassMaker} is known to depend on,
+     * when the class is finished. This ensures that the classes can be found without relying
+     * on the normal hierarchical class loading technique. Classes in the "java.*" packages
+     * aren't installed, because they're always available from the system class loader.
+     *
+     * @param filter optional filter to check if a class should be installed; pass null to
+     * install all of them
+     * @return this
+     * @throws IllegalStateException if this maker was begun with a lookup object, or if the
+     * class is already finished
+     */
+    ClassMaker installDependentClasses(Predicate<Class> filter);
 
     /**
      * Returns the set of methods which would need to be implemented by this class in order for

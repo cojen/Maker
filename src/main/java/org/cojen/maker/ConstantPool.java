@@ -24,6 +24,8 @@ import java.lang.invoke.MethodType;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import java.util.function.Consumer;
+
 import static java.lang.invoke.MethodHandleInfo.*;
 
 import static java.util.Objects.*;
@@ -239,6 +241,14 @@ class ConstantPool {
 
     C_NameAndType addNameAndType(C_UTF8 name, C_UTF8 typeDesc) {
         return addConstant(new C_NameAndType(name, typeDesc));
+    }
+
+    void forEachClass(Consumer<C_Class> consumer) {
+        for (Constant c : mConstants.keySet()) {
+            if (c instanceof C_Class cc) {
+                consumer.accept(cc);
+            }
+        }
     }
 
     @SuppressWarnings("unchecked")

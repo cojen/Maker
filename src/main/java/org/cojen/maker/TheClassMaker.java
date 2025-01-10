@@ -39,6 +39,8 @@ import java.util.TreeSet;
 
 import java.util.concurrent.ThreadLocalRandom;
 
+import java.util.function.Predicate;
+
 import static java.util.Objects.*;
 
 /**
@@ -87,6 +89,8 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
 
     // Accessed by Switcher.
     Map<Class<?>, Class<?>> mEnumMappers;
+
+    private Object mInstallClasses;
 
     static TheClassMaker begin(boolean external, String className, boolean explicit,
                                ClassLoader parentLoader, Object key, MethodHandles.Lookup lookup)
@@ -537,6 +541,15 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
     }
 
     @Override
+    public ClassMaker installDependentClasses(Predicate<Class> filter) {
+        if (mLookup != null || mConstants == null) {
+            throw new IllegalStateException();
+        }
+        mInstallClasses = filter == null ? Boolean.TRUE : filter;
+        return this;
+    }
+
+    @Override
     public Set<String> unimplementedMethods() {
         Set<String> unimplemented = null;
         var methodSet = new HashSet<BaseType.Method>();
@@ -803,6 +816,49 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
         }
 
         writeAttributesTo(out);
+
+        if (mInstallClasses != null) {
+            doInstallDependentClasses();
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private void doInstallDependentClasses() {
+        Predicate pred;
+        if (mInstallClasses instanceof Predicate p) {
+            pred = p;
+        } else {
+            pred = null;
+        }
+
+        mConstants.forEachClass((ConstantPool.C_Class cc) -> {
+            BaseType type = cc.mType;
+            Class clazz = type.classType();
+
+            if (clazz == null) {
+                return;
+            }
+
+            if (type.isArray()) {
+                while (true) {
+                    BaseType element = type.elementType();
+                    if (element == null) {
+                        break;
+                    }
+                    type = element;
+                }
+                clazz = type.classType();
+                if (clazz.isPrimitive()) {
+                    return;
+                }
+            }
+
+            if (!clazz.getName().startsWith("java.") && (pred == null || pred.test(clazz))) {
+                mInjectorGroup.installClass(clazz);
+            }
+        });
+
+        mInstallClasses = null;
     }
 
     static void checkSize(Map<?,?> c, int maxSize, String desc) {
