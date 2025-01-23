@@ -1,7 +1,7 @@
 Changelog
 =========
 
-v2.6.3
+v2.6.3 (2025-01-23)
 ------
 * Variables which are used once are never eliminated when they have a name.
 * Reduce the number of local variables by using a swap against pushes of constants and static
