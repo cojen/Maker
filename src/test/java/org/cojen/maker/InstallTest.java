@@ -136,7 +136,7 @@ public class InstallTest {
     public void installArray() throws Exception {
         Class<?> ref;
         {
-            ClassMaker cm = ClassMaker.begin("a.Bee", null, "key2").public_();
+            ClassMaker cm = ClassMaker.begin("b.Bee", null, "key2").public_();
             cm.addConstructor().public_();
             ref = cm.finish();
         }
