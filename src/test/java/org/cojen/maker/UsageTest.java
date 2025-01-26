@@ -709,8 +709,7 @@ public class UsageTest {
 
     @Test
     public void bigStringConstant() throws Exception {
-        ClassMaker cm = ClassMaker.begin().public_();
-        MethodMaker mm = cm.addMethod(String.class, "get").public_().static_();
+        MethodMaker mm = mClassMaker.addMethod(String.class, "get").public_().static_();
 
         try {
             mm.return_(makeString(65536, 'a'));
@@ -749,6 +748,17 @@ public class UsageTest {
             fail();
         } catch (IllegalStateException e) {
             check(e, "100000");
+        }
+    }
+
+    @Test
+    public void voidArray() throws Exception {
+        MethodMaker mm = mClassMaker.addMethod(null, "test");
+        try {
+            mm.new_(Type.from(void.class).asArray(), 10);
+            fail();
+        } catch (IllegalArgumentException e) {
+            check(e, "void");
         }
     }
 
