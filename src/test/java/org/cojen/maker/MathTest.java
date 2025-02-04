@@ -424,6 +424,19 @@ public class MathTest {
     }
 
     @Test
+    public void misc2() throws Exception {
+        ClassMaker cm = ClassMaker.begin().public_();
+        MethodMaker mm = cm.addMethod(null, "run").static_().public_();
+
+        var v1 = mm.var(float.class).set(0);
+        var v2 = mm.var(float.class).set(1);
+        var v3 = v1.add(v2);
+        mm.var(Assert.class).invoke("assertTrue", v3.eq(1.0f));
+
+        cm.finish().getMethod("run").invoke(null);
+    }
+
+    @Test
     public void nop() throws Exception {
         // Not really a math test...
         ClassMaker cm = ClassMaker.begin().public_();
