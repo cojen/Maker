@@ -82,9 +82,6 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
 
     private IdentityHashMap<Object, Integer> mSharedExactConstants;
 
-    // Maps constants to static final fields. Accessed by TheMethodMaker.
-    Map<ConstantPool.Constant, ConstantPool.C_Field> mResolvedConstants;
-
     // Accessed by Switcher.
     Map<Class<?>, Class<?>> mEnumMappers;
 
@@ -333,27 +330,6 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
         return fm;
     }
 
-    TheFieldMaker addSyntheticField(BaseType type, String prefix) {
-        checkFinished();
-
-        String name;
-        if (mFields == null) {
-            mFields = new LinkedHashMap<>();
-            name = prefix + '0';
-        } else {
-            name = prefix + mFields.size();
-            while (mFields.containsKey(name)) {
-                name = prefix + ThreadLocalRandom.current().nextInt(Integer.MAX_VALUE);
-            }
-        }
-
-        var fm = new TheFieldMaker(this, type().defineField(0, type, name));
-        fm.synthetic();
-        mFields.put(name, fm);
-
-        return fm;
-    }
- 
     @Override
     public TheMethodMaker addMethod(Object retType, String name, Object... paramTypes) {
         if (name.equals("<clinit>")) {

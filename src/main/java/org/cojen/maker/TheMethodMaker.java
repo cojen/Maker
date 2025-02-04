@@ -57,8 +57,6 @@ import static org.cojen.maker.BytesOut.*;
 class TheMethodMaker extends ClassMember implements MethodMaker {
     private static final int MAX_CODE_LENGTH = 65535;
 
-    private static final boolean CONDY_WORKAROUND = Runtime.version().feature() < 19;
-
     final BaseType.Method mMethod;
 
     private ParamVar[] mParams;
@@ -100,10 +98,6 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     private Attribute.ParameterAnnotations[] mParameterAnnotationsSet;
 
     private Attribute.ConstantList mExceptionsThrown;
-
-    // Detects when the code can no longer be described as a simple linear flow, used as a
-    // workaround for a HotSpot condy bug which disables code compilation.
-    private boolean mHasBranches;
 
     private int mFinished;
 
@@ -1118,8 +1112,6 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
      * @param type user-given catch type; is only checked if null or not
      */
     private Variable catch_(BaseType catchType, Lab startLab, Lab endLab, Object type) {
-        mHasBranches = true;
-
         ConstantPool.C_Class catchClass = mConstants.addClass(catchType);
         int smCatchCode = SM_OBJECT | catchClass.mIndex << 8;
 
@@ -2677,51 +2669,11 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         return mConstants.addDynamicConstant(bi, "_", type);
     }
 
+    /**
+     * @param type non-null
+     */
     private void addExplicitConstantOp(ConstantPool.Constant constant, BaseType type) {
-        addExplicitConstantOp(new ExplicitConstantOp(constant, type));
-    }
-
-    private void addExplicitConstantOp(ExplicitConstantOp op) {
-        if (CONDY_WORKAROUND && op.mConstant instanceof ConstantPool.C_Dynamic
-            && mHasBranches && !"<clinit>".equals(name()))
-        {
-            /*
-              Workaround a HotSpot bug which prevents code compilation. When an instruction
-              against a dynamic constant isn't reached, this happens:
-            
-                compilation bailout: could not resolve a constant
-
-              See: https://bugs.openjdk.java.net/browse/JDK-8270928
-
-              If there's a possibility of this happening, then the constant is eagerly resolved
-              and stored in a static final field. The field is then used instead of the
-              original direct reference. Sadly, this entirely defeats the point of having
-              dynamic constants, which are expected to be resolved lazily.
-
-              Note that this workaround isn't applied to static initializers, because they
-              almost never get compiled.
-            */
-
-            if (mClassMaker.mResolvedConstants == null) {
-                mClassMaker.mResolvedConstants = new HashMap<>();
-            }
-
-            ConstantPool.C_Field field = mClassMaker.mResolvedConstants.get(op.mConstant);
-
-            if (field == null) {
-                TheFieldMaker fm = mClassMaker.addSyntheticField(op.mType, "$condy-");
-                fm.private_().static_().final_();
-                TheMethodMaker mm = mClassMaker.addClinit();
-                mm.addOp(new ExplicitConstantOp(op.mConstant, op.mType));
-                field =  mm.field(fm.name()).mFieldRef;
-                mm.addOp(new FieldOp(PUTSTATIC, 1, field));
-                mClassMaker.mResolvedConstants.put(op.mConstant, field);
-            }
-
-            op.mResolved = field;
-        }
-
-        addOp(op);
+        addOp(new ExplicitConstantOp(constant, type));
     }
 
     /**
@@ -3413,7 +3365,6 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             mUsedCount++;
             if (mTrackOffsets == null) {
                 mTrackOffsets = new int[4];
-                TheMethodMaker.this.mHasBranches = true;
             }
         }
 
@@ -3895,6 +3846,15 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
      * Push a constant to the stack and optionally perform a conversion.
      */
     abstract static class ConstantOp extends Op {
+        final BaseType mType;
+
+        /**
+         * @param type non-null
+         */
+        ConstantOp(BaseType type) {
+            mType = type;
+        }
+
         @Override
         Op flow(Flow flow, Op prev) {
             // Check if storing to an unused variable and remove the pair.
@@ -3909,24 +3869,6 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
             return next;
         }
-    }
-
-    static final class BasicConstantOp extends ConstantOp {
-        final Object mValue;
-        final BaseType mType;
-
-        /**
-         * @param type non-null
-         */
-        BasicConstantOp(Object value, BaseType type) {
-            mValue = value;
-            mType = type;
-        }
-
-        @Override
-        void appendTo(TheMethodMaker m) {
-            m.pushConstant(mValue, mType);
-        }
 
         @Override
         boolean isSimplePush() {
@@ -3934,39 +3876,45 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
     }
 
-    static final class ExplicitConstantOp extends ConstantOp {
-        final ConstantPool.Constant mConstant;
-        final BaseType mType;
+    static final class BasicConstantOp extends ConstantOp {
+        final Object mValue;
 
-        ConstantPool.C_Field mResolved;
-
-        ExplicitConstantOp(ConstantPool.Constant constant, BaseType type) {
-            mConstant = constant;
-            mType = type;
+        /**
+         * @param type non-null
+         */
+        BasicConstantOp(Object value, BaseType type) {
+            super(type);
+            mValue = value;
         }
 
         @Override
         void appendTo(TheMethodMaker m) {
-            if (mResolved == null) {
-                int typeCode = mType.typeCode();
-                if (typeCode == T_DOUBLE || typeCode == T_LONG) {
-                    int index = mConstant.mIndex;
-                    m.appendByte(LDC2_W);
-                    m.appendShort(index);
-                    m.stackPush(mType);
-                } else {
-                    m.pushConstant(mConstant, mType);
-                }
-            } else {
-                m.appendByte(GETSTATIC);
-                m.appendShort(mResolved.mIndex);
-                m.stackPush(mResolved.mField.type());
-            }
+            m.pushConstant(mValue, mType);
+        }
+    }
+
+    static final class ExplicitConstantOp extends ConstantOp {
+        final ConstantPool.Constant mConstant;
+
+        /**
+         * @param type non-null
+         */
+        ExplicitConstantOp(ConstantPool.Constant constant, BaseType type) {
+            super(type);
+            mConstant = constant;
         }
 
         @Override
-        boolean isSimplePush() {
-            return (mResolved == null ? mType : mResolved.mField.type()).slotWidth() == 1;
+        void appendTo(TheMethodMaker m) {
+            int typeCode = mType.typeCode();
+            if (typeCode == T_DOUBLE || typeCode == T_LONG) {
+                int index = mConstant.mIndex;
+                m.appendByte(LDC2_W);
+                m.appendShort(index);
+                m.stackPush(mType);
+            } else {
+                m.pushConstant(mConstant, mType);
+            }
         }
     }
 
@@ -4656,20 +4604,6 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                 if (!eq) {
                     requireNonNull(val);
                 }
-            } else if (CONDY_WORKAROUND) capture: {
-                mHasBranches = true;
-                if (val instanceof ConstantVar cv) {
-                    var constant = cv.mConstant;
-                    if (!(constant instanceof ConstantPool.C_Dynamic)) {
-                        break capture;
-                    }
-                } else if (!ConstableSupport.isDynamicConstant(val)) {
-                    break capture;
-                }
-                // Must eagerly capture the dynamic constant into a local variable to
-                // avoid attempting to add code to the static initializer when the
-                // temporary operation (below) gets replaced.
-                val = storeToNewVar(addPushOp(null, val));
             }
 
             final Object value = val;
@@ -5448,7 +5382,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
         @Override
         void addStoreConstantOp(ExplicitConstantOp op) {
-            addExplicitConstantOp(op);
+            addOp(op);
             addStoreOp(this);
         }
 
@@ -6085,7 +6019,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         @Override
         void addStoreConstantOp(ExplicitConstantOp op) {
             addBeginStoreFieldOp();
-            addExplicitConstantOp(op);
+            addOp(op);
             addFinishStoreFieldOp();
         }
 
@@ -6375,7 +6309,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
             if (value instanceof ExplicitConstantOp op) {
                 allTypes[i] = mType;
-                addExplicitConstantOp(op);
+                addOp(op);
             } else {
                 allTypes[i] = addPushOp(mType, value);
             }
