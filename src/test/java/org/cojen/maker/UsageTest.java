@@ -312,6 +312,31 @@ public class UsageTest {
     }
 
     @Test
+    public void unsupportedConstantIndy() {
+        mClassMaker = ClassMaker.beginExternal("foo");
+        MethodMaker mm = mClassMaker.addMethod(null, "test");
+        try {
+            mm.var(UsageTest.class).indy("boot2", mm.var(String.class));
+            fail();
+        } catch (IllegalArgumentException e) {
+            check(e, "Unsupported constant");
+        }
+
+        try {
+            mm.var(UsageTest.class).indy("boot2", new java.util.ArrayList());
+            fail();
+        } catch (IllegalArgumentException e) {
+            check(e, "Unsupported constant");
+        }
+    }
+
+    public static CallSite boot2(MethodHandles.Lookup caller, String name, MethodType type,
+                                 Object param)
+    {
+        return null;
+    }
+
+    @Test
     public void unmodifiable() {
         MethodMaker mm = mClassMaker.addMethod(null, "test");
         var clazz = mm.class_();

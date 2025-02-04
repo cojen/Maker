@@ -1,6 +1,11 @@
 Changelog
 =========
 
+v2.6.4
+------
+* Removed the condy workaround code. If using the condy feature, be sure use JDK 19 or above to
+  ensure that HotSpot fully compiles code which uses it. See bug: JDK-8270928
+
 v2.6.3 (2025-01-23)
 ------
 * Variables which are used once are never eliminated when they have a name.
