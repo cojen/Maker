@@ -1,7 +1,7 @@
 Changelog
 =========
 
-v2.6.4
+v2.6.4 (2025-02-23)
 ------
 * Removed the condy workaround code. If using the condy feature, be sure use JDK 19 or above to
   ensure that HotSpot fully compiles code which uses it. See bug: JDK-8270928
