@@ -1,11 +1,11 @@
 Changelog
 =========
 
-v2.6.5
+v2.6.5 (2025-03-23)
 ------
 * Fields and methods should be referenced by the class they're accessed from, and not the class
-  they're defined in. This change affects linkage rules for classes which are loaded after
-  being defined, and it's now consistent with the Java compiler.
+  they're defined in. This change affects linkage rules for classes which aren't immediately
+  loaded, and it's now consistent with the Java compiler.
 
 v2.6.4 (2025-02-23)
 ------
