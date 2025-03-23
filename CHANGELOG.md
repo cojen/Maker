@@ -1,6 +1,12 @@
 Changelog
 =========
 
+v2.6.5
+------
+* Fields and methods should be referenced by the class they're accessed from, and not the class
+  they're defined in. This change affects linkage rules for classes which are loaded after
+  being defined, and it's now consistent with the Java compiler.
+
 v2.6.4 (2025-02-23)
 ------
 * Removed the condy workaround code. If using the condy feature, be sure use JDK 19 or above to

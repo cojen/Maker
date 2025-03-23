@@ -116,14 +116,28 @@ class ConstantPool {
     }
 
     C_Field addField(BaseType.Field field) {
-        C_Class clazz = addClass(field.enclosingType());
+        return addField(field.enclosingType(), field);
+    }
+
+    /**
+     * @param enclosingType must be the field's enclosingType or be a super class
+     */
+    C_Field addField(BaseType enclosingType, BaseType.Field field) {
+        C_Class clazz = addClass(enclosingType);
         C_NameAndType nameAndType = addNameAndType(field.name(), field.type().descriptor());
         return addConstant(new C_Field(clazz, nameAndType, field));
     }
 
     C_Method addMethod(BaseType.Method method) {
-        int tag = method.enclosingType().isInterface() ? 11 : 10;
-        C_Class clazz = addClass(method.enclosingType());
+        return addMethod(method.enclosingType(), method);
+    }
+
+    /**
+     * @param enclosingType must be the method's enclosingType or be a super class or interface
+     */
+    C_Method addMethod(BaseType enclosingType, BaseType.Method method) {
+        int tag = enclosingType.isInterface() ? 11 : 10;
+        C_Class clazz = addClass(enclosingType);
         C_NameAndType nameAndType = addNameAndType(method.name(), method.descriptor());
         return addConstant(new C_Method(tag, clazz, nameAndType, method));
     }

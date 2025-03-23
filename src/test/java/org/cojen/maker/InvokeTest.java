@@ -148,13 +148,17 @@ public class InvokeTest {
     }
 
     @Test
-    public void invokeDynamic() throws Exception {
+    public void invokeDynamic1() throws Exception {
+        invokeDynamic(InvokeTest.class);
+    }
+
+    private void invokeDynamic(Class<?> bootClass) throws Exception {
         // Dynamically generate a method which adds two numbers. In practice, this is overkill.
 
         ClassMaker cm = ClassMaker.begin().public_();
         MethodMaker mm = cm.addMethod(null, "run").public_().static_();
 
-        var bootVar = mm.var(InvokeTest.class).indy("boot");
+        var bootVar = mm.var(bootClass).indy("boot");
         var assertVar = mm.var(Assert.class);
 
         {
@@ -189,6 +193,15 @@ public class InvokeTest {
 
     @Test
     public void invokeDynamic2() throws Exception {
+        // Same thing as invokeDynamic1, but the bootstrap method is inherited.
+        invokeDynamic(Sub.class);
+    }
+
+    public static class Sub extends InvokeTest {
+    }
+
+    @Test
+    public void invokeDynamic3() throws Exception {
         // Dynamically generate a method which throws an exception. In practice, this is overkill.
 
         ClassMaker cm = ClassMaker.begin().public_();
