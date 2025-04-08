@@ -19,6 +19,9 @@ package org.cojen.maker;
 import java.io.OutputStream;
 import java.io.IOException;
 
+import java.lang.constant.ConstantDescs;
+import java.lang.constant.MethodTypeDesc;
+
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 
@@ -291,6 +294,15 @@ public interface ClassMaker extends Maker {
     }
 
     /**
+     * Add a method to this class.
+     *
+     * @param desc defines the return type and parameter types
+     */
+    default MethodMaker addMethod(String name, MethodTypeDesc desc) {
+        return addMethod(desc.returnType(), name, (Object[]) desc.parameterArray());
+    }
+
+    /**
      * Add a constructor to this class.
      *
      * @param paramTypes classes or names
@@ -316,6 +328,19 @@ public interface ClassMaker extends Maker {
             throw new IllegalArgumentException();
         }
         return addConstructor((Object[]) type.parameterArray());
+    }
+
+    /**
+     * Add a constructor to this class.
+     *
+     * @param desc defines the parameter types
+     * @throws IllegalArgumentException if the return type isn't void
+     */
+    default MethodMaker addConstructor(MethodTypeDesc desc) {
+        if (!ConstantDescs.CD_void.equals(desc.returnType())) {
+            throw new IllegalArgumentException();
+        }
+        return addConstructor((Object[]) desc.parameterArray());
     }
 
     /**

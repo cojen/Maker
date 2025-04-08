@@ -16,6 +16,8 @@
 
 package org.cojen.maker;
 
+import java.lang.constant.MethodTypeDesc;
+
 import java.lang.invoke.MethodType;
 
 import org.junit.*;
@@ -46,6 +48,30 @@ public class ConstructorTest {
         mm.invokeSuperConstructor();
 
         mm = cm.addConstructor(MethodType.methodType(void.class, int.class, String.class));
+        mm.public_();
+        mm.invokeSuperConstructor();
+
+        var clazz = cm.finish();
+
+        clazz.getConstructor().newInstance();
+        clazz.getConstructor(int.class, String.class).newInstance(10, "hello");
+    }
+
+    @Test
+    public void withMethodTypeDesc() throws Exception {
+        ClassMaker cm = ClassMaker.begin().public_();
+
+        try {
+            cm.addConstructor(MethodTypeDesc.ofDescriptor("()I"));
+            fail();
+        } catch (IllegalArgumentException e) {
+            // Expected, since return type is int.
+        }
+
+        MethodMaker mm = cm.addConstructor(MethodTypeDesc.ofDescriptor("()V")).public_();
+        mm.invokeSuperConstructor();
+
+        mm = cm.addConstructor(MethodTypeDesc.ofDescriptor("(ILjava/lang/String;)V"));
         mm.public_();
         mm.invokeSuperConstructor();
 

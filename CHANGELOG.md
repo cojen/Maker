@@ -1,6 +1,10 @@
 Changelog
 =========
 
+v2.6.6
+------
+* Overload the addMethod and addConstructor methods to accept a MethodTypeDesc.
+
 v2.6.5 (2025-03-23)
 ------
 * Fields and methods should be referenced by the class they're accessed from, and not the class
