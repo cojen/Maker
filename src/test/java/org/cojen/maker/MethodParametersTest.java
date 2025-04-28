@@ -16,6 +16,8 @@
 
 package org.cojen.maker;
 
+import java.lang.constant.MethodTypeDesc;
+
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 
@@ -87,5 +89,15 @@ public class MethodParametersTest {
             assertEquals("arg0", params[0].getName());
             assertEquals("p2", params[1].getName());
         }
+    }
+
+    @Test
+    public void withMethodTypeDesc() throws Exception {
+        ClassMaker cm = ClassMaker.begin().public_();
+        MethodMaker mm = cm.addMethod("test", MethodTypeDesc.ofDescriptor("(I)J"))
+            .public_().static_();
+        mm.return_(mm.param(0).add(1));
+        Object result = cm.finish().getMethod("test", int.class).invoke(null, 1);
+        assertEquals(2L, result);
     }
 }

@@ -1,7 +1,17 @@
 Changelog
 =========
 
-v2.6.4
+v2.6.6
+------
+* Overload the addMethod and addConstructor methods to accept a MethodTypeDesc.
+
+v2.6.5 (2025-03-23)
+------
+* Fields and methods should be referenced by the class they're accessed from, and not the class
+  they're defined in. This change affects linkage rules for classes which aren't immediately
+  loaded, and it's now consistent with the Java compiler.
+
+v2.6.4 (2025-02-23)
 ------
 * Removed the condy workaround code. If using the condy feature, be sure use JDK 19 or above to
   ensure that HotSpot fully compiles code which uses it. See bug: JDK-8270928

@@ -692,7 +692,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     FieldVar field(BaseType type, String name) {
         BaseType.Field field = findField(type, name);
         LocalVar instance = field.isStatic() ? null : this_();
-        return new FieldVar(instance, mConstants.addField(field));
+        return new FieldVar(instance, mConstants.addField(type, field));
     }
 
     private BaseFieldVar field(LocalVar var, String name) {
@@ -701,7 +701,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         if (field.isStatic()) {
             var = null;
         }
-        return new FieldVar(var, mConstants.addField(field)).access();
+        return new FieldVar(var, mConstants.addField(type, field)).access();
     }
 
     private BaseType.Field findField(BaseType type, String name) {
@@ -917,7 +917,12 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             savepoint = pushInstanceAt(savepoint, mhVar);
         }
 
-        ConstantPool.C_Method methodRef = mConstants.addMethod(method);
+        ConstantPool.C_Method methodRef;
+        if (inherit > 0 || type.isHidden()) {
+            methodRef = mConstants.addMethod(method);
+        } else {
+            methodRef = mConstants.addMethod(type, method);
+        }
 
         final BytecodeOp invokeOp;
         makeOp: {
@@ -927,7 +932,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             } else {
                 stackPop++;
 
-                if (method.enclosingType().isInterface()) {
+                if (methodRef.mClass.mType.isInterface()) {
                     int nargs = stackPop;
                     for (BaseType actualType : actualTypes) {
                         int tc = actualType.typeCode();
@@ -5077,26 +5082,29 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         ConstantVar methodHandle(BaseType returnType, String name, BaseType... paramTypes) {
+            BaseType enclosingType;
             BaseType.Method method;
             int kind;
 
             BaseType newReturnType;
 
             if (name.equals(".new") && (newReturnType = newReturnType(returnType)) != null) {
+                enclosingType = newReturnType;
                 method = newReturnType.findMethod("<init>", paramTypes, -1, -1, null, paramTypes);
                 kind = REF_newInvokeSpecial;
             } else {
-                BaseType type = invocationType();
-                if (type.isPrimitive()) {
-                    type = type.box();
+                enclosingType = invocationType();
+                if (enclosingType.isPrimitive()) {
+                    enclosingType = enclosingType.box();
                 }
 
                 int inherit = inherit();
-                method = type.findMethod(name, paramTypes, inherit, 0, returnType, paramTypes);
+                method = enclosingType.findMethod
+                    (name, paramTypes, inherit, 0, returnType, paramTypes);
 
                 if (method.isStatic()) {
                     kind = REF_invokeStatic;
-                } else if (method.enclosingType().isInterface()) {
+                } else if (enclosingType.isInterface()) {
                     kind = REF_invokeInterface;
                 } else if (inherit == 0) {
                     kind = REF_invokeVirtual;
@@ -5111,7 +5119,8 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             ConstantPool.Constant mhConstant;
 
             if (!isHidden(clazz)) {
-                mhConstant = mConstants.addMethodHandle(kind, mConstants.addMethod(method));
+                ConstantPool.C_Method ref = mConstants.addMethod(enclosingType, method);
+                mhConstant = mConstants.addMethodHandle(kind, ref);
             } else {
                 BaseType classType = BaseType.from(Class.class);
                 BaseType classArrayType = BaseType.from(Class[].class);
@@ -5220,9 +5229,10 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                 types[3 + i] = type;
             }
 
-            BaseType.Method bootstrap = type().findMethod(name, types, 0, 1, null, null);
+            BaseType thisType = type();
+            BaseType.Method bootstrap = thisType.findMethod(name, types, 0, 1, null, null);
 
-            ConstantPool.C_Method ref = mConstants.addMethod(bootstrap);
+            ConstantPool.C_Method ref = mConstants.addMethod(thisType, bootstrap);
             ConstantPool.C_MethodHandle bootHandle =
                 mConstants.addMethodHandle(REF_invokeStatic, ref);
 
