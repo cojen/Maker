@@ -144,6 +144,8 @@ public class SignatureTest {
         MethodMaker mm = cm.addMethod(List.class, "list", String.class).public_().static_()
             .signature("(", String.class, ")", List.class, "<", String.class, ">");
 
+        mm.param(0).name("p1").signature(String.class);
+
         var list = mm.var(ArrayList.class)
             .signature(ArrayList.class, "<", String.class, ">").name("list");
 

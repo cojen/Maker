@@ -82,7 +82,9 @@ public interface Variable {
      * @throws IllegalArgumentException if the annotation type is unsupported
      * @throws IllegalStateException if this variable doesn't support annotations
      */
-    AnnotationMaker addAnnotation(Object annotationType, boolean visible);
+    default AnnotationMaker addAnnotation(Object annotationType, boolean visible) {
+        throw new IllegalStateException("Cannot add an annotation");
+    }
 
     /**
      * Assign a value of 0, false, or null to this variable, depending on its type.

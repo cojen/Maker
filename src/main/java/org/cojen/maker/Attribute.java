@@ -659,15 +659,23 @@ abstract class Attribute extends Attributed {
 
     static class MethodParameters extends Attribute {
         private final ConstantPool.C_UTF8[] mNames;
+        private final int[] mFlags;
 
         MethodParameters(ConstantPool cp, int numParams) {
             super(cp, "MethodParameters");
             mNames = new ConstantPool.C_UTF8[Math.min(numParams, 255)];
+            mFlags = new int[mNames.length];
         }
 
         void setName(int index, ConstantPool.C_UTF8 name) {
             if (index < mNames.length) {
                 mNames[index] = name;
+            }
+        }
+
+        void addFlag(int index, int flag) {
+            if (index < mFlags.length) {
+                mFlags[index] |= flag;
             }
         }
 
@@ -679,9 +687,10 @@ abstract class Attribute extends Attributed {
         @Override
         void writeDataTo(BytesOut out) throws IOException {
             out.writeByte(mNames.length);
-            for (ConstantPool.C_UTF8 name : mNames) {
+            for (int i=0; i<mNames.length; i++) {
+                ConstantPool.C_UTF8 name = mNames[i];
                 out.writeShort(name == null ? 0 : name.mIndex);
-                out.writeShort(0); // access flags
+                out.writeShort(mFlags[i]);
             }
         }
     }
