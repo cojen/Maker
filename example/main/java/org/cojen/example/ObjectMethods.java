@@ -171,8 +171,8 @@ public class ObjectMethods {
     }
 
     private static void bootEquals(MethodMaker mm, Field[] fields, Class<?> targetClass) {
-        var target = mm.param(0);
-        var other = mm.param(1);
+        Variable target = mm.param(0);
+        Variable other = mm.param(1);
 
         // Quick instance equality check.
         Label L1 = mm.label();
