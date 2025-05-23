@@ -1,7 +1,7 @@
 Changelog
 =========
 
-v2.7.0
+v2.7.0 (2025-05-23)
 ------
 * Overload the addMethod and addConstructor methods to accept a MethodTypeDesc.
 * Added support for indicating that parameters can be final, synthetic, or mandated.
