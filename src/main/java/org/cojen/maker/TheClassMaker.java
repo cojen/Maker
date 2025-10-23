@@ -743,7 +743,7 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
         int version = 0x0000_003d; // Java 17.
 
         if (Modifiers.isValueClass(mModifiers)) {
-            version = 0xffff_0043; // Java 23, Valhalla EA
+            version = 0xffff_0046; // Java 26, Valhalla EA
         }
 
         if (mRecordCtors != null) {

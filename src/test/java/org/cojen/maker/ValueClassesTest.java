@@ -35,16 +35,17 @@ public class ValueClassesTest {
     public void basic() throws Exception {
         ClassMaker cm = ClassMaker.begin().public_().valueClass();
 
-        cm.addField(int.class, "data").public_().strict();
-        cm.addField(Instant.class, "when").public_().strict();
+        cm.addField(int.class, "data").public_().strict().final_();
+        cm.addField(Instant.class, "when").public_().strict().final_();
         cm.addLoadableType(Instant.class);
 
-        // Causes a JVM crash.
-        //cm.addLoadableType(int.class);
+        // Should be harmless.
+        cm.addLoadableType(int.class);
 
-        // Causes warnings to be logged.
-        //cm.addLoadableType(Instant[].class);
-        //cm.addLoadableType(int[].class);
+        cm.addLoadableType(Instant[].class);
+        cm.addLoadableType(int[].class);
+
+        // Causes a warning to be logged.
         //cm.addLoadableType(Object.class);
 
         MethodMaker ctor = cm.addConstructor(int.class, Instant.class).public_();

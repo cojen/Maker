@@ -53,7 +53,7 @@ class Modifiers {
 
     // For fields.
     static int toStrict(int bitmask) {
-        return bitmask | (Modifier.FINAL | 0x0800);
+        return bitmask | 0x0800;
     }
 
     // For methods.
