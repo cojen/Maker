@@ -219,11 +219,11 @@ public class ComparatorMaker<T> {
     }
 
     private void makeCompare(MethodMaker mm) {
-        var param0 = mm.param(0);
-        var param1 = mm.param(1);
+        Variable param0 = mm.param(0);
+        Variable param1 = mm.param(1);
 
-        var orderBy0 = param0;
-        var orderBy1 = param1;
+        Variable orderBy0 = param0;
+        Variable orderBy1 = param1;
 
         Clause clause = mFirstClause;
         Class<?> clauseType = Object.class;

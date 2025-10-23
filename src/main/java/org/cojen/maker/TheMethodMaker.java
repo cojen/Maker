@@ -559,11 +559,11 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     }
 
     @Override
-    public LocalVar param(int index) {
+    public Parameter param(int index) {
         if (index < 0) {
             throw new IndexOutOfBoundsException();
         }
-        LocalVar[] params = params();
+        ParamVar[] params = params();
         if (mThisVar != null) {
             index++;
         }
@@ -579,8 +579,8 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         return count;
     }
 
-    private LocalVar[] params() {
-        LocalVar[] params = mParams;
+    private ParamVar[] params() {
+        ParamVar[] params = mParams;
         if (params == null) {
             initParams();
             params = mParams;
@@ -4169,11 +4169,6 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
     abstract class OwnedVar implements Variable, Typed {
         @Override
-        public AnnotationMaker addAnnotation(Object annotationType, boolean visible) {
-            throw new IllegalStateException("Cannot add an annotation");
-        }
-
-        @Override
         public ClassMaker makerType() {
             return type().makerType();
         }
@@ -5437,7 +5432,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     /**
      * Method parameter variable.
      */
-    class ParamVar extends LocalVar {
+    class ParamVar extends LocalVar implements Parameter {
         private final int mIndex;
 
         ParamVar(BaseType type, int index) {
@@ -5452,35 +5447,65 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             return smCode();
         }
 
+        int paramIndex() {
+            int index = mIndex;
+            if (mThisVar != null) {
+                index--;
+            }
+            return index;
+        }
+
         @Override
-        public LocalVar name(String name) {
+        public ParamVar name(String name) {
             super.name(name);
+            if (this != mThisVar) {
+                mparams().setName(paramIndex(), mConstants.addUTF8(name));
+            }
+            return this;
+        }
 
-            // TODO: 4.7.24. The MethodParameters Attribute
-            //       Support ACC_FINAL, ACC_SYNTHETIC, and ACC_MANDATED
+        @Override
+        public ParamVar signature(Object... components) {
+            super.signature(components);
+            return this;
+        }
 
-            var thisVar = mThisVar;
-            if (this != thisVar) {
-                Attribute.MethodParameters mparams = mMethodParameters;
-                if (mparams == null) {
-                    int numParams = mParams.length;
-                    if (thisVar != null) {
-                        numParams--;
-                    }
-                    mparams = new Attribute.MethodParameters(mConstants, numParams);
-                    mMethodParameters = mparams;
-                    addAttribute(mparams);
+        @Override
+        public Parameter final_() {
+            return addFlag(Modifier.FINAL);
+        }
+
+        @Override
+        public Parameter synthetic() {
+            return addFlag(0x1000);
+        }
+
+        @Override
+        public Parameter mandated() {
+            return addFlag(0x8000);
+        }
+
+        private Parameter addFlag(int flag) {
+            if (this != mThisVar) {
+                mparams().addFlag(paramIndex(), flag);
+            }
+            return this;
+        }
+
+        private Attribute.MethodParameters mparams() {
+            Attribute.MethodParameters mparams = mMethodParameters;
+
+            if (mparams == null) {
+                int numParams = mParams.length;
+                if (mThisVar != null) {
+                    numParams--;
                 }
-
-                int index = mIndex;
-                if (thisVar != null) {
-                    index--;
-                }
-
-                mparams.setName(index, mConstants.addUTF8(name));
+                mparams = new Attribute.MethodParameters(mConstants, numParams);
+                mMethodParameters = mparams;
+                addAttribute(mparams);
             }
 
-            return this;
+            return mparams;
         }
 
         @Override
@@ -5509,13 +5534,8 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                 addAttribute(annotations);
             }
 
-            int index = mIndex;
-            if (thisVar != null) {
-                index--;
-            }
-
             var maker = new TheAnnotationMaker(mClassMaker, annotationType);
-            annotations.forParam(index).add(maker);
+            annotations.forParam(paramIndex()).add(maker);
 
             return maker;
         }

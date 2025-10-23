@@ -100,4 +100,40 @@ public class MethodParametersTest {
         Object result = cm.finish().getMethod("test", int.class).invoke(null, 1);
         assertEquals(2L, result);
     }
+
+    @Test
+    public void flags() throws Exception {
+        ClassMaker cm = ClassMaker.begin().public_();
+
+        MethodMaker mm = cm.addMethod(null, "t1", int.class, int.class, int.class, int.class);
+        mm.param(0).name("p1").final_();
+        mm.param(1).synthetic().name("p2");
+        mm.param(2).mandated();
+        mm.param(3).mandated().final_();
+
+        if (mm.this_() instanceof org.cojen.maker.Parameter p) {
+            // Shouldn't do anything.
+            p.final_();
+        }
+
+        var clazz = cm.finish();
+
+        Method m = clazz.getDeclaredMethod("t1", int.class, int.class, int.class, int.class);
+        Parameter[] params = m.getParameters();
+        assertEquals(4, params.length);
+
+        assertEquals("p1", params[0].getName());
+        assertEquals("p2", params[1].getName());
+        assertFalse(params[2].isNamePresent());
+        assertFalse(params[3].isNamePresent());
+
+        assertTrue(params[1].isSynthetic());
+        assertTrue(params[2].isImplicit());
+        assertTrue(params[3].isImplicit());
+
+        assertEquals(0x0010, params[0].getModifiers());
+        assertEquals(0x1000, params[1].getModifiers());
+        assertEquals(0x8000, params[2].getModifiers());
+        assertEquals(0x8010, params[3].getModifiers());
+    }
 }

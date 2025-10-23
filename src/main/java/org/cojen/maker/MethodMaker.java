@@ -288,7 +288,7 @@ public interface MethodMaker extends Maker {
      * @param index zero based index
      * @throws IndexOutOfBoundsException if index is out of bounds
      */
-    Variable param(int index);
+    Parameter param(int index);
 
     /**
      * Returns the number of parameters which can be accessed by the {@link #param param}
