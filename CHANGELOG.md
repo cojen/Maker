@@ -1,6 +1,10 @@
 Changelog
 =========
 
+v2.7.1
+------
+* Support invocation of inherited interface methods, for resolving default method conflicts.
+
 v2.7.0 (2025-05-23)
 ------
 * Overload the addMethod and addConstructor methods to accept a MethodTypeDesc.

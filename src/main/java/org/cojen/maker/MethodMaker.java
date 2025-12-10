@@ -283,6 +283,16 @@ public interface MethodMaker extends Maker {
     Variable super_();
 
     /**
+     * Returns a variable which is used for invoking inherited interface methods. The type of
+     * the variable is the interface, and when applicable, the instance is {@link #this_
+     * this_}.
+     *
+     * @param type an interface or interface name
+     * @throws IllegalStateException if the interface isn't implemented
+     */
+    Variable super_(Object type);
+
+    /**
      * Returns a variable which accesses a parameter of the method being built.
      *
      * @param index zero based index

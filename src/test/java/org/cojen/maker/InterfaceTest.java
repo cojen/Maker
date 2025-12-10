@@ -79,4 +79,39 @@ public class InterfaceTest {
 
         assertEquals(c1, result.getClass());
     }
+
+    @Test
+    public void defaultMethodConflict() throws Exception {
+        ClassMaker cm = ClassMaker.begin().public_().implement(A.class).implement(B.class);
+        cm.addConstructor().public_();
+
+        MethodMaker mm = cm.addMethod(int.class, "op", int.class).public_().override();
+
+        try {
+            mm.super_(Serializable.class);
+            fail();
+        } catch (IllegalStateException e) {
+            // expected
+        }
+
+        mm.return_(mm.super_(B.class).invoke("op", mm.param(0)));
+
+        Class<?> clazz = cm.finish();
+
+        Object obj = clazz.getConstructor().newInstance();
+        Object result = clazz.getMethod("op", int.class).invoke(obj, 10);
+        assertEquals(9, result);
+    }
+
+    public static interface A {
+        default int op(int a) {
+            return a + 1;
+        }
+    }
+
+    public static interface B {
+        default int op(int a) {
+            return a - 1;
+        }
+    }
 }
