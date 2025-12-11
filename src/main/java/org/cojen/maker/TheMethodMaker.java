@@ -559,6 +559,15 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     }
 
     @Override
+    public Variable super_(Object objType) {
+        BaseType type = mClassMaker.typeFrom(objType);
+        if (mClassMaker.type().interfaces().contains(type)) {
+            return new IfaceSuperVar(type);
+        }
+        throw new IllegalStateException();
+    }
+
+    @Override
     public Parameter param(int index) {
         if (index < 0) {
             throw new IndexOutOfBoundsException();
@@ -932,7 +941,11 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             } else {
                 stackPop++;
 
-                if (methodRef.mClass.mType.isInterface()) {
+                if (!methodRef.mClass.mType.isInterface()) {
+                    op = inherit == 0 ? INVOKEVIRTUAL : INVOKESPECIAL;
+                } else if (instance instanceof IfaceSuperVar) {
+                    op = INVOKESPECIAL;
+                } else {
                     int nargs = stackPop;
                     for (BaseType actualType : actualTypes) {
                         int tc = actualType.typeCode();
@@ -943,8 +956,6 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                     invokeOp = new InvokeInterfaceOp(stackPop, methodRef, nargs);
                     break makeOp;
                 }
-
-                op = inherit == 0 ? INVOKEVIRTUAL : INVOKESPECIAL;
             }
 
             invokeOp = new InvokeOp(op, stackPop, methodRef);
@@ -5023,8 +5034,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
         @Override
         public LocalVar invoke(String name, Object... values) {
-            return doInvoke(invocationType(), invocationInstance(),
-                            name, inherit(), values, null, null);
+            return doInvoke(invocationType(), this, name, inherit(), values, null, null);
         }
 
         @Override
@@ -5054,7 +5064,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             if (name.equals(".new") && (newReturnType = newReturnType(returnType)) != null) {
                 return doNew(newReturnType, values, paramTypes);
             } else {
-                return doInvoke(invocationType(), invocationInstance(),
+                return doInvoke(invocationType(), this,
                                 name, inherit(), values, returnType, paramTypes);
             }
         }
@@ -5169,13 +5179,6 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
          */
         BaseType invocationType() {
             return type();
-        }
-
-        /**
-         * Called to supply the object instance for method invocation.
-         */
-        OwnedVar invocationInstance() {
-            return this;
         }
 
         /**
@@ -5667,7 +5670,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
     }
 
-    final class SuperVar extends OwnedVar {
+    class SuperVar extends OwnedVar {
         @Override
         public BaseType type() {
             return mClassMaker.superType();
@@ -5729,14 +5732,33 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
-        OwnedVar invocationInstance() {
-            return tryThis();
+        int inherit() {
+            // 1: can only invoke super class method
+            return 1;
+        }
+    }
+
+    final class IfaceSuperVar extends SuperVar {
+        private final BaseType mSuperType;
+
+        IfaceSuperVar(BaseType superType) {
+            mSuperType = superType;
+        }
+
+        @Override
+        public BaseType type() {
+            return mSuperType;
+        }
+
+        @Override
+        BaseType invocationType() {
+            return mSuperType;
         }
 
         @Override
         int inherit() {
-            // 1: can only invoke super class method
-            return 1;
+            // 0: can invoke inherited method
+            return 0;
         }
     }
 
