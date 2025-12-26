@@ -501,7 +501,7 @@ public interface MethodMaker extends Maker {
 
     /**
      * Concatenate variables and constants together into a new {@link String} in the same
-     * matter as the Java concatenation operator. If no values are given, the returned variable
+     * manner as the Java concatenation operator. If no values are given, the returned variable
      * will refer to the empty string.
      *
      * @param values {@link Variable Variables} or constants
