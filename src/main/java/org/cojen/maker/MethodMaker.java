@@ -554,11 +554,27 @@ public interface MethodMaker extends Maker {
      * <p>The returned {@code ClassMaker} instance isn't attached to this maker, and so it can
      * be acted upon by a different thread.
      *
-     * @param className simple class name; pass null to use default
+     * @param className simple class name; pass null to add an anonymous inner class
      * @throws IllegalArgumentException if not given a simple class name
      * @throws IllegalStateException if the enclosing class or method is finished
      */
     ClassMaker addInnerClass(String className);
+
+    /**
+     * Add an inner class to this method, with an explicitly specified class name. The inner
+     * class doesn't have access to the local variables of the enclosing method, and so they
+     * must be passed along explicitly.
+     *
+     * <p>The returned {@code ClassMaker} instance isn't attached to this maker, and so it can
+     * be acted upon by a different thread.
+     *
+     * @param fullName fully qualified class name
+     * @param className simple class name (expected to also appear at the end of the full
+     * name); pass null to add an anonymous inner class
+     * @throws NullPointerException if full name is null
+     * @throws IllegalStateException if the enclosing class or method is finished
+     */
+    ClassMaker addExplicitInnerClass(String fullName, String className);
 
     /**
      * Finishes the definition of a standalone method.

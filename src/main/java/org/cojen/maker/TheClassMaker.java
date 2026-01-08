@@ -406,20 +406,16 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
     }
 
     TheClassMaker addInnerClass(final String className, final BaseType.Method hostMethod) {
-        TheClassMaker nestHost = nestHost(this);
-
         String prefix = name();
         int ix = prefix.lastIndexOf('-');
         if (ix > 0) {
             prefix = prefix.substring(0, ix);
         }
 
-        var innerClasses = innerClasses();
-
         String fullName;
 
         if (className == null) {
-            fullName = prefix + '$' + innerClasses.classNumberFor("");
+            fullName = prefix + '$' + innerClasses().classNumberFor("");
         } else {
             if (className.indexOf('.') >= 0) {
                 throw new IllegalArgumentException("Not a simple name: " + className);
@@ -430,11 +426,23 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
             {
                 fullName = prefix + '$' + className;
             } else {
-                fullName = prefix + '$' + innerClasses.classNumberFor(className) + className;
+                fullName = prefix + '$' + innerClasses().classNumberFor(className) + className;
             }
         }
 
-        var clazz = new TheClassMaker(this, fullName);
+        return addExplicitInnerClass(fullName, className, hostMethod);
+    }
+
+    @Override
+    public TheClassMaker addExplicitInnerClass(String fullName, String className) {
+        return addExplicitInnerClass(fullName, className, null);
+    }
+
+    TheClassMaker addExplicitInnerClass(String fullName, String className,
+                                        BaseType.Method hostMethod)
+    {
+        var clazz = new TheClassMaker(this, requireNonNull(fullName));
+        TheClassMaker nestHost = nestHost(this);
         clazz.setNestHost(nestHost.type());
         nestHost.addNestMember(clazz.type());
 
@@ -442,7 +450,7 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
             clazz.setEnclosingMethod(type(), hostMethod);
         }
 
-        innerClasses.add(clazz, this, className);
+        innerClasses().add(clazz, this, className);
         clazz.innerClasses().add(clazz, this, className);
 
         return clazz;

@@ -369,11 +369,25 @@ public interface ClassMaker extends Maker {
      * <p>The returned {@code ClassMaker} instance isn't attached to this maker, and so it can
      * be acted upon by a different thread.
      *
-     * @param className simple class name; pass null to use default
+     * @param className simple class name; pass null to add an anonymous inner class
      * @throws IllegalArgumentException if not given a simple class name
      * @see #another
      */
     ClassMaker addInnerClass(String className);
+
+    /**
+     * Add an inner class to this class, with an explicitly specified class name.
+     *
+     * <p>The returned {@code ClassMaker} instance isn't attached to this maker, and so it can
+     * be acted upon by a different thread.
+     *
+     * @param fullName fully qualified class name
+     * @param className simple class name (expected to also appear at the end of the full
+     * name); pass null to add an anonymous inner class
+     * @throws NullPointerException if full name is null
+     * @see #another
+     */
+    ClassMaker addExplicitInnerClass(String fullName, String className);
 
     /**
      * Set the source file of this class file by adding a source file attribute.
