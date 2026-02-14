@@ -1498,4 +1498,25 @@ public class InvokeTest {
         mm.return_(type);
         return new ConstantCallSite(mm.finish());
     }
+
+    @Test
+    public void byteParamBind() throws Exception {
+        ClassMaker cm = ClassMaker.begin().public_();
+        MethodMaker mm = cm.addMethod(null, "run").public_().static_();
+
+        var invokeVar = mm.var(InvokeTest.class);
+        var assertVar = mm.var(Assert.class);
+
+        assertVar.invoke("assertEquals", 100, invokeVar.invoke("bpm", (byte) 1));
+
+        cm.finish().getMethod("run").invoke(null);
+    }
+
+    public static int bpm(short a) {
+        return 100;
+    }
+
+    public static int bpm(int a) {
+        return 101;
+    }
 }

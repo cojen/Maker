@@ -4,6 +4,8 @@ Changelog
 v2.7.2
 ------
 * Added support for defining explicitly named inner classes.
+* When a method is overloaded to accept a short or int parameter and the argument is a byte,
+  bind to the short variant instead of failing with "No best matching method found".
 
 v2.7.1 (2025-12-23)
 ------

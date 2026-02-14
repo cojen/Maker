@@ -1910,13 +1910,13 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             return;
         }
 
-        if (code < 5) {
+        if (code < 7) {
             convertPrimitive(to, code);
             return;
         }
 
-        if (code < 10) {
-            code -= 5;
+        if (code < 14) {
+            code -= 7;
             BaseType primTo = convertPrimitive(to, code);
             if (primTo == null) {
                 // Assume converting to Object/Number. Need something specific.
@@ -1926,14 +1926,14 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             return;
         }
 
-        if (code < 15) {
+        if (code < 21) {
             // See doAddConversionOp.
             throw new AssertionError();
         }
 
-        if (code < 20) {
+        if (code < 28) {
             unbox(from);
-            convertPrimitive(to, code - 15);
+            convertPrimitive(to, code - 21);
             return;
         }
 
@@ -1944,19 +1944,19 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         switch (code) {
         default:
             return to.unbox();
-        case 1:
+        case 3:
             appendOp(I2L, 1);
             to = LONG;
             break;
-        case 2:
+        case 4:
             appendOp(I2F, 1);
             to = FLOAT;
             break;
-        case 3:
+        case 5:
             appendOp(I2D, 1);
             to = DOUBLE;
             break;
-        case 4:
+        case 6:
             appendOp(F2D, 1);
             to = DOUBLE;
             break;
@@ -2613,7 +2613,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             return;
         }
 
-        if (code < 10 || code >= 15) {
+        if (code < 14 || code >= 21) {
             addOp(new Op() {
                 @Override
                 void appendTo(TheMethodMaker m) {
@@ -2623,7 +2623,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             return;
         }
 
-        // Rebox without throwing NPE. Code is in the range 10..14.
+        // Rebox without throwing NPE. Code is in the range 14..20.
 
         LocalVar fromVar;
         if (mLastOp instanceof PushVarOp op) {
