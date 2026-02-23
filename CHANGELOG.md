@@ -1,7 +1,7 @@
 Changelog
 =========
 
-v2.7.2
+v2.7.2 (2026-02-23)
 ------
 * Added support for defining explicitly named inner classes.
 * When a method is overloaded to accept a short or int parameter and the argument is a byte,
