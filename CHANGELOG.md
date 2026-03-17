@@ -3,7 +3,7 @@ Changelog
 
 v2.7.3
 ------
-* Added support for special floating point comparsion operations.
+* Added support for special primitive type comparsion operations.
 
 v2.7.2 (2026-02-23)
 ------

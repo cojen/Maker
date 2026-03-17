@@ -2961,39 +2961,59 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     }
 
     /**
-     * Add a comparison operation, supporting floats and doubles.
+     * Add a comparison operation, supporting all primitive types.
      *
-     * @param op FCMPL or FCMPG
+     * @param op LCMP, FCMPL, or FCMPG
      * @return new variable
      */
-    private LocalVar addFloatCompareOp(String name, byte op, OwnedVar var, Object value) {
+    private LocalVar addCompareOp(String name, byte op, OwnedVar var, Object value) {
         final BaseType varType = var.type();
         final BaseType primType = varType.unbox();
 
         if (primType == null) {
-            throw new IllegalStateException("Cannot '" + name + "' against a non-numeric type");
+            throw new IllegalStateException("Cannot '" + name + "' against a non-primitive type");
         }
 
         if (value == null) {
             throw new IllegalArgumentException("Cannot '" + name + "' against null");
         }
 
-        switch (primType.typeCode()) {
-        case T_BYTE: case T_CHAR: case T_SHORT: case T_INT: case T_LONG:
-            throw new IllegalStateException
-                ("Cannot '" + name + "' against a non-floating point type");
-        case T_FLOAT:
-            break;
-        case T_DOUBLE:
-            op += 2;
-            break;
-        default:
-            throw new IllegalStateException("Cannot '" + name + "' against a non-numeric type");
-        }
-
         addPushOp(primType, var);
         addPushOp(primType, value);
-        addBytecodeOp(op, 1);
+
+        addOp: {
+            useMethod: {
+                switch (primType.typeCode()) {
+                case T_LONG:
+                    op = LCMP;
+                    break useMethod;
+                case T_FLOAT:
+                    if (op != LCMP) {
+                        break useMethod;
+                    }
+                    break;
+                case T_DOUBLE:
+                    if (op != LCMP) {
+                        op += 2;
+                        break useMethod;
+                    }
+                    break;
+                }
+
+                BaseType boxed = primType.box();
+
+                BaseType.Method method = boxed.findMethod
+                    ("compare", new BaseType[] {primType, primType}, -1, 1, null, null);
+
+                ConstantPool.C_Method ref = mConstants.addMethod(boxed, method);
+
+                addOp(new InvokeOp(INVOKESTATIC, 2, ref));
+
+                break addOp;
+            }
+
+            addOp(new CompareOp(op));
+        }
 
         return storeToNewVar(BaseType.INT);
     }
@@ -5006,13 +5026,18 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
+        public Variable cmp(Object value) {
+            return addCompareOp("cmp", LCMP, this, value);
+        }
+
+        @Override
         public Variable cmpl(Object value) {
-            return addFloatCompareOp("cmpl", FCMPL, this, value);
+            return addCompareOp("cmpl", FCMPL, this, value);
         }
 
         @Override
         public Variable cmpg(Object value) {
-            return addFloatCompareOp("cmpg", FCMPG, this, value);
+            return addCompareOp("cmpg", FCMPG, this, value);
         }
 
         @Override

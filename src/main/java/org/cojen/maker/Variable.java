@@ -778,8 +778,20 @@ public interface Variable {
     Variable com();
 
     /**
-     * Compares two floating point values, returning -1, 0, or 1. If either value is NaN, then
-     * -1 is returned.
+     * Compares two primitive values, returning -1, 0, or 1. A value of NaN is treated as equal
+     * to itself and greater than all other values.
+     *
+     * @param value a {@link Variable} or a constant
+     * @return the result in a new int variable
+     * @throws IllegalArgumentException if the value isn't a variable or a supported constant
+     * @throws IllegalStateException if this variable doesn't support the operation, or if the
+     * value is incompatible
+     */
+    Variable cmp(Object value);
+
+    /**
+     * Compares two primitive values, returning -1, 0, or 1. If either value is NaN, then -1 is
+     * returned.
      *
      * @param value a {@link Variable} or a constant
      * @return the result in a new int variable
@@ -790,8 +802,8 @@ public interface Variable {
     Variable cmpl(Object value);
 
     /**
-     * Compares two floating point values, returning -1, 0, or 1. If either value is NaN, then
-     * 1 is returned.
+     * Compares two primitive values, returning -1, 0, or 1. If either value is NaN, then 1 is
+     * returned.
      *
      * @param value a {@link Variable} or a constant
      * @return the result in a new int variable
