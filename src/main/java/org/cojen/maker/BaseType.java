@@ -351,13 +351,13 @@ abstract class BaseType implements Type, Typed {
      * conversion cost.
      *
      *      0: Equal types.
-     *   1..4: Primitive to wider primitive type (strict).
-     *      5: Primitive to specific boxed instance.
-     *   6..9: Primitive to converted boxed instance (wider type, Number, or Object).
+     *   1..6: Primitive to wider primitive type (strict).
+     *      7: Primitive to specific boxed instance.
+     *  8..13: Primitive to converted boxed instance (wider type, Number, or Object).
      *      0: Specific instance to superclass or implemented interface (no-op cast)
-     * 10..14: Reboxing to wider object type (NPE isn't possible).
-     *     15: Unboxing to specific primitive type (NPE is possible).
-     * 16..19: Unboxing to wider primitive type (NPE is possible).
+     * 14..20: Reboxing to wider object type (NPE isn't possible).
+     *     21: Unboxing to specific primitive type (NPE is possible).
+     * 22..27: Unboxing to wider primitive type (NPE is possible).
      *    max: Disallowed.
      *
      * @return conversion code, which is max value if disallowed
@@ -372,29 +372,29 @@ abstract class BaseType implements Type, Typed {
                 switch (this.typeCode()) {
                 case T_BYTE:
                     switch (to.typeCode()) {
-                    case T_SHORT:
-                    case T_INT:    return 0;
-                    case T_LONG:   return 1; // I2L
-                    case T_FLOAT:  return 2; // I2F
-                    case T_DOUBLE: return 3; // I2D
+                    case T_SHORT:  return 1;
+                    case T_INT:    return 2;
+                    case T_LONG:   return 3; // I2L
+                    case T_FLOAT:  return 4; // I2F
+                    case T_DOUBLE: return 5; // I2D
                     }
                     return Integer.MAX_VALUE;
                 case T_CHAR: case T_SHORT:
                     switch (to.typeCode()) {
-                    case T_INT:    return 0;
-                    case T_LONG:   return 1; // I2L
-                    case T_FLOAT:  return 2; // I2F
-                    case T_DOUBLE: return 3; // I2D
+                    case T_INT:    return 2;
+                    case T_LONG:   return 3; // I2L
+                    case T_FLOAT:  return 4; // I2F
+                    case T_DOUBLE: return 5; // I2D
                     }
                     return Integer.MAX_VALUE;
                 case T_INT:
                     switch (to.typeCode()) {
-                    case T_LONG:   return 1; // I2L
-                    case T_DOUBLE: return 3; // I2D
+                    case T_LONG:   return 3; // I2L
+                    case T_DOUBLE: return 5; // I2D
                     }
                     return Integer.MAX_VALUE;
                 case T_FLOAT:
-                    return to != DOUBLE ? Integer.MAX_VALUE : 4; // F2D
+                    return to != DOUBLE ? Integer.MAX_VALUE : 6; // F2D
                 }
 
                 return Integer.MAX_VALUE;
@@ -404,14 +404,14 @@ abstract class BaseType implements Type, Typed {
             if (toUnboxed != null) {
                 int code = this.canConvertTo(toUnboxed);
                 if (code != Integer.MAX_VALUE) {
-                    // 5: Simple boxing, 6..9: Convert then box.
-                    code += 5;
+                    // +7: Simple boxing, 8..13: Convert then box.
+                    code += 7;
                 }
                 return code;
             }
 
             if (to.isAssignableFrom(from(Number.class))) {
-                return 5; // Simple boxing.
+                return 7; // Simple boxing.
             }
 
             return Integer.MAX_VALUE;
@@ -430,11 +430,11 @@ abstract class BaseType implements Type, Typed {
 
         // This point is reached when converting boxed primitives.
 
-        // Expect 0..4 or max
+        // Expect 0..6 or max
         int code = thisUnboxed.canConvertTo(toUnboxed);
 
         if (code != Integer.MAX_VALUE) {
-            code += to.isObject() ? 10 : 15;
+            code += to.isObject() ? 14 : 21;
         }
 
         return code;

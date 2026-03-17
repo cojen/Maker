@@ -1633,6 +1633,11 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     }
 
     @Override
+    public ClassMaker addExplicitInnerClass(String fullName, String className)  {
+        return mClassMaker.addExplicitInnerClass(fullName, className, mMethod);
+    }
+
+    @Override
     public MethodHandle finish() {
         throw new IllegalStateException("Not a standalone method");
     }
@@ -1905,13 +1910,13 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             return;
         }
 
-        if (code < 5) {
+        if (code < 7) {
             convertPrimitive(to, code);
             return;
         }
 
-        if (code < 10) {
-            code -= 5;
+        if (code < 14) {
+            code -= 7;
             BaseType primTo = convertPrimitive(to, code);
             if (primTo == null) {
                 // Assume converting to Object/Number. Need something specific.
@@ -1921,14 +1926,14 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             return;
         }
 
-        if (code < 15) {
+        if (code < 21) {
             // See doAddConversionOp.
             throw new AssertionError();
         }
 
-        if (code < 20) {
+        if (code < 28) {
             unbox(from);
-            convertPrimitive(to, code - 15);
+            convertPrimitive(to, code - 21);
             return;
         }
 
@@ -1939,19 +1944,19 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         switch (code) {
         default:
             return to.unbox();
-        case 1:
+        case 3:
             appendOp(I2L, 1);
             to = LONG;
             break;
-        case 2:
+        case 4:
             appendOp(I2F, 1);
             to = FLOAT;
             break;
-        case 3:
+        case 5:
             appendOp(I2D, 1);
             to = DOUBLE;
             break;
-        case 4:
+        case 6:
             appendOp(F2D, 1);
             to = DOUBLE;
             break;
@@ -2608,7 +2613,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             return;
         }
 
-        if (code < 10 || code >= 15) {
+        if (code < 14 || code >= 21) {
             addOp(new Op() {
                 @Override
                 void appendTo(TheMethodMaker m) {
@@ -2618,7 +2623,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             return;
         }
 
-        // Rebox without throwing NPE. Code is in the range 10..14.
+        // Rebox without throwing NPE. Code is in the range 14..20.
 
         LocalVar fromVar;
         if (mLastOp instanceof PushVarOp op) {
@@ -2827,7 +2832,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         if (op != INEG && value == null) {
-            throw new IllegalArgumentException("Cannot '" + name + "' by null");
+            throw new IllegalArgumentException("Cannot '" + name + "' against null");
         }
 
         byte castOp = 0;
@@ -2890,7 +2895,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         if (value == null) {
-            throw new IllegalArgumentException("Cannot '" + name + "' by null");
+            throw new IllegalArgumentException("Cannot '" + name + "' against null");
         }
 
         byte castOp = 0;
@@ -2953,6 +2958,64 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         addConversionOp(primType, varType);
 
         return storeToNewVar(varType);
+    }
+
+    /**
+     * Add a comparison operation, supporting all primitive types.
+     *
+     * @param op LCMP, FCMPL, or FCMPG
+     * @return new variable
+     */
+    private LocalVar addCompareOp(String name, byte op, OwnedVar var, Object value) {
+        final BaseType varType = var.type();
+        final BaseType primType = varType.unbox();
+
+        if (primType == null) {
+            throw new IllegalStateException("Cannot '" + name + "' against a non-primitive type");
+        }
+
+        if (value == null) {
+            throw new IllegalArgumentException("Cannot '" + name + "' against null");
+        }
+
+        addPushOp(primType, var);
+        addPushOp(primType, value);
+
+        addOp: {
+            useMethod: {
+                switch (primType.typeCode()) {
+                case T_LONG:
+                    op = LCMP;
+                    break useMethod;
+                case T_FLOAT:
+                    if (op != LCMP) {
+                        break useMethod;
+                    }
+                    break;
+                case T_DOUBLE:
+                    if (op != LCMP) {
+                        op += 2;
+                        break useMethod;
+                    }
+                    break;
+                }
+
+                BaseType boxed = primType.box();
+
+                BaseType.Method method = boxed.findMethod
+                    ("compare", new BaseType[] {primType, primType}, -1, 1, null, null);
+
+                ConstantPool.C_Method ref = mConstants.addMethod(boxed, method);
+
+                addOp(new InvokeOp(INVOKESTATIC, 2, ref));
+
+                break addOp;
+            }
+
+            addOp(new CompareOp(op));
+        }
+
+        return storeToNewVar(BaseType.INT);
     }
 
     private void addBranchOp(byte op, int stackPop, Label label) {
@@ -3582,6 +3645,18 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                 return null;
             }
             return mNext;
+        }
+    }
+
+    static class CompareOp extends BytecodeOp {
+        CompareOp(byte op) {
+            super(op, 2);
+        }
+
+        @Override
+        void appendTo(TheMethodMaker m) {
+            super.appendTo(m);
+            m.stackPush(INT);
         }
     }
 
@@ -4432,13 +4507,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                 throw new AssertionError();
             }
 
-            addOp(new BytecodeOp(cmpOp, 2) {
-                @Override
-                void appendTo(TheMethodMaker m) {
-                    super.appendTo(m);
-                    stackPush(INT);
-                }
-            });
+            addOp(new CompareOp(cmpOp));
 
             addBranchOp(zeroOp, 1, label);
         }
@@ -4954,6 +5023,21 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         @Override
         public LocalVar com() {
             return addLogicalOp("complement", IXOR, this, -1);
+        }
+
+        @Override
+        public Variable cmp(Object value) {
+            return addCompareOp("cmp", LCMP, this, value);
+        }
+
+        @Override
+        public Variable cmpl(Object value) {
+            return addCompareOp("cmpl", FCMPL, this, value);
+        }
+
+        @Override
+        public Variable cmpg(Object value) {
+            return addCompareOp("cmpg", FCMPG, this, value);
         }
 
         @Override

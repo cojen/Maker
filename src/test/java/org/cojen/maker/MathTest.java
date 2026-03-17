@@ -530,4 +530,124 @@ public class MathTest {
 
         cm.finish().getMethod("run").invoke(null);
     }
+
+    @Test
+    public void compare() throws Exception {
+        ClassMaker cm = ClassMaker.begin().public_();
+        MethodMaker mm = cm.addMethod(null, "run").static_().public_();
+
+        try {
+            mm.var(String.class).set("x").cmpl(10);
+        } catch (IllegalStateException e) {
+            assertTrue(e.getMessage().contains("non-primitive"));
+        }
+
+        try {
+            mm.var(int.class).set(10).cmpl(null);
+        } catch (IllegalArgumentException e) {
+            assertTrue(e.getMessage().contains("null"));
+        }
+
+        {
+            var v1 = mm.var(float.class).set(10.3f).cmpl(10.2f);
+            mm.var(Assert.class).invoke("assertEquals", 1, v1.get());
+
+            var v2 = mm.var(float.class).set(10.1f).cmpl(Float.NaN);
+            mm.var(Assert.class).invoke("assertEquals", -1, v2.get());
+
+            var v3 = mm.var(float.class).set(Float.NaN).cmpl(10.1f);
+            mm.var(Assert.class).invoke("assertEquals", -1, v3.get());
+
+            var v4 = mm.var(float.class).set(Float.NaN).cmpl(10);
+            mm.var(Assert.class).invoke("assertEquals", -1, v4.get());
+
+            var v5 = mm.var(float.class).set(100f).cmpl(10);
+            mm.var(Assert.class).invoke("assertEquals", 1, v5.get());
+
+            var v6 = mm.var(float.class).set(Float.NaN).cmpl(10);
+            mm.var(Assert.class).invoke("assertEquals", -1, v6.get());
+
+            var v7 = mm.var(float.class).set(Float.NaN).cmp(10);
+            mm.var(Assert.class).invoke("assertEquals", 1, v7.get());
+
+            var v8 = mm.var(float.class).set(10.3f).cmpg(10.2f);
+            mm.var(Assert.class).invoke("assertEquals", 1, v8.get());
+
+            var v9 = mm.var(float.class).set(10.1f).cmpg(Float.NaN);
+            mm.var(Assert.class).invoke("assertEquals", 1, v9.get());
+        }
+
+        {
+            var v1 = mm.var(double.class).set(10.3).cmpl(10.2);
+            mm.var(Assert.class).invoke("assertEquals", 1, v1.get());
+
+            var v2 = mm.var(double.class).set(10.1).cmpl(Double.NaN);
+            mm.var(Assert.class).invoke("assertEquals", -1, v2.get());
+
+            var v3 = mm.var(double.class).set(Double.NaN).cmpl(10.1);
+            mm.var(Assert.class).invoke("assertEquals", -1, v3.get());
+
+            var v4 = mm.var(double.class).set(Double.NaN).cmpl(10);
+            mm.var(Assert.class).invoke("assertEquals", -1, v4.get());
+
+            var v5 = mm.var(double.class).set(100).cmpl(10);
+            mm.var(Assert.class).invoke("assertEquals", 1, v5.get());
+
+            var v6 = mm.var(double.class).set(Double.NaN).cmpl(10);
+            mm.var(Assert.class).invoke("assertEquals", -1, v6.get());
+
+            var v7 = mm.var(double.class).set(Double.NaN).cmp(10);
+            mm.var(Assert.class).invoke("assertEquals", 1, v7.get());
+
+            var v8 = mm.var(double.class).set(10.3).cmpg(10.2);
+            mm.var(Assert.class).invoke("assertEquals", 1, v8.get());
+
+            var v9 = mm.var(double.class).set(10.1).cmpg(Double.NaN);
+            mm.var(Assert.class).invoke("assertEquals", 1, v9.get());
+        }
+
+        {
+            var v1 = mm.var(long.class).set(5).cmp(5);
+            mm.var(Assert.class).invoke("assertEquals", 0, v1.get());
+
+            var v2 = mm.var(long.class).set(5).cmp(6);
+            mm.var(Assert.class).invoke("assertEquals", -1, v2.get());
+
+            var v3 = mm.var(long.class).set(5).cmpl(6);
+            mm.var(Assert.class).invoke("assertEquals", -1, v3.get());
+
+            var v4 = mm.var(long.class).set(5).cmpg(6);
+            mm.var(Assert.class).invoke("assertEquals", -1, v4.get());
+        }
+
+        {
+            var v1 = mm.var(short.class).set(5).cmp(5);
+            mm.var(Assert.class).invoke("assertEquals", 0, v1.get());
+
+            var v2 = mm.var(short.class).set(5).cmp(6);
+            mm.var(Assert.class).invoke("assertEquals", -1, v2.get());
+
+            var v3 = mm.var(short.class).set(5).cmpl(6);
+            mm.var(Assert.class).invoke("assertEquals", -1, v3.get());
+
+            var v4 = mm.var(short.class).set(5).cmpg(6);
+            mm.var(Assert.class).invoke("assertEquals", -1, v4.get());
+        }
+
+        {
+            var v1 = mm.var(boolean.class).set(true).cmp(true);
+            mm.var(Assert.class).invoke("assertEquals", 0, v1.get());
+
+            var v2 = mm.var(boolean.class).set(false).cmp(true);
+            mm.var(Assert.class).invoke("assertEquals", -1, v2.get());
+
+            var v3 = mm.var(boolean.class).set(false).cmpl(true);
+            mm.var(Assert.class).invoke("assertEquals", -1, v3.get());
+
+            var v4 = mm.var(boolean.class).set(false).cmpg(true);
+            mm.var(Assert.class).invoke("assertEquals", -1, v4.get());
+        }
+
+        cm.finish().getMethod("run").invoke(null);
+    }
 }

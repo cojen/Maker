@@ -1,7 +1,17 @@
 Changelog
 =========
 
-v2.7.1
+v2.7.3
+------
+* Added support for special primitive type comparsion operations.
+
+v2.7.2 (2026-02-23)
+------
+* Added support for defining explicitly named inner classes.
+* When a method is overloaded to accept a short or int parameter and the argument is a byte,
+  bind to the short variant instead of failing with "No best matching method found".
+
+v2.7.1 (2025-12-23)
 ------
 * Support invocation of inherited interface methods, for resolving default method conflicts.
 
