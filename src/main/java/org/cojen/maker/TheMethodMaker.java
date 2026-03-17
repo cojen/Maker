@@ -2832,7 +2832,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         if (op != INEG && value == null) {
-            throw new IllegalArgumentException("Cannot '" + name + "' by null");
+            throw new IllegalArgumentException("Cannot '" + name + "' against null");
         }
 
         byte castOp = 0;
@@ -2895,7 +2895,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         if (value == null) {
-            throw new IllegalArgumentException("Cannot '" + name + "' by null");
+            throw new IllegalArgumentException("Cannot '" + name + "' against null");
         }
 
         byte castOp = 0;
@@ -2958,6 +2958,44 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         addConversionOp(primType, varType);
 
         return storeToNewVar(varType);
+    }
+
+    /**
+     * Add a comparison operation, supporting floats and doubles.
+     *
+     * @param op FCMPL or FCMPG
+     * @return new variable
+     */
+    private LocalVar addFloatCompareOp(String name, byte op, OwnedVar var, Object value) {
+        final BaseType varType = var.type();
+        final BaseType primType = varType.unbox();
+
+        if (primType == null) {
+            throw new IllegalStateException("Cannot '" + name + "' against a non-numeric type");
+        }
+
+        if (value == null) {
+            throw new IllegalArgumentException("Cannot '" + name + "' against null");
+        }
+
+        switch (primType.typeCode()) {
+        case T_BYTE: case T_CHAR: case T_SHORT: case T_INT: case T_LONG:
+            throw new IllegalStateException
+                ("Cannot '" + name + "' against a non-floating point type");
+        case T_FLOAT:
+            break;
+        case T_DOUBLE:
+            op += 2;
+            break;
+        default:
+            throw new IllegalStateException("Cannot '" + name + "' against a non-numeric type");
+        }
+
+        addPushOp(primType, var);
+        addPushOp(primType, value);
+        addBytecodeOp(op, 1);
+
+        return storeToNewVar(BaseType.INT);
     }
 
     private void addBranchOp(byte op, int stackPop, Label label) {
@@ -3587,6 +3625,18 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                 return null;
             }
             return mNext;
+        }
+    }
+
+    static class CompareOp extends BytecodeOp {
+        CompareOp(byte op) {
+            super(op, 2);
+        }
+
+        @Override
+        void appendTo(TheMethodMaker m) {
+            super.appendTo(m);
+            m.stackPush(INT);
         }
     }
 
@@ -4437,13 +4487,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                 throw new AssertionError();
             }
 
-            addOp(new BytecodeOp(cmpOp, 2) {
-                @Override
-                void appendTo(TheMethodMaker m) {
-                    super.appendTo(m);
-                    stackPush(INT);
-                }
-            });
+            addOp(new CompareOp(cmpOp));
 
             addBranchOp(zeroOp, 1, label);
         }
@@ -4959,6 +5003,16 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         @Override
         public LocalVar com() {
             return addLogicalOp("complement", IXOR, this, -1);
+        }
+
+        @Override
+        public Variable cmpl(Object value) {
+            return addFloatCompareOp("cmpl", FCMPL, this, value);
+        }
+
+        @Override
+        public Variable cmpg(Object value) {
+            return addFloatCompareOp("cmpg", FCMPG, this, value);
         }
 
         @Override

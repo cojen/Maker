@@ -1,6 +1,10 @@
 Changelog
 =========
 
+v2.7.3
+------
+* Added support for special floating point comparsion operations.
+
 v2.7.2 (2026-02-23)
 ------
 * Added support for defining explicitly named inner classes.

@@ -778,6 +778,30 @@ public interface Variable {
     Variable com();
 
     /**
+     * Compares two floating point values, returning -1, 0, or 1. If either value is NaN, then
+     * -1 is returned.
+     *
+     * @param value a {@link Variable} or a constant
+     * @return the result in a new int variable
+     * @throws IllegalArgumentException if the value isn't a variable or a supported constant
+     * @throws IllegalStateException if this variable doesn't support the operation, or if the
+     * value is incompatible
+     */
+    Variable cmpl(Object value);
+
+    /**
+     * Compares two floating point values, returning -1, 0, or 1. If either value is NaN, then
+     * 1 is returned.
+     *
+     * @param value a {@link Variable} or a constant
+     * @return the result in a new int variable
+     * @throws IllegalArgumentException if the value isn't a variable or a supported constant
+     * @throws IllegalStateException if this variable doesn't support the operation, or if the
+     * value is incompatible
+     */
+    Variable cmpg(Object value);
+
+    /**
      * Box this primitive variable into its object peer. If not a primitive type, then this is
      * equivalent to calling {@link #get get}.
      *

@@ -356,13 +356,13 @@ public class UsageTest {
             mm.var(int.class).set(1).add(null);
             fail();
         } catch (IllegalArgumentException e) {
-            check(e, "Cannot 'add' by null");
+            check(e, "Cannot 'add' against null");
         }
         try {
             mm.var(int.class).set(1).shr(null);
             fail();
         } catch (IllegalArgumentException e) {
-            check(e, "Cannot 'shift' by null");
+            check(e, "Cannot 'shift' against null");
         }
     }
 
