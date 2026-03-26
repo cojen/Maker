@@ -111,6 +111,7 @@ public class TypeTest {
             assertFalse(type.isInterface());
             assertFalse(type.isArray());
             assertNull(type.elementType());
+            assertTrue(type.classExists());
             assertEquals(BaseType.SM_NULL, type.stackMapCode());
             assertFalse(type.isAssignableFrom(BaseType.from(Object.class)));
         }
@@ -142,6 +143,7 @@ public class TypeTest {
             assertTrue(type.isArray());
             assertFalse(type.isInterface());
             assertNull(type.classType());
+            assertFalse(type.classExists());
 
             // Find by descriptor.
             assertEquals(type, BaseType.from(loader, "[Labc/Foo;"));
@@ -234,6 +236,8 @@ public class TypeTest {
         assertFalse(type.isAssignableFrom(object));
         
         assertFalse(object.isAssignableFrom(type));
+
+        assertTrue(type.classExists());
     }
 
     @Test

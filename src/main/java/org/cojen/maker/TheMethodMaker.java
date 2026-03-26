@@ -715,9 +715,17 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
     private BaseType.Field findField(BaseType type, String name) {
         BaseType.Field field = type.findField(name);
+
         if (field == null) {
-            throw new IllegalStateException("Field not found in " + type.name() + ": " + name);
+            String message = "Field not found in " + type.name() + ": " + name;
+
+            if (!type.classExists()) {
+                message = message + " (class not found)";
+            }
+
+            throw new IllegalStateException(message);
         }
+
         return field;
     }
 

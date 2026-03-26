@@ -267,6 +267,11 @@ abstract class BaseType implements Type, Typed {
     }
 
     /**
+     * @return false if the class couldn't be found by loading it
+     */
+    abstract boolean classExists();
+
+    /**
      * Returns the type code used by the stack map table attribute.
      *
      * @return SM_*
@@ -586,8 +591,13 @@ abstract class BaseType implements Type, Typed {
                 }
             }
 
-            throw new IllegalStateException
-                ("No matching methods found for: " + name() + '.' + methodName);
+            String message = "No matching methods found for: " + name() + '.' + methodName;
+
+            if (!classExists()) {
+                message = message + " (class not found)";
+            }
+
+            throw new IllegalStateException(message);
         }
 
         var b = new StringBuilder()
@@ -1021,6 +1031,11 @@ abstract class BaseType implements Type, Typed {
         }
 
         @Override
+        boolean classExists() {
+            return true;
+        }
+
+        @Override
         int stackMapCode() {
             return mStackMapCode;
         }
@@ -1167,6 +1182,11 @@ abstract class BaseType implements Type, Typed {
         }
 
         @Override
+        boolean classExists() {
+            return true;
+        }
+
+        @Override
         int stackMapCode() {
             return SM_NULL;
         }
@@ -1263,6 +1283,11 @@ abstract class BaseType implements Type, Typed {
                 }
             }
             return clazz;
+        }
+
+        @Override
+        boolean classExists() {
+            return classType() != null;
         }
 
         @Override
@@ -1420,6 +1445,11 @@ abstract class BaseType implements Type, Typed {
                 }
             }
             return clazz;
+        }
+
+        @Override
+        boolean classExists() {
+            return classType() != null;
         }
 
         @Override
@@ -1953,6 +1983,11 @@ abstract class BaseType implements Type, Typed {
             // It doesn't exist yet, so don't try loading it. Doing so causes the ClassLoader
             // to allocate a lock object, and it might never be reclaimed.
             return null;
+        }
+
+        @Override
+        boolean classExists() {
+            return true;
         }
 
         @Override
