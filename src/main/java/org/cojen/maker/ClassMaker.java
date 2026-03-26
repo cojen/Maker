@@ -231,6 +231,7 @@ public interface ClassMaker extends Maker {
      * @return this
      * @throws IllegalArgumentException if the type is unsupported
      * @throws IllegalStateException if already assigned
+     * @see <a href="package-summary.html#types-and-values-heading">Types and Values</a>
      */
     ClassMaker extend(Object superClass);
 
@@ -241,6 +242,7 @@ public interface ClassMaker extends Maker {
      * @param iface non-null type, specified by a Class or a String, etc.
      * @throws IllegalArgumentException if the type is unsupported
      * @return this
+     * @see <a href="package-summary.html#types-and-values-heading">Types and Values</a>
      */
     ClassMaker implement(Object iface);
 
@@ -256,6 +258,7 @@ public interface ClassMaker extends Maker {
      * @param subclass non-null type, specified by a Class or a String, etc.
      * @return this
      * @throws IllegalArgumentException if the type is unsupported
+     * @see <a href="package-summary.html#types-and-values-heading">Types and Values</a>
      */
     ClassMaker permitSubclass(Object subclass);
 
@@ -265,6 +268,7 @@ public interface ClassMaker extends Maker {
      * @param type a class or name
      * @throws IllegalArgumentException if the type is unsupported
      * @throws IllegalStateException if field is already defined
+     * @see <a href="package-summary.html#types-and-values-heading">Types and Values</a>
      */
     FieldMaker addField(Object type, String name);
 
@@ -274,6 +278,7 @@ public interface ClassMaker extends Maker {
      * @param retType a class or name; can be null if the method returns void
      * @param paramTypes classes or names
      * @throws IllegalArgumentException if a type is unsupported
+     * @see <a href="package-summary.html#types-and-values-heading">Types and Values</a>
      */
     MethodMaker addMethod(Object retType, String name, Object... paramTypes);
 
@@ -307,6 +312,7 @@ public interface ClassMaker extends Maker {
      *
      * @param paramTypes classes or names
      * @throws IllegalArgumentException if a type is unsupported
+     * @see <a href="package-summary.html#types-and-values-heading">Types and Values</a>
      */
     MethodMaker addConstructor(Object... paramTypes);
 

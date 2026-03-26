@@ -113,6 +113,7 @@ public interface FieldMaker extends Maker {
      * @throws IllegalArgumentException if the value isn't a supported constant
      * @throws IllegalStateException if not a static field, or if the value type isn't
      * compatible with the field type
+     * @see <a href="package-summary.html#types-and-values-heading">Types and Values</a>
      */
     FieldMaker init(Object value);
 

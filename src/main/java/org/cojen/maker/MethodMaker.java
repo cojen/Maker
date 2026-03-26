@@ -41,6 +41,7 @@ public interface MethodMaker extends Maker {
      * @param paramTypes classes or names
      * @throws IllegalArgumentException if a type is unsupported
      * @see #finish
+     * @see <a href="package-summary.html#types-and-values-heading">Types and Values</a>
      */
     static MethodMaker begin(MethodHandles.Lookup lookup,
                              Object retType, String name, Object... paramTypes)
@@ -244,6 +245,7 @@ public interface MethodMaker extends Maker {
      * @param type a class or class name
      * @return this
      * @throws IllegalArgumentException if the type is unsupported
+     * @see <a href="package-summary.html#types-and-values-heading">Types and Values</a>
      */
     MethodMaker throws_(Object type);
 
@@ -289,6 +291,7 @@ public interface MethodMaker extends Maker {
      *
      * @param type an interface or interface name
      * @throws IllegalStateException if the interface isn't implemented
+     * @see <a href="package-summary.html#types-and-values-heading">Types and Values</a>
      */
     Variable super_(Object type);
 
@@ -312,6 +315,7 @@ public interface MethodMaker extends Maker {
      *
      * @param type a class, class name, or a variable
      * @throws IllegalArgumentException if the type is unsupported
+     * @see <a href="package-summary.html#types-and-values-heading">Types and Values</a>
      */
     Variable var(Object type);
 
@@ -347,6 +351,7 @@ public interface MethodMaker extends Maker {
      * @param value {@link Variable} or constant
      * @throws IllegalArgumentException if the value isn't a variable or a supported constant
      * @throws IllegalStateException if this method must return void
+     * @see <a href="package-summary.html#types-and-values-heading">Types and Values</a>
      */
     void return_(Object value);
 
@@ -368,6 +373,7 @@ public interface MethodMaker extends Maker {
      * @throws IllegalArgumentException if a value isn't a variable or a supported constant
      * @throws IllegalStateException if the method isn't found
      * @see Variable#invoke Variable.invoke
+     * @see <a href="package-summary.html#types-and-values-heading">Types and Values</a>
      */
     Variable invoke(String name, Object... values);
 
@@ -386,6 +392,7 @@ public interface MethodMaker extends Maker {
      * @throws IllegalArgumentException if a value isn't a variable or a supported constant
      * @throws IllegalStateException if not defining a constructor, or if a matching
      * constructor isn't found
+     * @see <a href="package-summary.html#types-and-values-heading">Types and Values</a>
      */
     void invokeSuperConstructor(Object... values);
 
@@ -404,6 +411,7 @@ public interface MethodMaker extends Maker {
      * @throws IllegalArgumentException if a value isn't a variable or a supported constant
      * @throws IllegalStateException if not defining a constructor, or if a matching
      * constructor isn't found
+     * @see <a href="package-summary.html#types-and-values-heading">Types and Values</a>
      */
     void invokeThisConstructor(Object... values);
 
@@ -424,6 +432,7 @@ public interface MethodMaker extends Maker {
      * @throws IllegalArgumentException if a value isn't a variable or a supported constant
      * @throws IllegalStateException if defining an external class and the handle isn't truly
      * {@code Constable}
+     * @see <a href="package-summary.html#types-and-values-heading">Types and Values</a>
      */
     Variable invoke(MethodHandle handle, Object... values);
 
@@ -445,6 +454,7 @@ public interface MethodMaker extends Maker {
      * @throws IllegalArgumentException if the type is unsupported, or if a value isn't a
      * variable or a supported constant
      * @throws IllegalStateException if the constructor isn't found
+     * @see <a href="package-summary.html#types-and-values-heading">Types and Values</a>
      */
     Variable new_(Object type, Object... values);
 
@@ -463,6 +473,7 @@ public interface MethodMaker extends Maker {
      * @return a variable which references the exception instance
      * @throws IllegalArgumentException if the type is unsupported
      * @throws IllegalStateException if the start label is unpositioned
+     * @see <a href="package-summary.html#types-and-values-heading">Types and Values</a>
      */
     Variable catch_(Label tryStart, Label tryEnd, Object type);
 
@@ -476,6 +487,7 @@ public interface MethodMaker extends Maker {
      * @return a variable which references the exception instance
      * @throws IllegalArgumentException if a type is unsupported, or if no types are given
      * @throws IllegalStateException if the start label is unpositioned
+     * @see <a href="package-summary.html#types-and-values-heading">Types and Values</a>
      */
     Variable catch_(Label tryStart, Label tryEnd, Object... types);
 
@@ -487,6 +499,7 @@ public interface MethodMaker extends Maker {
      * @param handler receives a variable which references the exception instance
      * @throws IllegalArgumentException if the type is unsupported
      * @throws IllegalStateException if the start label is unpositioned
+     * @see <a href="package-summary.html#types-and-values-heading">Types and Values</a>
      */
     void catch_(Label tryStart, Object type, Consumer<Variable> handler);
 
@@ -507,6 +520,7 @@ public interface MethodMaker extends Maker {
      * @param values {@link Variable Variables} or constants
      * @return the result in a new {@code String} variable
      * @throws IllegalArgumentException if a value isn't a variable or a supported constant
+     * @see <a href="package-summary.html#types-and-values-heading">Types and Values</a>
      */
     Variable concat(Object... values);
 
@@ -531,6 +545,7 @@ public interface MethodMaker extends Maker {
      * if the number of values doesn't match the number of coordinates
      * @throws IllegalStateException if defining an external class and the handle isn't truly
      * {@code Constable}
+     * @see <a href="package-summary.html#types-and-values-heading">Types and Values</a>
      */
     Field access(VarHandle handle, Object... values);
 

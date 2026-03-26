@@ -33,6 +33,7 @@ public interface Bootstrap {
      * @param name constant or method name
      * @return the constant value, or the result of the method, which is null if it's void
      * @throws IllegalArgumentException if the type is unsupported
+     * @see <a href="package-summary.html#types-and-values-heading">Types and Values</a>
      */
     default Variable invoke(Object type, String name) {
         return invoke(type, name, null);
@@ -50,6 +51,7 @@ public interface Bootstrap {
      * @throws IllegalArgumentException if a type is unsupported, or if a value isn't a
      * variable or a supported constant
      * @throws IllegalStateException if this is a condy bootstrap
+     * @see <a href="package-summary.html#types-and-values-heading">Types and Values</a>
      */
     Variable invoke(Object returnType, String name, Object[] types, Object... values);
 

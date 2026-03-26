@@ -40,6 +40,7 @@ public interface Parameter extends Variable {
      *
      * @throws IllegalArgumentException if given an unsupported component
      * @return this
+     * @see <a href="package-summary.html#types-and-values-heading">Types and Values</a>
      */
     @Override
     Parameter signature(Object... components);

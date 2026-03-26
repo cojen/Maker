@@ -41,6 +41,7 @@ public interface AnnotationMaker {
      *
      * @param annotationType name or class which refers to an annotation interface
      * @throws IllegalArgumentException if the annotation type is unsupported
+     * @see <a href="package-summary.html#types-and-values-heading">Types and Values</a>
      */
     AnnotationMaker newAnnotation(Object annotationType);
 }
