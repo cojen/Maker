@@ -57,6 +57,14 @@ import static org.cojen.maker.BytesOut.*;
 class TheMethodMaker extends ClassMember implements MethodMaker {
     private static final int MAX_CODE_LENGTH = 65535;
 
+    private static final boolean OPTIMIZE = true;
+
+    // Accessed by tests. Don't access the constant directly because changing it requires that
+    // the tests be recompiled.
+    static boolean optimizeEnabled() {
+        return OPTIMIZE;
+    }
+
     final BaseType.Method mMethod;
 
     private ParamVar[] mParams;
@@ -3718,7 +3726,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                 byte op = op();
 
                 if (op == GOTO || op == GOTO_W) {
-                    if (target == next) {
+                    if (OPTIMIZE && target == next) {
                         // Remove silly goto.
                         flow.removeOps(prev, this, next, 1);
                         target.lessUsed();
@@ -3727,6 +3735,10 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                 }
 
                 // If the next op is a goto, then flip the condition and remove the goto.
+
+                if (!OPTIMIZE) {
+                    break;
+                }
 
                 if (!(next instanceof BranchOp nextBranch)) {
                     break;
@@ -3958,10 +3970,11 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
         @Override
         Op flow(Flow flow, Op prev) {
+            Op next = mNext;
+
             // Check if storing to an unused variable and remove the pair.
 
-            Op next = mNext;
-            if (next instanceof StoreVarOp op && op.unusedVar()) {
+            if (OPTIMIZE && next instanceof StoreVarOp op && op.unusedVar()) {
                 next = next.mNext;
                 // Removing 2 ops, but specify 1 because the store op won't be visited.
                 flow.removeOps(prev, this, next, 1);
@@ -4063,10 +4076,11 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
         @Override
         Op flow(Flow flow, Op prev) {
+            Op next = mNext;
+
             // Check if storing to an unused variable and remove the pair.
 
-            Op next = mNext;
-            if (next instanceof StoreVarOp op && op.unusedVar()) {
+            if (OPTIMIZE && next instanceof StoreVarOp op && op.unusedVar()) {
                 mVar.mPushCount--;
                 next = next.mNext;
                 // Removing 2 ops, but specify 1 because the store op won't be visited.
@@ -4131,7 +4145,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
             // If storing to a single-use variable, try to eliminate it.
 
-            if (mVar.mPushCount == 1 && mVar.name() == null) {
+            if (OPTIMIZE && mVar.mPushCount == 1 && mVar.name() == null) {
                 Op next = mNext;
 
                 if (next instanceof PushVarOp push) {

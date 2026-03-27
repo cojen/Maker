@@ -732,6 +732,8 @@ public class BranchTest {
         // Test conversion of a conditional store into a boolean variable back into a direct
         // branch operation.
 
+        org.junit.Assume.assumeTrue(TheMethodMaker.optimizeEnabled());
+
         for (int variant=0; variant<=6; variant++) {
             ClassMaker cm = ClassMaker.begin().public_();
             rebranch(cm, 0, variant);
