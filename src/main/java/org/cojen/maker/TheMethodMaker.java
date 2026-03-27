@@ -1979,7 +1979,8 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
      */
     private void box(BaseType primType) {
         BaseType objType = primType.box();
-        BaseType.Method method = objType.defineMethod(FLAG_STATIC, objType, "valueOf", primType);
+        BaseType.Method method = objType.findMethod
+            ("valueOf", new BaseType[] {primType}, -1, 1, null, null);
         appendOp(INVOKESTATIC, 1);
         appendShort(mConstants.addMethod(method).mIndex);
         stackPush(objType);
@@ -1991,7 +1992,8 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
      */
     private void unbox(BaseType objType) {
         BaseType primType = objType.unbox();
-        BaseType.Method method = objType.defineMethod(0, primType, primType.name() + "Value");
+        BaseType.Method method = objType.findMethod
+            (primType.name() + "Value", new BaseType[0], -1, -1, null, null);
         appendOp(INVOKEVIRTUAL, 1);
         appendShort(mConstants.addMethod(method).mIndex);
         stackPush(primType);

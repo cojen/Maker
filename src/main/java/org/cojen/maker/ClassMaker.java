@@ -278,6 +278,7 @@ public interface ClassMaker extends Maker {
      * @param retType a class or name; can be null if the method returns void
      * @param paramTypes classes or names
      * @throws IllegalArgumentException if a type is unsupported
+     * @throws IllegalStateException if method is already defined
      * @see <a href="package-summary.html#types-and-values-heading">Types and Values</a>
      */
     MethodMaker addMethod(Object retType, String name, Object... paramTypes);
@@ -293,6 +294,7 @@ public interface ClassMaker extends Maker {
      * Add a method to this class.
      *
      * @param type defines the return type and parameter types
+     * @throws IllegalStateException if method is already defined
      */
     default MethodMaker addMethod(String name, MethodType type) {
         return addMethod(type.returnType(), name, (Object[]) type.parameterArray());
@@ -302,6 +304,7 @@ public interface ClassMaker extends Maker {
      * Add a method to this class.
      *
      * @param desc defines the return type and parameter types
+     * @throws IllegalStateException if method is already defined
      */
     default MethodMaker addMethod(String name, MethodTypeDesc desc) {
         return addMethod(desc.returnType(), name, (Object[]) desc.parameterArray());
@@ -312,6 +315,7 @@ public interface ClassMaker extends Maker {
      *
      * @param paramTypes classes or names
      * @throws IllegalArgumentException if a type is unsupported
+     * @throws IllegalStateException if constructor is already defined
      * @see <a href="package-summary.html#types-and-values-heading">Types and Values</a>
      */
     MethodMaker addConstructor(Object... paramTypes);
@@ -328,6 +332,7 @@ public interface ClassMaker extends Maker {
      *
      * @param type defines the parameter types
      * @throws IllegalArgumentException if the return type isn't void
+     * @throws IllegalStateException if constructor is already defined
      */
     default MethodMaker addConstructor(MethodType type) {
         if (type.returnType() != void.class) {
@@ -341,6 +346,7 @@ public interface ClassMaker extends Maker {
      *
      * @param desc defines the parameter types
      * @throws IllegalArgumentException if the return type isn't void
+     * @throws IllegalStateException if constructor is already defined
      */
     default MethodMaker addConstructor(MethodTypeDesc desc) {
         if (!ConstantDescs.CD_void.equals(desc.returnType())) {

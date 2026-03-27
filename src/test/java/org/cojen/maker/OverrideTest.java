@@ -77,7 +77,7 @@ public class OverrideTest {
         }
 
         try {
-            cm.addMethod(boolean.class, "isEmpty").static_().override();
+            cm.addMethod(int.class, "size").static_().override();
             fail();
         } catch (IllegalStateException e) {
             assertTrue(e.getMessage().contains("Not defining a virtual"));

@@ -4,6 +4,10 @@ Changelog
 v2.7.3
 ------
 * Added support for special primitive type comparsion operations.
+* Disallow duplicate methods, which would result in a ClassFormatError when the class is
+  finished. An IllegalStateException is thrown instead.
+* Improve exception message when the class isn't found when looking for a field, method, or
+  constructor.
 
 v2.7.2 (2026-02-23)
 ------

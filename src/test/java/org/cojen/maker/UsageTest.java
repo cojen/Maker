@@ -605,11 +605,43 @@ public class UsageTest {
     @Test
     public void doubleField() {
         mClassMaker.addField(int.class, "foo");
+
+        try {
+            mClassMaker.addField(int.class, "foo");
+            fail();
+        } catch (IllegalStateException e) {
+            check(e, "Field is");
+        }
+
         try {
             mClassMaker.addField(String.class, "foo");
             fail();
         } catch (IllegalStateException e) {
-            check(e, "Field is");
+            check(e, "Conflicting field");
+        }
+    }
+
+    @Test
+    public void doubleMethod() {
+        mClassMaker.addMethod(int.class, "foo");
+
+        try {
+            mClassMaker.addMethod(int.class, "foo");
+            fail();
+        } catch (IllegalStateException e) {
+            check(e, "Method is");
+        }
+    }
+
+    @Test
+    public void doubleConstructor() {
+        mClassMaker.addConstructor(int.class, String.class);
+
+        try {
+            mClassMaker.addConstructor(int.class, String.class);
+            fail();
+        } catch (IllegalStateException e) {
+            check(e, "Method is");
         }
     }
 

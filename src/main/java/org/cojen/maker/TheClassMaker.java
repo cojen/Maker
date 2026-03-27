@@ -314,13 +314,13 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
 
         if (mFields == null) {
             mFields = new LinkedHashMap<>();
-        } else if (mFields.containsKey(name)) {
-            throw new IllegalStateException("Field is already defined: " + name);
-        }
+        } 
 
         BaseType tType = typeFrom(type);
 
+        // If the field already exists, defineField throws an exception.
         var fm = new TheFieldMaker(this, type().defineField(0, tType, name));
+
         mFields.put(name, fm);
 
         if (tType.isAnnotatable()) {
@@ -349,6 +349,7 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
     }
 
     private TheMethodMaker doAddMethod(Object retType, String name, Object... paramTypes) {
+        // If the method already exists, defineMethod throws an exception.
         var mm = new TheMethodMaker(this, defineMethod(retType, name, paramTypes));
         doAddMethod(mm);
         return mm;
@@ -374,6 +375,7 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
             }
         }
 
+        // If the method already exists, defineMethod throws an exception.
         return type().defineMethod(0, tRetType, name, tParamTypes);
     }
 

@@ -1575,7 +1575,7 @@ abstract class BaseType implements Type, Typed {
                     return field;
                 }
                 if (field.equals(existing)) {
-                    return existing;
+                    throw new IllegalStateException("Field is already defined: " + name);
                 }
             }
 
@@ -1838,7 +1838,7 @@ abstract class BaseType implements Type, Typed {
                     return method;
                 }
                 if (method.equals(existing)) {
-                    return existing;
+                    throw new IllegalStateException("Method is already defined: " + existing);
                 }
             }
 
