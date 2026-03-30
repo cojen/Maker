@@ -6,8 +6,9 @@ v2.7.3
 * Added support for special primitive type comparsion operations.
 * Disallow duplicate methods, which would result in a ClassFormatError when the class is
   finished. An IllegalStateException is thrown instead.
-* Improve exception message when the class isn't found when looking for a field, method, or
+* Improve the exception message when the class isn't found when looking for a field, method, or
   constructor.
+* Support logical shifts by longs, although only the lower 5 or 6 bits are effective.
 
 v2.7.2 (2026-02-23)
 ------

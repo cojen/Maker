@@ -2960,9 +2960,14 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         if ((op & 0xff) < IAND) {
-            // Second argument to shift instruction is always an int. Note: Automatic
-            // downcast from long could be allowed, but it's not really necessary.
-            addPushOp(INT, value);
+            // Second argument to shift instruction is always an int. If it's long, casting it
+            // to an int is fine, since only the lower 5 or 6 bits are examined.
+            if (value instanceof Long v) {
+                value = v.intValue();
+                addOp(new BasicConstantOp(v.intValue(), INT));
+            } else if (!(value instanceof OwnedVar v) || !v.cast(int.class).tryPushTo(this)) {
+                addPushOp(INT, value);
+            }
         } else {
             addPushOp(primType, value);
         }

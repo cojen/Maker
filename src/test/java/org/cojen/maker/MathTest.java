@@ -114,7 +114,7 @@ public class MathTest {
 
         {
             ops.add(new Op(OP_ISHR, 10).init(mm, opLabels, opVar));
-            intVar.set(mm.var(int.class).set(40).shr(2));
+            intVar.set(mm.var(int.class).set(40).shr(2L));
             mm.invoke("add", intVar);
             mm.goto_(contLabel);
         }
@@ -379,6 +379,27 @@ public class MathTest {
             ok.here();
             return this;
         }
+    }
+
+    @Test
+    public void longShift() throws Exception {
+        ClassMaker cm = ClassMaker.begin().public_();
+        MethodMaker mm = cm.addMethod(null, "run").static_().public_();
+
+        var v1 = mm.var(int.class).set(0x123);
+        var v2 = mm.var(long.class).set(0xffff_ffff_ffff_0004L);
+        var v3 = v1.shl(v2);
+        mm.var(Assert.class).invoke("assertEquals", 0x1230, v3.get());
+
+        try {
+            ClassMaker cm2 = ClassMaker.begin();
+            MethodMaker mm2 = cm2.addMethod(null, "run");
+            v1.shl(mm2.var(long.class).set(1));
+        } catch (IllegalStateException e) {
+            assertTrue(e.getMessage().startsWith("Unknown variable"));
+        }
+
+        cm.finish().getMethod("run").invoke(null);
     }
 
     @Test
