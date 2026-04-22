@@ -2961,7 +2961,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
         if ((op & 0xff) < IAND) {
             // Second argument to shift instruction is always an int. If it's long, casting it
-            // to an int is fine, since only the lower 5 or 6 bits are examined.
+            // to an int is fine, since only the lower 5 or 6 bits are effective.
             if (value instanceof Long v) {
                 value = v.intValue();
                 addOp(new BasicConstantOp(v.intValue(), INT));
@@ -4745,14 +4745,10 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                     Op next = mNext;
                     final Op last = flow.lastOp();
 
-                    PushVarOp push;
-                    BranchOp branch;
                     byte branchOp;
-                    if (result.mPushCount == 1 && next instanceof PushVarOp
-                        && (push = (PushVarOp) next).mVar == result
-                        && push.mNext instanceof BranchOp
-                        && ((branchOp = (branch = (BranchOp) push.mNext).op()) == IFEQ
-                            || branchOp == IFNE))
+                    if (result.mPushCount == 1 && next instanceof PushVarOp push
+                        && push.mVar == result && push.mNext instanceof BranchOp branch
+                        && ((branchOp = branch.op()) == IFEQ || branchOp == IFNE))
                     {
                         // Remove this operation up to the branch operation, and insert a new
                         // branch. The amount removed is actually more than three at this
