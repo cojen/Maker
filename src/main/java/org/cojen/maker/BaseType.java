@@ -1999,7 +1999,11 @@ abstract class BaseType implements Type, Typed {
         BaseType superType() {
             BaseType superType = mSuperType;
             if (superType == null) {
-                mSuperType = superType = makerType().superType();
+                TheClassMaker makerType = makerType();
+                BaseType candidate = makerType.superTypeNonNull();
+                if (!candidate.equals(makerType.type())) {
+                    mSuperType = superType = candidate;
+                }
             }
             return superType;
         }

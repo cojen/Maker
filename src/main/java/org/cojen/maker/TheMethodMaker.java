@@ -5371,18 +5371,12 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
         @Override
         public void throw_() {
-            BaseType type = type();
-            Class clazz = type.classType();
-            if (clazz == null) {
-                clazz = (((TheClassMaker) type.makerType()).superType()).classType();
-            }
-            if (!Throwable.class.isAssignableFrom(clazz)) {
-                throw new IllegalStateException("Non-throwable type: " + type.name());
+            if (!BaseType.from(Throwable.class).isAssignableFrom(type())) {
+                throw new IllegalStateException("Non-throwable type: " + type().name());
             }
             push();
             addBytecodeOp(ATHROW, 1);
         }
-
 
         @Override
         public void monitorEnter() {
@@ -5782,7 +5776,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     class SuperVar extends OwnedVar {
         @Override
         public BaseType type() {
-            return mClassMaker.superType();
+            return mClassMaker.superTypeNonNull();
         }
 
         @Override

@@ -237,7 +237,11 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
         return superClass;
     }
 
-    BaseType superType() {
+    /**
+     * Note: Never returns null, even if this class is java.lang.Object, in which case it
+     * returns the same type: java.lang.Object.
+     */
+    BaseType superTypeNonNull() {
         return superClass().mType;
     }
 
@@ -292,7 +296,7 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
             }
         }
 
-        for (BaseType s = superType(); s != null; s = s.superType()) {
+        for (BaseType s = type().superType(); s != null; s = s.superType()) {
             Set<BaseType> inherited = s.interfaces();
             if (inherited != null && !inherited.isEmpty()) {
                 if (all == null) {
