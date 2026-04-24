@@ -4150,7 +4150,11 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
             // If storing to a single-use variable, try to eliminate it.
 
-            if (OPTIMIZE && mVar.mPushCount == 1 && mVar.name() == null) {
+            if (OPTIMIZE && mVar.mPushCount == 1 &&
+                // Don't eliminate named variables which can be null, otherwise a possible
+                // NullPointerException message won't refer to the variable name.
+                (mVar.name() == null || mVar.type().isPrimitive()))
+            {
                 Op next = mNext;
 
                 if (next instanceof PushVarOp push) {

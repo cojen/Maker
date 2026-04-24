@@ -11,6 +11,8 @@ v2.7.3
 * Support logical shifts by longs, although only the lower 5 or 6 bits are effective.
 * Fixed an infinite loop when looking for superclasses of java.lang.Object.
 * Improve peephole optimization against the relational operations which return a boolean.
+* Partially undo a change from version 2.6.3 and eliminate unnecessary primitive variables,
+  even if they have a name.
 
 v2.7.2 (2026-02-23)
 ------
