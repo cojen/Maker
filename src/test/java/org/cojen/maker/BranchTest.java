@@ -751,8 +751,16 @@ public class BranchTest {
             assertEquals("false", method.invoke(null, 5));
         }
 
+        for (int variant=0; variant<=6; variant++) {
+            ClassMaker cm = ClassMaker.begin().public_();
+            rebranch(cm, 2, variant);
+            var method = cm.finish().getMethod("run", Integer.class);
+            assertEquals("true", method.invoke(null, 10));
+            assertEquals("false", method.invoke(null, 11));
+        }
+
         // Verify that the code is the same in all cases.
-        for (int test=0; test<=1; test++) {
+        for (int test=0; test<=2; test++) {
             byte[] last = null;
             for (int variant=0; variant<=6; variant++) {
                 ClassMaker cm = ClassMaker.beginExternal("Test").public_();
@@ -767,7 +775,7 @@ public class BranchTest {
     }
 
     /**
-     * @param test 0: "p < 10",  1: "p == null"
+     * @param test 0: "p < 10",  1: "p == null", 2: "p == 10; with extra variables"
      * @param variant conditional code variant
      */
     private void rebranch(ClassMaker cm, int test, int variant) throws Exception {
@@ -780,16 +788,22 @@ public class BranchTest {
             // The desired outcome in all cases.
             if (test == 0) {
                 mm.param(0).ifLt(10, isTrue);
-            } else {
+            } else if (test == 1) {
                 mm.param(0).ifEq(null, isTrue);
+            } else {
+                mm.param(0).ifEq(10, isTrue);
             }
             mm.goto_(isFalse);
         } else {
             Variable x;
             if (test == 0) {
                 x = mm.param(0).lt(10);
-            } else {
+            } else if (test == 1) {
                 x = mm.param(0).eq(null);
+            } else {
+                var t1 = mm.param(0).eq(10);
+                var t2 = mm.var(boolean.class).set(t1);
+                x = mm.var(boolean.class).set(t2);
             }
 
             switch (variant) {
@@ -833,6 +847,56 @@ public class BranchTest {
 
         isFalse.here();
         mm.return_("false");
+    }
+
+    @Test
+    public void rebranchMismatch() throws Exception {
+        // Test special cases when the rebranch optimization cannot be applied.
+
+        org.junit.Assume.assumeTrue(TheMethodMaker.optimizeEnabled());
+
+        ClassMaker cm = ClassMaker.begin().public_();
+        MethodMaker mm = cm.addMethod(boolean.class, "run", int.class).static_().public_();
+
+        var result = mm.var(boolean.class).set(false);
+
+        {
+            var x = mm.param(0).eq(10);
+            var y = mm.var(boolean.class).set(x);
+            Label isTrue = mm.label();
+            y.ifEq(true, isTrue);
+            mm.var(Assert.class).invoke("fail");
+            isTrue.here();
+            // Another push of the result copy disables the optimization.
+            result.set(y);
+        }
+
+        {
+            var x = mm.param(0).eq(10);
+            var y = mm.var(boolean.class).set(x);
+            // The extra store isn't followed by an immediate push.
+            mm.nop();
+            Label isTrue = mm.label();
+            y.ifEq(true, isTrue);
+            mm.var(Assert.class).invoke("fail");
+            isTrue.here();
+        }
+
+        {
+            var x = mm.param(0).eq(10);
+            var y = mm.var(boolean.class).set(x);
+            Label isTrue = mm.label();
+            // Push something other than y, breaking the chain of store/push pairs.
+            result.ifEq(true, isTrue);
+            mm.var(Assert.class).invoke("fail");
+            isTrue.here();
+            result.set(y);
+        }
+
+        mm.return_(result);
+
+        Class<?> clazz = cm.finish();
+        clazz.getMethod("run", int.class).invoke(null, 10);
     }
 
     @Test
