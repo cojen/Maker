@@ -13,6 +13,8 @@ v2.7.3
 * Improve peephole optimization against the relational operations which return a boolean.
 * Partially undo a change from version 2.6.3 and eliminate unnecessary primitive variables,
   even if they have a name.
+* Removed internal pseudo ops for supporting local variable names and signatures, because it
+  interfered with peephole optimizations, preventing them from being applied.
 
 v2.7.2 (2026-02-23)
 ------
