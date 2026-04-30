@@ -69,6 +69,8 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
     private ParamVar[] mParams;
 
+    private int mLineNum = -1;
+
     private Op mFirstOp;
     private Op mLastOp;
 
@@ -95,8 +97,6 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     private int mUnpositionedLabels;
 
     private StackMapTable mStackMapTable;
-
-    private Attribute.LineNumberTable mLineNumberTable;
 
     private Attribute.MethodParameters mMethodParameters;
 
@@ -201,7 +201,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                 if (!h.mEndLab.isPositioned()) {
                     throw finishFail("Unpositioned exception handler end label");
                 }
-                if (!h.mHandlerLab.mVisited) {
+                if (!h.mHandlerLab.isVisited()) {
                     it.remove();
                 }
             }
@@ -216,6 +216,8 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         mCode = new byte[Math.min(MAX_CODE_LENGTH, opCount * 2)];
         mStack = new LocalVar[8];
 
+        Attribute.LineNumberTable lineNumberTable;
+
         Op lastAppendedOp = null;
 
         while (true) {
@@ -224,12 +226,25 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             mStackSize = 0;
             mMaxStackSlot = 0;
             mUnpositionedLabels = 0;
-            mLineNumberTable = null;
             mFinished = 0;
 
+            int lastLineNum = -1;
+            lineNumberTable = null;
+
             for (Op op = mFirstOp; op != null; op = op.mNext) {
-                if (op.mVisited) { // only append if visited by flow analysis
+                if (op.isVisited()) { // only append if visited by flow analysis
+                    int lineNum = op.lineNum();
+
+                    if (lineNum >= 0 && lineNum != lastLineNum) {
+                        if (lineNumberTable == null) {
+                            lineNumberTable = new Attribute.LineNumberTable(mConstants);
+                        }
+                        lineNumberTable.add(mCodeLen, lineNum);
+                        lastLineNum = lineNum;
+                    }
+
                     op.appendTo(this);
+
                     lastAppendedOp = op;
                 }
             }
@@ -318,8 +333,8 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
         mParams = null;
 
-        if (mLineNumberTable != null && mLineNumberTable.finish(mCodeLen)) {
-            codeAttr.addAttribute(mLineNumberTable);
+        if (lineNumberTable != null && lineNumberTable.finish(mCodeLen)) {
+            codeAttr.addAttribute(lineNumberTable);
         }
 
         if (localVariableTable != null && localVariableTable.finish(mCodeLen)) {
@@ -679,7 +694,10 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
     @Override
     public void lineNum(int num) {
-        addOp(new LineNumOp(num));
+        if (num < 0) {
+            throw new IllegalArgumentException();
+        }
+        mLineNum = num;
     }
 
     @Override
@@ -1197,7 +1215,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             Op flow(Flow flow, Op prev) {
                 // The end label isn't reached normally, but it cannot be dropped. An address
                 // must be captured to build the exception table.
-                endLab.mVisited = true;
+                endLab.markVisited();
 
                 // Flow into the handler itself.
                 flow.run(handlerLab);
@@ -2156,10 +2174,12 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     }
 
     private void addOp(Op op) {
-        if (mLastOp == null) {
+        op.lineNum(mLineNum);
+        Op last = mLastOp;
+        if (last == null) {
             mFirstOp = op;
         } else {
-            mLastOp.mNext = op;
+            last.mNext = op;
         }
         mLastOp = op;
     }
@@ -2191,6 +2211,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
      * @param replacement a new op which isn't in the linked list
      */
     private void replaceOp(Op prev, Op original, Op replacement) {
+        replacement.lineNum(original.lineNum());
         if (prev == null) {
             mFirstOp = replacement;
         } else {
@@ -3178,8 +3199,8 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
                 while (true) {
                     Op next;
-                    if (!op.mVisited) {
-                        op.mVisited = true;
+                    if (!op.isVisited()) {
+                        op.markVisited();
                         mOpCount++;
                         next = op.flow(this, prev);
                     } else {
@@ -3268,15 +3289,37 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
     abstract static class Op {
         Op mNext;
-        boolean mVisited;
+        int mState;
 
         abstract void appendTo(TheMethodMaker m);
+
+        /**
+         * @return -1 if undefined
+         */
+        int lineNum() {
+            return (mState & 0x7fff_ffff) - 1;
+        }
+
+        /**
+         * @param lineNum usually >= 0; can be -1 if undefined; other are values illegal
+         */
+        void lineNum(int lineNum) {
+            mState = (mState & 0x8000_0000) | ((lineNum + 1) & 0x7fff_ffff);
+        }
+
+        boolean isVisited() {
+            return mState < 0;
+        }
+
+        void markVisited() {
+            mState |= 0x8000_0000;
+        }
 
         /**
          * Should be called before running another pass over the code.
          */
         void reset() {
-            mVisited = false;
+            mState &= 0x7fff_ffff;
         }
 
         /**
@@ -3658,7 +3701,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         @Override
         boolean isTarget() {
             // Won't be reached by a branch, but instead will only be reached by tryCatchFlow.
-            return mVisited;
+            return isVisited();
         }
 
         @Override
@@ -4248,23 +4291,6 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
     }
 
-    static final class LineNumOp extends Op {
-        final int mNum;
-
-        LineNumOp(int num) {
-            mNum = num;
-        }
-
-        @Override
-        void appendTo(TheMethodMaker m) {
-            Attribute.LineNumberTable table = m.mLineNumberTable;
-            if (table == null) {
-                m.mLineNumberTable = table = new Attribute.LineNumberTable(m.mConstants);
-            }
-            table.add(m.mCodeLen, mNum);
-        }
-    }
-
     abstract class OwnedVar implements Variable, Typed {
         @Override
         public ClassMaker makerType() {
@@ -4717,6 +4743,18 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
                 @Override
                 Op flow(Flow flow, Op prev) {
+                    // The replace method will add new operations, so make sure they're
+                    // attributed to the correct source code line number.
+                    final int original = mLineNum;
+                    mLineNum = lineNum();
+                    try {
+                        return replace(flow, prev);
+                    } finally {
+                        mLineNum = original;
+                    }
+                }
+
+                private Op replace(Flow flow, Op prev) {
                     // Replace this operation with real ones.
 
                     // Fix the push counts. They'll get adjusted again by the new operations.
