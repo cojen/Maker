@@ -1,7 +1,7 @@
 Changelog
 =========
 
-v2.7.3
+v2.8.0
 ------
 * Added support for special primitive type comparsion operations.
 * Disallow duplicate methods, which would result in a ClassFormatError when the class is
