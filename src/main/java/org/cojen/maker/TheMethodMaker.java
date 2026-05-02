@@ -4769,7 +4769,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                     /*
                       The straightforward implementation stores the comparison result into a
                       boolean variable, but this can result in more "if" branch operations than
-                      is necessary. Try to use a direct if" branch, discarding the boolean
+                      is necessary. Try to use a direct "if" branch, discarding the boolean
                       result variable.
 
                       The pattern to match starts with:
