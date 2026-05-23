@@ -1,7 +1,7 @@
 Changelog
 =========
 
-v2.8.0
+v2.8.0 (2026-05-23)
 ------
 * Fixed handling of bootstrap methods with varargs.
 * Fixed an infinite loop when looking for superclasses of java.lang.Object.
