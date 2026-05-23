@@ -239,7 +239,11 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
         return superClass;
     }
 
-    BaseType superType() {
+    /**
+     * Note: Never returns null, even if this class is java.lang.Object, in which case it
+     * returns the same type: java.lang.Object.
+     */
+    BaseType superTypeNonNull() {
         return superClass().mType;
     }
 
@@ -294,7 +298,7 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
             }
         }
 
-        for (BaseType s = superType(); s != null; s = s.superType()) {
+        for (BaseType s = type().superType(); s != null; s = s.superType()) {
             Set<BaseType> inherited = s.interfaces();
             if (inherited != null && !inherited.isEmpty()) {
                 if (all == null) {
@@ -316,13 +320,13 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
 
         if (mFields == null) {
             mFields = new LinkedHashMap<>();
-        } else if (mFields.containsKey(name)) {
-            throw new IllegalStateException("Field is already defined: " + name);
-        }
+        } 
 
         BaseType tType = typeFrom(type);
 
+        // If the field already exists, defineField throws an exception.
         var fm = new TheFieldMaker(this, type().defineField(0, tType, name));
+
         mFields.put(name, fm);
 
         if (tType.isAnnotatable()) {
@@ -351,6 +355,7 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
     }
 
     private TheMethodMaker doAddMethod(Object retType, String name, Object... paramTypes) {
+        // If the method already exists, defineMethod throws an exception.
         var mm = new TheMethodMaker(this, defineMethod(retType, name, paramTypes));
         doAddMethod(mm);
         return mm;
@@ -376,6 +381,7 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
             }
         }
 
+        // If the method already exists, defineMethod throws an exception.
         return type().defineMethod(0, tRetType, name, tParamTypes);
     }
 

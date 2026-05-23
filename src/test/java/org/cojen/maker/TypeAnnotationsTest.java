@@ -544,7 +544,12 @@ public class TypeAnnotationsTest {
 
         var field = at.defineField(0, at, "xxx");
 
-        assertSame(field, at.defineField(0, at, "xxx"));
+        try {
+            at.defineField(0, at, "xxx");
+        } catch (IllegalStateException e) {
+            assertTrue(e.getMessage().contains("already defined"));
+        }
+
         assertSame(field, at.inventField(0, at, "xxx"));
 
         try {
@@ -556,7 +561,12 @@ public class TypeAnnotationsTest {
 
         var method = at.defineMethod(0, at, "xxx");
 
-        assertSame(method, at.defineMethod(0, at, "xxx"));
+        try {
+            at.defineMethod(0, at, "xxx");
+        } catch (IllegalStateException e) {
+            assertTrue(e.getMessage().contains("already defined"));
+        }
+
         assertSame(method, at.inventMethod(0, at, "xxx"));
 
         try {

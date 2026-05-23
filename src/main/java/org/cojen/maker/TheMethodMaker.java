@@ -57,9 +57,19 @@ import static org.cojen.maker.BytesOut.*;
 class TheMethodMaker extends ClassMember implements MethodMaker {
     private static final int MAX_CODE_LENGTH = 65535;
 
+    private static final boolean OPTIMIZE = true;
+
+    // Accessed by tests. Don't access the constant directly because changing it requires that
+    // the tests be recompiled.
+    static boolean optimizeEnabled() {
+        return OPTIMIZE;
+    }
+
     final BaseType.Method mMethod;
 
     private ParamVar[] mParams;
+
+    private int mLineNum = -1;
 
     private Op mFirstOp;
     private Op mLastOp;
@@ -87,11 +97,6 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     private int mUnpositionedLabels;
 
     private StackMapTable mStackMapTable;
-
-    private Attribute.LineNumberTable mLineNumberTable;
-
-    private Attribute.LocalVariableTable mLocalVariableTable;
-    private Attribute.LocalVariableTable mLocalVariableTypeTable;
 
     private Attribute.MethodParameters mMethodParameters;
 
@@ -196,7 +201,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                 if (!h.mEndLab.isPositioned()) {
                     throw finishFail("Unpositioned exception handler end label");
                 }
-                if (!h.mHandlerLab.mVisited) {
+                if (!h.mHandlerLab.isVisited()) {
                     it.remove();
                 }
             }
@@ -211,6 +216,8 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         mCode = new byte[Math.min(MAX_CODE_LENGTH, opCount * 2)];
         mStack = new LocalVar[8];
 
+        Attribute.LineNumberTable lineNumberTable;
+
         Op lastAppendedOp = null;
 
         while (true) {
@@ -219,14 +226,25 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             mStackSize = 0;
             mMaxStackSlot = 0;
             mUnpositionedLabels = 0;
-            mLineNumberTable = null;
-            mLocalVariableTable = null;
-            mLocalVariableTypeTable = null;
             mFinished = 0;
 
+            int lastLineNum = -1;
+            lineNumberTable = null;
+
             for (Op op = mFirstOp; op != null; op = op.mNext) {
-                if (op.mVisited) { // only append if visited by flow analysis
+                if (op.isVisited()) { // only append if visited by flow analysis
+                    int lineNum = op.lineNum();
+
+                    if (lineNum >= 0 && lineNum != lastLineNum) {
+                        if (lineNumberTable == null) {
+                            lineNumberTable = new Attribute.LineNumberTable(mConstants);
+                        }
+                        lineNumberTable.add(mCodeLen, lineNum);
+                        lastLineNum = lineNum;
+                    }
+
                     op.appendTo(this);
+
                     lastAppendedOp = op;
                 }
             }
@@ -248,6 +266,45 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             mStackMapTable.reset();
 
             new Flow(varList, varUsage).run(mFirstOp);
+        }
+
+        // Apply local variable names and signatures.
+        Attribute.LocalVariableTable localVariableTable = null;
+        Attribute.LocalVariableTable localVariableTypeTable = null;
+
+        {
+            ConstantPool constants = mConstants;
+
+            for (LocalVar v : mVars) {
+                int slot = v.mSlot;
+                String name;
+                if (slot < 0 || (name = v.name()) == null) {
+                    continue;
+                }
+
+                if (localVariableTable == null) {
+                    localVariableTable = new Attribute.LocalVariableTable
+                        (constants, "LocalVariableTable");
+                }
+
+                // Without support for variable scopes, just cover the whole range.
+                ConstantPool.C_UTF8 nameConstant = constants.addUTF8(name);
+                localVariableTable.add(0, Integer.MAX_VALUE, nameConstant,
+                                       constants.addUTF8(v.mType.descriptor()), slot);
+
+                String signature = v.mSignature;
+
+                if (signature != null) {
+                    if (localVariableTypeTable == null) {
+                        localVariableTypeTable = new Attribute.LocalVariableTable
+                            (constants, "LocalVariableTypeTable");
+                    }
+
+                    // Without support for variable scopes, just cover the whole range.
+                    localVariableTypeTable.add(0, Integer.MAX_VALUE, nameConstant,
+                                               constants.addUTF8(signature), slot);
+                }
+            }
         }
 
         mFirstOp = null;
@@ -276,18 +333,16 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
         mParams = null;
 
-        if (mLineNumberTable != null && mLineNumberTable.finish(mCodeLen)) {
-            codeAttr.addAttribute(mLineNumberTable);
+        if (lineNumberTable != null && lineNumberTable.finish(mCodeLen)) {
+            codeAttr.addAttribute(lineNumberTable);
         }
 
-        if (mLocalVariableTable != null && mLocalVariableTable.finish(mCodeLen)) {
-            codeAttr.addAttribute(mLocalVariableTable);
-            mLocalVariableTable = null;
+        if (localVariableTable != null && localVariableTable.finish(mCodeLen)) {
+            codeAttr.addAttribute(localVariableTable);
         }
 
-        if (mLocalVariableTypeTable != null && mLocalVariableTypeTable.finish(mCodeLen)) {
-            codeAttr.addAttribute(mLocalVariableTypeTable);
-            mLocalVariableTypeTable = null;
+        if (localVariableTypeTable != null && localVariableTypeTable.finish(mCodeLen)) {
+            codeAttr.addAttribute(localVariableTypeTable);
         }
 
         addAttribute(codeAttr);
@@ -639,7 +694,10 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
     @Override
     public void lineNum(int num) {
-        addOp(new LineNumOp(num));
+        if (num < 0) {
+            throw new IllegalArgumentException();
+        }
+        mLineNum = num;
     }
 
     @Override
@@ -715,9 +773,17 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
     private BaseType.Field findField(BaseType type, String name) {
         BaseType.Field field = type.findField(name);
+
         if (field == null) {
-            throw new IllegalStateException("Field not found in " + type.name() + ": " + name);
+            String message = "Field not found in " + type.name() + ": " + name;
+
+            if (!type.classExists()) {
+                message = message + " (class not found)";
+            }
+
+            throw new IllegalStateException(message);
         }
+
         return field;
     }
 
@@ -1149,7 +1215,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             Op flow(Flow flow, Op prev) {
                 // The end label isn't reached normally, but it cannot be dropped. An address
                 // must be captured to build the exception table.
-                endLab.mVisited = true;
+                endLab.markVisited();
 
                 // Flow into the handler itself.
                 flow.run(handlerLab);
@@ -1971,7 +2037,8 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
      */
     private void box(BaseType primType) {
         BaseType objType = primType.box();
-        BaseType.Method method = objType.defineMethod(FLAG_STATIC, objType, "valueOf", primType);
+        BaseType.Method method = objType.findMethod
+            ("valueOf", new BaseType[] {primType}, -1, 1, null, null);
         appendOp(INVOKESTATIC, 1);
         appendShort(mConstants.addMethod(method).mIndex);
         stackPush(objType);
@@ -1983,7 +2050,8 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
      */
     private void unbox(BaseType objType) {
         BaseType primType = objType.unbox();
-        BaseType.Method method = objType.defineMethod(0, primType, primType.name() + "Value");
+        BaseType.Method method = objType.findMethod
+            (primType.name() + "Value", new BaseType[0], -1, -1, null, null);
         appendOp(INVOKEVIRTUAL, 1);
         appendShort(mConstants.addMethod(method).mIndex);
         stackPush(primType);
@@ -2106,10 +2174,12 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     }
 
     private void addOp(Op op) {
-        if (mLastOp == null) {
+        op.lineNum(mLineNum);
+        Op last = mLastOp;
+        if (last == null) {
             mFirstOp = op;
         } else {
-            mLastOp.mNext = op;
+            last.mNext = op;
         }
         mLastOp = op;
     }
@@ -2141,6 +2211,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
      * @param replacement a new op which isn't in the linked list
      */
     private void replaceOp(Op prev, Op original, Op replacement) {
+        replacement.lineNum(original.lineNum());
         if (prev == null) {
             mFirstOp = replacement;
         } else {
@@ -2942,9 +3013,14 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         if ((op & 0xff) < IAND) {
-            // Second argument to shift instruction is always an int. Note: Automatic
-            // downcast from long could be allowed, but it's not really necessary.
-            addPushOp(INT, value);
+            // Second argument to shift instruction is always an int. If it's long, casting it
+            // to an int is fine, since only the lower 5 or 6 bits are effective.
+            if (value instanceof Long v) {
+                value = v.intValue();
+                addOp(new BasicConstantOp(v.intValue(), INT));
+            } else if (!(value instanceof OwnedVar v) || !v.cast(int.class).tryPushTo(this)) {
+                addPushOp(INT, value);
+            }
         } else {
             addPushOp(primType, value);
         }
@@ -3123,8 +3199,8 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
                 while (true) {
                     Op next;
-                    if (!op.mVisited) {
-                        op.mVisited = true;
+                    if (!op.isVisited()) {
+                        op.markVisited();
                         mOpCount++;
                         next = op.flow(this, prev);
                     } else {
@@ -3213,15 +3289,37 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
     abstract static class Op {
         Op mNext;
-        boolean mVisited;
+        int mState;
 
         abstract void appendTo(TheMethodMaker m);
+
+        /**
+         * @return -1 if undefined
+         */
+        int lineNum() {
+            return (mState & 0x7fff_ffff) - 1;
+        }
+
+        /**
+         * @param lineNum usually >= 0; can be -1 if undefined; other are values illegal
+         */
+        void lineNum(int lineNum) {
+            mState = (mState & 0x8000_0000) | ((lineNum + 1) & 0x7fff_ffff);
+        }
+
+        boolean isVisited() {
+            return mState < 0;
+        }
+
+        void markVisited() {
+            mState |= 0x8000_0000;
+        }
 
         /**
          * Should be called before running another pass over the code.
          */
         void reset() {
-            mVisited = false;
+            mState &= 0x7fff_ffff;
         }
 
         /**
@@ -3603,7 +3701,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         @Override
         boolean isTarget() {
             // Won't be reached by a branch, but instead will only be reached by tryCatchFlow.
-            return mVisited;
+            return isVisited();
         }
 
         @Override
@@ -3667,6 +3765,15 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
         @Override
         Op flow(Flow flow, Op prev) {
+            // Check if this is a redundant return operation which can be eliminated.
+
+            if (OPTIMIZE && op() == RETURN &&
+                mNext instanceof Lab lab && lab.mNext instanceof ReturnOp nr && nr.op() == RETURN)
+            {
+                flow.removeOps(prev, this, lab, 1);
+                return lab;
+            }
+
             return null;
         }
     }
@@ -3708,7 +3815,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                 byte op = op();
 
                 if (op == GOTO || op == GOTO_W) {
-                    if (target == next) {
+                    if (OPTIMIZE && target == next) {
                         // Remove silly goto.
                         flow.removeOps(prev, this, next, 1);
                         target.lessUsed();
@@ -3717,6 +3824,10 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                 }
 
                 // If the next op is a goto, then flip the condition and remove the goto.
+
+                if (!OPTIMIZE) {
+                    break;
+                }
 
                 if (!(next instanceof BranchOp nextBranch)) {
                     break;
@@ -3948,10 +4059,11 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
         @Override
         Op flow(Flow flow, Op prev) {
+            Op next = mNext;
+
             // Check if storing to an unused variable and remove the pair.
 
-            Op next = mNext;
-            if (next instanceof StoreVarOp op && op.unusedVar()) {
+            if (OPTIMIZE && next instanceof StoreVarOp op && op.unusedVar()) {
                 next = next.mNext;
                 // Removing 2 ops, but specify 1 because the store op won't be visited.
                 flow.removeOps(prev, this, next, 1);
@@ -4053,10 +4165,11 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
         @Override
         Op flow(Flow flow, Op prev) {
+            Op next = mNext;
+
             // Check if storing to an unused variable and remove the pair.
 
-            Op next = mNext;
-            if (next instanceof StoreVarOp op && op.unusedVar()) {
+            if (OPTIMIZE && next instanceof StoreVarOp op && op.unusedVar()) {
                 mVar.mPushCount--;
                 next = next.mNext;
                 // Removing 2 ops, but specify 1 because the store op won't be visited.
@@ -4121,7 +4234,11 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
             // If storing to a single-use variable, try to eliminate it.
 
-            if (mVar.mPushCount == 1 && mVar.name() == null) {
+            if (OPTIMIZE && mVar.mPushCount == 1 &&
+                // Don't eliminate named variables which can be null, otherwise a possible
+                // NullPointerException message won't refer to the variable name.
+                (mVar.name() == null || mVar.type().isPrimitive()))
+            {
                 Op next = mNext;
 
                 if (next instanceof PushVarOp push) {
@@ -4180,76 +4297,6 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                 m.appendShort(slot);
                 m.appendShort(mAmount);
             }
-        }
-    }
-
-    static final class LineNumOp extends Op {
-        final int mNum;
-
-        LineNumOp(int num) {
-            mNum = num;
-        }
-
-        @Override
-        void appendTo(TheMethodMaker m) {
-            Attribute.LineNumberTable table = m.mLineNumberTable;
-            if (table == null) {
-                m.mLineNumberTable = table = new Attribute.LineNumberTable(m.mConstants);
-            }
-            table.add(m.mCodeLen, mNum);
-        }
-    }
-
-    static final class NameLocalVarOp extends Op {
-        final LocalVar mVar;
-
-        NameLocalVarOp(LocalVar var) {
-            mVar = var;
-        }
-
-        @Override
-        void appendTo(TheMethodMaker m) {
-            int slot = mVar.mSlot;
-            if (slot < 0) {
-                return;
-            }
-            ConstantPool constants = m.mConstants;
-            Attribute.LocalVariableTable table = m.mLocalVariableTable;
-            if (table == null) {
-                table = new Attribute.LocalVariableTable(constants, "LocalVariableTable");
-                m.mLocalVariableTable = table;
-            }
-            // Without support for variable scopes, just cover the whole range.
-            table.add(0, Integer.MAX_VALUE, constants.addUTF8(mVar.name()),
-                      constants.addUTF8(mVar.mType.descriptor()), slot);
-        }
-    }
-
-    static final class SignatureLocalVarOp extends Op {
-        final LocalVar mVar;
-        final String mSignature;
-
-        SignatureLocalVarOp(LocalVar var, String signature) {
-            mVar = var;
-            mSignature = signature;
-        }
-
-        @Override
-        void appendTo(TheMethodMaker m) {
-            int slot = mVar.mSlot;
-            String name;
-            if (slot < 0 || (name = mVar.name()) == null) {
-                return;
-            }
-            ConstantPool constants = m.mConstants;
-            Attribute.LocalVariableTable table = m.mLocalVariableTypeTable;
-            if (table == null) {
-                table = new Attribute.LocalVariableTable(constants, "LocalVariableTypeTable");
-                m.mLocalVariableTypeTable = table;
-            }
-            // Without support for variable scopes, just cover the whole range.
-            table.add(0, Integer.MAX_VALUE, constants.addUTF8(name),
-                      constants.addUTF8(mSignature), slot);
         }
     }
 
@@ -4705,6 +4752,18 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
                 @Override
                 Op flow(Flow flow, Op prev) {
+                    // The replace method will add new operations, so make sure they're
+                    // attributed to the correct source code line number.
+                    final int original = mLineNum;
+                    mLineNum = lineNum();
+                    try {
+                        return replace(flow, prev);
+                    } finally {
+                        mLineNum = original;
+                    }
+                }
+
+                private Op replace(Flow flow, Op prev) {
                     // Replace this operation with real ones.
 
                     // Fix the push counts. They'll get adjusted again by the new operations.
@@ -4713,23 +4772,100 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                     adjustPushCount(-1);
                     TheMethodMaker.adjustPushCount(value, -1);
 
-                    Op next = mNext;
+                    final Op next = mNext;
                     final Op last = flow.lastOp();
 
-                    PushVarOp push;
-                    BranchOp branch;
-                    byte branchOp;
-                    if (result.mPushCount == 1 && next instanceof PushVarOp
-                        && (push = (PushVarOp) next).mVar == result
-                        && push.mNext instanceof BranchOp
-                        && ((branchOp = (branch = (BranchOp) push.mNext).op()) == IFEQ
-                            || branchOp == IFNE))
+                    /*
+                      The straightforward implementation stores the comparison result into a
+                      boolean variable, but this can result in more "if" branch operations than
+                      is necessary. Try to use a direct "if" branch, discarding the boolean
+                      result variable.
+
+                      The pattern to match starts with:
+
+                      - The boolean result is pushed only once.
+                      - The next operation is the one push of the result variable.
+
+                      In the middle, any number of unnecessary store/push operation pairs can
+                      be encountered which simply propagate the result to another variable.
+                      Each of these must match this pattern:
+
+                      - Store into a variable which is pushed only once.
+                      - The next operation is the one push of the previous store.
+
+                      Finally, the last operation to match must be an appropriate branch
+                      against the boolean result.
+
+                      If the pattern doesn't fully match, but unnecessary store/push operations
+                      were encountered, they'll be eliminated later by the StoreVarOp.flow
+                      method.
+                     */
+
+                    direct: if (OPTIMIZE && result.mPushCount == 1 &&
+                                next instanceof PushVarOp push && push.mVar == result)
                     {
-                        // Remove this operation up to the branch operation, and insert a new
-                        // branch. The amount removed is actually more than three at this
-                        // point, but the trailing ones will be added back.
-                        flow.removeOps(prev, this, null, 3);
+                        BranchOp branch;
+                        byte branchOp;
+
+                        Op n = push.mNext;
+
+                        ArrayList<LocalVar> unusedVars = null;
+
+                        while (true) {
+                            if (n instanceof BranchOp) {
+                                branch = (BranchOp) n;
+                                branchOp = branch.op();
+                                // An "if" branch operation against a boolean can only ever be
+                                // IFEQ or IFNE, but check anyhow just be safe.
+                                if (branchOp == IFEQ || branchOp == IFNE) {
+                                    // Pattern match complete. Do a direct branch.
+                                    break;
+                                }
+                                // Pattern doesn't match.
+                                break direct;
+                            } else if (n instanceof StoreVarOp store) {
+                                LocalVar v = store.mVar;
+                                n = store.mNext;
+                                if (v.mPushCount == 1 && n instanceof PushVarOp p && p.mVar == v) {
+                                    // Removing a store/pair.
+                                    if (unusedVars == null) {
+                                        unusedVars = new ArrayList<>(2);
+                                    }
+                                    unusedVars.add(v);
+                                    n = p.mNext;
+                                } else {
+                                    // Pattern doesn't match.
+                                    break direct;
+                                }
+                            } else {
+                                // Pattern doesn't match.
+                                break direct;
+                            }
+                        }
+
+                        // At a minimum, three operations will be removed: this temporary
+                        // operation, the first push, and the final branch against the boolean
+                        // result. Additional operations are removed if unnecessary store/push
+                        // pairs were encountered.
+                        int toRemove = 3;
+
+                        if (unusedVars != null) {
+                            toRemove += unusedVars.size() * 2;
+                            for (LocalVar v : unusedVars) {
+                                // This step isn't critical, because without an associated
+                                // operation, a variable slot won't be assigned anyhow.
+                                v.mPushCount = 0;
+                            }
+                        }
+
+                        // Remove this temporary operation, the branch, and all operations in
+                        // between. Null is passed as the next op, and so all of the remaining
+                        // operations are effectively removed at this point. They'll be added
+                        // back when addOps is called below.
+                        flow.removeOps(prev, this, null, toRemove);
                         branch.mTarget.lessUsed();
+
+                        // Insert new operations which perform a direct "if" branch.
 
                         if (value == null) {
                             byte effectiveOp = (byte) (zeroOp + (IFNULL - IFEQ));
@@ -4748,31 +4884,36 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                             ifRelational(value, branch.mTarget, eq, effectiveOp, effectiveZeroOp);
                         }
 
-                        next = branch.mNext;
-                    } else {
-                        // Remove this operation and insert new operations that store to a
-                        // boolean variable. The amount removed is actually more than one at
-                        // this point, but the trailing ones will be added back.
-                        flow.removeOps(prev, this, null, 1);
+                        // Add back the operations that were removed earlier.
+                        flow.addOps(branch.mNext, last);
 
-                        PopLab match = new PopLab();
-                        if (value == null) {
-                            push();
-                            addBranchOp((byte) (zeroOp + (IFNULL - IFEQ)), 1, match);
-                        } else {
-                            ifRelational(value, match, eq, op, zeroOp);
-                        }
-                        addOp(new BasicConstantOp(false, BOOLEAN));
-                        Label cont = label();
-                        goto_(cont);
-                        // Uses a PopLab because the above goto is unconditional, and the
-                        // logic which tracks the stack during code generation is dumb.
-                        match.here();
-                        addOp(new BasicConstantOp(true, BOOLEAN));
-                        cont.here();
-                        addStoreOp(result);
+                        return flow.nextOpFor(prev);
                     }
 
+                    // Remove this temporary operation, and then insert new operations that
+                    // store to a boolean variable. Null is passed as the next op, and so all
+                    // of the remaining operations are effectively removed at this point.
+                    // They'll be added back when addOps is called below.
+                    flow.removeOps(prev, this, null, 1);
+
+                    PopLab match = new PopLab();
+                    if (value == null) {
+                        push();
+                        addBranchOp((byte) (zeroOp + (IFNULL - IFEQ)), 1, match);
+                    } else {
+                        ifRelational(value, match, eq, op, zeroOp);
+                    }
+                    addOp(new BasicConstantOp(false, BOOLEAN));
+                    Label cont = label();
+                    goto_(cont);
+                    // Uses a PopLab because the above goto is unconditional, and the
+                    // logic which tracks the stack during code generation is dumb.
+                    match.here();
+                    addOp(new BasicConstantOp(true, BOOLEAN));
+                    cont.here();
+                    addStoreOp(result);
+
+                    // Add back the operations that were removed earlier.
                     flow.addOps(next, last);
 
                     return flow.nextOpFor(prev);
@@ -5320,20 +5461,25 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
             BaseType[] bootTypes = bootstrap.paramTypes();
             var bootArgs = new ConstantPool.Constant[args.length];
+
             if (!bootstrap.isVarargs()) {
                 for (int i=0; i<args.length; i++) {
                     // +3 to skip these: Lookup caller, String name, and MethodType type
                     bootArgs[i] = addLoadableConstant(bootTypes[i + 3], args[i]);
                 }
             } else {
-                // +3 to skip these: Lookup caller, String name, and MethodType type
-                int i = 3;
+                // Up to +3 to skip these: Lookup caller, String name, and MethodType type
+                final int skip = Math.min(3, bootTypes.length - 1);
+
+                int i = skip;
                 for (; i < bootTypes.length - 1; i++) {
-                    bootArgs[i - 3] = addLoadableConstant(bootTypes[i], args[i - 3]);
+                    bootArgs[i - skip] = addLoadableConstant(bootTypes[i], args[i - skip]);
                 }
+
                 // Remaining args are passed as varargs.
                 BaseType varargType = bootTypes[i].elementType();
-                i -= 3;
+
+                i -= skip;
                 for (; i < args.length; i++) {
                     bootArgs[i] = addLoadableConstant(varargType, args[i]);
                 }
@@ -5346,18 +5492,12 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
         @Override
         public void throw_() {
-            BaseType type = type();
-            Class clazz = type.classType();
-            if (clazz == null) {
-                clazz = (((TheClassMaker) type.makerType()).superType()).classType();
-            }
-            if (!Throwable.class.isAssignableFrom(clazz)) {
-                throw new IllegalStateException("Non-throwable type: " + type.name());
+            if (!BaseType.from(Throwable.class).isAssignableFrom(type())) {
+                throw new IllegalStateException("Non-throwable type: " + type().name());
             }
             push();
             addBytecodeOp(ATHROW, 1);
         }
-
 
         @Override
         public void monitorEnter() {
@@ -5399,7 +5539,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         // Updated as Op list is built.
         int mPushCount;
 
-        private String mName;
+        private String mName, mSignature;
 
         LocalVar(BaseType type) {
             requireNonNull(type);
@@ -5454,14 +5594,13 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             if (mName != null) {
                 throw new IllegalStateException("Already named");
             }
-            addOp(new NameLocalVarOp(this));
             mName = name;
             return this;
         }
 
         @Override
         public Variable signature(Object... components) {
-            addOp(new SignatureLocalVarOp(this, Attributed.fullSignature(components)));
+            mSignature = Attributed.fullSignature(components);
             return this;
         }
 
@@ -5757,7 +5896,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     class SuperVar extends OwnedVar {
         @Override
         public BaseType type() {
-            return mClassMaker.superType();
+            return mClassMaker.superTypeNonNull();
         }
 
         @Override

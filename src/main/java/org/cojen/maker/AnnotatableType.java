@@ -166,6 +166,11 @@ final class AnnotatableType extends BaseType {
     }
 
     @Override
+    boolean classExists() {
+        return mBase.classExists();
+    }
+
+    @Override
     int stackMapCode() {
         return mBase.stackMapCode();
     }

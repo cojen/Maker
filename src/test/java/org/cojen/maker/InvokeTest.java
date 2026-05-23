@@ -1089,6 +1089,93 @@ public class InvokeTest {
     }
 
     @Test
+    public void indyVarargs2() throws Exception {
+        ClassMaker cm = ClassMaker.begin().public_();
+        MethodMaker mm = cm.addMethod(null, "run").public_().static_();
+
+        var bootstrap = mm.var(InvokeTest.class);
+        var result = bootstrap.indy("bootVarargs2", 10, "hello", "world").invoke(String.class, "x");
+
+        var assertVar = mm.var(Assert.class);
+        assertVar.invoke("assertEquals", "MethodType10helloworld", result);
+
+        cm.finish().getMethod("run").invoke(null);
+    }
+
+    public static CallSite bootVarargs2(MethodHandles.Lookup caller, String name, Object... args) {
+        MethodMaker mm = MethodMaker.begin(MethodHandles.lookup(), String.class, "_");
+
+        var b = new StringBuilder();
+        b.append(args[0].getClass().getSimpleName());
+        for (int i=1; i<args.length; i++) {
+            b.append(args[i]);
+        }
+
+        mm.return_(b.toString());
+
+        return new ConstantCallSite(mm.finish());
+    }
+
+    @Test
+    public void indyVarargs3() throws Exception {
+        ClassMaker cm = ClassMaker.begin().public_();
+        MethodMaker mm = cm.addMethod(null, "run").public_().static_();
+
+        var bootstrap = mm.var(InvokeTest.class);
+        var result = bootstrap.indy("bootVarargs3", 10, "hello", "world").invoke(String.class, "x");
+
+        var assertVar = mm.var(Assert.class);
+        assertVar.invoke("assertEquals", "xMethodType10helloworld", result);
+
+        cm.finish().getMethod("run").invoke(null);
+    }
+
+    public static CallSite bootVarargs3(MethodHandles.Lookup caller, Object... args) {
+        MethodMaker mm = MethodMaker.begin(MethodHandles.lookup(), String.class, "_");
+
+        var b = new StringBuilder();
+        b.append(args[0]);
+        b.append(args[1].getClass().getSimpleName());
+        for (int i=2; i<args.length; i++) {
+            b.append(args[i]);
+        }
+
+        mm.return_(b.toString());
+
+        return new ConstantCallSite(mm.finish());
+    }
+
+    @Test
+    public void indyVarargs4() throws Exception {
+        ClassMaker cm = ClassMaker.begin().public_();
+        MethodMaker mm = cm.addMethod(null, "run").public_().static_();
+
+        var bootstrap = mm.var(InvokeTest.class);
+        var result = bootstrap.indy("bootVarargs4", 10, "hello", "world").invoke(String.class, "x");
+
+        var assertVar = mm.var(Assert.class);
+        assertVar.invoke("assertEquals", "LookupxMethodType10helloworld", result);
+
+        cm.finish().getMethod("run").invoke(null);
+    }
+
+    public static CallSite bootVarargs4(Object... args) {
+        MethodMaker mm = MethodMaker.begin(MethodHandles.lookup(), String.class, "_");
+
+        var b = new StringBuilder();
+        b.append(args[0].getClass().getSimpleName());
+        b.append(args[1]);
+        b.append(args[2].getClass().getSimpleName());
+        for (int i=3; i<args.length; i++) {
+            b.append(args[i]);
+        }
+
+        mm.return_(b.toString());
+
+        return new ConstantCallSite(mm.finish());
+    }
+
+    @Test
     public void signaturePolymorphic() throws Exception {
         MethodHandle mh = MethodHandles.lookup()
             .findStatic(InvokeTest.class, "secret", MethodType.methodType(int.class, int.class));

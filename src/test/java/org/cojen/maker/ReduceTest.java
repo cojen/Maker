@@ -92,7 +92,7 @@ public class ReduceTest {
 
     @Test
     public void preserveVariable() throws Exception {
-        // An unnecessary variable shouldn't be eliminated when it has a name.
+        // An unnecessary non-primitive variable shouldn't be eliminated when it has a name.
 
         ClassMaker cm = ClassMaker.begin().public_();
 

@@ -53,6 +53,7 @@ public interface Type {
      * Return a Type corresponding to the given object parameter.
      *
      * @param obj Class, String, ClassMaker, Variable, Field, FieldMaker, or ClassDesc
+     * @see <a href="package-summary.html#types-and-values-heading">Types and Values</a>
      */
     static Type from(Object obj) {
         return BaseType.from(null, obj);
@@ -64,6 +65,7 @@ public interface Type {
      *
      * @param obj Class, String, ClassMaker, Variable, Field, FieldMaker, or ClassDesc
      * @param loader can be null to use the bootstrap ClassLoader
+     * @see <a href="package-summary.html#types-and-values-heading">Types and Values</a>
      */
     static Type from(Object obj, ClassLoader loader) {
         return BaseType.from(loader, obj);
@@ -154,6 +156,7 @@ public interface Type {
      * @param visible true if annotation is visible at runtime
      * @throws IllegalStateException if this type isn't annotatable or it's frozen
      * @throws IllegalArgumentException if the annotation type is unsupported
+     * @see <a href="package-summary.html#types-and-values-heading">Types and Values</a>
      */
     AnnotationMaker addAnnotation(Object annotationType, boolean visible);
 

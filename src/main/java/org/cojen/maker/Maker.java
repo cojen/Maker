@@ -76,6 +76,7 @@ public interface Maker {
      *
      * @throws IllegalArgumentException if given an unsupported component
      * @return this
+     * @see <a href="package-summary.html#types-and-values-heading">Types and Values</a>
      */
     Maker signature(Object... components);
 
@@ -91,6 +92,7 @@ public interface Maker {
      * @param annotationType name or class which refers to an annotation interface
      * @param visible true if annotation is visible at runtime
      * @throws IllegalArgumentException if the annotation type is unsupported
+     * @see <a href="package-summary.html#types-and-values-heading">Types and Values</a>
      */
     AnnotationMaker addAnnotation(Object annotationType, boolean visible);
 

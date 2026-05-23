@@ -71,6 +71,7 @@ public interface Variable {
      * @throws IllegalArgumentException if given an unsupported component
      * @throws IllegalStateException if this isn't a plain local variable
      * @return this
+     * @see <a href="package-summary.html#types-and-values-heading">Types and Values</a>
      */
     Variable signature(Object... components);
 
@@ -81,6 +82,7 @@ public interface Variable {
      * @param visible true if annotation is visible at runtime
      * @throws IllegalArgumentException if the annotation type is unsupported
      * @throws IllegalStateException if this variable doesn't support annotations
+     * @see <a href="package-summary.html#types-and-values-heading">Types and Values</a>
      */
     default AnnotationMaker addAnnotation(Object annotationType, boolean visible) {
         throw new IllegalStateException("Cannot add an annotation");
@@ -110,6 +112,7 @@ public interface Variable {
      * @throws IllegalArgumentException if the value isn't a variable or a supported constant
      * @throws IllegalStateException if this variable cannot be modified, or if it's not
      * compatible with the value type
+     * @see <a href="package-summary.html#types-and-values-heading">Types and Values</a>
      */
     Variable set(Object value);
 
@@ -208,6 +211,7 @@ public interface Variable {
      *
      * @param value a {@link Variable} or a constant
      * @throws IllegalArgumentException if the value isn't a variable or a supported constant
+     * @see <a href="package-summary.html#types-and-values-heading">Types and Values</a>
      */
     void ifEq(Object value, Label label);
 
@@ -218,6 +222,7 @@ public interface Variable {
      * @param value a {@link Variable} or a constant
      * @param then called to generate the body of the "then" case
      * @throws IllegalArgumentException if the value isn't a variable or a supported constant
+     * @see <a href="package-summary.html#types-and-values-heading">Types and Values</a>
      */
     default void ifEq(Object value, Runnable then) {
         Label endLabel = methodMaker().label();
@@ -234,6 +239,7 @@ public interface Variable {
      * @param then called to generate the body of the "then" case
      * @param else_ called to generate the body of the "else" case
      * @throws IllegalArgumentException if the value isn't a variable or a supported constant
+     * @see <a href="package-summary.html#types-and-values-heading">Types and Values</a>
      */
     default void ifEq(Object value, Runnable then, Runnable else_) {
         MethodMaker mm = methodMaker();
@@ -252,6 +258,7 @@ public interface Variable {
      *
      * @param value a {@link Variable} or a constant
      * @throws IllegalArgumentException if the value isn't a variable or a supported constant
+     * @see <a href="package-summary.html#types-and-values-heading">Types and Values</a>
      */
     void ifNe(Object value, Label label);
 
@@ -262,6 +269,7 @@ public interface Variable {
      * @param value a {@link Variable} or a constant
      * @param then called to generate the body of the "then" case
      * @throws IllegalArgumentException if the value isn't a variable or a supported constant
+     * @see <a href="package-summary.html#types-and-values-heading">Types and Values</a>
      */
     default void ifNe(Object value, Runnable then) {
         Label endLabel = methodMaker().label();
@@ -278,6 +286,7 @@ public interface Variable {
      * @param then called to generate the body of the "then" case
      * @param else_ called to generate the body of the "else" case
      * @throws IllegalArgumentException if the value isn't a variable or a supported constant
+     * @see <a href="package-summary.html#types-and-values-heading">Types and Values</a>
      */
     default void ifNe(Object value, Runnable then, Runnable else_) {
         MethodMaker mm = methodMaker();
@@ -296,6 +305,7 @@ public interface Variable {
      *
      * @param value a {@link Variable} or a constant
      * @throws IllegalArgumentException if the value isn't a variable or a supported constant
+     * @see <a href="package-summary.html#types-and-values-heading">Types and Values</a>
      */
     void ifLt(Object value, Label label);
 
@@ -306,6 +316,7 @@ public interface Variable {
      * @param value a {@link Variable} or a constant
      * @param then called to generate the body of the "then" case
      * @throws IllegalArgumentException if the value isn't a variable or a supported constant
+     * @see <a href="package-summary.html#types-and-values-heading">Types and Values</a>
      */
     default void ifLt(Object value, Runnable then) {
         Label endLabel = methodMaker().label();
@@ -322,6 +333,7 @@ public interface Variable {
      * @param then called to generate the body of the "then" case
      * @param else_ called to generate the body of the "else" case
      * @throws IllegalArgumentException if the value isn't a variable or a supported constant
+     * @see <a href="package-summary.html#types-and-values-heading">Types and Values</a>
      */
     default void ifLt(Object value, Runnable then, Runnable else_) {
         MethodMaker mm = methodMaker();
@@ -340,6 +352,7 @@ public interface Variable {
      *
      * @param value a {@link Variable} or a constant
      * @throws IllegalArgumentException if the value isn't a variable or a supported constant
+     * @see <a href="package-summary.html#types-and-values-heading">Types and Values</a>
      */
     void ifGe(Object value, Label label);
 
@@ -350,6 +363,7 @@ public interface Variable {
      * @param value a {@link Variable} or a constant
      * @param then called to generate the body of the "then" case
      * @throws IllegalArgumentException if the value isn't a variable or a supported constant
+     * @see <a href="package-summary.html#types-and-values-heading">Types and Values</a>
      */
     default void ifGe(Object value, Runnable then) {
         Label endLabel = methodMaker().label();
@@ -366,6 +380,7 @@ public interface Variable {
      * @param then called to generate the body of the "then" case
      * @param else_ called to generate the body of the "else" case
      * @throws IllegalArgumentException if the value isn't a variable or a supported constant
+     * @see <a href="package-summary.html#types-and-values-heading">Types and Values</a>
      */
     default void ifGe(Object value, Runnable then, Runnable else_) {
         MethodMaker mm = methodMaker();
@@ -384,6 +399,7 @@ public interface Variable {
      *
      * @param value a {@link Variable} or a constant
      * @throws IllegalArgumentException if the value isn't a variable or a supported constant
+     * @see <a href="package-summary.html#types-and-values-heading">Types and Values</a>
      */
     void ifGt(Object value, Label label);
 
@@ -394,6 +410,7 @@ public interface Variable {
      * @param value a {@link Variable} or a constant
      * @param then called to generate the body of the "then" case
      * @throws IllegalArgumentException if the value isn't a variable or a supported constant
+     * @see <a href="package-summary.html#types-and-values-heading">Types and Values</a>
      */
     default void ifGt(Object value, Runnable then) {
         Label endLabel = methodMaker().label();
@@ -410,6 +427,7 @@ public interface Variable {
      * @param then called to generate the body of the "then" case
      * @param else_ called to generate the body of the "else" case
      * @throws IllegalArgumentException if the value isn't a variable or a supported constant
+     * @see <a href="package-summary.html#types-and-values-heading">Types and Values</a>
      */
     default void ifGt(Object value, Runnable then, Runnable else_) {
         MethodMaker mm = methodMaker();
@@ -428,6 +446,7 @@ public interface Variable {
      *
      * @param value a {@link Variable} or a constant
      * @throws IllegalArgumentException if the value isn't a variable or a supported constant
+     * @see <a href="package-summary.html#types-and-values-heading">Types and Values</a>
      */
     void ifLe(Object value, Label label);
 
@@ -438,6 +457,7 @@ public interface Variable {
      * @param value a {@link Variable} or a constant
      * @param then called to generate the body of the "then" case
      * @throws IllegalArgumentException if the value isn't a variable or a supported constant
+     * @see <a href="package-summary.html#types-and-values-heading">Types and Values</a>
      */
     default void ifLe(Object value, Runnable then) {
         Label endLabel = methodMaker().label();
@@ -454,6 +474,7 @@ public interface Variable {
      * @param then called to generate the body of the "then" case
      * @param else_ called to generate the body of the "else" case
      * @throws IllegalArgumentException if the value isn't a variable or a supported constant
+     * @see <a href="package-summary.html#types-and-values-heading">Types and Values</a>
      */
     default void ifLe(Object value, Runnable then, Runnable else_) {
         MethodMaker mm = methodMaker();
@@ -510,6 +531,7 @@ public interface Variable {
      * case type isn't supported
      * @throws IllegalStateException if the class being made is {@link ClassMaker#beginExternal
      * external}
+     * @see <a href="package-summary.html#types-and-values-heading">Types and Values</a>
      */
     void switch_(Label defaultLabel, Object[] cases, Label... labels);
 
@@ -521,6 +543,7 @@ public interface Variable {
      * @throws IllegalArgumentException if the value isn't a variable or a supported constant
      * @throws IllegalStateException if this variable doesn't support the operation, or if the
      * value is incompatible
+     * @see <a href="package-summary.html#types-and-values-heading">Types and Values</a>
      */
     void inc(Object value);
 
@@ -532,6 +555,7 @@ public interface Variable {
      * @throws IllegalArgumentException if the value isn't a variable or a supported constant
      * @throws IllegalStateException if this variable doesn't support the operation, or if the
      * value is incompatible
+     * @see <a href="package-summary.html#types-and-values-heading">Types and Values</a>
      */
     void dec(Object value);
 
@@ -544,6 +568,7 @@ public interface Variable {
      * @throws IllegalArgumentException if the value isn't a variable or a supported constant
      * @throws IllegalStateException if this variable doesn't support the operation, or if the
      * value is incompatible
+     * @see <a href="package-summary.html#types-and-values-heading">Types and Values</a>
      */
     Variable add(Object value);
 
@@ -556,6 +581,7 @@ public interface Variable {
      * @throws IllegalArgumentException if the value isn't a variable or a supported constant
      * @throws IllegalStateException if this variable doesn't support the operation, or if the
      * value is incompatible
+     * @see <a href="package-summary.html#types-and-values-heading">Types and Values</a>
      */
     Variable sub(Object value);
 
@@ -568,6 +594,7 @@ public interface Variable {
      * @throws IllegalArgumentException if the value isn't a variable or a supported constant
      * @throws IllegalStateException if this variable doesn't support the operation, or if the
      * value is incompatible
+     * @see <a href="package-summary.html#types-and-values-heading">Types and Values</a>
      */
     Variable mul(Object value);
 
@@ -580,6 +607,7 @@ public interface Variable {
      * @throws IllegalArgumentException if the value isn't a variable or a supported constant
      * @throws IllegalStateException if this variable doesn't support the operation, or if the
      * value is incompatible
+     * @see <a href="package-summary.html#types-and-values-heading">Types and Values</a>
      */
     Variable div(Object value);
 
@@ -592,6 +620,7 @@ public interface Variable {
      * @throws IllegalArgumentException if the value isn't a variable or a supported constant
      * @throws IllegalStateException if this variable doesn't support the operation, or if the
      * value is incompatible
+     * @see <a href="package-summary.html#types-and-values-heading">Types and Values</a>
      */
     Variable rem(Object value);
 
@@ -603,6 +632,7 @@ public interface Variable {
      * @return the result in a new boolean variable
      * @throws IllegalArgumentException if the value isn't a variable or a supported constant
      * @see #ifEq
+     * @see <a href="package-summary.html#types-and-values-heading">Types and Values</a>
      */
     Variable eq(Object value);
 
@@ -614,6 +644,7 @@ public interface Variable {
      * @return the result in a new boolean variable
      * @throws IllegalArgumentException if the value isn't a variable or a supported constant
      * @see #ifNe
+     * @see <a href="package-summary.html#types-and-values-heading">Types and Values</a>
      */
     Variable ne(Object value);
 
@@ -625,6 +656,7 @@ public interface Variable {
      * @return the result in a new boolean variable
      * @throws IllegalArgumentException if the value isn't a variable or a supported constant
      * @see #ifLt
+     * @see <a href="package-summary.html#types-and-values-heading">Types and Values</a>
      */
     Variable lt(Object value);
 
@@ -636,6 +668,7 @@ public interface Variable {
      * @return the result in a new boolean variable
      * @throws IllegalArgumentException if the value isn't a variable or a supported constant
      * @see #ifGe
+     * @see <a href="package-summary.html#types-and-values-heading">Types and Values</a>
      */
     Variable ge(Object value);
 
@@ -647,6 +680,7 @@ public interface Variable {
      * @return the result in a new boolean variable
      * @throws IllegalArgumentException if the value isn't a variable or a supported constant
      * @see #ifGt
+     * @see <a href="package-summary.html#types-and-values-heading">Types and Values</a>
      */
     Variable gt(Object value);
 
@@ -658,6 +692,7 @@ public interface Variable {
      * @return the result in a new boolean variable
      * @throws IllegalArgumentException if the value isn't a variable or a supported constant
      * @see #ifLe
+     * @see <a href="package-summary.html#types-and-values-heading">Types and Values</a>
      */
     Variable le(Object value);
 
@@ -668,6 +703,7 @@ public interface Variable {
      * @param type class or interface
      * @return the result in a new boolean variable
      * @throws IllegalArgumentException if the type is unsupported
+     * @see <a href="package-summary.html#types-and-values-heading">Types and Values</a>
      */
     Variable instanceOf(Object type);
 
@@ -678,6 +714,7 @@ public interface Variable {
      * @param type class or interface
      * @return the result in a new variable
      * @throws IllegalArgumentException if the type is unsupported
+     * @see <a href="package-summary.html#types-and-values-heading">Types and Values</a>
      */
     Variable cast(Object type);
 
@@ -698,6 +735,7 @@ public interface Variable {
      * @throws IllegalArgumentException if the value isn't a variable or a supported constant
      * @throws IllegalStateException if this variable doesn't support the operation, or if the
      * value is incompatible
+     * @see <a href="package-summary.html#types-and-values-heading">Types and Values</a>
      */
     Variable and(Object value);
 
@@ -710,6 +748,7 @@ public interface Variable {
      * @throws IllegalArgumentException if the value isn't a variable or a supported constant
      * @throws IllegalStateException if this variable doesn't support the operation, or if the
      * value is incompatible
+     * @see <a href="package-summary.html#types-and-values-heading">Types and Values</a>
      */
     Variable or(Object value);
 
@@ -722,6 +761,7 @@ public interface Variable {
      * @throws IllegalArgumentException if the value isn't a variable or a supported constant
      * @throws IllegalStateException if this variable doesn't support the operation, or if the
      * value is incompatible
+     * @see <a href="package-summary.html#types-and-values-heading">Types and Values</a>
      */
     Variable xor(Object value);
 
@@ -734,6 +774,7 @@ public interface Variable {
      * @throws IllegalArgumentException if the value isn't a variable or a supported constant
      * @throws IllegalStateException if this variable doesn't support the operation, or if the
      * value is incompatible
+     * @see <a href="package-summary.html#types-and-values-heading">Types and Values</a>
      */
     Variable shl(Object value);
 
@@ -746,6 +787,7 @@ public interface Variable {
      * @throws IllegalArgumentException if the value isn't a variable or a supported constant
      * @throws IllegalStateException if this variable doesn't support the operation, or if the
      * value is incompatible
+     * @see <a href="package-summary.html#types-and-values-heading">Types and Values</a>
      */
     Variable shr(Object value);
 
@@ -758,6 +800,7 @@ public interface Variable {
      * @throws IllegalArgumentException if the value isn't a variable or a supported constant
      * @throws IllegalStateException if this variable doesn't support the operation, or if the
      * value is incompatible
+     * @see <a href="package-summary.html#types-and-values-heading">Types and Values</a>
      */
     Variable ushr(Object value);
 
@@ -786,6 +829,7 @@ public interface Variable {
      * @throws IllegalArgumentException if the value isn't a variable or a supported constant
      * @throws IllegalStateException if this variable doesn't support the operation, or if the
      * value is incompatible
+     * @see <a href="package-summary.html#types-and-values-heading">Types and Values</a>
      */
     Variable cmp(Object value);
 
@@ -798,6 +842,7 @@ public interface Variable {
      * @throws IllegalArgumentException if the value isn't a variable or a supported constant
      * @throws IllegalStateException if this variable doesn't support the operation, or if the
      * value is incompatible
+     * @see <a href="package-summary.html#types-and-values-heading">Types and Values</a>
      */
     Variable cmpl(Object value);
 
@@ -810,6 +855,7 @@ public interface Variable {
      * @throws IllegalArgumentException if the value isn't a variable or a supported constant
      * @throws IllegalStateException if this variable doesn't support the operation, or if the
      * value is incompatible
+     * @see <a href="package-summary.html#types-and-values-heading">Types and Values</a>
      */
     Variable cmpg(Object value);
 
@@ -879,6 +925,7 @@ public interface Variable {
      * @return the result in a new variable
      * @throws IllegalArgumentException if the index isn't a variable or a supported constant
      * @throws IllegalStateException if this variable isn't an array type
+     * @see <a href="package-summary.html#types-and-values-heading">Types and Values</a>
      */
     Variable aget(Object index);
 
@@ -891,6 +938,7 @@ public interface Variable {
      * constant
      * @throws IllegalStateException if this variable isn't an array type
      * @see #set
+     * @see <a href="package-summary.html#types-and-values-heading">Types and Values</a>
      */
     void aset(Object index, Object value);
 
@@ -910,6 +958,7 @@ public interface Variable {
      * @return the result of the method, which is null if it's void
      * @throws IllegalArgumentException if a value isn't a variable or a supported constant
      * @throws IllegalStateException if the method isn't found
+     * @see <a href="package-summary.html#types-and-values-heading">Types and Values</a>
      */
     Variable invoke(String name, Object... values);
 
@@ -933,6 +982,7 @@ public interface Variable {
      * @throws IllegalArgumentException if a type is unsupported, or if a value isn't a
      * variable or a supported constant
      * @throws IllegalStateException if the method isn't found
+     * @see <a href="package-summary.html#types-and-values-heading">Types and Values</a>
      */
     Variable invoke(Object returnType, String name, Object[] types, Object... values);
 
@@ -955,6 +1005,7 @@ public interface Variable {
      * @param types method parameter types
      * @throws IllegalArgumentException if a type is unsupported
      * @throws IllegalStateException if the method isn't found
+     * @see <a href="package-summary.html#types-and-values-heading">Types and Values</a>
      */
     Variable methodHandle(Object returnType, String name, Object... types);
 
@@ -974,6 +1025,7 @@ public interface Variable {
      * first three standard arguments: {@code (Lookup caller, String name, MethodType type)}
      * @throws IllegalArgumentException if an argument isn't a supported constant
      * @see java.lang.invoke
+     * @see <a href="package-summary.html#types-and-values-heading">Types and Values</a>
      */
     Bootstrap indy(String name, Object... args);
 
@@ -995,6 +1047,7 @@ public interface Variable {
      * first three standard arguments: {@code (Lookup caller, String name, Class type)}
      * @throws IllegalArgumentException if an argument isn't a supported constant
      * @see java.lang.invoke
+     * @see <a href="package-summary.html#types-and-values-heading">Types and Values</a>
      */
     Bootstrap condy(String name, Object... args);
 
