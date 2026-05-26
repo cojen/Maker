@@ -517,7 +517,8 @@ public interface MethodMaker extends Maker {
      * Define a finally handler which is generated for every possible exit path between the
      * start label and here. If the handler throws an exception at runtime, the suppress
      * parameter decides what to do with pending exceptions. When true, the pending exception
-     * is passed to the {@code Throwable#addSuppressed} method of the handler's exception.
+     * is passed to the {@link Throwable#addSuppressed addSuppressed} method of the handler's
+     * exception.
      *
      * @param handler called for each exit path to generate handler code
      * @param suppress pass true to suppress pending exceptions when an exception is thrown
