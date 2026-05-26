@@ -1386,6 +1386,15 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
     @Override
     public void finally_(Label start, Runnable handler) {
+        doFinally(start, handler);
+    }
+
+    @Override
+    public void finally_(Label start, Consumer<Variable> handler) {
+        doFinally(start, handler);
+    }
+
+    private void doFinally(Label start, Object handler) {
         Lab startLab = target(start);
         Lab endLab = new Lab();
         addOp(endLab);
@@ -1469,7 +1478,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
         if (!lastTransformed) {
             // Add a finally handler here, and then go past everything else.
-            handler.run();
+            callHandler(handler, null);
             veryEnd = new Lab();
             goto_(veryEnd);
         }
@@ -1477,21 +1486,21 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         // Add the "catch all" exception handler.
         {
             var exVar = catch_(startLab, endLab, (Object) null);
-            handler.run();
+            callHandler(handler, exVar);
             exVar.throw_();
         }
 
         // Add finally handlers for each branch-based exit.
         for (Map.Entry<Lab, Lab> e : exits.entrySet()) {
             e.getValue().here();
-            handler.run();
+            callHandler(handler, null);
             goto_(e.getKey());
         }
 
         // Add a finally handler for any return exits.
         if (retHandler != null) {
             retHandler.here();
-            handler.run();
+            callHandler(handler, null);
             if (retVar == null) {
                 doReturn();
             } else {
@@ -1501,6 +1510,15 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
         if (veryEnd != null) {
             veryEnd.here();
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private static void callHandler(Object handler, Variable exVar) {
+        if (handler instanceof Runnable r) {
+            r.run();
+        } else {
+            ((Consumer<Variable>) handler).accept(exVar);
         }
     }
 

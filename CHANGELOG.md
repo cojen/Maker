@@ -1,6 +1,10 @@
 Changelog
 =========
 
+v2.8.1
+------
+* Added convenience methods for managing pending exceptions within a finally handler.
+
 v2.8.0 (2026-05-23)
 ------
 * Fixed handling of bootstrap methods with varargs.

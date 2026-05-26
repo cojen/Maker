@@ -16,6 +16,8 @@
 
 package org.cojen.maker;
 
+import java.lang.reflect.InvocationTargetException;
+
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -269,5 +271,79 @@ public class FinallyTest {
 
         assertEquals(20, method.invoke(null, 2));
         assertEquals(20, field.get(null));
+    }
+
+    @Test
+    public void suppressManual() throws Exception {
+        ClassMaker cm = ClassMaker.begin().public_();
+        MethodMaker mm = cm.addMethod(null, "run").public_().static_();
+
+        Runnable finallyCode = () -> {
+            mm.new_(Exception.class, "b").throw_();
+        };
+
+        Label start = mm.label().here();
+
+        mm.new_(Exception.class, "a").throw_();
+
+        mm.finally_(start, exVar -> {
+            if (exVar == null) {
+                finallyCode.run();
+            } else {
+                Label finallyStart = mm.label().here();
+                finallyCode.run();
+                mm.catch_(finallyStart, Throwable.class, exVar2 -> {
+                    exVar2.invoke("addSuppressed", exVar);
+                    exVar2.throw_();
+                });
+            }
+        });
+
+        var clazz = cm.finish();
+        var method = clazz.getMethod("run");
+
+        try {
+            method.invoke(null);
+        } catch (InvocationTargetException e) {
+            Throwable cause = e.getCause();
+            assertEquals("b", cause.getMessage());
+            Throwable[] suppressed = cause.getSuppressed();
+            assertEquals(1, suppressed.length);
+            assertEquals("a", suppressed[0].getMessage());
+        }
+    }
+
+    @Test
+    public void suppressAutomatic() throws Exception {
+        suppressAutomatic(false);
+        suppressAutomatic(true);
+    }
+
+    private void suppressAutomatic(boolean suppress) throws Exception {
+        ClassMaker cm = ClassMaker.begin().public_();
+        MethodMaker mm = cm.addMethod(null, "run").public_().static_();
+
+        Label start = mm.label().here();
+        mm.new_(Exception.class, "a").throw_();
+        mm.finally_(start, suppress, () -> {
+            mm.new_(Exception.class, "b").throw_();
+        });
+
+        var clazz = cm.finish();
+        var method = clazz.getMethod("run");
+
+        try {
+            method.invoke(null);
+        } catch (InvocationTargetException e) {
+            Throwable cause = e.getCause();
+            assertEquals("b", cause.getMessage());
+            Throwable[] suppressed = cause.getSuppressed();
+            if (!suppress) {
+                assertEquals(0, suppressed.length);
+            } else {
+                assertEquals(1, suppressed.length);
+                assertEquals("a", suppressed[0].getMessage());
+            }
+        }
     }
 }
