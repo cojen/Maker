@@ -1351,8 +1351,9 @@ if the number of values doesn't match the number of coordinates</dd>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="return-type"><a href="ClassMaker.html" title="interface in org.cojen.maker">ClassMaker</a></span>&nbsp;<span class="element-name">addInnerClass</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/26/docs/api/java.base/java/lang/String.html" title="class in java.lang" class="external-link">String</a>&nbsp;className)</span></div>
 <div class="block">Add an inner class to this method. The actual class name will have a suitable suffix
-applied to ensure uniqueness. The inner class doesn't have access to the local variables
-of the enclosing method, and so they must be passed along explicitly.
+applied to ensure uniqueness, unless the <code>ClassMaker</code> creates explicit or external
+classes. The inner class doesn't have access to the local variables of the enclosing
+method, and so they must be passed along explicitly.
 
 <p>The returned <code>ClassMaker</code> instance isn't attached to this maker, and so it can
 be acted upon by a different thread.</div>
