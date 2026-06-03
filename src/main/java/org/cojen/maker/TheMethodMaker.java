@@ -4259,6 +4259,12 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             {
                 Op next = mNext;
 
+                // Replace any temporary ops.
+                while (next instanceof RelationalOp rel) {
+                    next = rel.flow(flow, this);
+                    assert next == mNext;
+                }
+
                 if (next instanceof PushVarOp push) {
                     // If performing a store/push pair to the same variable, just remove the pair
                     // of operations and rely on the operand stack.
@@ -4315,6 +4321,203 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                 m.appendShort(slot);
                 m.appendShort(mAmount);
             }
+        }
+    }
+
+    /**
+     * Defines a temporary operation which gets replaced during flow analysis.
+     */
+    private final class RelationalOp extends Op {
+        private final OwnedVar mVar;
+        private final Object mValue;
+        private final boolean mEq;
+        private final byte mOp, mZeroOp;
+        private final LocalVar mResult;
+
+        RelationalOp(OwnedVar var, Object val, boolean eq, byte op, byte zeroOp, LocalVar result) {
+            mVar = var;
+            mValue = val;
+            mEq = eq;
+            mOp = op;
+            mZeroOp = zeroOp;
+            mResult = result;
+
+            // Indicate that the arguments will be used at some point, preventing premature
+            // elimination of local variables.
+            var.adjustPushCount(1);
+            adjustPushCount(val, 1);
+        }
+
+        @Override
+        void appendTo(TheMethodMaker m) {
+            // Should always get replaced.
+            throw new AssertionError();
+        }
+
+        @Override
+        Op flow(Flow flow, Op prev) {
+            // The replace method will add new operations, so make sure they're attributed to
+            // the correct source code line number.
+            final int original = mLineNum;
+            mLineNum = lineNum();
+            try {
+                return replace(flow, prev);
+            } finally {
+                mLineNum = original;
+            }
+        }
+
+        private Op replace(Flow flow, Op prev) {
+            // Replace this operation with real ones.
+
+            // Fix the push counts. They'll get adjusted again by the new operations. This
+            // correction isn't strictly necessary, but it might help with future optimizations
+            // which reduce variable usage.
+            mVar.adjustPushCount(-1);
+            adjustPushCount(mValue, -1);
+
+            final Op next = mNext;
+            final Op last = flow.lastOp();
+
+            /*
+              The straightforward implementation stores the comparison result into a boolean
+              variable, but this can result in more "if" branch operations than is necessary.
+              Try to use a direct "if" branch, discarding the boolean result variable.
+
+              The pattern to match starts with:
+
+              - The boolean result is pushed only once.
+              - The next operation is the one push of the result variable.
+
+              In the middle, any number of unnecessary store/push operation pairs can be
+              encountered which simply propagate the result to another variable. Each of these
+              must match this pattern:
+
+              - Store into a variable which is pushed only once.
+              - The next operation is the one push of the previous store.
+
+              Finally, the last operation to match must be an appropriate branch against the
+              boolean result.
+
+              If the pattern doesn't fully match, but unnecessary store/push operations were
+              encountered, they'll be eliminated by the StoreVarOp.flow method.
+            */
+
+            direct: if (OPTIMIZE && mResult.mPushCount == 1 &&
+                        next instanceof PushVarOp push && push.mVar == mResult)
+            {
+                BranchOp branch;
+                byte branchOp;
+
+                Op n = push.mNext;
+
+                ArrayList<LocalVar> unusedVars = null;
+
+                while (true) {
+                    if (n instanceof BranchOp) {
+                        branch = (BranchOp) n;
+                        branchOp = branch.op();
+                        // An "if" branch operation against a boolean can only ever be
+                        // IFEQ or IFNE, but check anyhow just be safe.
+                        if (branchOp == IFEQ || branchOp == IFNE) {
+                            // Pattern match complete. Do a direct branch.
+                            break;
+                        }
+                        // Pattern doesn't match.
+                        break direct;
+                    } else if (n instanceof StoreVarOp store) {
+                        LocalVar v = store.mVar;
+                        n = store.mNext;
+                        if (v.mPushCount == 1 && n instanceof PushVarOp p && p.mVar == v) {
+                            // Removing a store/pair.
+                            if (unusedVars == null) {
+                                unusedVars = new ArrayList<>(2);
+                            }
+                            unusedVars.add(v);
+                            n = p.mNext;
+                        } else {
+                            // Pattern doesn't match.
+                            break direct;
+                        }
+                    } else {
+                        // Pattern doesn't match.
+                        break direct;
+                    }
+                }
+
+                // At a minimum, three operations will be removed: this temporary operation,
+                // the first push, and the final branch against the boolean result. Additional
+                // operations are removed if unnecessary store/push pairs were encountered.
+                int toRemove = 3;
+
+                if (unusedVars != null) {
+                    toRemove += unusedVars.size() * 2;
+                    for (LocalVar v : unusedVars) {
+                        // This step isn't critical, because without an associated operation, a
+                        // variable slot won't be assigned anyhow.
+                        v.mPushCount = 0;
+                    }
+                }
+
+                // Remove this temporary operation, the branch, and all operations in between.
+                // Null is passed as the next op, and so all of the remaining operations are
+                // effectively removed at this point. They'll be added back when addOps is
+                // called below.
+                flow.removeOps(prev, this, null, toRemove);
+                branch.mTarget.lessUsed();
+
+                // Insert new operations which perform a direct "if" branch.
+
+                if (mValue == null) {
+                    byte effectiveOp = (byte) (mZeroOp + (IFNULL - IFEQ));
+                    if (branchOp == IFEQ) {
+                        effectiveOp = flipIf(effectiveOp);
+                    }
+                    mVar.push();
+                    addBranchOp(effectiveOp, 1, branch.mTarget);
+                } else {
+                    byte effectiveOp = mOp;
+                    byte effectiveZeroOp = mZeroOp;
+                    if (branchOp == IFEQ) {
+                        effectiveOp = flipIf(effectiveOp);
+                        effectiveZeroOp = flipIf(effectiveZeroOp);
+                    }
+                    mVar.ifRelational(mValue, branch.mTarget, mEq, effectiveOp, effectiveZeroOp);
+                }
+
+                // Add back the operations that were removed earlier.
+                flow.addOps(branch.mNext, last);
+
+                return flow.nextOpFor(prev);
+            }
+
+            // Remove this temporary operation, and then insert new operations that store to a
+            // boolean variable. Null is passed as the next op, and so all of the remaining
+            // operations are effectively removed at this point. They'll be added back when
+            // addOps is called below.
+            flow.removeOps(prev, this, null, 1);
+
+            PopLab match = new PopLab();
+            if (mValue == null) {
+                mVar.push();
+                addBranchOp((byte) (mZeroOp + (IFNULL - IFEQ)), 1, match);
+            } else {
+                mVar.ifRelational(mValue, match, mEq, mOp, mZeroOp);
+            }
+            addOp(new BasicConstantOp(false, BOOLEAN));
+            Label cont = label();
+            goto_(cont);
+            // Uses a PopLab because the above goto is unconditional, and the logic which
+            // tracks the stack during code generation is dumb.
+            match.here();
+            addOp(new BasicConstantOp(true, BOOLEAN));
+            cont.here();
+            addStoreOp(mResult);
+
+            // Add back the operations that were removed earlier.
+            flow.addOps(next, last);
+
+            return flow.nextOpFor(prev);
         }
     }
 
@@ -4751,193 +4954,10 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                 }
             }
 
-            final Object value = val;
-            final LocalVar result = new LocalVar(BOOLEAN);
-
-            // Indicate that the arguments will be used at some point, preventing premature
-            // elimination of local variables.
-            adjustPushCount(1);
-            TheMethodMaker.adjustPushCount(value, 1);
-
             // Add a temporary operation which gets replaced during flow analysis.
 
-            addOp(new Op() {
-                @Override
-                void appendTo(TheMethodMaker m) {
-                    // Should always get replaced.
-                    throw new AssertionError();
-                }
-
-                @Override
-                Op flow(Flow flow, Op prev) {
-                    // The replace method will add new operations, so make sure they're
-                    // attributed to the correct source code line number.
-                    final int original = mLineNum;
-                    mLineNum = lineNum();
-                    try {
-                        return replace(flow, prev);
-                    } finally {
-                        mLineNum = original;
-                    }
-                }
-
-                private Op replace(Flow flow, Op prev) {
-                    // Replace this operation with real ones.
-
-                    // Fix the push counts. They'll get adjusted again by the new operations.
-                    // This correction isn't strictly necessary, but it might help with future
-                    // optimizations which reduce variable usage.
-                    adjustPushCount(-1);
-                    TheMethodMaker.adjustPushCount(value, -1);
-
-                    final Op next = mNext;
-                    final Op last = flow.lastOp();
-
-                    /*
-                      The straightforward implementation stores the comparison result into a
-                      boolean variable, but this can result in more "if" branch operations than
-                      is necessary. Try to use a direct "if" branch, discarding the boolean
-                      result variable.
-
-                      The pattern to match starts with:
-
-                      - The boolean result is pushed only once.
-                      - The next operation is the one push of the result variable.
-
-                      In the middle, any number of unnecessary store/push operation pairs can
-                      be encountered which simply propagate the result to another variable.
-                      Each of these must match this pattern:
-
-                      - Store into a variable which is pushed only once.
-                      - The next operation is the one push of the previous store.
-
-                      Finally, the last operation to match must be an appropriate branch
-                      against the boolean result.
-
-                      If the pattern doesn't fully match, but unnecessary store/push operations
-                      were encountered, they'll be eliminated later by the StoreVarOp.flow
-                      method.
-                     */
-
-                    direct: if (OPTIMIZE && result.mPushCount == 1 &&
-                                next instanceof PushVarOp push && push.mVar == result)
-                    {
-                        BranchOp branch;
-                        byte branchOp;
-
-                        Op n = push.mNext;
-
-                        ArrayList<LocalVar> unusedVars = null;
-
-                        while (true) {
-                            if (n instanceof BranchOp) {
-                                branch = (BranchOp) n;
-                                branchOp = branch.op();
-                                // An "if" branch operation against a boolean can only ever be
-                                // IFEQ or IFNE, but check anyhow just be safe.
-                                if (branchOp == IFEQ || branchOp == IFNE) {
-                                    // Pattern match complete. Do a direct branch.
-                                    break;
-                                }
-                                // Pattern doesn't match.
-                                break direct;
-                            } else if (n instanceof StoreVarOp store) {
-                                LocalVar v = store.mVar;
-                                n = store.mNext;
-                                if (v.mPushCount == 1 && n instanceof PushVarOp p && p.mVar == v) {
-                                    // Removing a store/pair.
-                                    if (unusedVars == null) {
-                                        unusedVars = new ArrayList<>(2);
-                                    }
-                                    unusedVars.add(v);
-                                    n = p.mNext;
-                                } else {
-                                    // Pattern doesn't match.
-                                    break direct;
-                                }
-                            } else {
-                                // Pattern doesn't match.
-                                break direct;
-                            }
-                        }
-
-                        // At a minimum, three operations will be removed: this temporary
-                        // operation, the first push, and the final branch against the boolean
-                        // result. Additional operations are removed if unnecessary store/push
-                        // pairs were encountered.
-                        int toRemove = 3;
-
-                        if (unusedVars != null) {
-                            toRemove += unusedVars.size() * 2;
-                            for (LocalVar v : unusedVars) {
-                                // This step isn't critical, because without an associated
-                                // operation, a variable slot won't be assigned anyhow.
-                                v.mPushCount = 0;
-                            }
-                        }
-
-                        // Remove this temporary operation, the branch, and all operations in
-                        // between. Null is passed as the next op, and so all of the remaining
-                        // operations are effectively removed at this point. They'll be added
-                        // back when addOps is called below.
-                        flow.removeOps(prev, this, null, toRemove);
-                        branch.mTarget.lessUsed();
-
-                        // Insert new operations which perform a direct "if" branch.
-
-                        if (value == null) {
-                            byte effectiveOp = (byte) (zeroOp + (IFNULL - IFEQ));
-                            if (branchOp == IFEQ) {
-                                effectiveOp = flipIf(effectiveOp);
-                            }
-                            push();
-                            addBranchOp(effectiveOp, 1, branch.mTarget);
-                        } else {
-                            byte effectiveOp = op;
-                            byte effectiveZeroOp = zeroOp;
-                            if (branchOp == IFEQ) {
-                                effectiveOp = flipIf(effectiveOp);
-                                effectiveZeroOp = flipIf(effectiveZeroOp);
-                            }
-                            ifRelational(value, branch.mTarget, eq, effectiveOp, effectiveZeroOp);
-                        }
-
-                        // Add back the operations that were removed earlier.
-                        flow.addOps(branch.mNext, last);
-
-                        return flow.nextOpFor(prev);
-                    }
-
-                    // Remove this temporary operation, and then insert new operations that
-                    // store to a boolean variable. Null is passed as the next op, and so all
-                    // of the remaining operations are effectively removed at this point.
-                    // They'll be added back when addOps is called below.
-                    flow.removeOps(prev, this, null, 1);
-
-                    PopLab match = new PopLab();
-                    if (value == null) {
-                        push();
-                        addBranchOp((byte) (zeroOp + (IFNULL - IFEQ)), 1, match);
-                    } else {
-                        ifRelational(value, match, eq, op, zeroOp);
-                    }
-                    addOp(new BasicConstantOp(false, BOOLEAN));
-                    Label cont = label();
-                    goto_(cont);
-                    // Uses a PopLab because the above goto is unconditional, and the
-                    // logic which tracks the stack during code generation is dumb.
-                    match.here();
-                    addOp(new BasicConstantOp(true, BOOLEAN));
-                    cont.here();
-                    addStoreOp(result);
-
-                    // Add back the operations that were removed earlier.
-                    flow.addOps(next, last);
-
-                    return flow.nextOpFor(prev);
-                }
-            });
-
+            LocalVar result = new LocalVar(BOOLEAN);
+            addOp(new RelationalOp(this, val, eq, op, zeroOp, result));
             return result;
         }
 

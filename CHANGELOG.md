@@ -4,6 +4,8 @@ Changelog
 v2.8.1
 ------
 * Added convenience methods for managing pending exceptions within a finally handler.
+* Improve peephole optimization against relational operations and eliminate a temporary
+  variable for the condition when possible.
 
 v2.8.0 (2026-05-23)
 ------
