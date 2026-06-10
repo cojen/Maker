@@ -376,7 +376,7 @@ public interface ClassMaker extends Maker {
 
     /**
      * Add an inner class to this class. The actual class name will have a suitable suffix
-     * applied to ensure uniqueness.
+     * applied to ensure uniqueness, unless this maker creates explicit or external classes.
      *
      * <p>The returned {@code ClassMaker} instance isn't attached to this maker, and so it can
      * be acted upon by a different thread.

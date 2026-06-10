@@ -505,12 +505,55 @@ public interface MethodMaker extends Maker {
 
     /**
      * Define a finally handler which is generated for every possible exit path between the
-     * start label and here.
+     * start label and here. If the handler throws an exception at runtime, then any pending
+     * exception is dropped.
      *
      * @param handler called for each exit path to generate handler code
      * @throws IllegalStateException if the start label is unpositioned
      */
     void finally_(Label tryStart, Runnable handler);
+
+    /**
+     * Define a finally handler which is generated for every possible exit path between the
+     * start label and here. If the handler throws an exception at runtime, the suppress
+     * parameter decides what to do with pending exceptions. When true, the pending exception
+     * is passed to the {@link Throwable#addSuppressed addSuppressed} method of the handler's
+     * exception.
+     *
+     * @param handler called for each exit path to generate handler code
+     * @param suppress pass true to suppress pending exceptions when an exception is thrown
+     * from the handler itself; pass false to drop the pending exception
+     * @throws IllegalStateException if the start label is unpositioned
+     */
+    default void finally_(Label tryStart, boolean suppress, Runnable handler) {
+        if (!suppress) {
+            finally_(tryStart, handler);
+        } else {
+            finally_(tryStart, exVar -> {
+                if (exVar == null) {
+                    handler.run();
+                } else {
+                    Label finallyStart = label().here();
+                    handler.run();
+                    catch_(finallyStart, null, exVar2 -> {
+                        exVar2.invoke("addSuppressed", exVar);
+                        exVar2.throw_();
+                    });
+                }
+            });
+        }
+    }
+
+    /**
+     * Define a finally handler which is generated for every possible exit path between the
+     * start label and here. When the handler is called for generating the exception case, a
+     * variable of type {@link Throwable} is provided when references the exception which will
+     * be rethrown. For all other cases, null is provided.
+     *
+     * @param handler called for each exit path to generate handler code
+     * @throws IllegalStateException if the start label is unpositioned
+     */
+    void finally_(Label tryStart, Consumer<Variable> handler);
 
     /**
      * Concatenate variables and constants together into a new {@link String} in the same
@@ -563,8 +606,9 @@ public interface MethodMaker extends Maker {
 
     /**
      * Add an inner class to this method. The actual class name will have a suitable suffix
-     * applied to ensure uniqueness. The inner class doesn't have access to the local variables
-     * of the enclosing method, and so they must be passed along explicitly.
+     * applied to ensure uniqueness, unless the {@code ClassMaker} creates explicit or external
+     * classes. The inner class doesn't have access to the local variables of the enclosing
+     * method, and so they must be passed along explicitly.
      *
      * <p>The returned {@code ClassMaker} instance isn't attached to this maker, and so it can
      * be acted upon by a different thread.
