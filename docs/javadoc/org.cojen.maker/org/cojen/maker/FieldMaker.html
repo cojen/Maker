@@ -76,6 +76,7 @@ initTheme();
 <li><a href="#protected_()" tabindex="0">protected_()</a></li>
 <li><a href="#static_()" tabindex="0">static_()</a></li>
 <li><a href="#final_()" tabindex="0">final_()</a></li>
+<li><a href="#strict()" tabindex="0">strict()</a></li>
 <li><a href="#volatile_()" tabindex="0">volatile_()</a></li>
 <li><a href="#transient_()" tabindex="0">transient_()</a></li>
 <li><a href="#synthetic()" tabindex="0">synthetic()</a></li>
@@ -177,23 +178,28 @@ built dynamically instead of loaded from a file.</div>
 <div class="block">Switch this field to be static.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="FieldMaker.html" title="interface in org.cojen.maker">FieldMaker</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#synthetic()" class="member-name-link">synthetic</a>()</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#strict()" class="member-name-link">strict</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="block">Switch this field to be require strict initialization.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="FieldMaker.html" title="interface in org.cojen.maker">FieldMaker</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#synthetic()" class="member-name-link">synthetic</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Indicate that this field is synthetic.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="FieldMaker.html" title="interface in org.cojen.maker">FieldMaker</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#transient_()" class="member-name-link">transient_</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="FieldMaker.html" title="interface in org.cojen.maker">FieldMaker</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#transient_()" class="member-name-link">transient_</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Switch this field to be transient.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="Type.html" title="interface in org.cojen.maker">Type</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#type()" class="member-name-link">type</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="Type.html" title="interface in org.cojen.maker">Type</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#type()" class="member-name-link">type</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Returns the type of this field being made.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="FieldMaker.html" title="interface in org.cojen.maker">FieldMaker</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#volatile_()" class="member-name-link">volatile_</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="FieldMaker.html" title="interface in org.cojen.maker">FieldMaker</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#volatile_()" class="member-name-link">volatile_</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Switch this field to be volatile.</div>
 </div>
 </div>
@@ -328,6 +334,19 @@ specification.</div>
 <dl class="notes">
 <dt>Specified by:</dt>
 <dd><code><a href="Maker.html#final_()">final_</a></code>&nbsp;in interface&nbsp;<code><a href="Maker.html" title="interface in org.cojen.maker">Maker</a></code></dd>
+<dt>Returns:</dt>
+<dd>this</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="strict()">
+<h3>strict</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="return-type"><a href="FieldMaker.html" title="interface in org.cojen.maker">FieldMaker</a></span>&nbsp;<span class="element-name">strict</span>()</div>
+<div class="block">Switch this field to be require strict initialization. Fields are non-strict by default.</div>
+<dl class="notes">
 <dt>Returns:</dt>
 <dd>this</dd>
 </dl>
