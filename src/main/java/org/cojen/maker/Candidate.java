@@ -74,6 +74,15 @@ final class Candidate {
             return 0;
         }
 
+        if (param == BaseType.Null.THE) {
+            BaseType objType = BaseType.from(Object.class);
+            if (objType.equals(aParam)) {
+                return objType.equals(bParam) ? 0 : -1;
+            } else {
+                return objType.equals(bParam) ? 1 : 0;
+            }
+        }
+
         if (param.equals(aParam)) {
             return param.equals(bParam) ? 0 : -1;
         } else if (param.equals(bParam)) {

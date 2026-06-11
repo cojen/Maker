@@ -3,6 +3,7 @@ Changelog
 
 v2.8.1
 ------
+* Fixed method selection when parameter is an explicit null constant.
 * Added convenience methods for managing pending exceptions within a finally handler.
 * Improve peephole optimization against relational operations and eliminate a temporary
   variable for the condition when possible.
