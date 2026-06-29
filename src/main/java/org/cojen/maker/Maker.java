@@ -104,4 +104,144 @@ public interface Maker {
      * the first element can be interpreted as such.
      */
     void addAttribute(String name, Object value);
+
+    /**
+     * Mangles a name as described by <a href="https://web.archive.org/web/20160622140347/http://blogs.oracle.com/jrose/entry/symbolic_freedom_in_the_vm">symbolic freedom in the VM</a>.
+     * If the name doesn't need to be mangled, then the original name is returned. Otherwise,
+     * the returned mangled name starts with a backslash character.
+     *
+     * @see #demangle
+     */
+    public static String mangle(String name) {
+        int length = name.length();
+
+        if (length == 0) {
+            return "\\=";
+        }
+
+        for (int i = 0; i < length; i++) {
+            char c = name.charAt(i);
+            char m = mangle(name, i, c);
+
+            if (m != '\0') {
+                var b = new StringBuilder(name.length() + 3);
+                if (i > 0 && name.charAt(0) != '\\') {
+                    b.append("\\=");
+                }
+                b.append(name, 0, i).append('\\').append(m);
+                i++;
+
+                for (; i<name.length(); i++) {
+                    c = name.charAt(i);
+                    m = mangle(name, i, c);
+                    if (m == '\0') {
+                        b.append(c);
+                    } else {
+                        b.append('\\').append(m);
+                    }
+                }
+
+                return b.toString();
+            }
+        }
+
+        return name;
+    }
+
+    /**
+     * @return 0 if no need to mangle
+     */
+    private static char mangle(String name, int i, char c) {
+        return switch (c) {
+            default  -> '\0';
+
+            case '/' -> '|';
+            case '.' -> ',';
+            case ';' -> '?';
+            case '$' -> '%';
+            case '<' -> '^';
+            case '>' -> '_';
+            case '[' -> '{';
+            case ']' -> '}';
+            case ':' -> '!';
+
+            case '\\' -> {
+                if (++i < name.length()) {
+                    // Only need to escape if it would be interpeted as an accidental escape.
+                    yield switch (name.charAt(i)) {
+                        default  -> '\0';
+                        case '|', ',', '?', '%', '^', '_', '{', '}', '!', '-' -> '-';
+                        case '=' -> i <= 1 ? '-' : '\0';
+                    };
+                }
+                yield '\0';
+            }
+        };
+    }
+
+    /**
+     * Demangles a name. If the given string doesn't start with a backslash, then the original
+     * string is returned. If the string starts with {@code \=} (backslash, equals), then that
+     * portion is always trimmed off, even if the rest of the string isn't mangled.
+     *
+     * @see #mangle
+     */
+    public static String demangle(String mangled) {
+        int length = mangled.length();
+
+        if (length > 0) {
+            char c = mangled.charAt(0);
+
+            if (c == '\\' && length > 1) {
+                var b = new StringBuilder(length - 1);
+                int i = 1 + demangle(b, 1, mangled.charAt(1));
+
+                while (i < length) {
+                    c = mangled.charAt(i++);
+                    if (c != '\\' || i >= length) {
+                        b.append(c);
+                    } else {
+                        i += demangle(b, i, mangled.charAt(i));
+                    }
+                }
+
+                return b.toString();
+            }
+        }
+
+        return mangled;
+    }
+
+    private static int demangle(StringBuilder b, int i, char c) {
+        switch (c) {
+            default  -> {
+                // Wasn't a real escape.
+                b.append('\\');
+                return 0;
+            }
+
+            case '|' -> c = '/';
+            case ',' -> c = '.';
+            case '?' -> c = ';';
+            case '%' -> c = '$';
+            case '^' -> c = '<';
+            case '_' -> c = '>';
+            case '{' -> c = '[';
+            case '}' -> c = ']';
+            case '!' -> c = ':';
+            case '-' -> c = '\\';
+
+            case '=' -> {
+                if (i <= 1) {
+                    return 1;
+                }
+                // "\=" is only treated as an escape at the start of the string.
+                b.append('\\');
+            }
+        }
+
+        b.append(c);
+
+        return 1;
+    }
 }
