@@ -1606,4 +1606,42 @@ public class InvokeTest {
     public static int bpm(int a) {
         return 101;
     }
+
+    @Test
+    public void nullParam() throws Exception {
+        ClassMaker cm = ClassMaker.begin().public_();
+        MethodMaker mm = cm.addMethod(null, "run").public_().static_();
+
+
+        {
+            var resultVar = mm.var(InvokeTest.class).invoke("nparam", (Object) null);
+            var assertVar = mm.var(Assert.class);
+            assertVar.invoke("assertEquals", 4, resultVar);
+        }
+
+        {
+            var n = mm.var(Object.class).clear();
+            var resultVar = mm.var(InvokeTest.class).invoke("nparam", n);
+            var assertVar = mm.var(Assert.class);
+            assertVar.invoke("assertEquals", 4, resultVar);
+        }
+
+        cm.finish().getMethod("run").invoke(null);
+    }
+
+    public static int nparam(String x) {
+        return 1;
+    }
+
+    public static int nparam(List x) {
+        return 2;
+    }
+
+    public static int nparam(char[] x) {
+        return 3;
+    }
+
+    public static int nparam(Object x) {
+        return 4;
+    }
 }

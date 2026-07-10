@@ -76,6 +76,8 @@ initTheme();
 <li><a href="#classMaker()" tabindex="0">classMaker()</a></li>
 <li><a href="#addAnnotation(java.lang.Object,boolean)" tabindex="0">addAnnotation(Object, boolean)</a></li>
 <li><a href="#addAttribute(java.lang.String,java.lang.Object)" tabindex="0">addAttribute(String, Object)</a></li>
+<li><a href="#mangle(java.lang.String)" tabindex="0">mangle(String)</a></li>
+<li><a href="#demangle(java.lang.String)" tabindex="0">demangle(String)</a></li>
 </ol>
 </li>
 </ol>
@@ -103,7 +105,7 @@ initTheme();
 <section class="method-summary" id="method-summary">
 <h2>Method Summary</h2>
 <div id="method-summary-table">
-<div class="table-tabs" role="tablist" aria-orientation="horizontal"><button id="method-summary-table-tab0" role="tab" aria-selected="true" aria-controls="method-summary-table.tabpanel" tabindex="0" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table', 3)" class="active-table-tab">All Methods</button><button id="method-summary-table-tab2" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab2', 3)" class="table-tab">Instance Methods</button><button id="method-summary-table-tab3" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab3', 3)" class="table-tab">Abstract Methods</button></div>
+<div class="table-tabs" role="tablist" aria-orientation="horizontal"><button id="method-summary-table-tab0" role="tab" aria-selected="true" aria-controls="method-summary-table.tabpanel" tabindex="0" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table', 3)" class="active-table-tab">All Methods</button><button id="method-summary-table-tab1" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab1', 3)" class="table-tab">Static Methods</button><button id="method-summary-table-tab2" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab2', 3)" class="table-tab">Instance Methods</button><button id="method-summary-table-tab3" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab3', 3)" class="table-tab">Abstract Methods</button></div>
 <div id="method-summary-table.tabpanel" role="tabpanel" aria-labelledby="method-summary-table-tab0">
 <div class="summary-table three-column-summary">
 <div class="table-header col-first">Modifier and Type</div>
@@ -127,10 +129,20 @@ initTheme();
 <div class="block">Returns the <code>ClassMaker</code> for this item, which can also be used as a type
 specification.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="Maker.html" title="interface in org.cojen.maker">Maker</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#final_()" class="member-name-link">final_</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1"><code>static <a href="https://docs.oracle.com/en/java/javase/26/docs/api/java.base/java/lang/String.html" title="class in java.lang" class="external-link">String</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1"><code><a href="#demangle(java.lang.String)" class="member-name-link">demangle</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/26/docs/api/java.base/java/lang/String.html" title="class in java.lang" class="external-link">String</a>&nbsp;mangled)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1">
+<div class="block">Demangles a name.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="Maker.html" title="interface in org.cojen.maker">Maker</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#final_()" class="member-name-link">final_</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Switch this item to be final.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1"><code>static <a href="https://docs.oracle.com/en/java/javase/26/docs/api/java.base/java/lang/String.html" title="class in java.lang" class="external-link">String</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1"><code><a href="#mangle(java.lang.String)" class="member-name-link">mangle</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/26/docs/api/java.base/java/lang/String.html" title="class in java.lang" class="external-link">String</a>&nbsp;name)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1">
+<div class="block">Mangles a name as described by <a href="https://web.archive.org/web/20160622140347/http://blogs.oracle.com/jrose/entry/symbolic_freedom_in_the_vm">symbolic freedom in the VM</a>.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="https://docs.oracle.com/en/java/javase/26/docs/api/java.base/java/lang/String.html" title="class in java.lang" class="external-link">String</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#name()" class="member-name-link">name</a>()</code></div>
@@ -335,6 +347,44 @@ advanced feature for defining attributes which aren't directly supported by the 
 maker API. Allowed value types are: int, float, long, double, String, Class, raw byte[],
 or an array of values. Arrays aren't encoded with any length prefix, but a raw byte[] as
 the first element can be interpreted as such.</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="mangle(java.lang.String)">
+<h3>mangle</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">static</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/26/docs/api/java.base/java/lang/String.html" title="class in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">mangle</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/26/docs/api/java.base/java/lang/String.html" title="class in java.lang" class="external-link">String</a>&nbsp;name)</span></div>
+<div class="block">Mangles a name as described by <a href="https://web.archive.org/web/20160622140347/http://blogs.oracle.com/jrose/entry/symbolic_freedom_in_the_vm">symbolic freedom in the VM</a>.
+If the name doesn't need to be mangled, then the original name is returned. Otherwise,
+the returned mangled name starts with a backslash character.</div>
+<dl class="notes">
+<dt>See Also:</dt>
+<dd>
+<ul class="tag-list">
+<li><a href="#demangle(java.lang.String)"><code>demangle(String)</code></a></li>
+</ul>
+</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="demangle(java.lang.String)">
+<h3>demangle</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="modifiers">static</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/26/docs/api/java.base/java/lang/String.html" title="class in java.lang" class="external-link">String</a></span>&nbsp;<span class="element-name">demangle</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/26/docs/api/java.base/java/lang/String.html" title="class in java.lang" class="external-link">String</a>&nbsp;mangled)</span></div>
+<div class="block">Demangles a name. If the given string doesn't start with a backslash, then the original
+string is returned. If the string starts with <code>\=</code> (backslash, equals), then that
+portion is always trimmed off, even if the rest of the string isn't mangled.</div>
+<dl class="notes">
+<dt>See Also:</dt>
+<dd>
+<ul class="tag-list">
+<li><a href="#mangle(java.lang.String)"><code>mangle(String)</code></a></li>
+</ul>
+</dd>
+</dl>
 </div>
 </section>
 </li>
