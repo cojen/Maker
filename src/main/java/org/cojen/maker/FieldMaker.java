@@ -70,7 +70,7 @@ public interface FieldMaker extends Maker {
     FieldMaker final_();
 
     /**
-     * Switch this field to be require strict initialization. Fields are non-strict by default.
+     * Switch this field to require strict initialization. Fields are non-strict by default.
      *
      * @return this
      */
