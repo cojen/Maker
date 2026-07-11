@@ -22,7 +22,6 @@ import java.io.IOException;
 import java.io.Serializable;
 
 import java.net.URL;
-import java.net.URLClassLoader;
 
 import java.util.*;
 
@@ -66,8 +65,7 @@ public class TypeTest {
             var cm1 = (TheClassMaker) ClassMaker.begin();
             BaseType type1 = cm1.type();
 
-            var loader = new URLClassLoader(new URL[0]);
-            BaseType type2 = BaseType.begin(loader, cm1, cm1.name());
+            BaseType type2 = BaseType.begin(cm1, cm1.name());
 
             assertNotSame(type1, type2);
             assertEquals(type1, type2);

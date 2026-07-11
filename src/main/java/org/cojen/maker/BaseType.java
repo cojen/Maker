@@ -94,8 +94,8 @@ abstract class BaseType implements Type, Typed {
     /**
      * Called when making a new class.
      */
-    static BaseType begin(ClassLoader loader, TheClassMaker maker, String name) {
-        return new NewClazz(loader, maker, name);
+    static BaseType begin(TheClassMaker maker, String name) {
+        return new NewClazz(maker, name);
     }
 
     static BaseType from(ClassLoader loader, Object type) {
@@ -160,7 +160,7 @@ abstract class BaseType implements Type, Typed {
             } else {
                 break isDescriptor;
             }
-            return new Clazz(loader, null, desc, null);
+            return new Loadable(loader, null, desc);
         }
 
         if (type.charAt(type.length() - 1) == ';') {
@@ -177,7 +177,7 @@ abstract class BaseType implements Type, Typed {
             }
         }
 
-        return new Clazz(loader, name, null, null);
+        return new Loadable(loader, name, null);
     }
 
     static BaseType from(Class type) {
@@ -220,7 +220,7 @@ abstract class BaseType implements Type, Typed {
             return new JavaLang(type);
         }
 
-        return new Clazz(type);
+        return new Loaded(type);
     }
 
     static String makeDescriptor(BaseType returnType, List<BaseType> paramTypes) {
@@ -1316,9 +1316,7 @@ abstract class BaseType implements Type, Typed {
         }
     }
 
-    private static class Clazz extends Obj {
-        private final ClassLoader mLoader;
-        private volatile Class mClass;
+    private static abstract class Clazz extends Obj {
         private volatile String mName;
         private volatile String mDesc;
         protected volatile Boolean mIsInterface;
@@ -1332,17 +1330,11 @@ abstract class BaseType implements Type, Typed {
 
         private volatile ConcurrentHashMap<String, Map<FindKey, Set<Method>>> mFindMethods;
 
-        Clazz(Class clazz) {
-            this(clazz.getClassLoader(), clazz.getName(), null, clazz.isInterface());
-            mClass = clazz;
-        }
-
         /**
          * @param name can be null if desc isn't null
          * @param desc can be null if name isn't null
          */
-        Clazz(ClassLoader loader, String name, String desc, Boolean isInterface) {
-            mLoader = loader;
+        Clazz(String name, String desc, Boolean isInterface) {
             mName = name;
             mDesc = desc;
             mIsInterface = isInterface;
@@ -1432,19 +1424,6 @@ abstract class BaseType implements Type, Typed {
             }
 
             return false;
-        }
-
-        @Override
-        public Class<?> classType() {
-            Class clazz = mClass;
-            if (clazz == null) {
-                try {
-                    mClass = clazz = Class.forName(name(), true, mLoader);
-                } catch (ClassNotFoundException | LinkageError e) {
-                    // Ignore.
-                }
-            }
-            return clazz;
         }
 
         @Override
@@ -1935,7 +1914,48 @@ abstract class BaseType implements Type, Typed {
         }
     }
 
-    private static final class JavaLang extends Clazz {
+    private static class Loadable extends Clazz {
+        private final ClassLoader mLoader;
+        private volatile Class mClass;
+
+        /**
+         * @param name can be null if desc isn't null
+         * @param desc can be null if name isn't null
+         */
+        Loadable(ClassLoader loader, String name, String desc) {
+            super(name, desc, null);
+            mLoader = loader;
+        }
+
+        @Override
+        public Class<?> classType() {
+            Class clazz = mClass;
+            if (clazz == null) {
+                try {
+                    mClass = clazz = Class.forName(name(), true, mLoader);
+                } catch (ClassNotFoundException | LinkageError e) {
+                    // Ignore.
+                }
+            }
+            return clazz;
+        }
+    }
+
+    private static class Loaded extends Clazz {
+        private final Class mClass;
+
+        Loaded(Class clazz) {
+            super(clazz.getName(), null, clazz.isInterface());
+            mClass = clazz;
+        }
+
+        @Override
+        public Class<?> classType() {
+            return mClass;
+        }
+    }
+
+    private static final class JavaLang extends Loaded {
         private volatile BaseType mUnbox;
 
         JavaLang(Class clazz) {
@@ -1973,15 +1993,13 @@ abstract class BaseType implements Type, Typed {
         // to TheClassMaker. They are: Variable, Field, FieldMaker, and TheClassMaker itself.
         private final WeakReference<TheClassMaker> mMakerRef;
 
-        NewClazz(ClassLoader loader, TheClassMaker maker, String name) {
-            super(loader, name, null, false);
+        NewClazz(TheClassMaker maker, String name) {
+            super(name, null, false);
             mMakerRef = new WeakReference<>(maker);
         }
 
         @Override
         public Class<?> classType() {
-            // It doesn't exist yet, so don't try loading it. Doing so causes the ClassLoader
-            // to allocate a lock object, and it might never be reclaimed.
             return null;
         }
 

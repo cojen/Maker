@@ -109,7 +109,7 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
 
         className = injector.reserve(this, className, lookup == null);
 
-        mThisClass = mConstants.addClass(BaseType.begin(injector, this, className));
+        mThisClass = mConstants.addClass(BaseType.begin(this, className));
     }
 
     private TheClassMaker(TheClassMaker from, String className) {

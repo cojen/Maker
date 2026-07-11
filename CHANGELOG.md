@@ -1,6 +1,10 @@
 Changelog
 =========
 
+v2.8.2
+------
+
+
 v2.8.1 (2026-07-05)
 ------
 * Fixed method selection when parameter is an explicit null constant.
