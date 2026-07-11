@@ -1914,7 +1914,7 @@ abstract class BaseType implements Type, Typed {
         }
     }
 
-    private static class Loadable extends Clazz {
+    private static final class Loadable extends Clazz {
         private final ClassLoader mLoader;
         private volatile Class mClass;
 

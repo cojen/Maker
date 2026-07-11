@@ -25,7 +25,7 @@ import java.util.Arrays;
  *
  * @author Brian S O'Neill
  */
-class StackMapTable extends Attribute {
+final class StackMapTable extends Attribute {
     private Frame mFirstFrame, mLastFrame;
     private int mNumFrames;
     private BytesOut mFinished;

@@ -227,7 +227,7 @@ class ModuleAttribute extends Attribute {
         }
     }
 
-    static class Packages extends Attribute {
+    static final class Packages extends Attribute {
         private final ConstantPool.C_String[] mPackages;
 
         Packages(ConstantPool cp, Set<String> packages) {

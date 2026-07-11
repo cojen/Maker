@@ -70,7 +70,7 @@ abstract class Attribute extends Attributed {
      */
     abstract void writeDataTo(BytesOut out) throws IOException;
 
-    static class Empty extends Attribute {
+    static final class Empty extends Attribute {
         Empty(ConstantPool cp, String name) {
             super(cp, name);
         }
@@ -85,7 +85,7 @@ abstract class Attribute extends Attributed {
         }
     }
 
-    static class Composite extends Attribute {
+    static final class Composite extends Attribute {
         private final Attribute[] mEntries;
 
         /**
@@ -113,7 +113,7 @@ abstract class Attribute extends Attributed {
         }
     }
 
-    static class Bytes extends Attribute {
+    static final class Bytes extends Attribute {
         private final byte[] mBytes;
 
         Bytes(ConstantPool cp, String name, byte[] bytes) {
@@ -132,7 +132,7 @@ abstract class Attribute extends Attributed {
         }
     }
 
-    static class Constant extends Attribute {
+    static final class Constant extends Attribute {
         private final ConstantPool.Constant mConstant;
 
         Constant(ConstantPool cp, String name, ConstantPool.Constant constant) {
@@ -220,7 +220,7 @@ abstract class Attribute extends Attributed {
         }
     }
 
-    static class PermittedSubclasses extends ConstantList {
+    static final class PermittedSubclasses extends ConstantList {
         PermittedSubclasses(ConstantPool cp, Iterable<ConstantPool.C_Class> subclasses) {
             super(cp, "PermittedSubclasses");
             for (ConstantPool.C_Class subclass : subclasses) {
@@ -229,7 +229,7 @@ abstract class Attribute extends Attributed {
         }
     }
 
-    static class Code extends Attribute {
+    static final class Code extends Attribute {
         private final int mMaxStack, mMaxLocals;
         private final byte[] mCode;
         private final int mCodeLen;
@@ -286,7 +286,7 @@ abstract class Attribute extends Attributed {
         }
     }
 
-    static class LineNumberTable extends Attribute {
+    static final class LineNumberTable extends Attribute {
         private int[] mTable;
         private int mLength;
 
@@ -330,7 +330,7 @@ abstract class Attribute extends Attributed {
         }
     }
 
-    static class LocalVariableTable extends ListAttribute<LocalVariableTable.Entry> {
+    static final class LocalVariableTable extends ListAttribute<LocalVariableTable.Entry> {
         private int mMaxOffset;
 
         LocalVariableTable(ConstantPool cp, String name) {
@@ -383,7 +383,7 @@ abstract class Attribute extends Attributed {
         }
     }
 
-    static class BootstrapMethods extends Attribute {
+    static final class BootstrapMethods extends Attribute {
         private final LinkedHashMap<Entry, Entry> mEntries;
         private int mLength;
 
@@ -449,7 +449,7 @@ abstract class Attribute extends Attributed {
         }
     }
 
-    static class EnclosingMethod extends Attribute {
+    static final class EnclosingMethod extends Attribute {
         private final ConstantPool.C_Class mHostClass;
         private final ConstantPool.C_NameAndType mHostMethod;
 
@@ -473,7 +473,7 @@ abstract class Attribute extends Attributed {
         }
     }
 
-    static class InnerClasses extends ListAttribute<InnerClasses.Entry> {
+    static final class InnerClasses extends ListAttribute<InnerClasses.Entry> {
         private HashMap<String, Integer> mClassNumbers;
 
         InnerClasses(ConstantPool cp) {
@@ -569,14 +569,14 @@ abstract class Attribute extends Attributed {
         }
     }
 
-    static class TypeAnnotations extends Annotations {
+    static final class TypeAnnotations extends Annotations {
         TypeAnnotations(ConstantPool cp, boolean visible) {
             super(cp, visible ? "RuntimeVisibleTypeAnnotations"
                   : "RuntimeInvisibleTypeAnnotations");
         }
     }
 
-    static class ParameterAnnotations extends Attribute {
+    static final class ParameterAnnotations extends Attribute {
         private final Entry[] mEntries;
 
         ParameterAnnotations(ConstantPool cp, boolean visible, int numParams) {
@@ -638,7 +638,7 @@ abstract class Attribute extends Attributed {
         }
     }
 
-    static class AnnotationDefault extends Attribute {
+    static final class AnnotationDefault extends Attribute {
         private final TheAnnotationMaker.Element mElement;
 
         AnnotationDefault(ConstantPool cp, TheAnnotationMaker.Element element) {
@@ -657,7 +657,7 @@ abstract class Attribute extends Attributed {
         }
     }
 
-    static class MethodParameters extends Attribute {
+    static final class MethodParameters extends Attribute {
         private final ConstantPool.C_UTF8[] mNames;
         private final int[] mFlags;
 
@@ -695,7 +695,7 @@ abstract class Attribute extends Attributed {
         }
     }
 
-    static class Record extends ListAttribute<Record.Entry> {
+    static final class Record extends ListAttribute<Record.Entry> {
         Record(ConstantPool cp) {
             super(cp, "Record");
         }
@@ -735,7 +735,7 @@ abstract class Attribute extends Attributed {
             entry.writeAttributesTo(out);
         }
 
-        static class Entry extends Attributed {
+        static final class Entry extends Attributed {
             final ConstantPool.C_UTF8 mName, mDescriptor;
 
             Entry(ConstantPool cp, ConstantPool.C_UTF8 name, ConstantPool.C_UTF8 descriptor) {
