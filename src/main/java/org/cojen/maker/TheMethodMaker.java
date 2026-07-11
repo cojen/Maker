@@ -3293,7 +3293,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
     }
 
-    private static class Overflow {
+    private static final class Overflow {
         final Overflow mPrev;
         final Op mOp;
         final BitSet mVarUsage;
@@ -3683,7 +3683,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     /**
      * Special label which decrements the tracked stack but doesn't actually emit a pop opcode.
      */
-    class PopLab extends Lab {
+    final class PopLab extends Lab {
         PopLab() {
         }
 
@@ -3701,7 +3701,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     /**
      * Exception handler catch label.
      */
-    class HandlerLab extends Lab {
+    final class HandlerLab extends Lab {
         private final BaseType mCatchType;
         private final int mSmCatchCode;
 
@@ -3764,7 +3764,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
     }
 
-    static class CompareOp extends BytecodeOp {
+    static final class CompareOp extends BytecodeOp {
         CompareOp(byte op) {
             super(op, 2);
         }
@@ -3776,7 +3776,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
     }
 
-    static class ReturnOp extends BytecodeOp {
+    static final class ReturnOp extends BytecodeOp {
         ReturnOp(byte op, int stackPop) {
             super(op, stackPop);
         }
