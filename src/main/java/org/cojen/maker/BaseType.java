@@ -28,6 +28,7 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -1324,15 +1325,16 @@ abstract class BaseType implements Type, Typed {
         protected volatile BaseType mSuperType;
         protected volatile Set<BaseType> mInterfaces;
 
-        private volatile ConcurrentHashMap<String, Field> mFields;
+        private volatile Map<String, Field> mFields;
 
-        private volatile ConcurrentHashMap<MethodKey, Method> mMethods;
+        private volatile Map<MethodKey, Method> mMethods;
 
         private volatile ConcurrentHashMap<String, Map<FindKey, Set<Method>>> mFindMethods;
 
         /**
          * @param name can be null if desc isn't null
          * @param desc can be null if name isn't null
+         * @param isInterface can be null if not yet known
          */
         Clazz(String name, String desc, Boolean isInterface) {
             mName = name;
@@ -1562,7 +1564,7 @@ abstract class BaseType implements Type, Typed {
         }
 
         private Map<String, Field> initFields() {
-            var fields = new ConcurrentHashMap<String, Field>();
+            var fields = new HashMap<String, Field>();
 
             Class clazz = classType();
             if (clazz != null) {
@@ -1825,7 +1827,7 @@ abstract class BaseType implements Type, Typed {
         }
 
         private Map<MethodKey, Method> initMethods() {
-            var methods = new ConcurrentHashMap<MethodKey, Method>();
+            var methods = new HashMap<MethodKey, Method>();
 
             Class clazz = classType();
             if (clazz != null) {
