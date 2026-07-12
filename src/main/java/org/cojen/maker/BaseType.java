@@ -531,6 +531,25 @@ abstract class BaseType implements Type, Typed {
         return Collections.emptyMap();
     }
 
+    Map<MethodKey, Method> allMethods() {
+        var map = new HashMap<MethodKey, Method>();
+        allMethods(map);
+        return map;
+    }
+
+    void allMethods(Map<MethodKey, Method> map) {
+        for (BaseType t : interfaces()) {
+            t.allMethods(map);
+        }
+
+        BaseType t = superType();
+        if (t != null) {
+            t.allMethods(map);
+        }
+
+        map.putAll(methods());
+    }
+
     /**
      * Returns all the best candidate methods that match the given criteria. Parameter type
      * conversion might be required to call any of the methods.
@@ -1317,7 +1336,7 @@ abstract class BaseType implements Type, Typed {
         }
     }
 
-    private static abstract class Clazz extends Obj {
+    static abstract class Clazz extends Obj {
         private volatile String mName;
         private volatile String mDesc;
         protected volatile Boolean mIsInterface;
@@ -1325,9 +1344,9 @@ abstract class BaseType implements Type, Typed {
         protected volatile BaseType mSuperType;
         protected volatile Set<BaseType> mInterfaces;
 
-        private volatile Map<String, Field> mFields;
+        protected volatile Map<String, Field> mFields;
 
-        private volatile Map<MethodKey, Method> mMethods;
+        protected volatile Map<MethodKey, Method> mMethods;
 
         private volatile ConcurrentHashMap<String, Map<FindKey, Set<Method>>> mFindMethods;
 
@@ -1343,7 +1362,7 @@ abstract class BaseType implements Type, Typed {
         }
 
         @Override
-        public final boolean isInterface() {
+        public boolean isInterface() {
             Boolean is = mIsInterface;
             if (is == null) {
                 Class clazz = classType();
@@ -1563,7 +1582,7 @@ abstract class BaseType implements Type, Typed {
             throw new IllegalStateException("Conflicting field exists: " + existing);
         }
 
-        private Map<String, Field> initFields() {
+        protected Map<String, Field> initFields() {
             var fields = new HashMap<String, Field>();
 
             Class clazz = classType();
@@ -1826,7 +1845,7 @@ abstract class BaseType implements Type, Typed {
             throw new IllegalStateException("Conflicting method exists: " + existing);
         }
 
-        private Map<MethodKey, Method> initMethods() {
+        protected Map<MethodKey, Method> initMethods() {
             var methods = new HashMap<MethodKey, Method>();
 
             Class clazz = classType();

@@ -3,7 +3,7 @@ Changelog
 
 v2.8.2
 ------
-
+* Added support for externally specified types.
 
 v2.8.1 (2026-07-05)
 ------

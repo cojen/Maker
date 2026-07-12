@@ -72,6 +72,16 @@ public interface Type {
     }
 
     /**
+     * Define a type for a class which isn't loaded by a ClassLoader.
+     *
+     * @param name fully qualified class name
+     * @param provider provides type components as needed
+     */
+    static Type external(String name, Provider provider) {
+        return new ExternalType(name, provider);
+    }
+
+    /**
      * Returns the name of this type in Java syntax.
      */
     String name();
@@ -169,4 +179,49 @@ public interface Type {
      * Returns this type without any annotations.
      */
     Type unannotated();
+
+    /**
+     * Provides components of an external type definition as they're needed. The methods of
+     * this interface act upon a special {@link ClassMaker} instance, which isn't fully
+     * functional. Calling unneeded methods will have no effect, or they may throw a suitable
+     * exception.
+     *
+     * @see Type#external
+     */
+    public static interface Provider {
+        /**
+         * Initialize the external type by specifying the type hierarchy and access modifiers.
+         *
+         * @param cm a special {@code ClassMaker} instance which is only suitable for
+         * specifying external types
+         */
+        void init(ClassMaker cm);
+
+        /**
+         * Fill out the external type by adding all the fields and setting their access
+         * modifiers.
+         *
+         * @param cm a special {@code ClassMaker} instance which is only suitable for
+         * specifying external types
+         */
+        void addFields(ClassMaker cm);
+
+        /**
+         * Fill out the external type by adding all the methods and setting their access
+         * modifiers. Attempting to add any code to the methods will have no effect.
+         *
+         * @param cm a special {@code ClassMaker} instance which is only suitable for
+         * specifying external types
+         */
+        void addMethods(ClassMaker cm);
+
+        /**
+         * Fill out the external type by adding all the constructors and setting their access
+         * modifiers. Attempting to add any code to the constructors will have no effect.
+         *
+         * @param cm a special {@code ClassMaker} instance which is only suitable for
+         * specifying external types
+         */
+        void addConstructors(ClassMaker cm);
+    }
 }
