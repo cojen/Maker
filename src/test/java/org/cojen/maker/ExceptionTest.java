@@ -410,4 +410,45 @@ public class ExceptionTest {
             assertEquals("hello", method.invoke(null, new IllegalStateException("hello")));
         }
     }
+
+    @Test
+    public void emptyCatch() throws Exception {
+        ClassMaker cm = ClassMaker.begin().public_();
+
+        {
+            MethodMaker mm = cm.addMethod(int.class, "a", int.class).public_().static_();
+            var result = mm.param(0).add(1);
+            Label a = mm.label().here();
+            mm.finally_(a, () -> {});
+            mm.return_(result);
+        }
+
+        {
+            MethodMaker mm = cm.addMethod(int.class, "b", int.class).public_().static_();
+            Label a = mm.label().here();
+            var result = mm.param(0).add(1);
+            Label b = mm.label().here();
+            mm.finally_(b, () -> {});
+            mm.return_(result);
+            mm.catch_(a, b, (Object) null);
+            result.clear();
+            mm.return_(result);
+        }
+
+        {
+            MethodMaker mm = cm.addMethod(int.class, "c", int.class).public_().static_();
+            mm.return_(mm.param(0));
+            Label a = mm.label().here();
+            mm.return_(-1);
+            Label b = mm.label().here();
+            mm.catch_(a, b, Exception.class);
+            mm.return_(-2);
+        }
+
+        Class<?> clazz = cm.finish();
+
+        assertEquals(11, clazz.getMethod("a", int.class).invoke(null, 10));
+        assertEquals(12, clazz.getMethod("b", int.class).invoke(null, 11));
+        assertEquals(12, clazz.getMethod("c", int.class).invoke(null, 12));
+    }
 }

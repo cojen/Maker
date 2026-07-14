@@ -1213,12 +1213,15 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
             @Override
             Op flow(Flow flow, Op prev) {
-                // The end label isn't reached normally, but it cannot be dropped. An address
-                // must be captured to build the exception table.
-                endLab.markVisited();
+                // Check if the handled block has anything in it.
+                if (mNext != endLab) {
+                    // The end label isn't reached normally, but it cannot be dropped. An
+                    // address must be captured to build the exception table.
+                    endLab.markVisited();
 
-                // Flow into the handler itself.
-                flow.run(handlerLab);
+                    // Flow into the handler itself.
+                    flow.run(handlerLab);
+                }
 
                 // Return the first operation in the handled block.
                 return mNext;
