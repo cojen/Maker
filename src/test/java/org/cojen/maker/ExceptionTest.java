@@ -425,6 +425,15 @@ public class ExceptionTest {
 
         {
             MethodMaker mm = cm.addMethod(int.class, "b", int.class).public_().static_();
+            var result = mm.param(0).add(1);
+            Label a = mm.label().here();
+            mm.var(int.class).clear();
+            mm.finally_(a, () -> {});
+            mm.return_(result);
+        }
+
+        {
+            MethodMaker mm = cm.addMethod(int.class, "c", int.class).public_().static_();
             Label a = mm.label().here();
             var result = mm.param(0).add(1);
             Label b = mm.label().here();
@@ -436,7 +445,7 @@ public class ExceptionTest {
         }
 
         {
-            MethodMaker mm = cm.addMethod(int.class, "c", int.class).public_().static_();
+            MethodMaker mm = cm.addMethod(int.class, "d", int.class).public_().static_();
             mm.return_(mm.param(0));
             Label a = mm.label().here();
             mm.return_(-1);
@@ -448,7 +457,8 @@ public class ExceptionTest {
         Class<?> clazz = cm.finish();
 
         assertEquals(11, clazz.getMethod("a", int.class).invoke(null, 10));
-        assertEquals(12, clazz.getMethod("b", int.class).invoke(null, 11));
-        assertEquals(12, clazz.getMethod("c", int.class).invoke(null, 12));
+        assertEquals(11, clazz.getMethod("b", int.class).invoke(null, 10));
+        assertEquals(12, clazz.getMethod("c", int.class).invoke(null, 11));
+        assertEquals(12, clazz.getMethod("d", int.class).invoke(null, 12));
     }
 }

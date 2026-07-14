@@ -198,10 +198,16 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             Iterator<Handler> it = mExceptionHandlers.iterator();
             while (it.hasNext()) {
                 Handler h = it.next();
-                if (!h.mEndLab.isPositioned()) {
+                Lab endLab = h.mEndLab;
+                if (!endLab.isPositioned()) {
                     throw finishFail("Unpositioned exception handler end label");
                 }
-                if (!h.mHandlerLab.isVisited()) {
+                // Note: h.mStartLab.mNext is expected to be the startOp defined in the catch_
+                // method, which shouldn't be null. If the next op after that is the same as
+                // endLab, then the handler block might have become empty as a result of
+                // unnecessary ops being removed. The exception handler code will still be
+                // generated (if it was visited), but it will never be reached.
+                if (!h.mHandlerLab.isVisited() || h.mStartLab.mNext.mNext == endLab) {
                     it.remove();
                 }
             }
