@@ -2327,7 +2327,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
         if (value == null) {
             if (type != null && type.isPrimitive()) {
-                throw new IllegalStateException("Cannot store null into primitive variable");
+                throw new IllegalStateException("Cannot store null into a primitive variable");
             }
             constantType = Null.THE;
         } else if (value instanceof String str) {
