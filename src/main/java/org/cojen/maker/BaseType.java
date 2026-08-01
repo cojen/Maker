@@ -284,7 +284,7 @@ abstract class BaseType implements Type, Typed {
      */
     abstract int typeCode();
 
-    int slotWidth() {
+    final int slotWidth() {
         return switch (typeCode()) {
             default -> 1;
             case T_DOUBLE, T_LONG -> 2;
@@ -531,13 +531,13 @@ abstract class BaseType implements Type, Typed {
         return Collections.emptyMap();
     }
 
-    Map<MethodKey, Method> allMethods() {
+    final Map<MethodKey, Method> allMethods() {
         var map = new HashMap<MethodKey, Method>();
         allMethods(map);
         return map;
     }
 
-    void allMethods(Map<MethodKey, Method> map) {
+    final void allMethods(Map<MethodKey, Method> map) {
         for (BaseType t : interfaces()) {
             t.allMethods(map);
         }
@@ -1410,7 +1410,7 @@ abstract class BaseType implements Type, Typed {
         }
 
         @Override
-        boolean isAssignableFrom(BaseType other) {
+        final boolean isAssignableFrom(BaseType other) {
             if (other == Null.THE || this.equals(other)) {
                 return true;
             }
@@ -1453,13 +1453,13 @@ abstract class BaseType implements Type, Typed {
         }
 
         @Override
-        boolean isHidden() {
+        final boolean isHidden() {
             Class clazz = classType();
             return clazz != null && clazz.isHidden();
         }
 
         @Override
-        BaseType nonHiddenBase() {
+        final BaseType nonHiddenBase() {
             Class clazz = classType();
             return (clazz == null || !clazz.isHidden()) ? this : findNonHiddenBase(clazz);
         }
@@ -1535,7 +1535,7 @@ abstract class BaseType implements Type, Typed {
         }
 
         @Override
-        Map<String, Field> fields() {
+        final Map<String, Field> fields() {
             Map<String, Field> fields = mFields;
             if (fields == null) {
                 synchronized (this) {
@@ -1549,12 +1549,12 @@ abstract class BaseType implements Type, Typed {
         }
 
         @Override
-        Field defineField(int flags, BaseType type, String name) {
+        final Field defineField(int flags, BaseType type, String name) {
             return defineField(false, flags, type, name);
         }
 
         @Override
-        Field inventField(int flags, BaseType type, String name) {
+        final Field inventField(int flags, BaseType type, String name) {
             return defineField(true, flags, type, name);
         }
 
@@ -1599,7 +1599,7 @@ abstract class BaseType implements Type, Typed {
         }
 
         @Override
-        Map<MethodKey, Method> methods() {
+        final Map<MethodKey, Method> methods() {
             Map<MethodKey, Method> methods = mMethods;
             if (methods == null) {
                 synchronized (this) {
@@ -1613,9 +1613,9 @@ abstract class BaseType implements Type, Typed {
         }
 
         @Override
-        Set<Method> findMethods(String methodName, BaseType[] params,
-                                int inherit, int staticAllowed,
-                                BaseType specificReturnType, BaseType[] specificParamTypes)
+        final Set<Method> findMethods(String methodName, BaseType[] params,
+                                      int inherit, int staticAllowed,
+                                      BaseType specificReturnType, BaseType[] specificParamTypes)
         {
             BaseType type = this;
 
@@ -1806,12 +1806,16 @@ abstract class BaseType implements Type, Typed {
         }
 
         @Override
-        Method defineMethod(int flags, BaseType returnType, String name, BaseType... paramTypes) {
+        final Method defineMethod(int flags, BaseType returnType, String name,
+                                  BaseType... paramTypes)
+        {
             return defineMethod(false, flags, returnType, name, paramTypes);
         }
 
         @Override
-        Method inventMethod(int flags, BaseType returnType, String name, BaseType... paramTypes) {
+        final Method inventMethod(int flags, BaseType returnType, String name,
+                                  BaseType... paramTypes)
+        {
             return defineMethod(true, flags, returnType, name, paramTypes);
         }
 
@@ -1877,13 +1881,13 @@ abstract class BaseType implements Type, Typed {
         }
 
         @Override
-        public boolean equals(Object obj) {
+        public final boolean equals(Object obj) {
             return obj == this || baseType(obj) instanceof Clazz other
                 && name().equals(other.name());
         }
 
         @Override
-        public int hashCode() {
+        public final int hashCode() {
             return name().hashCode();
         }
 
@@ -1971,7 +1975,7 @@ abstract class BaseType implements Type, Typed {
         }
 
         @Override
-        public Class<?> classType() {
+        public final Class<?> classType() {
             return mClass;
         }
     }
