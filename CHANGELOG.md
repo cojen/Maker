@@ -1,7 +1,7 @@
 Changelog
 =========
 
-v2.8.2
+v2.8.2 (2026-08-07)
 ------
 * Fixed code generation of empty catch blocks (no exception table entry should be generated).
 * Added support for externally specified types.
