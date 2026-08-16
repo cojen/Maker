@@ -24,7 +24,7 @@ import java.lang.reflect.Modifier;
  * @author Brian S O'Neill
  */
 final class TheFieldMaker extends ClassMember implements FieldMaker, Typed {
-    private final BaseType.Field mField;
+    final BaseType.Field mField;
 
     TheFieldMaker(TheClassMaker classMaker, BaseType.Field field) {
         super(classMaker, field.name(), field.type().descriptor());
@@ -65,6 +65,13 @@ final class TheFieldMaker extends ClassMember implements FieldMaker, Typed {
     @Override
     public FieldMaker final_() {
         mModifiers = Modifiers.toFinal(mModifiers);
+        mField.toFinal();
+        return this;
+    }
+
+    @Override
+    public FieldMaker strict() {
+        mModifiers = Modifiers.toStrict(mModifiers);
         mField.toFinal();
         return this;
     }

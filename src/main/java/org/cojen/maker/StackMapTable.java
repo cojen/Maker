@@ -19,6 +19,7 @@ package org.cojen.maker;
 import java.io.IOException;
 
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * Builds the StackMapTable attribute.
@@ -43,9 +44,18 @@ final class StackMapTable extends Attribute {
      * @param address code address the new frame refers to; must not be lower any other frame
      * @param localCodes can be null
      * @param stackCodes can be null
+     * @param unsetFields defines the unset strict fields; can be null
      */
-    void add(int address, int[] localCodes, int[] stackCodes) {
-        Frame frame = new Frame(address, localCodes, stackCodes);
+    void add(int address, int[] localCodes, int[] stackCodes,
+             List<ConstantPool.C_Field> unsetFields)
+    {
+        Frame frame;
+        if (unsetFields == null) {
+            frame = new Frame(address, localCodes, stackCodes);
+        } else {
+            frame = new EarlyLarvalFrame(address, localCodes, stackCodes, unsetFields);
+        }
+
         Frame last = mLastFrame;
         if (last == null) {
             mFirstFrame = frame;
@@ -143,7 +153,7 @@ final class StackMapTable extends Attribute {
             mStackCodes = stackCodes;
         }
 
-        private void writeTo(Frame prev, BytesOut out) throws IOException {
+        void writeTo(Frame prev, BytesOut out) throws IOException {
             int offsetDelta;
             if (prev.mAddress < 0) {
                 if (prev.mAddress == Integer.MIN_VALUE) {
@@ -241,6 +251,27 @@ final class StackMapTable extends Attribute {
                 return to.length - from.length;
             }
             return Integer.MIN_VALUE;
+        }
+    }
+
+    private static final class EarlyLarvalFrame extends Frame {
+        private final List<ConstantPool.C_Field> mUnsetFields;
+
+        EarlyLarvalFrame(int address, int[] localCodes, int[] stackCodes,
+                         List<ConstantPool.C_Field> unsetFields)
+        {
+            super(address, localCodes, stackCodes);
+            mUnsetFields = unsetFields;
+        }
+
+        @Override
+        void writeTo(Frame prev, BytesOut out) throws IOException {
+            out.writeByte(246);
+            out.writeShort(mUnsetFields.size());
+            for (ConstantPool.C_Field field : mUnsetFields) {
+                out.writeShort(field.mNameAndType.mIndex);
+            }
+            super.writeTo(prev, out);
         }
     }
 }

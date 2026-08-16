@@ -275,6 +275,14 @@ final class ExternalType extends BaseType.Clazz implements ClassMaker, Annotatio
     }
 
     @Override
+    public ClassMaker valueClass() {
+        return this;
+    }
+
+    public void addLoadableType(Object type) {
+    }
+
+    @Override
     public ClassMaker sourceFile(String fileName) {
         return this;
     }
@@ -468,7 +476,7 @@ final class ExternalType extends BaseType.Clazz implements ClassMaker, Annotatio
 
         @Override
         public final MMaker abstract_() {
-            member.mFlags = Modifiers.toAbstract(member.mFlags);
+            member.mFlags = Modifiers.toAbstractClass(member.mFlags);
             return this;
         }
 

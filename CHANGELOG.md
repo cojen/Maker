@@ -1,6 +1,10 @@
 Changelog
 =========
 
+v2.9.0
+------
+* Added support for value objects, a preview feature described by JEP 401 and JEP 539.
+
 v2.8.2 (2026-08-07)
 ------
 * Fixed code generation of empty catch blocks (no exception table entry should be generated).

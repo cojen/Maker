@@ -29,7 +29,6 @@ import java.lang.reflect.Modifier;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.BitSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -93,6 +92,9 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     private int mStackSize;
     private int mMaxStackSlot;
 
+    // Maps strict fields to negative BitList indexes.
+    private Map<ConstantPool.C_Field, Integer> mStrictFieldMap;
+
     // Count of labels which need to be positioned to define all branch targets.
     private int mUnpositionedLabels;
 
@@ -155,10 +157,12 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
         positionReturnLabel();
 
+        String methodName = name();
+
         if (flowsThroughEnd(mLastOp)) {
             if (mMethod.returnType() == VOID) {
                 if (mLastOp == null &&
-                    "<init>".equals(name()) && mMethod.paramTypes().length == 0)
+                    "<init>".equals(methodName) && mMethod.paramTypes().length == 0)
                 {
                     invokeSuperConstructor();
                 }
@@ -173,8 +177,24 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             initParams();
         }
 
+        Map<ConstantPool.C_Field, Integer> strictFieldMap = Map.of();
+
+        if ("<init>".equals(methodName)) {
+            for (TheFieldMaker field : mClassMaker.fields()) {
+                if (Modifiers.isStrictInstance(field.mModifiers)) {
+                    if (strictFieldMap.isEmpty()) {
+                        strictFieldMap = new LinkedHashMap<>();
+                    }
+                    ConstantPool.C_Field ref = mConstants.addField(field.mField);
+                    strictFieldMap.put(ref, strictFieldMap.size() - 1);
+                }
+            }
+        }
+
+        mStrictFieldMap = strictFieldMap;
+
         List<LocalVar> varList = new ArrayList<>();
-        BitSet varUsage = new BitSet();
+        BitList varUsage = new BitList(strictFieldMap.size());
 
         for (LocalVar param : mParams) {
             varList.add(param);
@@ -318,6 +338,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         mReturnLabel = null;
         mVars = null;
         mStack = null;
+        mStrictFieldMap = null;
 
         if (mThisVar instanceof InitThisVar && mThisVar.smCode() == SM_UNINIT_THIS) {
             throw finishFail("Super or this constructor is never invoked");
@@ -469,7 +490,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
     @Override
     public MethodMaker abstract_() {
-        mModifiers = Modifiers.toAbstract(mModifiers);
+        mModifiers = Modifiers.toAbstractMethod(mModifiers);
         return this;
     }
 
@@ -3189,7 +3210,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         final List<LocalVar> mVarList;
 
         // Bits are set for variables known to be available at the current flow position.
-        BitSet mVarUsage;
+        BitList mVarUsage;
 
         // Is used to estimate the final code size.
         int mOpCount;
@@ -3199,7 +3220,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         private int mDepth;
         private Overflow mOverflow;
 
-        Flow(List<LocalVar> varList, BitSet varUsage) {
+        Flow(List<LocalVar> varList, BitList varUsage) {
             mVarList = varList;
             mVarUsage = varUsage;
         }
@@ -3210,7 +3231,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
          * @param op always expected to be a Lab except for the very first op
          */
         void run(Op op) {
-            final BitSet original = (BitSet) mVarUsage.clone();
+            final BitList original = mVarUsage.clone();
 
             if (mDepth >= 100) {
                 // Prevent stack overflow.
@@ -3300,14 +3321,18 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             LocalVar last = vars.get(vars.size() - 1);
             return last.mSlot + last.slotWidth();
         }
+
+        TheMethodMaker methodMaker() {
+            return TheMethodMaker.this;
+        }
     }
 
     private static final class Overflow {
         final Overflow mPrev;
         final Op mOp;
-        final BitSet mVarUsage;
+        final BitList mVarUsage;
 
-        Overflow(Overflow prev, Op op, BitSet varUsage) {
+        Overflow(Overflow prev, Op op, BitList varUsage) {
             mPrev = prev;
             mOp = op;
             mVarUsage = varUsage;
@@ -3382,7 +3407,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         private int mTrackCount;
 
         // Bits are set for variables known to be available at this label.
-        private BitSet mVarUsage;
+        private BitList mVarUsage;
 
         Lab() {
         }
@@ -3465,10 +3490,10 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
             if (isTarget()) {
                 LocalVar[] vars = m.mVars;
-                BitSet usage = mVarUsage;
+                BitList usage = mVarUsage;
 
-                // First figure out the number of local codes to fill in. Assume that caller
-                // has already sorted the variables by slot.
+                // First figure out the number of local codes to fill in. Assume that the
+                // caller has already sorted the variables by slot.
 
                 int numCodes = 0;
                 for (int i=vars.length; --i>=0; ) {
@@ -3508,7 +3533,21 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
                 int[] stackCodes = stackCodes(m);
 
-                m.mStackMapTable.add(mAddress, localCodes, stackCodes);
+                List<ConstantPool.C_Field> unsetFields = null;
+
+                Map<ConstantPool.C_Field, Integer> strictFieldMap = m.mStrictFieldMap;
+
+                if (!strictFieldMap.isEmpty()) {
+                    unsetFields = new ArrayList<>(strictFieldMap.size());
+
+                    for (Map.Entry<ConstantPool.C_Field, Integer> e : strictFieldMap.entrySet()) {
+                        if (!usage.get(e.getValue())) {
+                            unsetFields.add(e.getKey());
+                        }
+                    }
+                }
+
+                m.mStackMapTable.add(mAddress, localCodes, stackCodes, unsetFields);
             }
 
             if (mTrackOffsets != null && mTrackCount != 0) {
@@ -3538,7 +3577,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
         @Override
         Op flow(Flow flow, Op prev) {
-            mVarUsage = (BitSet) flow.mVarUsage.clone();
+            mVarUsage = flow.mVarUsage.clone();
             return mNext;
         }
 
@@ -3557,7 +3596,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             }
             // Variable usage at this label changed, so the code that follows will need to be
             // revisited.
-            mVarUsage = (BitSet) flow.mVarUsage.clone();
+            mVarUsage = flow.mVarUsage.clone();
             return mNext;
         }
 
@@ -3987,6 +4026,19 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
+        Op flow(Flow flow, Op prev) {
+            byte op = op();
+            if (op == PUTFIELD) {
+                Integer index = flow.methodMaker().mStrictFieldMap.get(mFieldRef);
+                if (index != null) {
+                    flow.mVarUsage.set(index);
+                }
+            }
+
+            return mNext;
+        }
+
+        @Override
         boolean isSimplePush() {
             return op() == GETSTATIC && mFieldRef.mField.type().slotWidth() == 1;
         }
@@ -4164,10 +4216,9 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             int slot = var.mSlot;
 
             if (slot < 0) {
-                List<LocalVar> varList = flow.mVarList;
                 slot = flow.nextSlot();
                 var.mSlot = slot;
-                varList.add(var);
+                flow.mVarList.add(var);
             }
 
             flow.mVarUsage.set(slot);

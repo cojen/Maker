@@ -59,7 +59,7 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
 
     private ConstantPool.C_Class mSuperClass;
 
-    int mModifiers;
+    int mModifiers = Modifiers.ACC_IDENTITY;
 
     private Set<ConstantPool.C_Class> mInterfaces;
     private LinkedHashMap<String, TheFieldMaker> mFields;
@@ -72,6 +72,8 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
     private Attribute.ConstantList mNestMembers;
 
     private Attribute.InnerClasses mInnerClasses;
+
+    private Attribute.LoadableDescriptors mLoadableDescriptors;
 
     private Set<ConstantPool.C_Class> mPermittedSubclasses;
 
@@ -178,7 +180,7 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
     @Override
     public ClassMaker abstract_() {
         checkFinished();
-        mModifiers = Modifiers.toAbstract(mModifiers);
+        mModifiers = Modifiers.toAbstractClass(mModifiers);
         return this;
     }
 
@@ -332,6 +334,10 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
         }
 
         return fm;
+    }
+
+    Collection<TheFieldMaker> fields() {
+        return mFields == null ? Collections.emptySet() : mFields.values();
     }
 
     @Override
@@ -498,6 +504,25 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
             addAttribute(mInnerClasses);
         }
         return mInnerClasses;
+    }
+
+    @Override
+    public ClassMaker valueClass() {
+        checkFinished();
+        mModifiers = Modifiers.toValueClass(mModifiers);
+        return this;
+    }
+
+    @Override
+    public void addLoadableType(Object type) {
+        Type tType = typeFrom(type);
+
+        if (mLoadableDescriptors == null) {
+            mLoadableDescriptors = new Attribute.LoadableDescriptors(mConstants);
+            addAttribute(mLoadableDescriptors);
+        }
+
+        mLoadableDescriptors.add(tType);
     }
 
     @Override
@@ -734,6 +759,20 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
         superClass();
 
         int version = 0x0000_003d; // Java 17.
+
+        if (Modifiers.isValueClass(mModifiers)) {
+            version = 0xffff_0048; // Java 28 EA
+
+            if (mFields != null) {
+                // Force all the instance fields to be final and strict.
+                for (TheFieldMaker field : mFields.values()) {
+                    int modifiers = field.mModifiers;
+                    if (!Modifier.isStatic(modifiers)) {
+                        field.mModifiers = modifiers | (Modifier.FINAL | 0x0800);
+                    }
+                }
+            }
+        }
 
         if (mRecordCtors != null) {
             TheMethodMaker.doFinish(mRecordCtors);

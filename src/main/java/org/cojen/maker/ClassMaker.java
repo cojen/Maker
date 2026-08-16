@@ -387,7 +387,7 @@ public interface ClassMaker extends Maker {
      */
     ClassMaker addInnerClass(String className);
 
-    /**
+	/**
      * Add an inner class to this class, with an explicitly specified class name.
      *
      * <p>The returned {@code ClassMaker} instance isn't attached to this maker, and so it can
@@ -400,6 +400,25 @@ public interface ClassMaker extends Maker {
      * @see #another
      */
     ClassMaker addExplicitInnerClass(String fullName, String className);
+
+    /**
+     * Switch this class to be a value class. All instance fields of values classes will
+     * automatically be {@link FieldMaker#final_ final} and {@link FieldMaker#strict strict}.
+     *
+     * @return this
+     * @see #addLoadableType
+     * @see <a href="https://openjdk.org/jeps/401">JEP 401: Value Objects (Preview)</a>
+     */
+    ClassMaker valueClass();
+
+    /**
+     * Indicate that the given type should be loaded early, which is a useful feature for the
+     * fields of {@link #valueClass value classes}.
+     *
+     * @see <a href="package-summary.html#types-and-values-heading">Types and Values</a>
+     * @see <a href="https://openjdk.org/jeps/401">JEP 401: Value Objects (Preview)</a>
+     */
+    void addLoadableType(Object type);
 
     /**
      * Set the source file of this class file by adding a source file attribute.

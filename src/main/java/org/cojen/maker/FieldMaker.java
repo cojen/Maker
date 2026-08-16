@@ -63,11 +63,21 @@ public interface FieldMaker extends Maker {
     FieldMaker static_();
 
     /**
-     * Switch this field to be final. Fields are non-final by default.
+     * Switch this field to be final. Fields are non-final by default, except for instance
+     * fields of {@link ClassMaker#valueClass value classes}.
      *
      * @return this
      */
     FieldMaker final_();
+
+    /**
+     * Switch this field to require strict initialization. Fields are non-strict by default,
+     * except for instance fields of {@link ClassMaker#valueClass value classes}.
+     *
+     * @return this
+     * @see <a href="https://openjdk.org/jeps/539">JEP 539: Strict Field Initialization in the JVM (Preview)</a>
+     */
+    FieldMaker strict();
 
     /**
      * Switch this field to be volatile. Fields are non-volatile by default.
