@@ -113,6 +113,11 @@ public interface Type {
     boolean isInterface();
 
     /**
+     * Returns true if this type is known to be a value class.
+     */
+    boolean isValueClass();
+
+    /**
      * Returns true if this type is an array.
      */
     boolean isArray();

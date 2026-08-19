@@ -517,12 +517,14 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
     public void addLoadableType(Object type) {
         Type tType = typeFrom(type);
 
-        if (mLoadableDescriptors == null) {
-            mLoadableDescriptors = new Attribute.LoadableDescriptors(mConstants);
-            addAttribute(mLoadableDescriptors);
-        }
+        if (!tType.isPrimitive()) {
+            if (mLoadableDescriptors == null) {
+                mLoadableDescriptors = new Attribute.LoadableDescriptors(mConstants);
+                addAttribute(mLoadableDescriptors);
+            }
 
-        mLoadableDescriptors.add(tType);
+            mLoadableDescriptors.add(tType);
+        }
     }
 
     @Override

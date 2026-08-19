@@ -42,12 +42,16 @@ public class ValueClassesTest {
     public void basic() throws Exception {
         org.junit.Assume.assumeTrue(isAvailable());
 
+        assertTrue(Type.from(Instant.class).isValueClass());
+
         doBasic();
     }
 
     @Test
     public void failBasic() throws Exception {
         if (!isAvailable()) {
+            assertFalse(Type.from(Instant.class).isValueClass());
+
             try {
                 doBasic();
                 fail();
@@ -57,7 +61,10 @@ public class ValueClassesTest {
     }
 
     private void doBasic() throws Exception {
-        ClassMaker cm = ClassMaker.begin().public_().valueClass();
+        ClassMaker cm = ClassMaker.begin().public_();
+        assertFalse(cm.type().isValueClass());
+        cm.valueClass();
+        assertTrue(cm.type().isValueClass());
 
         cm.addField(int.class, "data").public_().strict().final_();
         cm.addField(Instant.class, "when").public_().strict().final_();
@@ -119,5 +126,13 @@ public class ValueClassesTest {
         Class<?> clazz = cm.finish();
 
         clazz.getConstructor(int.class).newInstance(0);
+    }
+
+    @Test
+    public void notValueClasses() {
+        assertFalse(Type.from(int.class).isValueClass());
+        assertFalse(BaseType.Null.THE.isValueClass());
+        assertFalse(Type.from(Instant[].class).isValueClass());
+        assertFalse(Type.from(ValueClassesTest.class).isValueClass());
     }
 }

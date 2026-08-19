@@ -76,6 +76,11 @@ final class AnnotatableType extends BaseType {
     }
 
     @Override
+    public boolean isValueClass() {
+        return mBase.isValueClass();
+    }
+
+    @Override
     public boolean isArray() {
         return mBase.isArray();
     }

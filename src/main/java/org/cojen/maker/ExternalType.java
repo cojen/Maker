@@ -40,7 +40,7 @@ final class ExternalType extends BaseType.Clazz implements ClassMaker, Annotatio
     private boolean mInitialized;
 
     ExternalType(String name, Provider provider) {
-        super(Objects.requireNonNull(name), null, null);
+        super(Objects.requireNonNull(name), null);
         mProvider = Objects.requireNonNull(provider);
     }
 
@@ -109,7 +109,7 @@ final class ExternalType extends BaseType.Clazz implements ClassMaker, Annotatio
 
     @Override
     public ClassMaker interface_() {
-        mIsInterface = true;
+        setIsInterface(true);
         return this;
     }
 
@@ -276,6 +276,7 @@ final class ExternalType extends BaseType.Clazz implements ClassMaker, Annotatio
 
     @Override
     public ClassMaker valueClass() {
+        setIsValueClass(true);
         return this;
     }
 
@@ -329,19 +330,36 @@ final class ExternalType extends BaseType.Clazz implements ClassMaker, Annotatio
 
     @Override
     public boolean isInterface() {
-        Boolean is = mIsInterface;
+        int is = getIsInterface();
 
-        if (is == null) {
+        if (is == 0) {
             synchronized (this) {
                 doInit();
-                is = mIsInterface;
-                if (is == null) {
-                    mIsInterface = is = false;
+                is = getIsInterface();
+                if (is == 0) {
+                    is = setIsInterface(false);
                 }
             }
         }
 
-        return is;
+        return is == 3;
+    }
+
+    @Override
+    public boolean isValueClass() {
+        int is = getIsValueClass();
+
+        if (is == 0) {
+            synchronized (this) {
+                doInit();
+                is = getIsValueClass();
+                if (is == 0) {
+                    is = setIsValueClass(false);
+                }
+            }
+        }
+
+        return is == 3;
     }
 
     @Override

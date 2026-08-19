@@ -110,6 +110,7 @@ public class ExternalTypeTest {
 
         // Force init.
         assertFalse(t.isInterface());
+        assertFalse(t.isValueClass());
 
         FieldMaker fm = fref[0];
         var field = (BaseType.Field) ((ExternalType.MMaker) fm).member;
@@ -199,6 +200,7 @@ public class ExternalTypeTest {
             public void init(ClassMaker cm) {
                 ref[0] = cm;
                 cm.interface_();
+                cm.valueClass();
             }
 
             @Override
@@ -217,6 +219,7 @@ public class ExternalTypeTest {
         Type t = Type.external("xyz", provider);
 
         assertTrue(t.isInterface());
+        assertTrue(t.isValueClass());
 
         var bt = (BaseType) t;
 

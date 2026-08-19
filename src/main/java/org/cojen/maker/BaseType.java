@@ -17,6 +17,7 @@
 package org.cojen.maker;
 
 import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
 import java.lang.invoke.VarHandle;
 
 import java.lang.ref.SoftReference;
@@ -1041,6 +1042,11 @@ abstract class BaseType implements Type, Typed {
         }
 
         @Override
+        public boolean isValueClass() {
+            return false;
+        }
+
+        @Override
         public boolean isArray() {
             return false;
         }
@@ -1192,6 +1198,11 @@ abstract class BaseType implements Type, Typed {
         }
 
         @Override
+        public boolean isValueClass() {
+            return false;
+        }
+
+        @Override
         public boolean isArray() {
             return false;
         }
@@ -1251,6 +1262,11 @@ abstract class BaseType implements Type, Typed {
 
         @Override
         public boolean isInterface() {
+            return false;
+        }
+
+        @Override
+        public boolean isValueClass() {
             return false;
         }
 
@@ -1337,9 +1353,22 @@ abstract class BaseType implements Type, Typed {
     }
 
     static abstract class Clazz extends Obj {
+        private static final VarHandle cFlagsHandle;
+
+        static {
+            try {
+                cFlagsHandle = MethodHandles.lookup()
+                    .findVarHandle(Clazz.class, "mFlags", int.class);
+            } catch (Throwable e) {
+                throw new ExceptionInInitializerError();
+            }
+        }
+
         private volatile String mName;
         private volatile String mDesc;
-        protected volatile Boolean mIsInterface;
+
+        // bits [0, 1]: isInterface,  bits [2, 3]: isValueClass
+        private volatile int mFlags;
 
         protected volatile BaseType mSuperType;
         protected volatile Set<BaseType> mInterfaces;
@@ -1353,22 +1382,76 @@ abstract class BaseType implements Type, Typed {
         /**
          * @param name can be null if desc isn't null
          * @param desc can be null if name isn't null
-         * @param isInterface can be null if not yet known
          */
-        Clazz(String name, String desc, Boolean isInterface) {
+        Clazz(String name, String desc) {
             mName = name;
             mDesc = desc;
-            mIsInterface = isInterface;
         }
 
         @Override
         public boolean isInterface() {
-            Boolean is = mIsInterface;
-            if (is == null) {
+            int is = getIsInterface();
+            if (is == 0) {
                 Class clazz = classType();
-                mIsInterface = is = clazz != null && clazz.isInterface();
+                is = setIsInterface(clazz != null && clazz.isInterface());
             }
-            return is;
+            return is == 3;
+        }
+
+        /**
+         * @return 0 if unknown, 1 if not an interface, and 3 if is an interface
+         */
+        protected final int getIsInterface() {
+            return mFlags & 0b0011;
+        }
+
+        /**
+         * Note: once set to true, setting it to false is ignored
+         */
+        protected final int setIsInterface(boolean b) {
+            int f = b ? 0b0011 : 0b0001;
+            cFlagsHandle.getAndBitwiseOrRelease(this, f);
+            return f;
+        }
+
+        @Override
+        public boolean isValueClass() {
+            int is = getIsValueClass();
+
+            if (is == 0) {
+                boolean b = false;
+                Class<?> clazz = classType();
+
+                if (clazz != null) {
+                    try {
+                        b = (boolean) Class.class.getMethod("isValue").invoke(clazz);
+                    } catch (NoSuchMethodException | IllegalAccessException |
+                             java.lang.reflect.InvocationTargetException e)
+                    {
+                        // ignore
+                    }
+                }
+
+                is = setIsValueClass(b);
+            }
+
+            return is == 3;
+        }
+
+        /**
+         * @return 0 if unknown, 1 if not a value class, and 3 if is a value class
+         */
+        protected final int getIsValueClass() {
+            return (mFlags & 0b1100) >> 2;
+        }
+
+        /**
+         * Note: once set to true, setting it to false is ignored
+         */
+        protected final int setIsValueClass(boolean b) {
+            int f = b ? 0b1100 : 0b0100;
+            cFlagsHandle.getAndBitwiseOrRelease(this, f);
+            return f >> 2;
         }
 
         @Override
@@ -1948,7 +2031,7 @@ abstract class BaseType implements Type, Typed {
          * @param desc can be null if name isn't null
          */
         Loadable(ClassLoader loader, String name, String desc) {
-            super(name, desc, null);
+            super(name, desc);
             mLoader = loader;
         }
 
@@ -1970,7 +2053,7 @@ abstract class BaseType implements Type, Typed {
         private final Class mClass;
 
         Loaded(Class clazz) {
-            super(clazz.getName(), null, clazz.isInterface());
+            super(clazz.getName(), null);
             mClass = clazz;
         }
 
@@ -2019,13 +2102,18 @@ abstract class BaseType implements Type, Typed {
         private final WeakReference<TheClassMaker> mMakerRef;
 
         NewClazz(TheClassMaker maker, String name) {
-            super(name, null, false);
+            super(name, null);
             mMakerRef = new WeakReference<>(maker);
         }
 
         @Override
         public Class<?> classType() {
             return null;
+        }
+
+        @Override
+        public boolean isValueClass() {
+            return (makerType().mModifiers & Modifiers.ACC_IDENTITY) == 0;
         }
 
         @Override
@@ -2073,7 +2161,7 @@ abstract class BaseType implements Type, Typed {
 
         @Override
         void toInterface() {
-            mIsInterface = true;
+            setIsInterface(true);
         }
     }
 }
