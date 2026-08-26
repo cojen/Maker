@@ -202,4 +202,77 @@ public class ArrayTest {
 
         cm.finish().getMethod("run").invoke(null);
     }
+
+    @Test
+    public void access() throws Exception {
+        {
+            var arrayVar = mm.new_(String[].class, 10);
+            arrayVar.aset(1, "hello");
+
+            Field access = arrayVar.arrayAccess(1);
+            assertEquals(String.class, access.type().classType());
+
+            mm.var(Assert.class).invoke("assertEquals", "hello", access.get());
+
+            access.clear();
+            mm.var(Assert.class).invoke("assertNull", access);
+
+            access.setExact("world");
+            mm.var(Assert.class).invoke("assertSame", "world", arrayVar.aget(1));
+            mm.var(Assert.class).invoke("assertTrue", access.eq("world"));
+
+            access.ifNe("world", () -> {
+                mm.var(Assert.class).invoke("fail");
+            });
+
+            {
+                Label start = mm.label().here();
+                access.cast(Number.class);
+                mm.var(Assert.class).invoke("fail");
+                mm.catch_(start, ClassCastException.class, exVar -> {});
+            }
+
+            access.setPlain("end");
+            mm.var(Assert.class).invoke("assertEquals", "end", access.getPlain());
+        }
+
+        {
+            var arrayVar = mm.new_(int[].class, 10);
+            arrayVar.aset(1, 10);
+
+            Field access = arrayVar.arrayAccess(1);
+            assertEquals(int.class, access.type().classType());
+
+            access.inc(1000);
+            mm.var(Assert.class).invoke("assertEquals", 1010, access);
+
+            access.getAndAdd(5);
+            mm.var(Assert.class).invoke("assertEquals", 1015, access);
+
+            access.dec(10);
+            mm.var(Assert.class).invoke("assertEquals", 1005, access);
+
+            var indexVar = mm.var(int.class).set(1);
+            access = arrayVar.arrayAccess(indexVar);
+
+            mm.var(Assert.class).invoke("assertEquals", 1005, access);
+
+            indexVar.inc(1);
+            mm.var(Assert.class).invoke("assertEquals", 0, access);
+            arrayVar.aset(indexVar, 123);
+            mm.var(Assert.class).invoke("assertEquals", 123, access);
+        }
+
+        {
+            cm.addConstructor();
+
+            var arrayVar = mm.new_(cm.type().asArray(), 1);
+            Field access = arrayVar.arrayAccess(0);
+            var instance = mm.new_(cm);
+            access.setVolatile(instance);
+            mm.var(Assert.class).invoke("assertSame", instance, access.getAcquire());
+        }
+
+        cm.finish().getMethod("run").invoke(null);
+    }
 }

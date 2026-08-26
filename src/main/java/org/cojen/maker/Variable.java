@@ -943,6 +943,17 @@ public interface Variable {
     void aset(Object index, Object value);
 
     /**
+     * Access an array via a pseudo field. If the given index is a {@code Variable}, then it
+     * will be evaluated each time the array is accessed.
+     *
+     * @param index a {@link Variable} or a constant
+     * @return a pseudo field which accesses the array at the given index
+     * @throws IllegalStateException if this variable isn't an array type
+     * @see <a href="package-summary.html#types-and-values-heading">Types and Values</a>
+     */
+    Field arrayAccess(Object index);
+
+    /**
      * Access a static or instance field from the object referred to by this variable.
      *
      * @param name field name

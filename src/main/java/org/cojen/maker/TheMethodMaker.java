@@ -39,6 +39,7 @@ import java.util.Objects;
 import java.util.Set;
 
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import static java.lang.invoke.MethodHandleInfo.*;
 
@@ -1724,16 +1725,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             }
         }
 
-        BaseType handleType = BaseType.from(VarHandle.class);
-        var handleVar = new LocalVar(handleType);
-
-        if (mClassMaker.allowExactConstants()) {
-            handleVar.setExact(handle);
-        } else {
-            handleVar.set(handle);
-        }
-
-        return new HandleVar(handleVar, BaseType.from(handle.varType()), coordinateTypes, values);
+        return new LazyHandleVar(handle, coordinateTypes, values);
     }
 
     @Override
@@ -4608,6 +4600,9 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             return false;
         }
 
+        /**
+         * Note: When overriding the push method, adjustPushCount must be overridden too.
+         */
         abstract void push();
 
         void push(BaseType type) {
@@ -5318,20 +5313,79 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
         @Override
         public LocalVar aget(Object index) {
-            byte op = aloadOp();
-            push();
-            addPushOp(INT, index);
-            addBytecodeOp(op, 1);
+            byte aloadOp = apush(index);
+            addBytecodeOp(aloadOp, 1);
             return storeToNewVar(type().elementType());
         }
 
         @Override
         public void aset(Object index, Object value) {
-            byte op = aloadOp();
+            byte aloadOp = apush(index);
+            addPushOp(type().elementType(), value);
+            addBytecodeOp(toAstoreOp(aloadOp), 3);
+        }
+
+        /**
+         * Modifies an array element, guaranteeing that the index is evaluated once.
+         *
+         * @param modifier given an element value, returns the modified element value
+         */
+        void amodify(Object index, Function<OwnedVar, OwnedVar> modifier) {
+            BaseType arrayType = type();
+            BaseType elementType = arrayType.elementType();
+
+            // push the array and index to the stack
+            byte aloadOp = apush(index);
+
+            // duplicate the array index pair
+            addOp(new BytecodeOp(DUP2, 0) {
+                @Override
+                void appendTo(TheMethodMaker m) {
+                    super.appendTo(m);
+                    m.stackPush(arrayType);
+                    m.stackPush(BaseType.INT); // index type
+                }
+            });
+
+            // get the array element, consuming an array index pair
+            addBytecodeOp(aloadOp, 1);
+            OwnedVar elementVar = storeToNewVar(elementType);
+
+            // perform the value modification
+            elementVar = modifier.apply(elementVar);
+
+            // push the modified element to the stack
+            addPushOp(elementType, elementVar);
+
+            // set the array element, consuming the array index pair and the element
+            addBytecodeOp(toAstoreOp(aloadOp), 3);
+        }
+
+        /**
+         * @return the aloadOp
+         */
+        byte apush(Object index) {
+            byte aloadOp = aloadOp();
             push();
             addPushOp(INT, index);
-            addPushOp(type().elementType(), value);
-            addBytecodeOp((byte) (op + (IASTORE - IALOAD)), 3);
+            return aloadOp;
+        }
+
+        void asetExact(Object index, ExplicitConstantOp constOp) {
+            byte aloadOp = aloadOp();
+            push();
+            addPushOp(INT, index);
+            addOp(constOp);
+            addBytecodeOp(toAstoreOp(aloadOp), 3);
+        }
+
+        private static byte toAstoreOp(byte aloadOp) {
+            return (byte) (aloadOp + (IASTORE - IALOAD));
+        }
+
+        @Override
+        public Field arrayAccess(Object index) {
+            return ArrayHandleVar.from(TheMethodMaker.this, arrayCheck(), this, index);
         }
 
         private BaseType arrayCheck() throws IllegalStateException {
@@ -6564,8 +6618,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     /**
      * Pseudo field which accesses a VarHandle.
      */
-    final class HandleVar extends BaseFieldVar {
-        private final LocalVar mHandleVar;
+    abstract class BaseHandleVar extends BaseFieldVar {
         private final BaseType mType;
         private final BaseType[] mCoordinateTypes;
         private final Object[] mCoordinates;
@@ -6573,26 +6626,22 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         private Variable mHandleGet, mHandleSet;
 
         /**
-         * @param handleVar must be of type VarHandle
          * @param type VarHandle.varType
          * @param coordinates variables and constants
          */
-        HandleVar(LocalVar handleVar, BaseType type,
-                  BaseType[] coordinateTypes, Object[] coordinates)
-        {
-            mHandleVar = handleVar;
+        BaseHandleVar(BaseType type, BaseType[] coordinateTypes, Object[] coordinates) {
             mType = type;
             mCoordinateTypes = coordinateTypes;
             mCoordinates = coordinates;
         }
 
         @Override
-        public BaseType type() {
+        public final BaseType type() {
             return mType;
         }
 
         @Override
-        public String name() {
+        public final String name() {
             return null;
         }
 
@@ -6602,30 +6651,30 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
-        public HandleVar set(Object value) {
+        public BaseHandleVar set(Object value) {
             setPlain(value);
             return this;
         }
 
         @Override
-        public Variable varHandle() {
+        public final Variable varHandle() {
             // Return a new variable each time because it can be modified.
-            return mHandleVar.get();
+            return handleVar().get();
         }
 
         @Override
-        public Variable methodHandleGet() {
+        public final Variable methodHandleGet() {
             if (mHandleGet == null) {
-                mHandleGet = mHandleVar.invoke("toMethodHandle", VarHandle.AccessMode.GET);
+                mHandleGet = handleVar().invoke("toMethodHandle", VarHandle.AccessMode.GET);
             }
             // Return a new variable each time because it can be modified.
             return mHandleGet.get();
         }
 
         @Override
-        public Variable methodHandleSet() {
+        public final Variable methodHandleSet() {
             if (mHandleSet == null) {
-                mHandleSet = mHandleVar.invoke("toMethodHandle", VarHandle.AccessMode.SET);
+                mHandleSet = handleVar().invoke("toMethodHandle", VarHandle.AccessMode.SET);
             }
             // Return a new variable each time because it can be modified.
             return mHandleSet.get();
@@ -6638,7 +6687,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
         @Override
         void adjustPushCount(int amt) {
-            mHandleVar.adjustPushCount(amt);
+            handleVar().adjustPushCount(amt);
             for (Object coordinate : mCoordinates) {
                 TheMethodMaker.adjustPushCount(coordinate, amt);
             }
@@ -6650,19 +6699,19 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
-        LocalVar vhGet(String name) {
+        final LocalVar vhGet(String name) {
             vhPush(name);
             return storeToNewVar(mType);
         }
 
-        void vhPush(String name) {
-            mHandleVar.push();
+        final void vhPush(String name) {
+            handleVar().push();
 
             for (int i=0; i<mCoordinates.length; i++) {
                 addPushOp(mCoordinateTypes[i], mCoordinates[i]);
             }
 
-            BaseType vhType = mHandleVar.type();
+            BaseType vhType = handleVar().type();
             BaseType.Method method = vhType.inventMethod(0, mType, name, mCoordinateTypes);
 
             ConstantPool.C_Method ref = mConstants.addMethod(method);
@@ -6670,8 +6719,8 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
-        void vhSet(String name, Object value) {
-            mHandleVar.push();
+        final void vhSet(String name, Object value) {
+            handleVar().push();
 
             BaseType[] allTypes = new BaseType[mCoordinateTypes.length + 1];
 
@@ -6687,7 +6736,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                 allTypes[i] = addPushOp(mType, value);
             }
 
-            BaseType vhType = mHandleVar.type();
+            BaseType vhType = handleVar().type();
             BaseType.Method method = vhType.inventMethod(0, VOID, name, allTypes);
 
             ConstantPool.C_Method ref = mConstants.addMethod(method);
@@ -6695,8 +6744,8 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
-        LocalVar vhCas(String name, BaseType retType, Object expectedValue, Object newValue) {
-            mHandleVar.push();
+        final LocalVar vhCas(String name, BaseType retType, Object expectedValue, Object newValue) {
+            handleVar().push();
 
             BaseType[] allTypes = new BaseType[mCoordinateTypes.length + 2];
 
@@ -6708,7 +6757,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             allTypes[i++] = addPushOp(mType, expectedValue);
             allTypes[i] = addPushOp(mType, newValue);
 
-            BaseType vhType = mHandleVar.type();
+            BaseType vhType = handleVar().type();
 
             if (retType == null) {
                 retType = mType;
@@ -6723,8 +6772,8 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
-        LocalVar vhGas(String name, Object value) {
-            mHandleVar.push();
+        final LocalVar vhGas(String name, Object value) {
+            handleVar().push();
 
             BaseType[] allTypes = new BaseType[mCoordinateTypes.length + 1];
 
@@ -6735,13 +6784,155 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
             allTypes[i] = addPushOp(mType, value);
 
-            BaseType vhType = mHandleVar.type();
+            BaseType vhType = handleVar().type();
             BaseType.Method method = vhType.inventMethod(0, mType, name, allTypes);
 
             ConstantPool.C_Method ref = mConstants.addMethod(method);
             addOp(new InvokeOp(INVOKEVIRTUAL, 2 + mCoordinates.length, ref));
 
             return storeToNewVar(mType);
+        }
+
+        abstract LocalVar handleVar();
+    }
+
+    final class HandleVar extends BaseHandleVar {
+        private final LocalVar mHandleVar;
+
+        /**
+         * @param handleVar must be of type VarHandle
+         * @param type VarHandle.varType
+         * @param coordinates variables and constants
+         */
+        HandleVar(LocalVar handleVar, BaseType type,
+                  BaseType[] coordinateTypes, Object[] coordinates)
+        {
+            super(type, coordinateTypes, coordinates);
+            mHandleVar = handleVar;
+        }
+
+        @Override
+        LocalVar handleVar() {
+            return mHandleVar;
+        }
+    }
+
+    /**
+     * Constructs the handleVar only when first needed, lazily creating a bootstrap entry.
+     */
+    class LazyHandleVar extends BaseHandleVar {
+        private VarHandle mHandle;
+        private LocalVar mHandleVar;
+
+        /**
+         * @param coordinates variables and constants
+         */
+        LazyHandleVar(VarHandle handle, BaseType[] coordinateTypes, Object[] coordinates) {
+            super(BaseType.from(handle.varType()), coordinateTypes, coordinates);
+            mHandle = handle;
+        }
+
+        @Override
+        final LocalVar handleVar() {
+            LocalVar handleVar = mHandleVar;
+            if (handleVar == null) {
+                mHandleVar = handleVar = createHandleVar();
+            }
+            return handleVar;
+        }
+
+        private LocalVar createHandleVar() {
+            var handleVar = new LocalVar(BaseType.from(VarHandle.class));
+
+            if (mClassMaker.allowExactConstants()) {
+                handleVar.setExact(mHandle);
+            } else {
+                handleVar.set(mHandle);
+            }
+
+            return handleVar;
+        }
+    }
+
+    final class ArrayHandleVar extends LazyHandleVar {
+        static ArrayHandleVar from(TheMethodMaker mm,
+                                   BaseType arrayType, OwnedVar arrayVar, Object index)
+        {
+            Class<?> arrayClass = arrayType.classType();
+
+            if (arrayClass == null) {
+                arrayClass = Object[].class;
+                arrayType = BaseType.from(arrayClass);
+            }
+
+            VarHandle handle = MethodHandles.arrayElementVarHandle(arrayClass);
+
+            var coordinateTypes = new BaseType[] {arrayType, BaseType.INT};
+            var coordinates = new Object[] {arrayVar, index};
+
+            return mm.new ArrayHandleVar(handle, coordinateTypes, coordinates, arrayVar, index);
+        }
+ 
+        private final OwnedVar mArrayVar;
+        private final Object mIndex;
+
+        private ArrayHandleVar(VarHandle handle, BaseType[] coordinateTypes, Object[] coordinates,
+                               OwnedVar arrayVar, Object index)
+        {
+            super(handle, coordinateTypes, coordinates);
+            mArrayVar = arrayVar;
+            mIndex = index;
+        }
+
+        // Overrides to avoid accessing the array index twice, in case it's a Field...
+
+        @Override
+        public void inc(Object value) {
+            mArrayVar.amodify(mIndex, elementVar -> elementVar.add(value));
+        }
+
+        @Override
+        public void dec(Object value) {
+            mArrayVar.amodify(mIndex, elementVar -> elementVar.sub(value));
+        }
+
+        // Overrides to avoid using the VarHandle, as an optimization...
+
+        @Override
+        public LocalVar get() {
+            return mArrayVar.aget(mIndex);
+        }
+
+        @Override
+        public LocalVar getPlain() {
+            return get();
+        }
+
+        @Override
+        public ArrayHandleVar set(Object value) {
+            mArrayVar.aset(mIndex, value);
+            return this;
+        }
+
+        @Override
+        public void setPlain(Object value) {
+            set(value);
+        }
+
+        @Override
+        void push() {
+            byte aloadOp = mArrayVar.apush(mIndex);
+            addBytecodeOp(aloadOp, 1);
+        }
+
+        @Override
+        void adjustPushCount(int amt) {
+            mArrayVar.adjustPushCount(amt);
+        }
+
+        @Override
+        void addStoreConstantOp(ExplicitConstantOp constOp) {
+            mArrayVar.asetExact(mIndex, constOp);
         }
     }
 
