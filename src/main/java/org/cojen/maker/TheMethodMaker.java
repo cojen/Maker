@@ -1077,12 +1077,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
         BaseType handleType = BaseType.from(MethodHandle.class);
         var handleVar = new LocalVar(handleType);
-
-        if (mClassMaker.allowExactConstants()) {
-            handleVar.setExact(handle);
-        } else {
-            handleVar.set(handle);
-        }
+        handleVar.setExactIfAllowed(handle);
 
         addOp(new PushVarOp(handleVar));
 
@@ -1725,7 +1720,12 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             }
         }
 
-        return new LazyHandleVar(handle, coordinateTypes, values);
+        return new LazyHandleVar(BaseType.from(handle.varType()), coordinateTypes, values) {
+            @Override
+            OwnedVar createHandleVar() {
+                return new LocalVar(BaseType.from(VarHandle.class)).setExactIfAllowed(handle);
+            }
+        };
     }
 
     @Override
@@ -4643,6 +4643,15 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             return this;
         }
 
+        OwnedVar setExactIfAllowed(Object value) {
+            if (mClassMaker.allowExactConstants()) {
+                setExact(value);
+            } else {
+                set(value);
+            }
+            return this;
+        }
+
         /**
          * @throws IllegalArgumentException if the constant isn't defined in the same ClassMaker
          */
@@ -6793,18 +6802,18 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             return storeToNewVar(mType);
         }
 
-        abstract LocalVar handleVar();
+        abstract OwnedVar handleVar();
     }
 
     final class HandleVar extends BaseHandleVar {
-        private final LocalVar mHandleVar;
+        private final OwnedVar mHandleVar;
 
         /**
          * @param handleVar must be of type VarHandle
          * @param type VarHandle.varType
          * @param coordinates variables and constants
          */
-        HandleVar(LocalVar handleVar, BaseType type,
+        HandleVar(OwnedVar handleVar, BaseType type,
                   BaseType[] coordinateTypes, Object[] coordinates)
         {
             super(type, coordinateTypes, coordinates);
@@ -6812,7 +6821,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
-        LocalVar handleVar() {
+        OwnedVar handleVar() {
             return mHandleVar;
         }
     }
@@ -6820,68 +6829,60 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     /**
      * Constructs the handleVar only when first needed, lazily creating a bootstrap entry.
      */
-    class LazyHandleVar extends BaseHandleVar {
-        private VarHandle mHandle;
-        private LocalVar mHandleVar;
+    abstract class LazyHandleVar extends BaseHandleVar {
+        private OwnedVar mHandleVar;
 
-        /**
-         * @param coordinates variables and constants
-         */
-        LazyHandleVar(VarHandle handle, BaseType[] coordinateTypes, Object[] coordinates) {
-            super(BaseType.from(handle.varType()), coordinateTypes, coordinates);
-            mHandle = handle;
+        LazyHandleVar(BaseType type, BaseType[] coordinateTypes, Object[] coordinates) {
+            super(type, coordinateTypes, coordinates);
         }
 
         @Override
-        final LocalVar handleVar() {
-            LocalVar handleVar = mHandleVar;
+        final OwnedVar handleVar() {
+            OwnedVar handleVar = mHandleVar;
             if (handleVar == null) {
                 mHandleVar = handleVar = createHandleVar();
             }
             return handleVar;
         }
 
-        private LocalVar createHandleVar() {
-            var handleVar = new LocalVar(BaseType.from(VarHandle.class));
-
-            if (mClassMaker.allowExactConstants()) {
-                handleVar.setExact(mHandle);
-            } else {
-                handleVar.set(mHandle);
-            }
-
-            return handleVar;
-        }
+        abstract OwnedVar createHandleVar();
     }
 
     final class ArrayHandleVar extends LazyHandleVar {
         static ArrayHandleVar from(TheMethodMaker mm,
                                    BaseType arrayType, OwnedVar arrayVar, Object index)
         {
-            Class<?> arrayClass = arrayType.classType();
-
-            if (arrayClass == null) {
-                arrayClass = Object[].class;
-                arrayType = BaseType.from(arrayClass);
-            }
-
-            VarHandle handle = MethodHandles.arrayElementVarHandle(arrayClass);
-
             var coordinateTypes = new BaseType[] {arrayType, BaseType.INT};
             var coordinates = new Object[] {arrayVar, index};
-
-            return mm.new ArrayHandleVar(handle, coordinateTypes, coordinates, arrayVar, index);
+            return mm.new ArrayHandleVar(coordinateTypes, coordinates, arrayType, arrayVar, index);
         }
  
+        private final BaseType mArrayType;
         private final OwnedVar mArrayVar;
         private final Object mIndex;
 
-        private ArrayHandleVar(VarHandle handle, BaseType[] coordinateTypes, Object[] coordinates,
-                               OwnedVar arrayVar, Object index)
+        private ArrayHandleVar(BaseType[] coordinateTypes, Object[] coordinates,
+                               BaseType arrayType, OwnedVar arrayVar, Object index)
         {
-            super(handle, coordinateTypes, coordinates);
+            super(arrayType.elementType(), coordinateTypes, coordinates);
+            mArrayType = arrayType;
             mArrayVar = arrayVar;
             mIndex = index;
+        }
+
+        @Override
+        OwnedVar createHandleVar() {
+            Class<?> arrayClass = mArrayType.classType();
+
+            if (arrayClass == null) {
+                arrayClass = Object[].class;
+            }
+
+            VarHandle handle = MethodHandles.arrayElementVarHandle(arrayClass);
+            var handleVar = new LocalVar(BaseType.from(VarHandle.class));
+            handleVar.setExactIfAllowed(handle);
+
+            return handleVar;
         }
 
         // Overrides to avoid accessing the array index twice, in case it's a Field...

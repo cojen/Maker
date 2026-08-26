@@ -271,6 +271,10 @@ public class ArrayTest {
             var instance = mm.new_(cm);
             access.setVolatile(instance);
             mm.var(Assert.class).invoke("assertSame", instance, access.getAcquire());
+
+            cm.addMethod(int.class, "test").return_(1);
+
+            mm.var(Assert.class).invoke("assertEquals", 1, access.getAcquire().invoke("test"));
         }
 
         cm.finish().getMethod("run").invoke(null);
