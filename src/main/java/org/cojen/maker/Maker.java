@@ -167,7 +167,7 @@ public interface Maker {
 
             case '\\' -> {
                 if (++i < name.length()) {
-                    // Only need to escape if it would be interpeted as an accidental escape.
+                    // Only need to escape if it would be interpreted as an accidental escape.
                     yield switch (name.charAt(i)) {
                         default  -> '\0';
                         case '|', ',', '?', '%', '^', '_', '{', '}', '!', '-' -> '-';

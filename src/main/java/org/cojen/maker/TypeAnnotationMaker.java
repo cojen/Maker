@@ -143,7 +143,7 @@ final class TypeAnnotationMaker extends TheAnnotationMaker {
         }
 
         @Override
-        void doWriteTo(BytesOut out) throws IOException {
+        void doWriteTo(BytesOut out) {
         }
     }
 

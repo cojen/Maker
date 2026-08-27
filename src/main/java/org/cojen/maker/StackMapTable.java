@@ -31,9 +31,6 @@ final class StackMapTable extends Attribute {
     private int mNumFrames;
     private BytesOut mFinished;
 
-    /**
-     * @param initCodes can be null
-     */
     StackMapTable(ConstantPool cp) {
         super(cp); // set the name later; see finish()
     }

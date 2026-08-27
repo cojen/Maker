@@ -37,8 +37,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
-import java.util.concurrent.ThreadLocalRandom;
-
 import static java.util.Objects.*;
 
 /**
@@ -751,9 +749,6 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
         }
     }
 
-    /**
-     * @param hidden when true, rename the class
-     */
     private void finishTo(BytesOut out) throws IOException {
         checkFinished();
 
