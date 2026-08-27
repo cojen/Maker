@@ -6666,6 +6666,71 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
+        public void inc(Object value) {
+            modify(v -> v.add(value));
+        }
+
+        @Override
+        public void dec(Object value) {
+            modify(v -> v.sub(value));
+        }
+
+        /**
+         * Modifies the value while guaranteeing that the coordinates are evaluated once.
+         *
+         * @param modifier given an existing value, returns the modified value
+         */
+        void modify(Function<OwnedVar, OwnedVar> modifier) {
+            BaseType vhType = handleVar().type();
+
+            var coordinateVars = new LocalVar[mCoordinates.length];
+
+            for (int i=0; i<coordinateVars.length; i++) {
+                coordinateVars[i] = storeToNewVar(addPushOp(mCoordinateTypes[i], mCoordinates[i]));
+            }
+
+            OwnedVar valueVar;
+
+            // get the value
+            {
+                handleVar().push();
+
+                for (LocalVar c : coordinateVars) {
+                    c.push();
+                }
+
+                BaseType.Method method = vhType.inventMethod(0, mType, "get", mCoordinateTypes);
+
+                ConstantPool.C_Method ref = mConstants.addMethod(method);
+                addOp(new InvokeOp(INVOKEVIRTUAL, 1 + mCoordinates.length, ref));
+
+                valueVar = storeToNewVar(mType);
+            }
+
+            // modify the value
+            valueVar = modifier.apply(valueVar);
+
+            // set the value
+            {
+                var allTypes = Arrays.copyOf(mCoordinateTypes, mCoordinateTypes.length + 1);
+                allTypes[allTypes.length - 1] = valueVar.type();
+
+                handleVar().push();
+
+                for (LocalVar c : coordinateVars) {
+                    c.push();
+                }
+
+                valueVar.push();
+
+                BaseType.Method method = vhType.inventMethod(0, VOID, "set", allTypes);
+
+                ConstantPool.C_Method ref = mConstants.addMethod(method);
+                addOp(new InvokeOp(INVOKEVIRTUAL, 2 + mCoordinates.length, ref));
+            }
+        }
+
+        @Override
         public final Variable varHandle() {
             // Return a new variable each time because it can be modified.
             return handleVar().get();

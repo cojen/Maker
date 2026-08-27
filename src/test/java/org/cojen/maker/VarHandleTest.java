@@ -18,6 +18,8 @@ package org.cojen.maker;
 
 import java.lang.invoke.*;
 
+import java.lang.reflect.Method;
+
 import java.nio.ByteOrder;
 
 import org.junit.*;
@@ -338,4 +340,40 @@ public class VarHandleTest {
 
         assertEquals(MethodType.methodType(int.class, VarHandle.class, clazz), mh.type());
     }
+
+    @Test
+    public void modify() throws Exception {
+        // Modify an array element via VarHandle with a coordinate defined by a field. The
+        // field should be accessed once per modification. This test doesn't fully verify the
+        // behavior, and so the generated code should be examined too.
+
+        VarHandle vh = MethodHandles.arrayElementVarHandle(int[].class);
+
+        ClassMaker cm = ClassMaker.begin().public_();
+        MethodMaker mm = cm.addMethod(null, "test", int[].class).public_().static_();
+
+        var assertVar = mm.var(Assert.class);
+        var access = mm.access(vh, mm.param(0), mm.var(VarHandleTest.class).field("publicInt"));
+
+        // The publicInt field should be accessed exactly four times.
+        access.inc(15);
+        assertVar.invoke("assertEquals", 25, access);
+        access.dec(1);
+        assertVar.invoke("assertEquals", 24, access);
+
+        Method m = cm.finish().getMethod("test", int[].class);
+
+        var array = new int[10];
+        array[1] = 10;
+        publicInt = 1;
+        m.invoke(null, array);
+        assertEquals(24, array[1]);
+
+        array[2] = 10;
+        publicInt = 2;
+        m.invoke(null, array);
+        assertEquals(24, array[2]);
+    }
+
+    public static volatile int publicInt;
 }

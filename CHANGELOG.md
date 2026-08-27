@@ -3,6 +3,7 @@ Changelog
 
 v2.9.0
 ------
+* The inc/dec operations against a pseudo field now access the coordinates just once.
 * Added a method to access an array via a pseudo field, for supporting atomic access features.
 * Added support for value objects, a preview feature described by JEP 401 and JEP 539.
 
