@@ -141,6 +141,7 @@ public class RecordTest {
 
         {
             MethodMaker ctor = cm.asRecord();
+            ctor.invokeSuperConstructor();
             var self = ctor.param(0);
             Label notNull = ctor.label();
             self.ifNe(null, notNull);

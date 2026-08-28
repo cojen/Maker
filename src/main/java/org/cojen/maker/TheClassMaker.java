@@ -772,14 +772,18 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
         }
 
         if (mRecordCtors != null) {
-            TheMethodMaker.doFinish(mRecordCtors);
+            var ctor = (AsRecord) TheMethodMaker.merge(mRecordCtors);
+            if (!ctor.mSuperInvoked) {
+                // Invoke the super constructor at the very end, after the fields are assigned.
+                ctor.invokeSuperConstructor();
+            }
         }
 
         if (mPermittedSubclasses != null) {
             addAttribute(new Attribute.PermittedSubclasses(mConstants, mPermittedSubclasses));
         }
 
-        TheMethodMaker.doFinish(mClinitMethods);
+        TheMethodMaker.merge(mClinitMethods);
 
         checkSize(mInterfaces, 65535, "Interface");
         checkSize(mFields, 65535, "Field");
@@ -933,8 +937,9 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
 
     /**
      * Define this code in a separate class such that it only loads when actually needed.
+     * It extends TheMethodMaker to detect if invokeSuperConstructor was manually called.
      */
-    private static class AsRecord {
+    private static class AsRecord extends TheMethodMaker {
         private static TheMethodMaker apply(TheClassMaker cm) {
             cm.extend("java.lang.Record").final_();
 
@@ -960,11 +965,12 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
                 }
             }
 
-            TheMethodMaker ctor = cm.addConstructor(paramTypes);
+            var ctor = new AsRecord(cm, cm.defineMethod(null, "<init>", paramTypes));
+            cm.doAddMethod(ctor);
+
             ctor.mModifiers = cm.mModifiers
                 & (Modifier.PUBLIC | Modifier.PROTECTED | Modifier.PRIVATE);
             ctor.useReturnLabel();
-            ctor.invokeSuperConstructor();
 
             cm.mRecordCtors = new ArrayList<TheMethodMaker>(2);
             cm.mRecordCtors.add(ctor);
@@ -1098,6 +1104,18 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
             for (String name : fields.keySet()) {
                 args[offset++] = mm.field(name).methodHandleGet();
             }
+        }
+
+        boolean mSuperInvoked;
+
+        private AsRecord(TheClassMaker classMaker, BaseType.Method method) {
+            super(classMaker, method);
+        }
+
+        @Override
+        public void invokeSuperConstructor(Object... values) {
+            super.invokeSuperConstructor(values);
+            mSuperInvoked = true;
         }
     }
 }

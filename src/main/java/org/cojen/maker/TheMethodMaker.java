@@ -383,12 +383,14 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     }
 
     /**
-     * Stitch methods together and finish as one. List can be null or empty.
+     * Merge a list of methods into the first one, matching the list order.
+     *
+     * @return the first maker result or null if the list was empty or null
      */
-    static void doFinish(List<TheMethodMaker> list) {
+    static TheMethodMaker merge(List<TheMethodMaker> list) {
         int size;
         if (list == null || (size = list.size()) == 0) {
-            return;
+            return null;
         }
 
         final TheMethodMaker first = list.get(0);
@@ -413,7 +415,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             }
         }
 
-        first.doFinish();
+        return first;
     }
 
     /**
