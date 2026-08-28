@@ -341,7 +341,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         mStack = null;
         mStrictFieldMap = null;
 
-        if (mThisVar instanceof InitThisVar && mThisVar.smCode() == SM_UNINIT_THIS) {
+        if (mThisVar instanceof InitThisVar thisVar && thisVar.smCode() == SM_UNINIT_THIS) {
             throw finishFail("Super or this constructor is never invoked");
         }
 
@@ -842,7 +842,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             void appendTo(TheMethodMaker m) {
                 // Flow analysis doesn't support variable types changing, so change it when the
                 // code is built. This trick doesn't work when making spaghetti code.
-                ((InitThisVar) this_()).ready();
+                ((InitThisVar) m.this_()).ready();
             }
         });
     }
