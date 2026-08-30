@@ -99,6 +99,9 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     // Count of labels which need to be positioned to define all branch targets.
     private int mUnpositionedLabels;
 
+    // Is set true if building code caused branch offsets to shift position.
+    private boolean mRebuild;
+
     private StackMapTable mStackMapTable;
 
     private Attribute.MethodParameters mMethodParameters;
@@ -106,8 +109,6 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     private Attribute.ParameterAnnotations[] mParameterAnnotationsSet;
 
     private Attribute.ConstantList mExceptionsThrown;
-
-    private int mFinished;
 
     TheMethodMaker(TheClassMaker classMaker, BaseType.Method method) {
         super(classMaker, method.name(), method.descriptor());
@@ -152,7 +153,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     }
 
     void doFinish() {
-        if (mFinished != 0 || (mModifiers & (Modifier.ABSTRACT | Modifier.NATIVE)) != 0) {
+        if ((mModifiers & (Modifier.ABSTRACT | Modifier.NATIVE)) != 0) {
             return;
         }
 
@@ -253,7 +254,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             mStackSize = 0;
             mMaxStackSlot = 0;
             mUnpositionedLabels = 0;
-            mFinished = 0;
+            mRebuild = false;
 
             int lastLineNum = -1;
             lineNumberTable = null;
@@ -280,7 +281,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                 throw finishFail("Unpositioned labels in method: " + mUnpositionedLabels);
             }
 
-            if (mFinished >= 0) {
+            if (!mRebuild) {
                 break;
             }
 
@@ -374,8 +375,6 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         addAttribute(codeAttr);
-
-        mFinished = 1;
     }
 
     private IllegalStateException finishFail(String message) {
@@ -3925,7 +3924,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                 mTarget.mNext = cont;
             }
             // Need to perform flow analysis again.
-            m.mFinished = -1;
+            m.mRebuild = true;
         }
 
         /**
