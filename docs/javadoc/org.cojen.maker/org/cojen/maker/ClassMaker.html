@@ -102,11 +102,11 @@ initTheme();
 <li><a href="#addConstructor(java.lang.invoke.MethodType)" tabindex="0">addConstructor(MethodType)</a></li>
 <li><a href="#addConstructor(java.lang.constant.MethodTypeDesc)" tabindex="0">addConstructor(MethodTypeDesc)</a></li>
 <li><a href="#addClinit()" tabindex="0">addClinit()</a></li>
-<li><a href="#asRecord()" tabindex="0">asRecord()</a></li>
 <li><a href="#addInnerClass(java.lang.String)" tabindex="0">addInnerClass(String)</a></li>
 <li><a href="#addExplicitInnerClass(java.lang.String,java.lang.String)" tabindex="0">addExplicitInnerClass(String, String)</a></li>
-<li><a href="#valueClass()" tabindex="0">valueClass()</a></li>
 <li><a href="#addLoadableType(java.lang.Object)" tabindex="0">addLoadableType(Object)</a></li>
+<li><a href="#valueClass()" tabindex="0">valueClass()</a></li>
+<li><a href="#asRecord()" tabindex="0">asRecord()</a></li>
 <li><a href="#sourceFile(java.lang.String)" tabindex="0">sourceFile(String)</a></li>
 <li><a href="#arrayType(int)" tabindex="0">arrayType(int)</a></li>
 <li><a href="#classLoader()" tabindex="0">classLoader()</a></li>
@@ -1019,22 +1019,6 @@ one initializer only breaks out of the local scope.</div>
 </section>
 </li>
 <li>
-<section class="detail" id="asRecord()">
-<h3>asRecord</h3>
-<div class="horizontal-scroll">
-<div class="member-signature"><span class="return-type"><a href="MethodMaker.html" title="interface in org.cojen.maker">MethodMaker</a></span>&nbsp;<span class="element-name">asRecord</span>()</div>
-<div class="block">Convert this class to a <code>record</code>, and return a newly added constructor for it.
-Each field which is currently defined in this class is treated as a record component,
-and each is also represented by a constructor parameter. The constructor shouldn't set
-the fields directly, since this is performed automatically at the end.
-
-<p>Unless already defined, the <code>equals</code>, <code>hashCode</code>, and <code>toString</code>
-methods are automatically added. The same rule applies for the component accessor
-methods.</div>
-</div>
-</section>
-</li>
-<li>
 <section class="detail" id="addInnerClass(java.lang.String)">
 <h3>addInnerClass</h3>
 <div class="horizontal-scroll">
@@ -1087,6 +1071,25 @@ name); pass null to add an anonymous inner class</dd>
 </section>
 </li>
 <li>
+<section class="detail" id="addLoadableType(java.lang.Object)">
+<h3>addLoadableType</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="return-type">void</span>&nbsp;<span class="element-name">addLoadableType</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/26/docs/api/java.base/java/lang/Object.html" title="class in java.lang" class="external-link">Object</a>&nbsp;type)</span></div>
+<div class="block">Indicate that the given type should be loaded early, which is a useful feature for the
+fields of <a href="#valueClass()"><code>value classes</code></a>.</div>
+<dl class="notes">
+<dt>See Also:</dt>
+<dd>
+<ul class="tag-list-long">
+<li><a href="package-summary.html#types-and-values-heading">Types and Values</a></li>
+<li><a href="https://openjdk.org/jeps/401">JEP 401: Value Objects (Preview)</a></li>
+</ul>
+</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
 <section class="detail" id="valueClass()">
 <h3>valueClass</h3>
 <div class="horizontal-scroll">
@@ -1108,21 +1111,18 @@ automatically be <a href="FieldMaker.html#final_()"><code>final</code></a> and <
 </section>
 </li>
 <li>
-<section class="detail" id="addLoadableType(java.lang.Object)">
-<h3>addLoadableType</h3>
+<section class="detail" id="asRecord()">
+<h3>asRecord</h3>
 <div class="horizontal-scroll">
-<div class="member-signature"><span class="return-type">void</span>&nbsp;<span class="element-name">addLoadableType</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/26/docs/api/java.base/java/lang/Object.html" title="class in java.lang" class="external-link">Object</a>&nbsp;type)</span></div>
-<div class="block">Indicate that the given type should be loaded early, which is a useful feature for the
-fields of <a href="#valueClass()"><code>value classes</code></a>.</div>
-<dl class="notes">
-<dt>See Also:</dt>
-<dd>
-<ul class="tag-list-long">
-<li><a href="package-summary.html#types-and-values-heading">Types and Values</a></li>
-<li><a href="https://openjdk.org/jeps/401">JEP 401: Value Objects (Preview)</a></li>
-</ul>
-</dd>
-</dl>
+<div class="member-signature"><span class="return-type"><a href="MethodMaker.html" title="interface in org.cojen.maker">MethodMaker</a></span>&nbsp;<span class="element-name">asRecord</span>()</div>
+<div class="block">Convert this class to a <code>record</code>, and return a newly added constructor for it.
+Each field which is currently defined in this class is treated as a record component,
+and each is also represented by a constructor parameter. The constructor shouldn't set
+the fields directly, since this is performed automatically at the end.
+
+<p>Unless already defined, the <code>equals</code>, <code>hashCode</code>, and <code>toString</code>
+methods are automatically added. The same rule applies for the component accessor
+methods.</div>
 </div>
 </section>
 </li>
