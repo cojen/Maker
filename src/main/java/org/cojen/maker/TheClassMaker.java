@@ -406,11 +406,6 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
     }
 
     @Override
-    public MethodMaker asRecord() {
-        return AsRecord.apply(this);
-    }
-
-    @Override
     public TheClassMaker addInnerClass(String className) {
         return addInnerClass(className, null);
     }
@@ -505,13 +500,6 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
     }
 
     @Override
-    public ClassMaker valueClass() {
-        checkFinished();
-        mModifiers = Modifiers.toValueClass(mModifiers);
-        return this;
-    }
-
-    @Override
     public void addLoadableType(Object type) {
         Type tType = typeFrom(type);
 
@@ -528,6 +516,18 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
     @Override
     public AnnotationMaker addAnnotation(Object annotationType, boolean visible) {
         return addAnnotationMaker(new TheAnnotationMaker(this, annotationType), visible);
+    }
+
+    @Override
+    public ClassMaker valueClass() {
+        checkFinished();
+        mModifiers = Modifiers.toValueClass(mModifiers);
+        return this;
+    }
+
+    @Override
+    public MethodMaker asRecord() {
+        return AsRecord.apply(this);
     }
 
     @Override

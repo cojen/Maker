@@ -363,18 +363,6 @@ public interface ClassMaker extends Maker {
     MethodMaker addClinit();
 
     /**
-     * Convert this class to a {@code record}, and return a newly added constructor for it.
-     * Each field which is currently defined in this class is treated as a record component,
-     * and each is also represented by a constructor parameter. The constructor shouldn't set
-     * the fields directly, since this is performed automatically at the end.
-     *
-     * <p>Unless already defined, the {@code equals}, {@code hashCode}, and {@code toString}
-     * methods are automatically added. The same rule applies for the component accessor
-     * methods.
-     */
-    MethodMaker asRecord();
-
-    /**
      * Add an inner class to this class. The actual class name will have a suitable suffix
      * applied to ensure uniqueness, unless this maker creates explicit or external classes.
      *
@@ -402,6 +390,15 @@ public interface ClassMaker extends Maker {
     ClassMaker addExplicitInnerClass(String fullName, String className);
 
     /**
+     * Indicate that the given type should be loaded early, which is a useful feature for the
+     * fields of {@link #valueClass value classes}.
+     *
+     * @see <a href="package-summary.html#types-and-values-heading">Types and Values</a>
+     * @see <a href="https://openjdk.org/jeps/401">JEP 401: Value Objects (Preview)</a>
+     */
+    void addLoadableType(Object type);
+
+    /**
      * Switch this class to be a value class. All instance fields of values classes will
      * automatically be {@link FieldMaker#final_ final} and {@link FieldMaker#strict strict}.
      *
@@ -412,13 +409,16 @@ public interface ClassMaker extends Maker {
     ClassMaker valueClass();
 
     /**
-     * Indicate that the given type should be loaded early, which is a useful feature for the
-     * fields of {@link #valueClass value classes}.
+     * Convert this class to a {@code record}, and return a newly added constructor for it.
+     * Each field which is currently defined in this class is treated as a record component,
+     * and each is also represented by a constructor parameter. The constructor shouldn't set
+     * the fields directly, since this is performed automatically at the end.
      *
-     * @see <a href="package-summary.html#types-and-values-heading">Types and Values</a>
-     * @see <a href="https://openjdk.org/jeps/401">JEP 401: Value Objects (Preview)</a>
+     * <p>Unless already defined, the {@code equals}, {@code hashCode}, and {@code toString}
+     * methods are automatically added. The same rule applies for the component accessor
+     * methods.
      */
-    void addLoadableType(Object type);
+    MethodMaker asRecord();
 
     /**
      * Set the source file of this class file by adding a source file attribute.
