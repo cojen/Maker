@@ -241,6 +241,29 @@ final class ExternalType extends BaseType.Clazz implements ClassMaker, Annotatio
     }
 
     @Override
+    public ClassMaker addInnerClass(String className) {
+        if (className == null || className.indexOf('.') >= 0) {
+            throw new IllegalArgumentException();
+        }
+        return addExplicitInnerClass(name() + '$' + className, className);
+    }
+
+    @Override
+    public ClassMaker addExplicitInnerClass(String fullName, String className) {
+        // Assume the provider looks at ClassMaker.name().
+        return new ExternalType(fullName, mProvider);
+    }
+
+    public void addLoadableType(Object type) {
+    }
+
+    @Override
+    public ClassMaker valueClass() {
+        setIsValueClass(true);
+        return this;
+    }
+
+    @Override
     public MethodMaker asRecord() {
         extend(Record.class).final_();
 
@@ -258,29 +281,6 @@ final class ExternalType extends BaseType.Clazz implements ClassMaker, Annotatio
         }
 
         return doAddMethod(BaseType.VOID, "<init>", paramTypes);
-    }
-
-    @Override
-    public ClassMaker addInnerClass(String className) {
-        if (className == null || className.indexOf('.') >= 0) {
-            throw new IllegalArgumentException();
-        }
-        return addExplicitInnerClass(name() + '$' + className, className);
-    }
-
-    @Override
-    public ClassMaker addExplicitInnerClass(String fullName, String className) {
-        // Assume the provider looks at ClassMaker.name().
-        return new ExternalType(fullName, mProvider);
-    }
-
-    @Override
-    public ClassMaker valueClass() {
-        setIsValueClass(true);
-        return this;
-    }
-
-    public void addLoadableType(Object type) {
     }
 
     @Override
