@@ -395,16 +395,17 @@ public interface ClassMaker extends Maker {
      *
      * <p>The given name is applied to an internal method which contains the function
      * definition. The actual method name will differ to ensure that it doesn't match any other
-     * methods in this class. Ultimately, the name is purely informational, and it can appear
-     * in stack traces.
+     * methods in this class. The name is purely informational, and it can appear in stack
+     * traces.
      *
      * @param functionType an interface with one abstract method
      * @param retType the return type for the function; pass null to use the original
      * @param name a tentative name for the function; pass null to use a default
      * @param paramTypes types for captured values, followed by the parameter types of the
-     * function method; pass null for the function parameters to use the originals
-     * @return a LambdaFunction whose parameters are the captured values followed by the
-     * function parameters
+     * function method; passing null for a function parameter type automatically selects the
+     * corresponding type specified by the abstract method
+     * @return a {@code LambdaFunction} whose parameters are the captured values followed by
+     * the function parameters
      * @see <a href="package-summary.html#types-and-values-heading">Types and Values</a>
      */
     LambdaFunction addLambdaFunction(Object functionType,

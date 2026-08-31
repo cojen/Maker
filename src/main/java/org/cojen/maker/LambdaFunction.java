@@ -17,7 +17,9 @@
 package org.cojen.maker;
 
 /**
- * Allows a lambda function to be defined.
+ * Allows a lambda function to be defined. This interface extends {@link MethodMaker} for
+ * adding code to the lambda function implementation. The first parameters to the method are
+ * the captured values, and the rest are the actual function parameters.
  *
  * @author Brian S. O'Neill
  * @see ClassMaker#addLambdaFunction

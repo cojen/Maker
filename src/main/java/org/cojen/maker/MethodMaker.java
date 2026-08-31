@@ -570,8 +570,8 @@ public interface MethodMaker extends Maker {
     /**
      * Returns a variable which refers to a lambda function instance.
      *
-     * @param values values locally captured variables
-     * @throws IllegalArgumentException if the captured values don't match the specification
+     * @param values locally captured variables
+     * @see <a href="package-summary.html#types-and-values-heading">Types and Values</a>
      */
     Variable create(LambdaFunction function, Object... values);
 
