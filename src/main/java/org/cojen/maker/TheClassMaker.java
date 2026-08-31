@@ -500,6 +500,80 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
     }
 
     @Override
+    public LambdaFunction addLambdaFunction(Object functionType,
+                                            Object retType, String name, Object... paramTypes)
+    {
+        checkFinished();
+
+        if (name == null) {
+            name = "";
+        }
+
+        BaseType actualFunctionType = typeFrom(functionType);
+
+        if (!actualFunctionType.isInterface()) {
+            throw new IllegalArgumentException
+                ("Not an interface type: " + actualFunctionType.name());
+        }
+
+        BaseType.Method theOne = null;
+
+        for (BaseType.Method m : actualFunctionType.methods().values()) {
+            if (m.isAbstract()) {
+                if (theOne != null) {
+                    throw new IllegalArgumentException
+                        ("More than one abstract method is defined in " +
+                         actualFunctionType.name());
+                }
+                theOne = m;
+            }
+        }
+
+        if (theOne == null) {
+            throw new IllegalArgumentException
+                ("No abstract method is defined in " + actualFunctionType.name());
+        }
+
+        BaseType actualReturnType;
+
+        if (retType == null) {
+            actualReturnType = theOne.returnType();
+        } else {
+            actualReturnType = typeFrom(retType);
+        }
+
+        BaseType[] actualParamTypes = theOne.paramTypes();
+
+        int numCaptures = paramTypes.length - actualParamTypes.length;
+
+        if (numCaptures < 0) {
+            throw new IllegalArgumentException
+                ("Too few parameter types given: " + paramTypes.length + " < " +
+                 actualParamTypes.length);
+        }
+
+        var allParamTypes = new BaseType[paramTypes.length];
+
+        for (int i=0; i<paramTypes.length; i++) {
+            Object paramType = paramTypes[i];
+            if (i < numCaptures || paramType != null) {
+                allParamTypes[i] = typeFrom(paramType);
+            } else {
+                allParamTypes[i] = actualParamTypes[i - numCaptures];
+            }
+        }
+
+        var method = type().new Method(0, actualReturnType, name, allParamTypes);
+
+        var function = new TheLambdaFunction(this, method, actualFunctionType, theOne);
+        function.private_().static_().synthetic();
+
+        doAddMethod(function);
+
+        return function;
+    }
+
+    @Override
     public void addLoadableType(Object type) {
         Type tType = typeFrom(type);
 
@@ -559,7 +633,7 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
         BaseType type = type();
         do {
             for (BaseType.Method method : type.methods().values()) {
-                if (methodSet.add(method) && Modifier.isAbstract(method.mFlags)) {
+                if (methodSet.add(method) && method.isAbstract()) {
                     if (unimplemented == null) {
                         unimplemented = new TreeSet<>();
                     }
@@ -579,7 +653,7 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
 
         for (BaseType ifaceType : type().interfaces()) {
             for (BaseType.Method method : ifaceType.methods().values()) {
-                if (Modifier.isAbstract(method.mFlags) && !methodSet.contains(method)) {
+                if (method.isAbstract() && !methodSet.contains(method)) {
                     if (unimplemented == null) {
                         unimplemented = new TreeSet<>();
                     }

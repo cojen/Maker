@@ -37,6 +37,8 @@ class ConstantPool {
     private final Map<Constant, Constant> mConstants;
     private int mSize;
 
+    private int mLateIndex;
+
     ConstantPool() {
         mConstants = new LinkedHashMap<>(64);
         mSize = 1; // constant 0 is reserved
@@ -55,8 +57,15 @@ class ConstantPool {
     }
 
     C_UTF8 addUTF8(String value) {
-        requireNonNull(value);
-        return addConstant(new C_UTF8(value));
+        return addConstant(new FinalUTF8(requireNonNull(value)));
+    }
+
+    /**
+     * Returns a UTF-8 constant which selects a unique UTF-8 value when the ConstantPool is
+     * written out. The final name will be base + '$' + an integer.
+     */
+    C_UTF8 addLateUTF8(String base) {
+        return addConstant(new LateUTF8(requireNonNull(base)));
     }
 
     C_Integer addInteger(int value) {
@@ -136,9 +145,17 @@ class ConstantPool {
      * @param enclosingType must be the method's enclosingType or be a super class or interface
      */
     C_Method addMethod(BaseType enclosingType, BaseType.Method method) {
+        return addMethod(enclosingType, method, addUTF8(method.name()));
+    }
+
+    /**
+     * @param enclosingType must be the method's enclosingType or be a super class or interface
+     * @param name override the method's current name
+     */
+    C_Method addMethod(BaseType enclosingType, BaseType.Method method, C_UTF8 name) {
         int tag = enclosingType.isInterface() ? 11 : 10;
         C_Class clazz = addClass(enclosingType);
-        C_NameAndType nameAndType = addNameAndType(method.name(), method.descriptor());
+        C_NameAndType nameAndType = addNameAndType(name, addUTF8(method.descriptor()));
         return addConstant(new C_Method(tag, clazz, nameAndType, method));
     }
 
@@ -280,11 +297,18 @@ class ConstantPool {
         }
     }
 
-    static final class C_UTF8 extends Constant {
-        final String mValue;
-
-        C_UTF8(String value) {
+    static abstract class C_UTF8 extends Constant {
+        C_UTF8() {
             super(1);
+        }
+
+        abstract String value();
+    }
+
+    static final class FinalUTF8 extends C_UTF8 {
+        private final String mValue;
+
+        FinalUTF8(String value) {
             mValue = value;
         }
 
@@ -295,14 +319,45 @@ class ConstantPool {
 
         @Override
         public boolean equals(Object obj) {
-            return this == obj || obj instanceof C_UTF8 other
+            return this == obj || obj instanceof FinalUTF8 other
                 && mValue.equals(other.mValue);
+        }
+
+        @Override
+        String value() {
+            return mValue;
         }
 
         @Override
         void writeTo(BytesOut out) throws IOException {
             super.writeTo(out);
             out.writeUTF(mValue);
+        }
+    }
+
+    final class LateUTF8 extends C_UTF8 {
+        private final String mBase;
+
+        LateUTF8(String base) {
+            mBase = base;
+        }
+
+        // Rely on identity hashcode and equals.
+
+        @Override
+        String value() {
+            return mBase;
+        }
+
+        @Override
+        void writeTo(BytesOut out) throws IOException {
+            String value;
+            do {
+                value = mBase + '$' + ++mLateIndex;
+            } while (mConstants.containsKey(new FinalUTF8(value)));
+
+            super.writeTo(out);
+            out.writeUTF(value);
         }
     }
 

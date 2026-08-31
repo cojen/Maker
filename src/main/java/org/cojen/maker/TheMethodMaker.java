@@ -136,6 +136,18 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     }
 
     /**
+     * Construct with name constant that doesn't match the method object's name. This is
+     * intended to be used to define late binding names. The given method object must not be
+     * registered with the BaseType.
+     *
+     * @see TheLambdaFunction
+     */
+    TheMethodMaker(TheClassMaker classMaker, ConstantPool.C_UTF8 name, BaseType.Method method) {
+        super(classMaker, name, classMaker.mConstants.addUTF8(method.descriptor()));
+        mMethod = method;
+    }
+
+    /**
      * Must call on each clinit method.
      */
     void useReturnLabel() {
@@ -493,6 +505,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     @Override
     public MethodMaker abstract_() {
         mModifiers = Modifiers.toAbstractMethod(mModifiers);
+        mMethod.toAbstract();
         return this;
     }
 
@@ -1701,6 +1714,14 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         addOp(new InvokeDynamicOp(valueTypes.size(), dynamic, strType));
 
         return storeToNewVar(strType);
+    }
+
+    @Override
+    public Variable create(LambdaFunction function, Object... values) {
+        if (function instanceof TheLambdaFunction f && f.mClassMaker == mClassMaker) {
+            return f.doCreate(this, values);
+        }
+        throw new IllegalStateException("Unknown function");
     }
 
     @Override

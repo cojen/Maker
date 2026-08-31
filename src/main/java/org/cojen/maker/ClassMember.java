@@ -52,7 +52,7 @@ abstract class ClassMember extends Attributed implements Maker {
     }
 
     public String name() {
-        return mName.mValue;
+        return mName.value();
     }
 
     final void writeTo(BytesOut out) throws IOException {

@@ -390,6 +390,27 @@ public interface ClassMaker extends Maker {
     ClassMaker addExplicitInnerClass(String fullName, String className);
 
     /**
+     * Add a lambda function which is defined at the class level. Locally captured variables
+     * must be explicitly passed in when the function is {@link MethodMaker#create created}.
+     *
+     * <p>The given name is applied to an internal method which contains the function
+     * definition. The actual method name will differ to ensure that it doesn't match any other
+     * methods in this class. Ultimately, the name is purely informational, and it can appear
+     * in stack traces.
+     *
+     * @param functionType an interface with one abstract method
+     * @param retType the return type for the function; pass null to use the original
+     * @param name a tentative name for the function; pass null to use a default
+     * @param paramTypes types for captured values, followed by the parameter types of the
+     * function method; pass null for the function parameters to use the originals
+     * @return a LambdaFunction whose parameters are the captured values followed by the
+     * function parameters
+     * @see <a href="package-summary.html#types-and-values-heading">Types and Values</a>
+     */
+    LambdaFunction addLambdaFunction(Object functionType,
+                                     Object retType, String name, Object... paramTypes);
+
+    /**
      * Indicate that the given type should be loaded early, which is a useful feature for the
      * fields of {@link #valueClass value classes}.
      *

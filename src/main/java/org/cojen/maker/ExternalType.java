@@ -254,6 +254,13 @@ final class ExternalType extends BaseType.Clazz implements ClassMaker, Annotatio
         return new ExternalType(fullName, mProvider);
     }
 
+    @Override
+    public LambdaFunction addLambdaFunction(Object functionType,
+                                            Object retType, String name, Object... paramTypes)
+    {
+        return StubMaker.newInstance(MMaker.class);
+    }
+
     public void addLoadableType(Object type) {
     }
 
@@ -424,7 +431,7 @@ final class ExternalType extends BaseType.Clazz implements ClassMaker, Annotatio
         return methods;
     }
 
-    public abstract static class MMaker implements FieldMaker, MethodMaker {
+    public abstract static non-sealed class MMaker implements FieldMaker, LambdaFunction {
         Member member;
 
         @Override

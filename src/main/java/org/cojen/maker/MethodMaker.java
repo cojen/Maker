@@ -568,6 +568,14 @@ public interface MethodMaker extends Maker {
     Variable concat(Object... values);
 
     /**
+     * Returns a variable which refers to a lambda function instance.
+     *
+     * @param values values locally captured variables
+     * @throws IllegalArgumentException if the captured values don't match the specification
+     */
+    Variable create(LambdaFunction function, Object... values);
+
+    /**
      * Access a {@link VarHandle} via a pseudo field. If making a class to be loaded {@link
      * ClassMaker#beginExternal externally}, the handle must be truly {@link Constable}.
      *

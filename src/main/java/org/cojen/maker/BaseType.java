@@ -89,7 +89,8 @@ abstract class BaseType implements Type, Typed {
         FLAG_STATIC = Modifier.STATIC,
         FLAG_FINAL = Modifier.FINAL,
         FLAG_BRIDGE = 0x40,
-        FLAG_VARARGS = 0x80;
+        FLAG_VARARGS = 0x80,
+        FLAG_ABSTRACT = Modifier.ABSTRACT;
 
     static final Object[] NO_ARGS = new Object[0];
 
@@ -853,6 +854,14 @@ abstract class BaseType implements Type, Typed {
 
         void toVarargs() {
             mFlags |= FLAG_VARARGS;
+        }
+
+        boolean isAbstract() {
+            return (mFlags & FLAG_ABSTRACT) != 0;
+        }
+
+        void toAbstract() {
+            mFlags |= FLAG_ABSTRACT;
         }
 
         BaseType returnType() {
