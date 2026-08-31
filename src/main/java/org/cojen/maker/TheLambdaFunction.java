@@ -39,6 +39,7 @@ final class TheLambdaFunction extends TheMethodMaker implements LambdaFunction {
     private final MethodTypeDesc mDynamicMethodType;
 
     private ArrayList<BaseType> mMarkers;
+    private ArrayList<MethodTypeDesc> mBridges;
 
     private ConstantVar mImplMethodHandle;
 
@@ -89,19 +90,38 @@ final class TheLambdaFunction extends TheMethodMaker implements LambdaFunction {
         mMarkers.add(mtype);
     }
 
+    @Override
+    public void addBridgeMethod(Object retType, Object... paramTypes) {
+        TheClassMaker cm = mClassMaker;
+
+        ClassDesc retDesc = ClassDesc.ofDescriptor(cm.typeFrom(retType).descriptor());
+
+        var paramDescs = new ClassDesc[paramTypes.length];
+        for (int i=0; i<paramTypes.length; i++) {
+            paramDescs[i] = ClassDesc.ofDescriptor(cm.typeFrom(paramTypes[i]).descriptor());
+        }
+
+        MethodTypeDesc bridge = MethodTypeDesc.of(retDesc, paramDescs);
+
+        if (mBridges == null) {
+            mBridges = new ArrayList<>(2);
+        }
+
+        mBridges.add(bridge);
+    }
+
     Variable doCreate(TheMethodMaker mm, Object... values) {
         int flags = 0;
         ArrayList<Object> altArgs = null;
 
         if (mMarkers != null) {
             flags |= LambdaMetafactory.FLAG_MARKERS;
-            if (altArgs == null) {
-                altArgs = new ArrayList<>();
-            }
-            altArgs.add(mMarkers.size());
-            for (BaseType mtype : mMarkers) {
-                altArgs.add(mtype);
-            }
+            altArgs = addToList(altArgs, mMarkers);
+        }
+
+        if (mBridges != null) {
+            flags |= LambdaMetafactory.FLAG_BRIDGES;
+            altArgs = addToList(altArgs, mBridges);
         }
 
         var factory = mm.var(LambdaMetafactory.class);
@@ -128,6 +148,17 @@ final class TheLambdaFunction extends TheMethodMaker implements LambdaFunction {
         }
 
         return indy.invoke(mFunctionType, mFunctionMethod.name(), null, values);
+    }
+
+    private static ArrayList<Object> addToList(ArrayList<Object> list, ArrayList<?> toAdd) {
+        if (list == null) {
+            list = new ArrayList<>();
+        }
+        list.add(toAdd.size());
+        for (Object obj : toAdd) {
+            list.add(obj);
+        }
+        return list;
     }
 
     /**

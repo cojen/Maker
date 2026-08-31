@@ -23,6 +23,7 @@ package org.cojen.maker;
  *
  * @author Brian S. O'Neill
  * @see ClassMaker#addLambdaFunction
+ * @see MethodMaker#create
  */
 public sealed interface LambdaFunction extends MethodMaker
     permits TheLambdaFunction, ExternalType.MMaker
@@ -39,4 +40,14 @@ public sealed interface LambdaFunction extends MethodMaker
      * @see <a href="package-summary.html#types-and-values-heading">Types and Values</a>
      */
     void addMarkerInterface(Object markerType);
+
+    /**
+     * Adds a descriptor for a bridge method that the generated function class should define.
+     * A bridge method has a more specific signature than the primary function method.
+     *
+     * @param retType a class or name; can be null if the method returns void
+     * @param paramTypes classes or names
+     * @see <a href="package-summary.html#types-and-values-heading">Types and Values</a>
+     */
+    void addBridgeMethod(Object retType, Object... paramTypes);
 }

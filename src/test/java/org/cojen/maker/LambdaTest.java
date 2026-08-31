@@ -19,6 +19,7 @@ package org.cojen.maker;
 import java.io.Serializable;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
 
 import java.util.List;
 import java.util.RandomAccess;
@@ -156,5 +157,41 @@ public class LambdaTest {
         Class<?> clazz = cm.finish();
 
         assertEquals("hello", clazz.getMethod("test").invoke(null));
+    }
+
+    @Test
+    public void bridges() throws Exception {
+        ClassMaker cm = ClassMaker.begin().public_();
+
+        LambdaFunction lf = cm.addLambdaFunction(Function.class, String.class, null, String.class);
+        lf.return_(lf.concat(lf.param(0), "world"));
+
+        lf.addBridgeMethod(String.class, String.class);
+        lf.addBridgeMethod(String.class, Object.class);
+        lf.addBridgeMethod(Object.class, String.class);
+
+        MethodMaker mm = cm.addMethod(Object.class, "test").public_().static_();
+        var function = mm.create(lf);
+        mm.return_(function);
+
+        Class<?> clazz = cm.finish();
+
+        Object result = clazz.getMethod("test").invoke(null);
+
+        assertTrue(result instanceof Function);
+
+        Method[] methods = result.getClass().getDeclaredMethods();
+
+        assertEquals(4, methods.length);
+
+        int numBridges = 0;
+
+        for (Method m : methods) {
+            if (m.isBridge()) {
+                numBridges++;
+            }
+        }
+
+        assertEquals(3, numBridges);
     }
 }
