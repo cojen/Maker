@@ -6,6 +6,7 @@ v2.9.0
 * The inc/dec operations against a pseudo field now access the coordinates just once.
 * Added a method to access an array via a pseudo field, for supporting atomic access features.
 * Added support for value objects, a preview feature described by JEP 401 and JEP 539.
+* Added support for creating lambda functions.
 
 v2.8.2 (2026-08-07)
 ------
