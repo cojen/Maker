@@ -66,6 +66,8 @@ initTheme();
 <li><a href="#method-detail" tabindex="0">Method Details</a>
 <ol class="toc-list">
 <li><a href="#functionType()" tabindex="0">functionType()</a></li>
+<li><a href="#addMarkerInterface(java.lang.Object)" tabindex="0">addMarkerInterface(Object)</a></li>
+<li><a href="#addBridgeMethod(java.lang.Object,java.lang.Object...)" tabindex="0">addBridgeMethod(Object, Object...)</a></li>
 </ol>
 </li>
 </ol>
@@ -92,6 +94,7 @@ the captured values, and the rest are the actual function parameters.</div>
 <dd>
 <ul class="tag-list-long">
 <li><a href="ClassMaker.html#addLambdaFunction(java.lang.Object,java.lang.Object,java.lang.String,java.lang.Object...)"><code>ClassMaker.addLambdaFunction(Object, Object, String, Object...)</code></a></li>
+<li><a href="MethodMaker.html#create(org.cojen.maker.LambdaFunction,java.lang.Object...)"><code>MethodMaker.create(LambdaFunction, Object...)</code></a></li>
 </ul>
 </dd>
 </dl>
@@ -110,6 +113,17 @@ the captured values, and the rest are the actual function parameters.</div>
 <div class="table-header col-first">Modifier and Type</div>
 <div class="table-header col-second">Method</div>
 <div class="table-header col-last">Description</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#addBridgeMethod(java.lang.Object,java.lang.Object...)" class="member-name-link">addBridgeMethod</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/26/docs/api/java.base/java/lang/Object.html" title="class in java.lang" class="external-link">Object</a>&nbsp;retType,
+ <a href="https://docs.oracle.com/en/java/javase/26/docs/api/java.base/java/lang/Object.html" title="class in java.lang" class="external-link">Object</a>...&nbsp;paramTypes)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="block">Adds a descriptor for a bridge method that the generated function class should define.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#addMarkerInterface(java.lang.Object)" class="member-name-link">addMarkerInterface</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/26/docs/api/java.base/java/lang/Object.html" title="class in java.lang" class="external-link">Object</a>&nbsp;markerType)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="block">Adds a marker interface that the generated function should implement.</div>
+</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="Type.html" title="interface in org.cojen.maker">Type</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#functionType()" class="member-name-link">functionType</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
@@ -442,6 +456,46 @@ method.</div>
 <div class="horizontal-scroll">
 <div class="member-signature"><span class="return-type"><a href="Type.html" title="interface in org.cojen.maker">Type</a></span>&nbsp;<span class="element-name">functionType</span>()</div>
 <div class="block">Returns the function interface type.</div>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="addMarkerInterface(java.lang.Object)">
+<h3>addMarkerInterface</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="return-type">void</span>&nbsp;<span class="element-name">addMarkerInterface</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/26/docs/api/java.base/java/lang/Object.html" title="class in java.lang" class="external-link">Object</a>&nbsp;markerType)</span></div>
+<div class="block">Adds a marker interface that the generated function should implement. The marker
+interface shouldn't have any abstract methods.</div>
+<dl class="notes">
+<dt>See Also:</dt>
+<dd>
+<ul class="tag-list">
+<li><a href="package-summary.html#types-and-values-heading">Types and Values</a></li>
+</ul>
+</dd>
+</dl>
+</div>
+</section>
+</li>
+<li>
+<section class="detail" id="addBridgeMethod(java.lang.Object,java.lang.Object...)">
+<h3>addBridgeMethod</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="return-type">void</span>&nbsp;<span class="element-name">addBridgeMethod</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/26/docs/api/java.base/java/lang/Object.html" title="class in java.lang" class="external-link">Object</a>&nbsp;retType,
+ <a href="https://docs.oracle.com/en/java/javase/26/docs/api/java.base/java/lang/Object.html" title="class in java.lang" class="external-link">Object</a>...&nbsp;paramTypes)</span></div>
+<div class="block">Adds a descriptor for a bridge method that the generated function class should define.
+A bridge method has a more specific signature than the primary function method.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>retType</code> - a class or name; can be null if the method returns void</dd>
+<dd><code>paramTypes</code> - classes or names</dd>
+<dt>See Also:</dt>
+<dd>
+<ul class="tag-list">
+<li><a href="package-summary.html#types-and-values-heading">Types and Values</a></li>
+</ul>
+</dd>
+</dl>
 </div>
 </section>
 </li>
