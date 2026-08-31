@@ -138,6 +138,10 @@ modifiers.</div>
 <dd>
 <div class="block">Add an inner class to this method.</div>
 </dd>
+<dt><a href="org.cojen.maker/org/cojen/maker/ClassMaker.html#addLambdaFunction(java.lang.Object,java.lang.Object,java.lang.String,java.lang.Object...)" class="member-name-link">addLambdaFunction(Object, Object, String, Object...)</a> - Method in interface org.cojen.maker.<a href="org.cojen.maker/org/cojen/maker/ClassMaker.html" title="interface in org.cojen.maker">ClassMaker</a></dt>
+<dd>
+<div class="block">Add a lambda function which is defined at the class level.</div>
+</dd>
 <dt><a href="org.cojen.maker/org/cojen/maker/ClassMaker.html#addLoadableType(java.lang.Object)" class="member-name-link">addLoadableType(Object)</a> - Method in interface org.cojen.maker.<a href="org.cojen.maker/org/cojen/maker/ClassMaker.html" title="interface in org.cojen.maker">ClassMaker</a></dt>
 <dd>
 <div class="block">Indicate that the given type should be loaded early, which is a useful feature for the
@@ -365,6 +369,10 @@ manner as the Java concatenation operator.</div>
 <dd>
 <div class="block">Specify a static bootstrap method for dynamically generating constants, as found in the
 class type of this variable.</div>
+</dd>
+<dt><a href="org.cojen.maker/org/cojen/maker/MethodMaker.html#create(org.cojen.maker.LambdaFunction,java.lang.Object...)" class="member-name-link">create(LambdaFunction, Object...)</a> - Method in interface org.cojen.maker.<a href="org.cojen.maker/org/cojen/maker/MethodMaker.html" title="interface in org.cojen.maker">MethodMaker</a></dt>
+<dd>
+<div class="block">Returns a variable which refers to a lambda function instance.</div>
 </dd>
 </dl>
 <h2 class="title" id="I:D">D</h2>
@@ -837,6 +845,10 @@ within a constructor.</div>
 <dd>
 <div class="block">Represents a label bound to a <a href="org.cojen.maker/org/cojen/maker/MethodMaker.html" title="interface in org.cojen.maker"><code>method</code></a> body.</div>
 </dd>
+<dt><a href="org.cojen.maker/org/cojen/maker/LambdaFunction.html" class="type-name-link" title="interface in org.cojen.maker">LambdaFunction</a> - Interface in <a href="org.cojen.maker/org/cojen/maker/package-summary.html">org.cojen.maker</a></dt>
+<dd>
+<div class="block">Allows a lambda function to be defined.</div>
+</dd>
 <dt><a href="org.cojen.maker/org/cojen/maker/Variable.html#le(java.lang.Object)" class="member-name-link">le(Object)</a> - Method in interface org.cojen.maker.<a href="org.cojen.maker/org/cojen/maker/Variable.html" title="interface in org.cojen.maker">Variable</a></dt>
 <dd>
 <div class="block">Determine if this variable is less than or equal to another variable or constant, and
@@ -1275,6 +1287,10 @@ explicitly declared.</div>
 <dt><a href="org.cojen.maker/org/cojen/maker/FieldMaker.html#type()" class="member-name-link">type()</a> - Method in interface org.cojen.maker.<a href="org.cojen.maker/org/cojen/maker/FieldMaker.html" title="interface in org.cojen.maker">FieldMaker</a></dt>
 <dd>
 <div class="block">Returns the type of this field being made.</div>
+</dd>
+<dt><a href="org.cojen.maker/org/cojen/maker/LambdaFunction.html#type()" class="member-name-link">type()</a> - Method in interface org.cojen.maker.<a href="org.cojen.maker/org/cojen/maker/LambdaFunction.html" title="interface in org.cojen.maker">LambdaFunction</a></dt>
+<dd>
+<div class="block">Returns the function interface type.</div>
 </dd>
 <dt><a href="org.cojen.maker/org/cojen/maker/Variable.html#type()" class="member-name-link">type()</a> - Method in interface org.cojen.maker.<a href="org.cojen.maker/org/cojen/maker/Variable.html" title="interface in org.cojen.maker">Variable</a></dt>
 <dd>
