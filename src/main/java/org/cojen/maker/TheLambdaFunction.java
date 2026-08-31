@@ -66,7 +66,7 @@ final class TheLambdaFunction extends TheMethodMaker implements LambdaFunction {
     }
 
     @Override
-    public BaseType type() {
+    public BaseType functionType() {
         return mFunctionType;
     }
 

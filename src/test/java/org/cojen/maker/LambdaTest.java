@@ -99,7 +99,7 @@ public class LambdaTest {
             (Function.class, String.class, "captures", cm.type(), int.class, null);
         lf.return_(lf.concat(lf.param(2), lf.param(1), lf.param(0)));
 
-        assertEquals(Type.from(Function.class), lf.type());
+        assertEquals(Type.from(Function.class), lf.functionType());
 
         MethodMaker mm = cm.addMethod(Object.class, "test", Function.class).static_();
         mm.return_(mm.param(0).invoke("apply", "hello"));

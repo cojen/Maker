@@ -30,5 +30,5 @@ public sealed interface LambdaFunction extends MethodMaker
     /**
      * Returns the function interface type.
      */
-    Type type();
+    Type functionType();
 }
