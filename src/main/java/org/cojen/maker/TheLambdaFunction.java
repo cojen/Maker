@@ -23,6 +23,8 @@ import java.lang.invoke.LambdaMetafactory;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodType;
 
+import java.util.ArrayList;
+
 import static java.lang.invoke.MethodHandleInfo.*;
 
 /**
@@ -35,6 +37,8 @@ final class TheLambdaFunction extends TheMethodMaker implements LambdaFunction {
     private final BaseType.Method mFunctionMethod;
     private final MethodTypeDesc mInterfaceMethodType;
     private final MethodTypeDesc mDynamicMethodType;
+
+    private ArrayList<BaseType> mMarkers;
 
     private ConstantVar mImplMethodHandle;
 
@@ -70,10 +74,60 @@ final class TheLambdaFunction extends TheMethodMaker implements LambdaFunction {
         return mFunctionType;
     }
 
+    @Override
+    public void addMarkerInterface(Object markerType) {
+        BaseType mtype = mClassMaker.typeFrom(markerType);
+
+        if (!mtype.isInterface()) {
+            throw new IllegalArgumentException("Not an interface type: " + mtype.name());
+        }
+
+        if (mMarkers == null) {
+            mMarkers = new ArrayList<>(2);
+        }
+
+        mMarkers.add(mtype);
+    }
+
     Variable doCreate(TheMethodMaker mm, Object... values) {
-        return mm.var(LambdaMetafactory.class)
-            .indy("metafactory", mInterfaceMethodType, implMethodHandle(), mDynamicMethodType)
-            .invoke(mFunctionType, mFunctionMethod.name(), null, values);
+        int flags = 0;
+        ArrayList<Object> altArgs = null;
+
+        if (mMarkers != null) {
+            flags |= LambdaMetafactory.FLAG_MARKERS;
+            if (altArgs == null) {
+                altArgs = new ArrayList<>();
+            }
+            altArgs.add(mMarkers.size());
+            for (BaseType mtype : mMarkers) {
+                altArgs.add(mtype);
+            }
+        }
+
+        var factory = mm.var(LambdaMetafactory.class);
+        ConstantVar implMethodHandle = implMethodHandle();
+
+        Bootstrap indy;
+
+        if (flags == 0) {
+            indy = factory.indy("metafactory",
+                                mInterfaceMethodType, implMethodHandle, mDynamicMethodType);
+        } else {
+            var fullArgs = new Object[4 + altArgs.size()];
+
+            fullArgs[0] = mInterfaceMethodType;
+            fullArgs[1] = implMethodHandle;
+            fullArgs[2] = mDynamicMethodType;
+            fullArgs[3] = flags;
+
+            for (int i = 4; i < fullArgs.length; i++) {
+                fullArgs[i] = altArgs.get(i - 4);
+            }
+
+            indy = factory.indy("altMetafactory", fullArgs);
+        }
+
+        return indy.invoke(mFunctionType, mFunctionMethod.name(), null, values);
     }
 
     /**

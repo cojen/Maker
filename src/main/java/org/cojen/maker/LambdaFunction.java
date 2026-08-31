@@ -31,4 +31,12 @@ public sealed interface LambdaFunction extends MethodMaker
      * Returns the function interface type.
      */
     Type functionType();
+
+    /**
+     * Adds a marker interface that the generated function should implement. The marker
+     * interface shouldn't have any abstract methods.
+     *
+     * @see <a href="package-summary.html#types-and-values-heading">Types and Values</a>
+     */
+    void addMarkerInterface(Object markerType);
 }

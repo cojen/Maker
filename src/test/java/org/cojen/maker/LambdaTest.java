@@ -21,6 +21,7 @@ import java.io.Serializable;
 import java.lang.reflect.Constructor;
 
 import java.util.List;
+import java.util.RandomAccess;
 
 import java.util.function.Function;
 
@@ -125,5 +126,35 @@ public class LambdaTest {
             var result = clazz.getMethod("test2").invoke(instance);
             assertEquals("hello0null", result);
         }
+    }
+
+    @Test
+    public void marker() throws Exception {
+        ClassMaker cm = ClassMaker.begin().public_();
+
+        LambdaFunction lf = cm.addLambdaFunction(Function.class, Object.class, null, Object.class);
+
+        try {
+            lf.addMarkerInterface(String.class);
+            fail();
+        } catch (IllegalArgumentException e) {
+            assertTrue(e.getMessage().contains("Not an interface"));
+        }
+
+        lf.addMarkerInterface(RandomAccess.class);
+
+        lf.return_(lf.param(0));
+
+        MethodMaker mm = cm.addMethod(Object.class, "test", Function.class).static_();
+        mm.return_(mm.param(0).invoke("apply", "hello"));
+
+        mm = cm.addMethod(Object.class, "test").public_().static_();
+        var function = mm.create(lf);
+        mm.var(Assert.class).invoke("assertTrue", function.instanceOf(RandomAccess.class));
+        mm.return_(mm.invoke("test", function));
+
+        Class<?> clazz = cm.finish();
+
+        assertEquals("hello", clazz.getMethod("test").invoke(null));
     }
 }
