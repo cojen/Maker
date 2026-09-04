@@ -594,8 +594,16 @@ public class UsageTest {
     @Test
     public void doubleFinish() {
         mClassMaker.finish();
+
         try {
             mClassMaker.finish();
+            fail();
+        } catch (IllegalStateException e) {
+            check(e, "Class definition");
+        }
+
+        try {
+            mClassMaker.addInnerClass(null);
             fail();
         } catch (IllegalStateException e) {
             check(e, "Class definition");

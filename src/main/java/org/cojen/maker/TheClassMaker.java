@@ -493,6 +493,7 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
 
     private Attribute.InnerClasses innerClasses() {
         if (mInnerClasses == null) {
+            checkFinished();
             mInnerClasses = new Attribute.InnerClasses(mConstants);
             addAttribute(mInnerClasses);
         }
