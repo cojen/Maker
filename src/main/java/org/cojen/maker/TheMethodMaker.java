@@ -5774,7 +5774,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         public LocalVar name(String name) {
             Objects.requireNonNull(name);
             if (mName != null) {
-                throw new IllegalStateException("Already named");
+                throw new IllegalStateException("Already named: " + mName);
             }
             mName = name;
             return this;
