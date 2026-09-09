@@ -4478,20 +4478,20 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                 // Insert new operations which perform a direct "if" branch.
 
                 if (mValue == null) {
-                    byte effectiveOp = (byte) (mZeroOp + (IFNULL - IFEQ));
+                    byte actualOp = (byte) (mZeroOp + (IFNULL - IFEQ));
                     if (branchOp == IFEQ) {
-                        effectiveOp = flipIf(effectiveOp);
+                        actualOp = flipIf(actualOp);
                     }
                     mVar.push();
-                    addBranchOp(effectiveOp, 1, branch.mTarget);
+                    addBranchOp(actualOp, 1, branch.mTarget);
                 } else {
-                    byte effectiveOp = mOp;
-                    byte effectiveZeroOp = mZeroOp;
+                    byte actualOp = mOp;
+                    byte actualZeroOp = mZeroOp;
                     if (branchOp == IFEQ) {
-                        effectiveOp = flipIf(effectiveOp);
-                        effectiveZeroOp = flipIf(effectiveZeroOp);
+                        actualOp = flipIf(actualOp);
+                        actualZeroOp = flipIf(actualZeroOp);
                     }
-                    mVar.ifRelational(mValue, branch.mTarget, mEq, effectiveOp, effectiveZeroOp);
+                    mVar.ifRelational(mValue, branch.mTarget, mEq, actualOp, actualZeroOp, true);
                 }
 
                 // Add back the operations that were removed earlier.
@@ -4511,7 +4511,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                 mVar.push();
                 addBranchOp((byte) (mZeroOp + (IFNULL - IFEQ)), 1, match);
             } else {
-                mVar.ifRelational(mValue, match, mEq, mOp, mZeroOp);
+                mVar.ifRelational(mValue, match, mEq, mOp, mZeroOp, false);
             }
             addOp(new BasicConstantOp(false, BOOLEAN));
             Label cont = label();
@@ -4639,7 +4639,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                 push();
                 addBranchOp(IFNULL, 1, label);
             } else {
-                ifRelational(value, label, true, IF_ICMPEQ, IFEQ);
+                ifRelational(value, label, true, IF_ICMPEQ, IFEQ, false);
             }
         }
 
@@ -4650,7 +4650,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                 push();
                 addBranchOp(IFNONNULL, 1, label);
             } else {
-                ifRelational(value, label, true, IF_ICMPNE, IFNE);
+                ifRelational(value, label, true, IF_ICMPNE, IFNE, false);
             }
         }
 
@@ -4662,30 +4662,33 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
         @Override
         public void ifLt(Object value, Label label) {
-            ifRelational(value, label, false, IF_ICMPLT, IFLT);
+            ifRelational(value, label, false, IF_ICMPLT, IFLT, false);
         }
 
         @Override
         public void ifGe(Object value, Label label) {
-            ifRelational(value, label, false, IF_ICMPGE, IFGE);
+            ifRelational(value, label, false, IF_ICMPGE, IFGE, false);
         }
 
         @Override
         public void ifGt(Object value, Label label) {
-            ifRelational(value, label, false, IF_ICMPGT, IFGT);
+            ifRelational(value, label, false, IF_ICMPGT, IFGT, false);
         }
 
         @Override
         public void ifLe(Object value, Label label) {
-            ifRelational(value, label, false, IF_ICMPLE, IFLE);
+            ifRelational(value, label, false, IF_ICMPLE, IFLE, false);
         }
 
         /**
          * @param eq true if performing an equality check
          * @param op normal op to use for ints
          * @param zeroOp op to use when comparing against a constant zero int
+         * @param flipped pass true if comparison ops were flipped; affects NaN comparison
          */
-        private void ifRelational(Object value, Label label, boolean eq, byte op, byte zeroOp) {
+        private void ifRelational(Object value, Label label, boolean eq, byte op, byte zeroOp,
+                                  boolean flipped)
+        {
             requireNonNull(value);
 
             BaseType typeCmp;
@@ -4769,11 +4772,11 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                 return;
 
             case SM_FLOAT:
-                cmpOp = (zeroOp == IFLE || zeroOp == IFLT) ? FCMPG : FCMPL;
+                cmpOp = ((zeroOp == IFLE || zeroOp == IFLT) ^ flipped) ? FCMPG : FCMPL;
                 break;
 
             case SM_DOUBLE:
-                cmpOp = (zeroOp == IFLE || zeroOp == IFLT) ? DCMPG : DCMPL;
+                cmpOp = ((zeroOp == IFLE || zeroOp == IFLT) ^ flipped) ? DCMPG : DCMPL;
                 break;
 
             case SM_LONG:

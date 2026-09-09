@@ -1,6 +1,11 @@
 Changelog
 =========
 
+v2.8.3
+------
+* Fixed handling of NaN comparisons for the variants that don't act on a label. For example,
+  `lt(Object)` and `ifLt(Object, Runnable)`.
+
 v2.8.2 (2026-08-07)
 ------
 * Fixed code generation of empty catch blocks (no exception table entry should be generated).

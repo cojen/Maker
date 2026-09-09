@@ -1129,4 +1129,42 @@ public class BranchTest {
         var clazz = cm.finish();
         clazz.getMethod("run").invoke(null);
     }
+
+    @Test
+    public void ifNaN() throws Exception {
+        ClassMaker cm = ClassMaker.begin().public_();
+
+        MethodMaker mm = cm.addMethod(null, "test", double.class).public_().static_();
+        var assertVar = mm.var(Assert.class);
+
+        var param = mm.param(0);
+
+        for (int i=0; i<5; i++) {
+            Label pass = mm.label();
+
+            Variable result = switch (i) {
+                default -> param.eq((double) i);
+                case 1 -> param.lt((double) i);
+                case 2 -> param.ge((double) i);
+                case 3 -> param.gt((double) i);
+                case 4 -> param.le((double) i);
+            };
+
+            result.ifFalse(pass);
+
+            assertVar.invoke("fail");
+            pass.here();
+        }
+
+        {
+            Label pass = mm.label();
+            param.ne(1.0).ifTrue(pass);
+            assertVar.invoke("fail");
+            pass.here();
+        }
+
+        var clazz = cm.finish();
+        clazz.getMethod("test", double.class).invoke(null, Double.NaN);
+        
+    }
 }
