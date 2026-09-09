@@ -1026,6 +1026,104 @@ public class BranchTest {
             passCount++;
         }
 
+        {
+            // NaN isn't equal to anything, even itself.
+            var v1 = mm.var(double.class).set(Double.NaN);
+
+            v1.ifNe(Double.NaN, pass);
+            passCount++;
+            v1.ifNe(Double.NaN, pass, fail);
+            passCount++;
+            v1.ifNe(1.0, pass);
+            passCount++;
+            v1.ifNe(1.0, pass, fail);
+            passCount++;
+
+            v1.ifEq(Double.NaN, fail);
+            v1.ifEq(Double.NaN, fail, pass);
+            passCount++;
+            v1.ifEq(1.0, fail);
+            v1.ifEq(1.0, fail, pass);
+            passCount++;
+
+            v1.ifLt(Double.NaN, fail);
+            v1.ifLt(Double.NaN, fail, pass);
+            passCount++;
+            v1.ifLt(1.0, fail);
+            v1.ifLt(1.0, fail, pass);
+            passCount++;
+
+            v1.ifGe(Double.NaN, fail);
+            v1.ifGe(Double.NaN, fail, pass);
+            passCount++;
+            v1.ifGe(1.0, fail);
+            v1.ifGe(1.0, fail, pass);
+            passCount++;
+
+            v1.ifGt(Double.NaN, fail);
+            v1.ifGt(Double.NaN, fail, pass);
+            passCount++;
+            v1.ifGt(1.0, fail);
+            v1.ifGt(1.0, fail, pass);
+            passCount++;
+
+            v1.ifLe(Double.NaN, fail);
+            v1.ifLe(Double.NaN, fail, pass);
+            passCount++;
+            v1.ifLe(1.0, fail);
+            v1.ifLe(1.0, fail, pass);
+            passCount++;
+        }
+
+        {
+            // NaN isn't equal to anything, even itself.
+            var v1 = mm.var(double.class).set(Float.NaN);
+
+            v1.ifNe(Float.NaN, pass);
+            passCount++;
+            v1.ifNe(Float.NaN, pass, fail);
+            passCount++;
+            v1.ifNe(1.0f, pass);
+            passCount++;
+            v1.ifNe(1.0f, pass, fail);
+            passCount++;
+
+            v1.ifEq(Float.NaN, fail);
+            v1.ifEq(Float.NaN, fail, pass);
+            passCount++;
+            v1.ifEq(1.0f, fail);
+            v1.ifEq(1.0f, fail, pass);
+            passCount++;
+
+            v1.ifLt(Float.NaN, fail);
+            v1.ifLt(Float.NaN, fail, pass);
+            passCount++;
+            v1.ifLt(1.0f, fail);
+            v1.ifLt(1.0f, fail, pass);
+            passCount++;
+
+            v1.ifGe(Float.NaN, fail);
+            v1.ifGe(Float.NaN, fail, pass);
+            passCount++;
+            v1.ifGe(1.0f, fail);
+            v1.ifGe(1.0f, fail, pass);
+            passCount++;
+
+            v1.ifGt(Float.NaN, fail);
+            v1.ifGt(Float.NaN, fail, pass);
+            passCount++;
+            v1.ifGt(1.0f, fail);
+            v1.ifGt(1.0f, fail, pass);
+            passCount++;
+
+            v1.ifLe(Float.NaN, fail);
+            v1.ifLe(Float.NaN, fail, pass);
+            passCount++;
+            v1.ifLe(1.0f, fail);
+            v1.ifLe(1.0f, fail, pass);
+            passCount++;
+        }
+
         assertVar.invoke("assertEquals", passCount, passVar);
 
         var clazz = cm.finish();

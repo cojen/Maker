@@ -225,10 +225,7 @@ public interface Variable {
      * @see <a href="package-summary.html#types-and-values-heading">Types and Values</a>
      */
     default void ifEq(Object value, Runnable then) {
-        Label endLabel = methodMaker().label();
-        ifNe(value, endLabel);
-        then.run();
-        endLabel.here();
+        ifEq(value, then, null);
     }
 
     /**
@@ -243,12 +240,14 @@ public interface Variable {
      */
     default void ifEq(Object value, Runnable then, Runnable else_) {
         MethodMaker mm = methodMaker();
-        Label elseLabel = mm.label();
-        ifNe(value, elseLabel);
-        then.run();
+        Label thenLabel = mm.label();
+        ifEq(value, thenLabel);
+        if (else_ != null) {
+            else_.run();
+        }
         Label endLabel = mm.label().goto_();
-        elseLabel.here();
-        else_.run();
+        thenLabel.here();
+        then.run();
         endLabel.here();
     }
 
@@ -272,10 +271,7 @@ public interface Variable {
      * @see <a href="package-summary.html#types-and-values-heading">Types and Values</a>
      */
     default void ifNe(Object value, Runnable then) {
-        Label endLabel = methodMaker().label();
-        ifEq(value, endLabel);
-        then.run();
-        endLabel.here();
+        ifNe(value, then, null);
     }
 
     /**
@@ -290,12 +286,14 @@ public interface Variable {
      */
     default void ifNe(Object value, Runnable then, Runnable else_) {
         MethodMaker mm = methodMaker();
-        Label elseLabel = mm.label();
-        ifEq(value, elseLabel);
-        then.run();
+        Label thenLabel = mm.label();
+        ifNe(value, thenLabel);
+        if (else_ != null) {
+            else_.run();
+        }
         Label endLabel = mm.label().goto_();
-        elseLabel.here();
-        else_.run();
+        thenLabel.here();
+        then.run();
         endLabel.here();
     }
 
@@ -319,10 +317,7 @@ public interface Variable {
      * @see <a href="package-summary.html#types-and-values-heading">Types and Values</a>
      */
     default void ifLt(Object value, Runnable then) {
-        Label endLabel = methodMaker().label();
-        ifGe(value, endLabel);
-        then.run();
-        endLabel.here();
+        ifLt(value, then, null);
     }
 
     /**
@@ -337,12 +332,14 @@ public interface Variable {
      */
     default void ifLt(Object value, Runnable then, Runnable else_) {
         MethodMaker mm = methodMaker();
-        Label elseLabel = mm.label();
-        ifGe(value, elseLabel);
-        then.run();
+        Label thenLabel = mm.label();
+        ifLt(value, thenLabel);
+        if (else_ != null) {
+            else_.run();
+        }
         Label endLabel = mm.label().goto_();
-        elseLabel.here();
-        else_.run();
+        thenLabel.here();
+        then.run();
         endLabel.here();
     }
 
@@ -366,10 +363,7 @@ public interface Variable {
      * @see <a href="package-summary.html#types-and-values-heading">Types and Values</a>
      */
     default void ifGe(Object value, Runnable then) {
-        Label endLabel = methodMaker().label();
-        ifLt(value, endLabel);
-        then.run();
-        endLabel.here();
+        ifGe(value, then, null);
     }
 
     /**
@@ -384,12 +378,14 @@ public interface Variable {
      */
     default void ifGe(Object value, Runnable then, Runnable else_) {
         MethodMaker mm = methodMaker();
-        Label elseLabel = mm.label();
-        ifLt(value, elseLabel);
-        then.run();
+        Label thenLabel = mm.label();
+        ifGe(value, thenLabel);
+        if (else_ != null) {
+            else_.run();
+        }
         Label endLabel = mm.label().goto_();
-        elseLabel.here();
-        else_.run();
+        thenLabel.here();
+        then.run();
         endLabel.here();
     }
 
@@ -413,10 +409,7 @@ public interface Variable {
      * @see <a href="package-summary.html#types-and-values-heading">Types and Values</a>
      */
     default void ifGt(Object value, Runnable then) {
-        Label endLabel = methodMaker().label();
-        ifLe(value, endLabel);
-        then.run();
-        endLabel.here();
+        ifGt(value, then, null);
     }
 
     /**
@@ -431,12 +424,14 @@ public interface Variable {
      */
     default void ifGt(Object value, Runnable then, Runnable else_) {
         MethodMaker mm = methodMaker();
-        Label elseLabel = mm.label();
-        ifLe(value, elseLabel);
-        then.run();
+        Label thenLabel = mm.label();
+        ifGt(value, thenLabel);
+        if (else_ != null) {
+            else_.run();
+        }
         Label endLabel = mm.label().goto_();
-        elseLabel.here();
-        else_.run();
+        thenLabel.here();
+        then.run();
         endLabel.here();
     }
 
@@ -460,10 +455,7 @@ public interface Variable {
      * @see <a href="package-summary.html#types-and-values-heading">Types and Values</a>
      */
     default void ifLe(Object value, Runnable then) {
-        Label endLabel = methodMaker().label();
-        ifGt(value, endLabel);
-        then.run();
-        endLabel.here();
+        ifLe(value, then, null);
     }
 
     /**
@@ -478,12 +470,14 @@ public interface Variable {
      */
     default void ifLe(Object value, Runnable then, Runnable else_) {
         MethodMaker mm = methodMaker();
-        Label elseLabel = mm.label();
-        ifGt(value, elseLabel);
-        then.run();
+        Label thenLabel = mm.label();
+        ifLe(value, thenLabel);
+        if (else_ != null) {
+            else_.run();
+        }
         Label endLabel = mm.label().goto_();
-        elseLabel.here();
-        else_.run();
+        thenLabel.here();
+        then.run();
         endLabel.here();
     }
 
