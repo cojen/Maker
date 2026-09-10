@@ -23,6 +23,8 @@ import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandleInfo;
 import java.lang.invoke.MethodType;
 
+import static org.cojen.maker.TheMethodMaker.run;
+
 /**
  * Represents a variable bound to the body of a {@link MethodMaker method}.
  *
@@ -150,7 +152,7 @@ public interface Variable {
     default void ifTrue(Runnable then) {
         Label endLabel = methodMaker().label();
         ifFalse(endLabel);
-        then.run();
+        run(then);
         endLabel.here();
     }
 
@@ -164,10 +166,10 @@ public interface Variable {
         MethodMaker mm = methodMaker();
         Label elseLabel = mm.label();
         ifFalse(elseLabel);
-        then.run();
+        run(then);
         Label endLabel = mm.label().goto_();
         elseLabel.here();
-        else_.run();
+        run(else_);
         endLabel.here();
     }
 
@@ -184,7 +186,7 @@ public interface Variable {
     default void ifFalse(Runnable then) {
         Label endLabel = methodMaker().label();
         ifTrue(endLabel);
-        then.run();
+        run(then);
         endLabel.here();
     }
 
@@ -198,10 +200,10 @@ public interface Variable {
         MethodMaker mm = methodMaker();
         Label elseLabel = mm.label();
         ifTrue(elseLabel);
-        then.run();
+        run(then);
         Label endLabel = mm.label().goto_();
         elseLabel.here();
-        else_.run();
+        run(else_);
         endLabel.here();
     }
 
@@ -242,12 +244,10 @@ public interface Variable {
         MethodMaker mm = methodMaker();
         Label thenLabel = mm.label();
         ifEq(value, thenLabel);
-        if (else_ != null) {
-            else_.run();
-        }
+        run(else_);
         Label endLabel = mm.label().goto_();
         thenLabel.here();
-        then.run();
+        run(then);
         endLabel.here();
     }
 
@@ -288,12 +288,10 @@ public interface Variable {
         MethodMaker mm = methodMaker();
         Label thenLabel = mm.label();
         ifNe(value, thenLabel);
-        if (else_ != null) {
-            else_.run();
-        }
+        run(else_);
         Label endLabel = mm.label().goto_();
         thenLabel.here();
-        then.run();
+        run(then);
         endLabel.here();
     }
 
@@ -334,12 +332,10 @@ public interface Variable {
         MethodMaker mm = methodMaker();
         Label thenLabel = mm.label();
         ifLt(value, thenLabel);
-        if (else_ != null) {
-            else_.run();
-        }
+        run(else_);
         Label endLabel = mm.label().goto_();
         thenLabel.here();
-        then.run();
+        run(then);
         endLabel.here();
     }
 
@@ -380,12 +376,10 @@ public interface Variable {
         MethodMaker mm = methodMaker();
         Label thenLabel = mm.label();
         ifGe(value, thenLabel);
-        if (else_ != null) {
-            else_.run();
-        }
+        run(else_);
         Label endLabel = mm.label().goto_();
         thenLabel.here();
-        then.run();
+        run(then);
         endLabel.here();
     }
 
@@ -426,12 +420,10 @@ public interface Variable {
         MethodMaker mm = methodMaker();
         Label thenLabel = mm.label();
         ifGt(value, thenLabel);
-        if (else_ != null) {
-            else_.run();
-        }
+        run(else_);
         Label endLabel = mm.label().goto_();
         thenLabel.here();
-        then.run();
+        run(then);
         endLabel.here();
     }
 
@@ -472,12 +464,10 @@ public interface Variable {
         MethodMaker mm = methodMaker();
         Label thenLabel = mm.label();
         ifLe(value, thenLabel);
-        if (else_ != null) {
-            else_.run();
-        }
+        run(else_);
         Label endLabel = mm.label().goto_();
         thenLabel.here();
-        then.run();
+        run(then);
         endLabel.here();
     }
 

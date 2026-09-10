@@ -1556,7 +1556,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
     @SuppressWarnings("unchecked")
     private static void callHandler(Object handler, Variable exVar) {
         if (handler instanceof Runnable r) {
-            r.run();
+            run(r);
         } else {
             ((Consumer<Variable>) handler).accept(exVar);
         }
@@ -1714,6 +1714,12 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         addOp(new InvokeDynamicOp(valueTypes.size(), dynamic, strType));
 
         return storeToNewVar(strType);
+    }
+
+    static void run(Runnable r) {
+        if (r != null) {
+            r.run();
+        }
     }
 
     @Override
@@ -3462,7 +3468,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                 // This label is the last operation, and so the body can be run immediately.
                 disallowFinish(true);
                 try {
-                    body.run();
+                    run(body);
                     return label().here();
                 } finally {
                     disallowFinish(false);
@@ -3477,7 +3483,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
             disallowFinish(true);
             try {
-                body.run();
+                run(body);
                 return label().here();
             } finally {
                 TheMethodMaker.this.mLastOp.mNext = next;
@@ -5708,7 +5714,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         public void synchronized_(Runnable body) {
             monitorEnter();
             Label start = label().here();
-            body.run();
+            run(body);
             finally_(start, this::monitorExit);
         }
 

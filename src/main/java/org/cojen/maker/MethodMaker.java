@@ -531,10 +531,10 @@ public interface MethodMaker extends Maker {
         } else {
             finally_(tryStart, exVar -> {
                 if (exVar == null) {
-                    handler.run();
+                    TheMethodMaker.run(handler);
                 } else {
                     Label finallyStart = label().here();
-                    handler.run();
+                    TheMethodMaker.run(handler);
                     catch_(finallyStart, null, exVar2 -> {
                         exVar2.invoke("addSuppressed", exVar);
                         exVar2.throw_();
