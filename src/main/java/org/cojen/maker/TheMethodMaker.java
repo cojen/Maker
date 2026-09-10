@@ -4551,11 +4551,13 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                 } else {
                     byte actualOp = mOp;
                     byte actualZeroOp = mZeroOp;
+                    boolean flipped = false;
                     if (branchOp == IFEQ) {
                         actualOp = flipIf(actualOp);
                         actualZeroOp = flipIf(actualZeroOp);
+                        flipped = true;
                     }
-                    mVar.ifRelational(mValue, branch.mTarget, mEq, actualOp, actualZeroOp, true);
+                    mVar.ifRelational(mValue, branch.mTarget, mEq, actualOp, actualZeroOp, flipped);
                 }
 
                 // Add back the operations that were removed earlier.

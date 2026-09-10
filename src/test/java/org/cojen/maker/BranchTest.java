@@ -1163,8 +1163,26 @@ public class BranchTest {
             pass.here();
         }
 
+        for (int i=0; i<5; i++) {
+            Label pass = mm.label();
+            Label fail = mm.label();
+
+            Variable result = switch (i) {
+                default -> param.eq((double) i);
+                case 1 -> param.lt((double) i);
+                case 2 -> param.ge((double) i);
+                case 3 -> param.gt((double) i);
+                case 4 -> param.le((double) i);
+            };
+
+            result.ifTrue(fail);
+            pass.goto_();
+            fail.here();
+            assertVar.invoke("fail");
+            pass.here();
+        }
+
         var clazz = cm.finish();
         clazz.getMethod("test", double.class).invoke(null, Double.NaN);
-        
     }
 }
