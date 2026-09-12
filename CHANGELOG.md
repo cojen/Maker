@@ -1,7 +1,7 @@
 Changelog
 =========
 
-v2.8.3
+v2.8.3 (2026-09-12)
 ------
 * Fixed handling of NaN comparisons for the variants that don't act on a label. For example,
   `lt(Object)` and `ifLt(Object, Runnable)`.
