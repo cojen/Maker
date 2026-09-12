@@ -8,7 +8,7 @@ v2.9.0
 * Added support for value objects, a preview feature described by JEP 401 and JEP 539.
 * Added support for creating lambda functions.
 
-v2.8.3
+v2.8.4 (2026-09-12)
 ------
 * Fixed handling of NaN comparisons for the variants that don't act on a label. For example,
   `lt(Object)` and `ifLt(Object, Runnable)`.
