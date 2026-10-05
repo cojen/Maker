@@ -288,7 +288,9 @@ final class ExternalType extends BaseType.Clazz implements ClassMaker, Annotatio
             paramTypes = new BaseType[fields.size()];
             Iterator<Field> it = fields.values().iterator();
             for (int i=0; i<paramTypes.length; i++) {
-                paramTypes[i] = it.next().type();
+                Field field = it.next();
+                addMethod(field.type(), field.name()).public_().final_();
+                paramTypes[i] = field.type();
             }
         }
 
