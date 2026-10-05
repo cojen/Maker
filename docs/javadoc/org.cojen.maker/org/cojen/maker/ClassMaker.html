@@ -88,6 +88,7 @@ initTheme();
 <li><a href="#another(java.lang.String)" tabindex="0">another(String)</a></li>
 <li><a href="#type()" tabindex="0">type()</a></li>
 <li><a href="#name()" tabindex="0">name()</a></li>
+<li><a href="#superclass()" tabindex="0">superclass()</a></li>
 <li><a href="#public_()" tabindex="0">public_()</a></li>
 <li><a href="#private_()" tabindex="0">private_()</a></li>
 <li><a href="#protected_()" tabindex="0">protected_()</a></li>
@@ -325,7 +326,7 @@ applied to ensure uniqueness.</div>
 <div class="block">Indicate that this class is defining an enum.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="ClassMaker.html" title="interface in org.cojen.maker">ClassMaker</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#extend(java.lang.Object)" class="member-name-link">extend</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/27/docs/api/java.base/java/lang/Object.html" title="class in java.lang" class="external-link">Object</a>&nbsp;superClass)</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#extend(java.lang.Object)" class="member-name-link">extend</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/27/docs/api/java.base/java/lang/Object.html" title="class in java.lang" class="external-link">Object</a>&nbsp;superclass)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Set a class that this class extends.</div>
 </div>
@@ -416,25 +417,30 @@ access to the class.</div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Switch this class to be static.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="ClassMaker.html" title="interface in org.cojen.maker">ClassMaker</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#synthetic()" class="member-name-link">synthetic</a>()</code></div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="Type.html" title="interface in org.cojen.maker">Type</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#superclass()" class="member-name-link">superclass</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="block">Returns the superclass type, which is null if not yet <a href="#extend(java.lang.Object)"><code>extended</code></a>.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="ClassMaker.html" title="interface in org.cojen.maker">ClassMaker</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#synthetic()" class="member-name-link">synthetic</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Indicate that this class is synthetic.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="Type.html" title="interface in org.cojen.maker">Type</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#type()" class="member-name-link">type</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="Type.html" title="interface in org.cojen.maker">Type</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#type()" class="member-name-link">type</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Returns the type of this class being made.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="https://docs.oracle.com/en/java/javase/27/docs/api/java.base/java/util/Set.html" title="interface in java.util" class="external-link">Set</a><wbr>&lt;<a href="https://docs.oracle.com/en/java/javase/27/docs/api/java.base/java/lang/String.html" title="class in java.lang" class="external-link">String</a>&gt;</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#unimplementedMethods()" class="member-name-link">unimplementedMethods</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="https://docs.oracle.com/en/java/javase/27/docs/api/java.base/java/util/Set.html" title="interface in java.util" class="external-link">Set</a><wbr>&lt;<a href="https://docs.oracle.com/en/java/javase/27/docs/api/java.base/java/lang/String.html" title="class in java.lang" class="external-link">String</a>&gt;</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#unimplementedMethods()" class="member-name-link">unimplementedMethods</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Returns the set of methods which would need to be implemented by this class in order for
 it to be non-abstract.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="ClassMaker.html" title="interface in org.cojen.maker">ClassMaker</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#valueClass()" class="member-name-link">valueClass</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="ClassMaker.html" title="interface in org.cojen.maker">ClassMaker</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#valueClass()" class="member-name-link">valueClass</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Switch this class to be a value class.</div>
 </div>
 </div>
@@ -653,6 +659,15 @@ be acted upon by a different thread.</div>
 </section>
 </li>
 <li>
+<section class="detail" id="superclass()">
+<h3>superclass</h3>
+<div class="horizontal-scroll">
+<div class="member-signature"><span class="return-type"><a href="Type.html" title="interface in org.cojen.maker">Type</a></span>&nbsp;<span class="element-name">superclass</span>()</div>
+<div class="block">Returns the superclass type, which is null if not yet <a href="#extend(java.lang.Object)"><code>extended</code></a>.</div>
+</div>
+</section>
+</li>
+<li>
 <section class="detail" id="public_()">
 <h3>public_</h3>
 <div class="horizontal-scroll">
@@ -799,11 +814,11 @@ to ensure that the enum class is defined correctly.</div>
 <section class="detail" id="extend(java.lang.Object)">
 <h3>extend</h3>
 <div class="horizontal-scroll">
-<div class="member-signature"><span class="return-type"><a href="ClassMaker.html" title="interface in org.cojen.maker">ClassMaker</a></span>&nbsp;<span class="element-name">extend</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/27/docs/api/java.base/java/lang/Object.html" title="class in java.lang" class="external-link">Object</a>&nbsp;superClass)</span></div>
+<div class="member-signature"><span class="return-type"><a href="ClassMaker.html" title="interface in org.cojen.maker">ClassMaker</a></span>&nbsp;<span class="element-name">extend</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/27/docs/api/java.base/java/lang/Object.html" title="class in java.lang" class="external-link">Object</a>&nbsp;superclass)</span></div>
 <div class="block">Set a class that this class extends.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
-<dd><code>superClass</code> - non-null type, specified by a Class or a String, etc.</dd>
+<dd><code>superclass</code> - non-null type, specified by a Class or a String, etc.</dd>
 <dt>Returns:</dt>
 <dd>this</dd>
 <dt>Throws:</dt>
