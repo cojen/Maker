@@ -154,6 +154,11 @@ public interface ClassMaker extends Maker {
     }
 
     /**
+     * Returns the superclass type, which is null if not yet {@link #extend extended}.
+     */
+    Type superclass();
+
+    /**
      * Switch this class to be public. Classes are package-private by default.
      *
      * @return this
@@ -227,13 +232,13 @@ public interface ClassMaker extends Maker {
     /**
      * Set a class that this class extends.
      *
-     * @param superClass non-null type, specified by a Class or a String, etc.
+     * @param superclass non-null type, specified by a Class or a String, etc.
      * @return this
      * @throws IllegalArgumentException if the type is unsupported
      * @throws IllegalStateException if already assigned
      * @see <a href="package-summary.html#types-and-values-heading">Types and Values</a>
      */
-    ClassMaker extend(Object superClass);
+    ClassMaker extend(Object superclass);
 
     /**
      * Add an interface that this class or interface implements. Call this method multiple

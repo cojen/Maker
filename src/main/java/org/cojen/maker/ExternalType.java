@@ -49,6 +49,11 @@ final class ExternalType extends BaseType.Clazz implements ClassMaker, Annotatio
     }
 
     @Override
+    public BaseType superclass() {
+        return mSuperType;
+    }
+
+    @Override
     boolean classExists() {
         return true;
     }
@@ -140,8 +145,8 @@ final class ExternalType extends BaseType.Clazz implements ClassMaker, Annotatio
     }
 
     @Override
-    public ClassMaker extend(Object superClass) {
-        BaseType type = typeFrom(superClass);
+    public ClassMaker extend(Object superclass) {
+        BaseType type = typeFrom(superclass);
 
         synchronized (this) {
             if (mSuperType != null) {

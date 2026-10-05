@@ -39,7 +39,9 @@ public class ExternalTypeTest {
             @Override
             public void init(ClassMaker cm) {
                 cm.public_().synthetic();
+                assertNull(cm.superclass());
                 cm.extend(java.util.AbstractList.class);
+                assertEquals(Type.from(java.util.AbstractList.class), cm.superclass());
                 cm.implement(java.util.RandomAccess.class);
                 try {
                     cm.extend(Object.class);

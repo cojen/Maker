@@ -55,7 +55,7 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
 
     final ConstantPool.C_Class mThisClass;
 
-    private ConstantPool.C_Class mSuperClass;
+    private ConstantPool.C_Class mSuperclass;
 
     int mModifiers = Modifiers.ACC_IDENTITY;
 
@@ -210,31 +210,31 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
     }
 
     @Override
-    public ClassMaker extend(Object superClass) {
-        requireNonNull(superClass);
-        if (mSuperClass != null) {
-            throw new IllegalStateException("Super class has already been assigned");
+    public ClassMaker extend(Object superclass) {
+        requireNonNull(superclass);
+        if (mSuperclass != null) {
+            throw new IllegalStateException("Superclass has already been assigned");
         }
-        doExtend(superClass);
+        doExtend(superclass);
         return this;
     }
 
-    private void doExtend(Object superClass) {
-        BaseType superType = typeFrom(superClass);
-        mSuperClass = mConstants.addClass(superType);
+    private void doExtend(Object superclass) {
+        BaseType superType = typeFrom(superclass);
+        mSuperclass = mConstants.addClass(superType);
         type().resetInherited();
         if (superType.isAnnotatable()) {
             superType.applyAnnotations(this, new TypeAnnotationMaker.Target2(0x10, 65535));
         }
     }
 
-    ConstantPool.C_Class superClass() {
-        ConstantPool.C_Class superClass = mSuperClass;
-        if (superClass == null) {
+    ConstantPool.C_Class superclassConstant() {
+        ConstantPool.C_Class superclass = mSuperclass;
+        if (superclass == null) {
             doExtend(Object.class);
-            superClass = mSuperClass;
+            superclass = mSuperclass;
         }
-        return superClass;
+        return superclass;
     }
 
     /**
@@ -242,7 +242,7 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
      * returns the same type: java.lang.Object.
      */
     BaseType superTypeNonNull() {
-        return superClass().mType;
+        return superclassConstant().mType;
     }
 
     @Override
@@ -667,10 +667,10 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
     }
 
     void toModule() {
-        if (mSuperClass != null) {
+        if (mSuperclass != null) {
             throw new IllegalStateException();
         }
-        mSuperClass = new ConstantPool.C_Class(null, null);
+        mSuperclass = new ConstantPool.C_Class(null, null);
         mModifiers = Modifiers.toModule(mModifiers);
     }
 
@@ -827,8 +827,8 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
     private void finishTo(BytesOut out) throws IOException {
         checkFinished();
 
-        // Ensure that mSuperClass has been assigned.
-        superClass();
+        // Ensure that mSuperclass has been assigned.
+        superclassConstant();
 
         int version = 0x0000_003d; // Java 17.
 
@@ -878,7 +878,7 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
         out.writeShort(mModifiers);
 
         out.writeShort(mThisClass.mIndex);
-        out.writeShort(mSuperClass.mIndex);
+        out.writeShort(mSuperclass.mIndex);
 
         if (mInterfaces == null) {
             out.writeShort(0);
@@ -939,6 +939,12 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
     @Override
     public BaseType type() {
         return mThisClass.mType;
+    }
+
+    @Override
+    public BaseType superclass() {
+        ConstantPool.C_Class superclass = mSuperclass;
+        return superclass == null ? null : superclass.mType;
     }
 
     BaseType typeFrom(Object type) {

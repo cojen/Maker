@@ -40,7 +40,12 @@ public class UsageTest {
 
     @Test
     public void changeExtend() {
+        assertNull(mClassMaker.superclass());
+
         mClassMaker.extend(UsageTest.class);
+
+        assertEquals(Type.from(UsageTest.class), mClassMaker.superclass());
+
         try {
             mClassMaker.extend(UsageTest.class);
             fail();
