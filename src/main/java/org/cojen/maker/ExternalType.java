@@ -49,6 +49,11 @@ final class ExternalType extends BaseType.Clazz implements ClassMaker, Annotatio
     }
 
     @Override
+    boolean classExists() {
+        return true;
+    }
+
+    @Override
     public Class<?> classType() {
         return null;
     }
