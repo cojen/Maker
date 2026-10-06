@@ -474,10 +474,10 @@ abstract class BaseType implements Type, Typed {
     }
 
     /**
-     * Returns the set of all interfaces, or null if not applicable or unknown.
+     * Returns the set of all interfaces, or an empty set if not applicable or unknown.
      */
     Set<BaseType> interfaces() {
-        return null;
+        return Collections.emptySet();
     }
 
     /**
@@ -1592,11 +1592,13 @@ abstract class BaseType implements Type, Typed {
                     interfaces = mInterfaces;
                     if (interfaces == null) {
                         Class clazz = classType();
-                        if (clazz != null) {
+                        if (clazz == null) {
+                            interfaces = Collections.emptySet();
+                        } else {
                             Set<BaseType> all = allInterfaces(null, clazz);
                             interfaces = all == null ? Collections.emptySet() : all;
-                            mInterfaces = interfaces;
                         }
+                        mInterfaces = interfaces;
                     }
                 }
             }

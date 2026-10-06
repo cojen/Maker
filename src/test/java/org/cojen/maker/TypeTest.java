@@ -201,7 +201,7 @@ public class TypeTest {
         assertFalse(type.isInterface());
 
         assertNull(type.superType());
-        assertNull(type.interfaces());
+        assertTrue(type.interfaces().isEmpty());
         assertTrue(type.fields().isEmpty());
         assertTrue(type.methods().isEmpty());
 
