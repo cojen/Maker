@@ -38,13 +38,6 @@ final class AnnotatableType extends BaseType {
         mAnnotations = new ArrayList<>(1);
     }
 
-    private AnnotatableType(BaseType base, AnnotatableType at) {
-        mBase = base;
-        synchronized (at) {
-            mAnnotations = new ArrayList<>(at.mAnnotations);
-        }
-    }
-
     private AnnotatableType(BaseType base, ArrayList<AnnMaker> annotations) {
         mBase = base;
         mAnnotations = annotations;
@@ -108,7 +101,7 @@ final class AnnotatableType extends BaseType {
 
     private synchronized AnnotatableType withBaseType(BaseType base) {
         if (!mFrozen) {
-            return new AnnotatableType(base, this);
+            return new AnnotatableType(base, new ArrayList<>(mAnnotations));
         } else if (base == mBase) {
             // Can only return this instance if it's immutable/frozen.
             return this;
@@ -121,8 +114,8 @@ final class AnnotatableType extends BaseType {
     }
 
     @Override
-    public Type annotatable() {
-        return new AnnotatableType(mBase, this);
+    public synchronized Type annotatable() {
+        return new AnnotatableType(mBase, new ArrayList<>(mAnnotations));
     }
 
     @Override
@@ -156,12 +149,12 @@ final class AnnotatableType extends BaseType {
     }
 
     @Override
-    public synchronized int hashCode() {
+    public int hashCode() {
         return mBase.hashCode();
     }
 
     @Override
-    public synchronized boolean equals(Object obj) {
+    public boolean equals(Object obj) {
         return mBase.equals(obj);
     }
 
