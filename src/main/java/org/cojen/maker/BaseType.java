@@ -1527,12 +1527,9 @@ abstract class BaseType implements Type, Typed {
                 return true;
             }
 
-            Set<BaseType> interfaces = other.interfaces();
-            if (interfaces != null) {
-                for (BaseType iface : interfaces) {
-                    if (isAssignableFrom(iface)) {
-                        return true;
-                    }
+            for (BaseType iface : other.interfaces()) {
+                if (isAssignableFrom(iface)) {
+                    return true;
                 }
             }
 
@@ -1785,11 +1782,8 @@ abstract class BaseType implements Type, Typed {
             }
 
             if (inherit == 0) {
-                Set<BaseType> interfaces = type.interfaces();
-                if (interfaces != null) {
-                    for (BaseType iface : interfaces) {
-                        addMethods(methods, iface, methodName, params, staticAllowed);
-                    }
+                for (BaseType iface : type.interfaces()) {
+                    addMethods(methods, iface, methodName, params, staticAllowed);
                 }
             }
 

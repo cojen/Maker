@@ -298,7 +298,7 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
 
         for (BaseType s = type().superType(); s != null; s = s.superType()) {
             Set<BaseType> inherited = s.interfaces();
-            if (inherited != null && !inherited.isEmpty()) {
+            if (!inherited.isEmpty()) {
                 if (all == null) {
                     all = new LinkedHashSet<>(inherited.size());
                 }
