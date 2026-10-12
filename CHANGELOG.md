@@ -3,10 +3,14 @@ Changelog
 
 v2.9.0
 ------
+* Fixed a NullPointerException when a class isn't found (the set of interfaces was null).
+* Fixed the error message for external classes when a method isn't found.
+* When asRecord is called on an external class, the required methods are defined too.
 * The inc/dec operations against a pseudo field now access the coordinates just once.
 * Added a method to access an array via a pseudo field, for supporting atomic access features.
 * Added support for value objects, a preview feature described by JEP 401 and JEP 539.
 * Added support for creating lambda functions.
+* Added a method to obtain the current superclass.
 
 v2.8.4 (2026-09-12)
 ------
