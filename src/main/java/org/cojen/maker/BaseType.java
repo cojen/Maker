@@ -1605,7 +1605,7 @@ abstract class BaseType implements Type, Typed {
         private static Set<BaseType> allInterfaces(Set<BaseType> all, Class clazz) {
             Class[] interfaces = clazz.getInterfaces();
 
-            if (interfaces != null && interfaces.length != 0) {
+            if (interfaces.length != 0) {
                 if (all == null) {
                     all = new LinkedHashSet<>(1);
                 }
