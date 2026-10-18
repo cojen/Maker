@@ -1,7 +1,7 @@
 Changelog
 =========
 
-v2.9.0
+v2.9.0 (2026-10-17)
 ------
 * Fixed a NullPointerException when a class isn't found (the set of interfaces was null).
 * Fixed the error message for external classes when a method isn't found.
