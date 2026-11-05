@@ -45,4 +45,14 @@ public class CandidateTest {
         assertEquals(0, Candidate.compare(strArray, str, num));
         assertEquals(0, Candidate.compare(objArray, strArray, numArray));
     }
+
+    @Test
+    public void preferBoxed() {
+        var param = BaseType.from(int.class);
+        var aParam = BaseType.from(Object.class);
+        var bParam = BaseType.from(Integer.class);
+
+        assertEquals(1, Candidate.compare(param, aParam, bParam));
+        assertEquals(-1, Candidate.compare(param, bParam, aParam));
+    }
 }

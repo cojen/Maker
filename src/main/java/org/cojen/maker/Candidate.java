@@ -70,39 +70,37 @@ final class Candidate {
             return aCost < bCost ? -1 : 1;
         }
 
-        if (aCost != 0) {
-            return 0;
-        }
-
-        if (param == BaseType.Null.THE) {
-            BaseType objType = BaseType.from(Object.class);
-            if (objType.equals(aParam)) {
-                return objType.equals(bParam) ? 0 : -1;
-            } else {
-                return objType.equals(bParam) ? 1 : 0;
-            }
-        }
-
-        if (param.equals(aParam)) {
-            return param.equals(bParam) ? 0 : -1;
-        } else if (param.equals(bParam)) {
-            return 1;
-        }
-
-        // Both a and b are supertypes of the actual param.
-
-        if (param.isArray()) {
-            if (aParam.isArray()) {
-                if (bParam.isArray()) {
-                    return compare(root(param), root(aParam), root(bParam));
+        if (aCost == 0) {
+            if (param == BaseType.Null.THE) {
+                BaseType objType = BaseType.from(Object.class);
+                if (objType.equals(aParam)) {
+                    return objType.equals(bParam) ? 0 : -1;
                 } else {
-                    return -1;
+                    return objType.equals(bParam) ? 1 : 0;
                 }
-            } else {
-                if (bParam.isArray()) {
-                    return 1;
+            }
+
+            if (param.equals(aParam)) {
+                return param.equals(bParam) ? 0 : -1;
+            } else if (param.equals(bParam)) {
+                return 1;
+            }
+
+            // Both a and b are supertypes of the actual param.
+
+            if (param.isArray()) {
+                if (aParam.isArray()) {
+                    if (bParam.isArray()) {
+                        return compare(root(param), root(aParam), root(bParam));
+                    } else {
+                        return -1;
+                    }
                 } else {
-                    return 0; // not expected
+                    if (bParam.isArray()) {
+                        return 1;
+                    } else {
+                        return 0; // not expected
+                    }
                 }
             }
         }
