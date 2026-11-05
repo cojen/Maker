@@ -3992,8 +3992,8 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                 int largest = mCases[mCases.length - 1];
                 m.appendInt(smallest);
                 m.appendInt(largest);
-                long c = smallest;
-                for (int i = 0; c <= largest; c++) {
+                int i = 0;
+                for (long c = smallest; c <= largest; c++) {
                     if (c == mCases[i]) {
                         mLabels[i].comesFromWide(m, srcAddr);
                         i++;
