@@ -805,8 +805,9 @@ public interface Variable {
     Variable com();
 
     /**
-     * Compares two primitive values, as if by calling a {@code Comparator}. A value of NaN is
-     * treated as equal to itself and greater than all other values.
+     * Compares two primitive values, as if by calling a {@link java.util.Comparator#compare
+     * Comparator}. A value of NaN is treated as equal to itself and greater than all other
+     * values.
      *
      * @param value a {@link Variable} or a constant
      * @return the result in a new int variable
@@ -818,8 +819,8 @@ public interface Variable {
     Variable cmp(Object value);
 
     /**
-     * Compares two primitive values, as if by calling a {@code Comparator}. If either value is
-     * NaN, then a negative value is returned.
+     * Compares two primitive values, as if by calling a {@link java.util.Comparator#compare
+     * Comparator}. If either value is NaN, then a negative value is returned.
      *
      * @param value a {@link Variable} or a constant
      * @return the result in a new int variable
@@ -831,8 +832,8 @@ public interface Variable {
     Variable cmpl(Object value);
 
     /**
-     * Compares two primitive values, as if by calling a {@code Comparator}. If either value is
-     * NaN, then a positive value is returned.
+     * Compares two primitive values, as if by calling a {@link java.util.Comparator#compare
+     * Comparator}. If either value is NaN, then a positive value is returned.
      *
      * @param value a {@link Variable} or a constant
      * @return the result in a new int variable
