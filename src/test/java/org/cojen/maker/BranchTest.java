@@ -301,6 +301,18 @@ public class BranchTest {
             def.here();
         }
 
+        // high range
+        {
+            Label def = mm.label();
+            int[] cases = {Integer.MAX_VALUE - 1, Integer.MAX_VALUE};
+            Label[] labels = {mm.label(), mm.label()};
+            mm.var(int.class).set(Integer.MAX_VALUE).switch_(def, cases, labels);
+            labels[0].here();
+            def.here();
+            assertVar.invoke("fail");
+            labels[1].here();
+        }
+
         // illegal
         try {
             Label def = mm.label();
