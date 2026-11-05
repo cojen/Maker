@@ -418,7 +418,7 @@ abstract class BaseType implements Type, Typed {
                 return code;
             }
 
-            if (to.isAssignableFrom(from(Number.class))) {
+            if (to.isAssignableFrom(this.box())) {
                 return 7; // Simple boxing.
             }
 

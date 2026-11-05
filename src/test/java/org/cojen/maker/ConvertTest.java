@@ -1181,4 +1181,22 @@ public class ConvertTest {
         var clazz = cm.finish();
         clazz.getMethod("run").invoke(null);
     }
+
+    @Test
+    public void toNumberCheck() throws Exception {
+        try {
+            MethodMaker mm = cm.addMethod(Number.class, "ntest0", boolean.class);
+            mm.return_(mm.param(0));
+            fail();
+        } catch (IllegalStateException e) {
+            assertTrue(e.getMessage().contains("conversion disallowed"));
+        }
+
+        try {
+            MethodMaker mm = cm.addMethod(Number.class, "ntest1", char.class);
+            mm.return_(mm.param(0));
+        } catch (IllegalStateException e) {
+            assertTrue(e.getMessage().contains("conversion disallowed"));
+        }
+    }
 }
