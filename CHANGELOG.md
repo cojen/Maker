@@ -1,6 +1,14 @@
 Changelog
 =========
 
+v2.9.1
+------
+* Fixed switch statement which has an upper bound of Integer.MAX_VALUE. An
+  ArrayIndexOutOfBoundsException was being thrown when the class is finished.
+* Disallow automatic conversion of boolean and char to Number.
+* When selecting a method to bind to, primitive values should prefer a boxed parameter over a
+  plain Object parameter. This eliminates a possible "No best matching method found" exception.
+
 v2.9.0 (2026-10-17)
 ------
 * Fixed a NullPointerException when a class isn't found (the set of interfaces was null).
