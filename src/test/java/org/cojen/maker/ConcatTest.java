@@ -145,4 +145,30 @@ public class ConcatTest {
             assertEquals(expect.toString(), result);
         }
     }
+
+    /**
+     * @author Claude
+     */
+    @Test
+    public void manyWideFields() throws Exception {
+        // Fields of type long and double each require two slots, and the limit is 200 slots
+        // when using StringConcatFactory. Check lengths which are just beyond the limit, and
+        // which are under the length where the StringBuilder fallback is used.
+        for (Class<?> type : new Class<?>[] {long.class, double.class}) {
+            for (int n : new int[] {100, 101, 150, 199, 200, 201}) {
+                ClassMaker cm = ClassMaker.begin().public_();
+                cm.addField(type, "f").public_().static_();
+                MethodMaker mm = cm.addMethod(String.class, "run").public_().static_();
+                mm.field("f").set(7);
+                var values = new Object[n];
+                for (int i=0; i<n; i++) {
+                    values[i] = mm.field("f");
+                }
+                mm.return_(mm.concat(values));
+                String result = (String) cm.finish().getMethod("run").invoke(null);
+                String one = type == long.class ? "7" : "7.0";
+                assertEquals("n=" + n, one.repeat(n), result);
+            }
+        }
+    }
 }

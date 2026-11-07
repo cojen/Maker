@@ -1606,7 +1606,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         if (values.length > 100) {
             int numSlots = values.length;
             for (Object value : values) {
-                if (value instanceof LocalVar var) {
+                if (value instanceof OwnedVar var) {
                     int tc = var.type().typeCode();
                     if (tc == T_DOUBLE || tc == T_LONG) {
                         numSlots++;
