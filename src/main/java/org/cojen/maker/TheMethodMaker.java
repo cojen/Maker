@@ -3372,22 +3372,22 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         /**
          * @return -1 if undefined
          */
-        int lineNum() {
+        final int lineNum() {
             return (mState & 0x7fff_ffff) - 1;
         }
 
         /**
          * @param lineNum usually >= 0; can be -1 if undefined; other are values illegal
          */
-        void lineNum(int lineNum) {
+        final void lineNum(int lineNum) {
             mState = (mState & 0x8000_0000) | ((lineNum + 1) & 0x7fff_ffff);
         }
 
-        boolean isVisited() {
+        final boolean isVisited() {
             return mState < 0;
         }
 
-        void markVisited() {
+        final void markVisited() {
             mState |= 0x8000_0000;
         }
 
@@ -3437,7 +3437,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
-        void reset() {
+        final void reset() {
             super.reset();
             mAddress = -1;
             mTrackBranches = null;
@@ -3446,7 +3446,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
-        public Label here() {
+        public final Label here() {
             if (isPositioned()) {
                 throw new IllegalStateException();
             }
@@ -3455,13 +3455,13 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
-        public Label goto_() {
+        public final Label goto_() {
             TheMethodMaker.this.goto_(this);
             return this;
         }
 
         @Override
-        public Label insert(Runnable body) {
+        public final Label insert(Runnable body) {
             final Op next = mNext;
             final Op last = TheMethodMaker.this.mLastOp;
 
@@ -3498,11 +3498,11 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
-        public MethodMaker methodMaker() {
+        public final MethodMaker methodMaker() {
             return TheMethodMaker.this;
         }
 
-        boolean isPositioned() {
+        final boolean isPositioned() {
             return mNext != null || TheMethodMaker.this.mLastOp == this;
         }
 
@@ -3600,13 +3600,13 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
-        Op flow(Flow flow, Op prev) {
+        final Op flow(Flow flow, Op prev) {
             mVarUsage = flow.mVarUsage.clone();
             return mNext;
         }
 
         @Override
-        Op revisit(Flow flow, Op prev) {
+        final Op revisit(Flow flow, Op prev) {
             if (mVarUsage != null) {
                 if (mVarUsage.equals(flow.mVarUsage)) {
                     // Nothing changed.
@@ -3628,7 +3628,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
          * Must be called when label is used as a branch target, but never when used by an
          * exception handler.
          */
-        void targeted() {
+        final void targeted() {
             mUsedCount++;
             if (mTrackOffsets == null) {
                 mTrackOffsets = new int[4];
@@ -3638,14 +3638,14 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         /**
          * Must be called when label is used by an exception handler.
          */
-        void handler() {
+        final void handler() {
             mUsedCount |= (1 << 31);
         }
 
         /**
          * @return true if totally unused as a branch target or an exception handler.
          */
-        boolean lessUsed() {
+        final boolean lessUsed() {
             int uc = mUsedCount;
             int count = uc & ~(1 << 31);
 
@@ -3671,7 +3671,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
          * Must be called after a branch operation to this label has been appended. The used
          * method must have already been called when the operation was initially created.
          */
-        void comesFrom(BranchOp branch, TheMethodMaker m) {
+        final void comesFrom(BranchOp branch, TheMethodMaker m) {
             int srcAddr = m.mCodeLen - 1; // opcode address
 
             if (mAddress >= 0) {
@@ -3722,7 +3722,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             mTrackOffsets[mTrackCount++] = offset;
         }
 
-        void comesFromWide(TheMethodMaker m, int srcAddr) {
+        final void comesFromWide(TheMethodMaker m, int srcAddr) {
             if (mAddress >= 0) {
                 m.appendInt(mAddress - srcAddr);
                 return;
@@ -4162,7 +4162,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
-        Op flow(Flow flow, Op prev) {
+        final Op flow(Flow flow, Op prev) {
             Op next = mNext;
 
             // Check if storing to an unused variable and remove the pair.
@@ -4178,7 +4178,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
-        boolean isSimplePush() {
+        final boolean isSimplePush() {
             return mType.slotWidth() == 1;
         }
     }
@@ -4251,7 +4251,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             return mNext;
         }
 
-        Op unassigned(Flow flow, Op prev) {
+        final Op unassigned(Flow flow, Op prev) {
             IllegalStateException ex = mVar.methodMaker().finishFail
                 ("Accessing an unassigned variable: type=" + mVar.type().name() +
                  ", name=" + mVar.name());
@@ -4619,12 +4619,12 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
     abstract class OwnedVar implements Variable, Typed {
         @Override
-        public ClassMaker makerType() {
+        public final ClassMaker makerType() {
             return type().makerType();
         }
 
         @Override
-        public Variable clear() {
+        public final Variable clear() {
             BaseType type = type();
             if (type.isObject()) {
                 set(null);
@@ -4649,7 +4649,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
          */
         abstract void push();
 
-        void push(BaseType type) {
+        final void push(BaseType type) {
             Op savepoint = mLastOp;
             try {
                 push();
@@ -4660,7 +4660,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             }
         }
 
-        void pushObject() {
+        final void pushObject() {
             push();
             BaseType type = type();
             if (type.isPrimitive()) {
@@ -4687,7 +4687,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             return this;
         }
 
-        OwnedVar setExactIfAllowed(Object value) {
+        final OwnedVar setExactIfAllowed(Object value) {
             if (mClassMaker.allowExactConstants()) {
                 setExact(value);
             } else {
@@ -4699,7 +4699,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         /**
          * @throws IllegalArgumentException if the constant isn't defined in the same ClassMaker
          */
-        Variable setConstant(ConstantVar cv) {
+        final Variable setConstant(ConstantVar cv) {
             BaseType type = type();
 
             if (!type.isAssignableFrom(cv.type())) {
@@ -4720,19 +4720,19 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
-        public void ifTrue(Label label) {
+        public final void ifTrue(Label label) {
             push(BOOLEAN);
             addBranchOp(IFNE, 1, label);
         }
 
         @Override
-        public void ifFalse(Label label) {
+        public final void ifFalse(Label label) {
             push(BOOLEAN);
             addBranchOp(IFEQ, 1, label);
         }
 
         @Override
-        public void ifEq(Object value, Label label) {
+        public final void ifEq(Object value, Label label) {
             if (value == null) {
                 nullCompareCheck();
                 push();
@@ -4743,7 +4743,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
-        public void ifNe(Object value, Label label) {
+        public final void ifNe(Object value, Label label) {
             if (value == null) {
                 nullCompareCheck();
                 push();
@@ -4753,29 +4753,29 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             }
         }
 
-        private void nullCompareCheck() {
+        private final void nullCompareCheck() {
             if (type().isPrimitive()) {
                 throw new IllegalStateException("Cannot compare a primitive type to null");
             }
         }
 
         @Override
-        public void ifLt(Object value, Label label) {
+        public final void ifLt(Object value, Label label) {
             ifRelational(value, label, false, IF_ICMPLT, IFLT, false);
         }
 
         @Override
-        public void ifGe(Object value, Label label) {
+        public final void ifGe(Object value, Label label) {
             ifRelational(value, label, false, IF_ICMPGE, IFGE, false);
         }
 
         @Override
-        public void ifGt(Object value, Label label) {
+        public final void ifGt(Object value, Label label) {
             ifRelational(value, label, false, IF_ICMPGT, IFGT, false);
         }
 
         @Override
-        public void ifLe(Object value, Label label) {
+        public final void ifLe(Object value, Label label) {
             ifRelational(value, label, false, IF_ICMPLE, IFLE, false);
         }
 
@@ -4926,7 +4926,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
-        public void switch_(Label defaultLabel, int[] cases, Label... labels) {
+        public final void switch_(Label defaultLabel, int[] cases, Label... labels) {
             if (cases.length != labels.length) {
                 throw new IllegalArgumentException("Number of cases and labels doesn't match");
             }
@@ -4998,57 +4998,57 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
-        public LocalVar add(Object value) {
+        public final LocalVar add(Object value) {
             return addMathOp("add", IADD, this, value);
         }
 
         @Override
-        public LocalVar sub(Object value) {
+        public final LocalVar sub(Object value) {
             return addMathOp("subtract", ISUB, this, value);
         }
 
         @Override
-        public LocalVar mul(Object value) {
+        public final LocalVar mul(Object value) {
             return addMathOp("multiply", IMUL, this, value);
         }
 
         @Override
-        public LocalVar div(Object value) {
+        public final LocalVar div(Object value) {
             return addMathOp("divide", IDIV, this, value);
         }
 
         @Override
-        public LocalVar rem(Object value) {
+        public final LocalVar rem(Object value) {
             return addMathOp("remainder", IREM, this, value);
         }
 
         @Override
-        public LocalVar eq(Object value) {
+        public final LocalVar eq(Object value) {
             return relational(value, true, IF_ICMPEQ, IFEQ);
         }
 
         @Override
-        public LocalVar ne(Object value) {
+        public final LocalVar ne(Object value) {
             return relational(value, true, IF_ICMPNE, IFNE);
         }
 
         @Override
-        public LocalVar lt(Object value) {
+        public final LocalVar lt(Object value) {
             return relational(value, false, IF_ICMPLT, IFLT);
         }
 
         @Override
-        public LocalVar ge(Object value) {
+        public final LocalVar ge(Object value) {
             return relational(value, false, IF_ICMPGE, IFGE);
         }
 
         @Override
-        public LocalVar gt(Object value) {
+        public final LocalVar gt(Object value) {
             return relational(value, false, IF_ICMPGT, IFGT);
         }
 
         @Override
-        public LocalVar le(Object value) {
+        public final LocalVar le(Object value) {
             return relational(value, false, IF_ICMPLE, IFLE);
         }
 
@@ -5073,7 +5073,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
-        public LocalVar instanceOf(Object clazz) {
+        public final LocalVar instanceOf(Object clazz) {
             if (!type().isObject()) {
                 throw new IllegalStateException("Not an object type");
             }
@@ -5115,7 +5115,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
-        public LocalVar cast(Object clazz) {
+        public final LocalVar cast(Object clazz) {
             final BaseType fromType = type();
             final BaseType toType = mClassMaker.typeFrom(clazz);
             final int code = fromType.canConvertTo(toType);
@@ -5271,74 +5271,74 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
-        public LocalVar not() {
+        public final LocalVar not() {
             return eq(false);
         }
 
         @Override
-        public LocalVar and(Object value) {
+        public final LocalVar and(Object value) {
             return addLogicalOp("and", IAND, this, value);
         }
 
         @Override
-        public LocalVar or(Object value) {
+        public final LocalVar or(Object value) {
             return addLogicalOp("or", IOR, this, value);
         }
 
         @Override
-        public LocalVar xor(Object value) {
+        public final LocalVar xor(Object value) {
             return addLogicalOp("xor", IXOR, this, value);
         }
 
         @Override
-        public LocalVar shl(Object value) {
+        public final LocalVar shl(Object value) {
             return addLogicalOp("shift", ISHL, this, value);
         }
 
         @Override
-        public LocalVar shr(Object value) {
+        public final LocalVar shr(Object value) {
             return addLogicalOp("shift", ISHR, this, value);
         }
 
         @Override
-        public LocalVar ushr(Object value) {
+        public final LocalVar ushr(Object value) {
             return addLogicalOp("shift", IUSHR, this, value);
         }
 
         @Override
-        public LocalVar neg() {
+        public final LocalVar neg() {
             return addMathOp("negate", INEG, this, null);
         }
 
         @Override
-        public LocalVar com() {
+        public final LocalVar com() {
             return addLogicalOp("complement", IXOR, this, -1);
         }
 
         @Override
-        public Variable cmp(Object value) {
+        public final LocalVar cmp(Object value) {
             return addCompareOp("cmp", LCMP, this, value);
         }
 
         @Override
-        public Variable cmpl(Object value) {
+        public final LocalVar cmpl(Object value) {
             return addCompareOp("cmpl", FCMPL, this, value);
         }
 
         @Override
-        public Variable cmpg(Object value) {
+        public final LocalVar cmpg(Object value) {
             return addCompareOp("cmpg", FCMPG, this, value);
         }
 
         @Override
-        public LocalVar box() {
+        public final LocalVar box() {
             BaseType type = type().box();
             push(type);
             return storeToNewVar(type);
         }
 
         @Override
-        public LocalVar unbox() {
+        public final LocalVar unbox() {
             BaseType type = type().unbox();
             if (type == null) {
                 throw new IllegalStateException("Cannot be unboxed");
@@ -5348,19 +5348,19 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
-        public Class<?> boxedType() {
+        public final Class<?> boxedType() {
             BaseType boxed = type().box();
             return boxed.unbox() != null ? boxed.classType() : null;
         }
 
         @Override
-        public Class<?> unboxedType() {
+        public final Class<?> unboxedType() {
             BaseType unboxed = type().unbox();
             return unboxed != null ? unboxed.classType() : null;
         }
 
         @Override
-        public LocalVar alength() {
+        public final LocalVar alength() {
             arrayCheck();
             push();
             addBytecodeOp(ARRAYLENGTH, 0);
@@ -5368,14 +5368,14 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
-        public LocalVar aget(Object index) {
+        public final LocalVar aget(Object index) {
             byte aloadOp = apush(index);
             addBytecodeOp(aloadOp, 1);
             return storeToNewVar(type().elementType());
         }
 
         @Override
-        public void aset(Object index, Object value) {
+        public final void aset(Object index, Object value) {
             byte aloadOp = apush(index);
             addPushOp(type().elementType(), value);
             addBytecodeOp(toAstoreOp(aloadOp), 3);
@@ -5386,7 +5386,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
          *
          * @param modifier given an element value, returns the modified element value
          */
-        void amodify(Object index, Function<OwnedVar, OwnedVar> modifier) {
+        final void amodify(Object index, Function<OwnedVar, OwnedVar> modifier) {
             BaseType arrayType = type();
             BaseType elementType = arrayType.elementType();
 
@@ -5420,14 +5420,14 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         /**
          * @return the aloadOp
          */
-        byte apush(Object index) {
+        final byte apush(Object index) {
             byte aloadOp = aloadOp();
             push();
             addPushOp(INT, index);
             return aloadOp;
         }
 
-        void asetExact(Object index, ExplicitConstantOp constOp) {
+        final void asetExact(Object index, ExplicitConstantOp constOp) {
             byte aloadOp = aloadOp();
             push();
             addPushOp(INT, index);
@@ -5440,7 +5440,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
-        public Field arrayAccess(Object index) {
+        public final Field arrayAccess(Object index) {
             return ArrayHandleVar.from(TheMethodMaker.this, arrayCheck(), this, index);
         }
 
@@ -5466,17 +5466,19 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
-        public LocalVar invoke(String name, Object... values) {
+        public final LocalVar invoke(String name, Object... values) {
             return doInvoke(invocationType(), this, name, inherit(), values, null, null);
         }
 
         @Override
-        public LocalVar invoke(String name) {
+        public final LocalVar invoke(String name) {
             return invoke(name, NO_ARGS);
         }
 
         @Override
-        public LocalVar invoke(Object retType, String name, Object[] types, Object... values) {
+        public final LocalVar invoke(Object retType, String name,
+                                     Object[] types, Object... values)
+        {
             BaseType returnType = null;
             BaseType[] paramTypes = null;
 
@@ -5503,7 +5505,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
-        public ConstantVar methodHandle(Object retType, String name, Object... types) {
+        public final ConstantVar methodHandle(Object retType, String name, Object... types) {
             BaseType returnType = retType == null ? null : mClassMaker.typeFrom(retType);
 
             BaseType[] paramTypes;
@@ -5519,7 +5521,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             return methodHandle(returnType, name, paramTypes);
         }
 
-        ConstantVar methodHandle(BaseType returnType, String name, BaseType... paramTypes) {
+        final ConstantVar methodHandle(BaseType returnType, String name, BaseType... paramTypes) {
             BaseType enclosingType;
             BaseType.Method method;
             int kind;
@@ -5623,12 +5625,12 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
-        public Bootstrap indy(String name, Object... args) {
+        public final Bootstrap indy(String name, Object... args) {
             return bootstrap(false, name, args);
         }
 
         @Override
-        public Bootstrap condy(String name, Object... args) {
+        public final Bootstrap condy(String name, Object... args) {
             return bootstrap(true, name, args);
         }
 
@@ -5699,7 +5701,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
-        public void throw_() {
+        public final void throw_() {
             if (!BaseType.from(Throwable.class).isAssignableFrom(type())) {
                 throw new IllegalStateException("Non-throwable type: " + type().name());
             }
@@ -5708,12 +5710,12 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
-        public void monitorEnter() {
+        public final void monitorEnter() {
             monitor(MONITORENTER);
         }
 
         @Override
-        public void monitorExit() {
+        public final void monitorExit() {
             monitor(MONITOREXIT);
         }
 
@@ -5734,7 +5736,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
-        public TheMethodMaker methodMaker() {
+        public final TheMethodMaker methodMaker() {
             return TheMethodMaker.this;
         }
     }
@@ -5755,11 +5757,11 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
-        public int compareTo(LocalVar other) {
+        public final int compareTo(LocalVar other) {
             return Integer.compare(mSlot, other.mSlot);
         }
 
-        int slotWidth() {
+        final int slotWidth() {
             return mType.slotWidth();
         }
 
@@ -5777,7 +5779,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
-        public BaseType type() {
+        public final BaseType type() {
             return mType;
         }
 
@@ -5787,12 +5789,12 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
-        void adjustPushCount(int amt) {
+        final void adjustPushCount(int amt) {
             mPushCount += amt;
         }
 
         @Override
-        public String name() {
+        public final String name() {
             return mName;
         }
 
@@ -5820,7 +5822,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
-        void addStoreConstantOp(ExplicitConstantOp op) {
+        final void addStoreConstantOp(ExplicitConstantOp op) {
             addOp(op);
             addStoreOp(this);
         }
@@ -5858,7 +5860,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
-        public BaseFieldVar field(String name) {
+        public final BaseFieldVar field(String name) {
             return TheMethodMaker.this.field(this, name);
         }
     }
@@ -5881,7 +5883,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             return smCode();
         }
 
-        int paramIndex() {
+        final int paramIndex() {
             int index = mIndex;
             if (mThisVar != null) {
                 index--;
@@ -5890,7 +5892,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
-        public ParamVar name(String name) {
+        public final ParamVar name(String name) {
             super.name(name);
             if (this != mThisVar) {
                 mparams().setName(paramIndex(), mConstants.addUTF8(name));
@@ -5899,23 +5901,23 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
-        public ParamVar signature(Object... components) {
+        public final ParamVar signature(Object... components) {
             super.signature(components);
             return this;
         }
 
         @Override
-        public Parameter final_() {
+        public final Parameter final_() {
             return addFlag(Modifier.FINAL);
         }
 
         @Override
-        public Parameter synthetic() {
+        public final Parameter synthetic() {
             return addFlag(0x1000);
         }
 
         @Override
-        public Parameter mandated() {
+        public final Parameter mandated() {
             return addFlag(0x8000);
         }
 
@@ -5943,7 +5945,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
-        public AnnotationMaker addAnnotation(Object annotationType, boolean visible) {
+        public final AnnotationMaker addAnnotation(Object annotationType, boolean visible) {
             var thisVar = mThisVar;
             if (this == thisVar) {
                 return super.addAnnotation(annotationType, visible);
@@ -5987,29 +5989,29 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
-        public LocalVar set(Object value) {
+        public final LocalVar set(Object value) {
             throw new IllegalStateException("Unmodifiable variable");
         }
 
         @Override
-        public Variable setExact(Object value) {
+        public final Variable setExact(Object value) {
             throw new IllegalStateException("Unmodifiable variable");
         }
 
         @Override
-        public void inc(Object value) {
+        public final void inc(Object value) {
             throw new IllegalStateException("Unmodifiable variable");
         }
 
         @Override
-        public void dec(Object value) {
+        public final void dec(Object value) {
             throw new IllegalStateException("Unmodifiable variable");
         }
 
         /**
          * @throws IllegalArgumentException if the constant isn't defined in the same ClassMaker
          */
-        ConstantPool.Constant obtain(TheMethodMaker mm) {
+        final ConstantPool.Constant obtain(TheMethodMaker mm) {
             if (mm.mClassMaker == TheMethodMaker.this.mClassMaker) {
                 return mConstant;
             }
@@ -6017,7 +6019,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
-        boolean tryPushTo(TheMethodMaker mm) {
+        final boolean tryPushTo(TheMethodMaker mm) {
             if (mClassMaker == mm.mClassMaker) {
                 pushTo(mm);
                 return true;
@@ -6026,11 +6028,11 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
-        void push() {
+        final void push() {
             pushTo(TheMethodMaker.this);
         }
 
-        void pushTo(TheMethodMaker mm) {
+        final void pushTo(TheMethodMaker mm) {
             mm.addExplicitConstantOp(mConstant, mType);
         }
     }
@@ -6108,52 +6110,52 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
-        void push() {
+        final void push() {
             this_().push();
         }
 
         @Override
-        void adjustPushCount(int amt) {
+        final void adjustPushCount(int amt) {
             this_().adjustPushCount(amt);
         }
 
         @Override
-        public String name() {
+        public final String name() {
             return null;
         }
 
         @Override
-        public LocalVar name(String name) {
+        public final LocalVar name(String name) {
             throw new IllegalStateException("Already named");
         }
 
         @Override
-        public Variable signature(Object... components) {
+        public final Variable signature(Object... components) {
             throw new IllegalStateException("Cannot define a signature");
         }
 
         @Override
-        public LocalVar set(Object value) {
+        public final LocalVar set(Object value) {
             throw new IllegalStateException("Unmodifiable variable");
         }
 
         @Override
-        void addStoreConstantOp(ExplicitConstantOp op) {
+        final void addStoreConstantOp(ExplicitConstantOp op) {
             throw new IllegalStateException("Unmodifiable variable");
         }
 
         @Override
-        public void inc(Object value) {
+        public final void inc(Object value) {
             throw new IllegalStateException("Unmodifiable variable");
         }
 
         @Override
-        public void dec(Object value) {
+        public final void dec(Object value) {
             throw new IllegalStateException("Unmodifiable variable");
         }
 
         @Override
-        public FieldVar field(String name) {
+        public final FieldVar field(String name) {
             return TheMethodMaker.this.field(type(), name);
         }
 
@@ -6195,17 +6197,17 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
     abstract class BaseFieldVar extends OwnedVar implements Field {
         @Override
-        public void switch_(Label defaultLabel, String[] cases, Label... labels) {
+        public final void switch_(Label defaultLabel, String[] cases, Label... labels) {
             get().switch_(defaultLabel, cases, labels);
         }
 
         @Override
-        public void switch_(Label defaultLabel, Enum<?>[] cases, Label... labels) {
+        public final void switch_(Label defaultLabel, Enum<?>[] cases, Label... labels) {
             get().switch_(defaultLabel, cases, labels);
         }
 
         @Override
-        public void switch_(Label defaultLabel, Object[] cases, Label... labels) {
+        public final void switch_(Label defaultLabel, Object[] cases, Label... labels) {
             get().switch_(defaultLabel, cases, labels);
         }
 
@@ -6220,12 +6222,12 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
-        public Field field(String name) {
+        public final Field field(String name) {
             return get().field(name);
         }
 
         @Override
-        public void synchronized_(Runnable body) {
+        public final void synchronized_(Runnable body) {
             get().synchronized_(body);
         }
 
@@ -6240,147 +6242,147 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
         }
 
         @Override
-        public LocalVar getOpaque() {
+        public final LocalVar getOpaque() {
             return vhGet("getOpaque");
         }
 
         @Override
-        public void setOpaque(Object value) {
+        public final void setOpaque(Object value) {
             vhSet("setOpaque", value);
         }
 
         @Override
-        public LocalVar getAcquire() {
+        public final LocalVar getAcquire() {
             return vhGet("getAcquire");
         }
 
         @Override
-        public void setRelease(Object value) {
+        public final void setRelease(Object value) {
             vhSet("setRelease", value);
         }
 
         @Override
-        public LocalVar getVolatile() {
+        public final LocalVar getVolatile() {
             return vhGet("getVolatile");
         }
 
         @Override
-        public void setVolatile(Object value) {
+        public final void setVolatile(Object value) {
             vhSet("setVolatile", value);
         }
 
         @Override
-        public Variable compareAndSet(Object expectedValue, Object newValue) {
+        public final Variable compareAndSet(Object expectedValue, Object newValue) {
             return vhCas("compareAndSet", BOOLEAN, expectedValue, newValue);
         }
 
         @Override
-        public Variable compareAndExchange(Object expectedValue, Object newValue) {
+        public final Variable compareAndExchange(Object expectedValue, Object newValue) {
             return vhCas("compareAndExchange", null, expectedValue, newValue);
         }
 
         @Override
-        public Variable compareAndExchangeAcquire(Object expectedValue, Object newValue) {
+        public final Variable compareAndExchangeAcquire(Object expectedValue, Object newValue) {
             return vhCas("compareAndExchangeAcquire", null, expectedValue, newValue);
         }
 
         @Override
-        public Variable compareAndExchangeRelease(Object expectedValue, Object newValue) {
+        public final Variable compareAndExchangeRelease(Object expectedValue, Object newValue) {
             return vhCas("compareAndExchangeRelease", null, expectedValue, newValue);
         }
 
         @Override
-        public Variable weakCompareAndSetPlain(Object expectedValue, Object newValue) {
+        public final Variable weakCompareAndSetPlain(Object expectedValue, Object newValue) {
             return vhCas("weakCompareAndSetPlain", BOOLEAN, expectedValue, newValue);
         }
 
         @Override
-        public Variable weakCompareAndSet(Object expectedValue, Object newValue) {
+        public final Variable weakCompareAndSet(Object expectedValue, Object newValue) {
             return vhCas("weakCompareAndSet", BOOLEAN, expectedValue, newValue);
         }
 
         @Override
-        public Variable weakCompareAndSetAcquire(Object expectedValue, Object newValue) {
+        public final Variable weakCompareAndSetAcquire(Object expectedValue, Object newValue) {
             return vhCas("weakCompareAndSetAcquire", BOOLEAN, expectedValue, newValue);
         }
 
         @Override
-        public Variable weakCompareAndSetRelease(Object expectedValue, Object newValue) {
+        public final Variable weakCompareAndSetRelease(Object expectedValue, Object newValue) {
             return vhCas("weakCompareAndSetRelease", BOOLEAN, expectedValue, newValue);
         }
 
         @Override
-        public Variable getAndSet(Object value) {
+        public final Variable getAndSet(Object value) {
             return vhGas("getAndSet", value);
         }
 
         @Override
-        public Variable getAndSetAcquire(Object value) {
+        public final Variable getAndSetAcquire(Object value) {
             return vhGas("getAndSetAcquire", value);
         }
 
         @Override
-        public Variable getAndSetRelease(Object value) {
+        public final Variable getAndSetRelease(Object value) {
             return vhGas("getAndSetRelease", value);
         }
 
         @Override
-        public Variable getAndAdd(Object value) {
+        public final Variable getAndAdd(Object value) {
             return vhGas("getAndAdd", value);
         }
 
         @Override
-        public Variable getAndAddAcquire(Object value) {
+        public final Variable getAndAddAcquire(Object value) {
             return vhGas("getAndAddAcquire", value);
         }
 
         @Override
-        public Variable getAndAddRelease(Object value) {
+        public final Variable getAndAddRelease(Object value) {
             return vhGas("getAndAddRelease", value);
         }
 
         @Override
-        public Variable getAndBitwiseOr(Object value) {
+        public final Variable getAndBitwiseOr(Object value) {
             return vhGas("getAndBitwiseOr", value);
         }
 
         @Override
-        public Variable getAndBitwiseOrAcquire(Object value) {
+        public final Variable getAndBitwiseOrAcquire(Object value) {
             return vhGas("getAndBitwiseOrAcquire", value);
         }
 
         @Override
-        public Variable getAndBitwiseOrRelease(Object value) {
+        public final Variable getAndBitwiseOrRelease(Object value) {
             return vhGas("getAndBitwiseOrRelease", value);
         }
 
         @Override
-        public Variable getAndBitwiseAnd(Object value) {
+        public final Variable getAndBitwiseAnd(Object value) {
             return vhGas("getAndBitwiseAnd", value);
         }
 
         @Override
-        public Variable getAndBitwiseAndAcquire(Object value) {
+        public final Variable getAndBitwiseAndAcquire(Object value) {
             return vhGas("getAndBitwiseAndAcquire", value);
         }
 
         @Override
-        public Variable getAndBitwiseAndRelease(Object value) {
+        public final Variable getAndBitwiseAndRelease(Object value) {
             return vhGas("getAndBitwiseAndRelease", value);
         }
 
         @Override
-        public Variable getAndBitwiseXor(Object value) {
+        public final Variable getAndBitwiseXor(Object value) {
             return vhGas("getAndBitwiseXor", value);
         }
 
         @Override
-        public Variable getAndBitwiseXorAcquire(Object value) {
+        public final Variable getAndBitwiseXorAcquire(Object value) {
             return vhGas("getAndBitwiseXorAcquire", value);
         }
 
         @Override
-        public Variable getAndBitwiseXorRelease(Object value) {
+        public final Variable getAndBitwiseXorRelease(Object value) {
             return vhGas("getAndBitwiseXorRelease", value);
         }
 
@@ -6727,7 +6729,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
          *
          * @param modifier given an existing value, returns the modified value
          */
-        void modify(Function<OwnedVar, OwnedVar> modifier) {
+        final void modify(Function<OwnedVar, OwnedVar> modifier) {
             BaseType vhType = handleVar().type();
 
             var coordinateVars = new LocalVar[mCoordinates.length];
