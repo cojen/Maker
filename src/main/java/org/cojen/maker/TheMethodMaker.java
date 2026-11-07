@@ -1485,10 +1485,15 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
             if (op instanceof BranchOp branchOp) {
                 branchOp.mTarget = finallyExit(inside, exits, branchOp.mTarget);
+                byte opcode = branchOp.op();
+                if (opcode != GOTO && opcode != GOTO_W) {
+                    // A conditional branch can fall through, and so the normal exit path still
+                    // needs a finally handler.
+                    lastTransformed = false;
+                }
             } else if (op instanceof SwitchOp switchOp) {
                 switchOp.finallyExits(this, inside, exits);
             } else if (op instanceof ReturnOp retOp) {
-
                 if (retHandler == null) {
                     retHandler = new Lab();
                     if (retOp.op() != RETURN) {

@@ -3,6 +3,7 @@ Changelog
 
 v2.9.1
 ------
+* Fixed the finally_ method when the last operation is a conditional branch.
 * Fixed switch statement which has an upper bound of Integer.MAX_VALUE. An
   ArrayIndexOutOfBoundsException was being thrown when the class is finished.
 * Fixed building of enum switches when a case is against an enum with a class body.

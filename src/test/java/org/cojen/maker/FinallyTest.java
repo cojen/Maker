@@ -346,4 +346,64 @@ public class FinallyTest {
             }
         }
     }
+
+    @Test
+    public void endsWithConditionalBranchOutside() throws Exception {
+        endsWithConditionalBranch(false);
+    }
+
+    @Test
+    public void endsWithConditionalBranchInside() throws Exception {
+        endsWithConditionalBranch(true);
+    }
+
+    /**
+     * Test case for when the last operation in the finally range is a conditional branch,
+     * which can fall through. The finally handler must be generated for the fall through
+     * path too, and an "Code flows into an exception handler" exception must not be thrown.
+     *
+     * @author Claude
+     */
+    private void endsWithConditionalBranch(boolean inside) throws Exception {
+        for (int x : new int[] {0, 3}) {
+            ClassMaker cm = ClassMaker.begin().public_();
+            MethodMaker mm = cm.addMethod(int.class, "run", int[].class, int.class)
+                .public_().static_();
+
+            var log = mm.param(0);
+            var xVar = mm.param(1);
+
+            Label start = mm.label().here();
+            Label out;
+
+            if (!inside) {
+                out = mm.label();
+                log.aset(0, log.aget(0).add(1));
+                xVar.ifGt(0, out);
+                mm.finally_(start, () -> log.aset(1, log.aget(1).add(1)));
+                mm.return_(0);
+                out.here();
+                mm.return_(1);
+            } else {
+                // A do-while loop is the last thing in the range.
+                var count = mm.var(int.class).set(0);
+                Label top = mm.label().here();
+                count.inc(1);
+                log.aset(0, log.aget(0).add(1));
+                count.ifLt(xVar, top);
+                mm.finally_(start, () -> log.aset(1, log.aget(1).add(1)));
+                mm.return_(count);
+            }
+
+            var clazz = cm.finish();
+            var log2 = new int[2];
+            int result = (Integer) clazz.getMethod("run", int[].class, int.class)
+                .invoke(null, log2, x);
+
+            int expect = inside ? Math.max(1, x) : (x > 0 ? 1 : 0);
+            assertEquals(expect, result);
+            assertEquals(inside ? Math.max(1, x) : 1, log2[0]);
+            assertEquals("finally must run exactly once", 1, log2[1]);
+        }
+    }
 }
