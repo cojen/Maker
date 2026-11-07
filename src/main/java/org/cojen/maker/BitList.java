@@ -80,6 +80,10 @@ final class BitList implements Cloneable {
         }
     }
 
+    public void clear() {
+        Arrays.fill(mData, 0);
+    }
+
     @Override
     public BitList clone() {
         return new BitList(this);

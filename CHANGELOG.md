@@ -10,6 +10,7 @@ v2.9.1
 * Fixed an edge case in which calling ClassMaker.finishTo would throw an exception because the
   internal buffer shrank in size.
 * Fixed concat with many long and double fields. Original code only examined local variables.
+* Fixed potential verification errors in methods which are large and have wide branches.
 * Disallow automatic conversion of boolean and char to Number.
 * When selecting a method to bind to, primitive values should prefer a boxed parameter over a
   plain Object parameter. This eliminates a possible "No best matching method found" exception.

@@ -305,6 +305,12 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
             mStackMapTable.reset();
 
+            // Must reset varUsage before doing flow analysis again.
+            varUsage.clear();
+            for (LocalVar param : mParams) {
+                varUsage.set(param.mSlot);
+            }
+
             new Flow(varList, varUsage).run(mFirstOp);
         }
 
