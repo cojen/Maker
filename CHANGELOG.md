@@ -5,6 +5,7 @@ v2.9.1
 ------
 * Fixed switch statement which has an upper bound of Integer.MAX_VALUE. An
   ArrayIndexOutOfBoundsException was being thrown when the class is finished.
+* Fixed building of enum switches when a case is against an enum with a class body.
 * Disallow automatic conversion of boolean and char to Number.
 * When selecting a method to bind to, primitive values should prefer a boxed parameter over a
   plain Object parameter. This eliminates a possible "No best matching method found" exception.

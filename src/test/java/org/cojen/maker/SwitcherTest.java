@@ -17,6 +17,7 @@
 package org.cojen.maker;
 
 import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -493,5 +494,41 @@ public class SwitcherTest {
         } catch (IllegalArgumentException e) {
             assertTrue(e.getMessage().contains("Unknown constant"));
         }
+    }
+
+    /**
+     * @author Claude
+     */
+    public enum BodyEnum {
+        A, 
+
+        B {
+            @Override
+            public String toString() {
+                return "bb";
+            }
+        },
+
+        C
+    }
+
+    /**
+     * @author Claude
+     */
+    @Test
+    public void enumConstantWithBody() throws Throwable {
+        ClassMaker cm = ClassMaker.begin().public_();
+        MethodMaker mm = cm.addMethod(int.class, "f", BodyEnum.class).public_().static_();
+        Label la = mm.label(), lb = mm.label(), def = mm.label();
+        mm.param(0).switch_(def, new Enum[] {BodyEnum.A, BodyEnum.B}, la, lb);
+        la.here(); mm.return_(1);
+        lb.here(); mm.return_(2);
+        def.here(); mm.return_(0);
+        var lookup = cm.finishHidden();
+        var h = lookup.findStatic(lookup.lookupClass(), "f",
+                                  MethodType.methodType(int.class, BodyEnum.class));
+        assertEquals(1, (int) h.invoke(BodyEnum.A));
+        assertEquals(2, (int) h.invoke(BodyEnum.B));
+        assertEquals(0, (int) h.invoke(BodyEnum.C));
     }
 }

@@ -67,7 +67,7 @@ public final class Switcher {
         }
 
         for (Enum<?> key : keys) {
-            if (key.getClass() != type) {
+            if (key.getDeclaringClass() != type) {
                 throw new IllegalArgumentException("Enum case doesn't match the condition type");
             }
         }
