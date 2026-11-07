@@ -154,4 +154,20 @@ public class BytesOutTest {
         assertEquals(65536, BytesOut.checkUTF(UsageTest.makeString(32767, '\u0100') + "ab"));
         assertEquals(65536, BytesOut.checkUTF(UsageTest.makeString(21845, '\u1000') + 'a'));
     }
+
+    /**
+     * @author Claude
+     */
+    @Test
+    public void streamModeNeverShrinks() throws Exception {
+        var real = new ByteArrayOutputStream();
+        var bo = new BytesOut(real, 16);
+        bo.writeLong(1);
+        bo.writeInt(2);
+        bo.writeUTF("");
+        bo.writeUTF("abc"); // forces a flush; used to shrink the buffer to 5 bytes
+        bo.writeLong(3);
+        bo.flush();
+        assertEquals(8 + 4 + 2 + 5 + 8, real.size());
+    }
 }

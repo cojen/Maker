@@ -143,4 +143,79 @@ public class ExternalTest {
     }
 
     private static volatile boolean finishAndLoadPassed;
+
+    /**
+     * Writing a class with many constants to an OutputStream must produce the same bytes as
+     * finishBytes, and the result must be loadable and usable. Short strings which are
+     * interleaved with long, double, and int constants used to cause the stream buffer to
+     * shrink below the size of a subsequent write, which threw an
+     * ArrayIndexOutOfBoundsException.
+     *
+     * @author Claude
+     */
+    @Test
+    public void finishToStreamManyConstants() throws Exception {
+        // The failure depends on where the buffer happens to fill up, so try many sizes.
+        for (int n = 1; n <= 150; n++) {
+            String name = "org.cojen.maker.StreamFake" + n;
+
+            byte[] expectBytes = streamFake(name, n).finishBytes();
+
+            var out = new ByteArrayOutputStream();
+            streamFake(name, n).finishTo(out);
+            byte[] bytes = out.toByteArray();
+
+            assertArrayEquals("n=" + n, expectBytes, bytes);
+
+            // Verify that the class actually loads and computes the expected result.
+
+            var loader = new ClassLoader() {
+                {
+                    defineClass(name, bytes, 0, bytes.length);
+                }
+            };
+
+            Class<?> clazz = loader.loadClass(name);
+
+            long expect = 0;
+            double dexpect = 0;
+            for (int i = 0; i < n; i++) {
+                expect += 1_000_000_000_000L + i;
+                dexpect += 0.5 + i;
+                expect += 100_000 + i;
+                expect += Integer.toString(i, 36).length();
+            }
+            expect += (long) dexpect;
+
+            assertEquals("n=" + n, expect, (long) clazz.getMethod("run").invoke(null));
+        }
+    }
+
+    /**
+     * Makes a class with a static run method which uses many distinct constants. The strings
+     * are short and unique, and they're interleaved with constants that require 4 and 8 byte
+     * writes.
+     *
+     * @author Claude
+     */
+    private static ClassMaker streamFake(String name, int n) {
+        ClassMaker cm = ClassMaker.beginExternal(name).public_();
+        MethodMaker mm = cm.addMethod(long.class, "run").public_().static_();
+
+        var sum = mm.var(long.class).set(0L);
+        var dsum = mm.var(double.class).set(0.0);
+
+        for (int i = 0; i < n; i++) {
+            var str = mm.var(String.class).set(Integer.toString(i, 36));
+            sum.set(sum.add(1_000_000_000_000L + i));
+            dsum.set(dsum.add(0.5 + i));
+            sum.set(sum.add(100_000 + i));
+            sum.set(sum.add(str.invoke("length")));
+        }
+
+        sum.set(sum.add(dsum.cast(long.class)));
+        mm.return_(sum);
+
+        return cm;
+    }
 }

@@ -234,6 +234,10 @@ final class BytesOut {
         if (mOut != null) {
             mOut.write(mBuffer, 0, mSize);
             mSize = 0;
+            if (amt <= mBuffer.length) {
+                // With mSize now zero, calling expand would actually shrink the buffer.
+                return;
+            }
         }
         expand(amt);
     }
