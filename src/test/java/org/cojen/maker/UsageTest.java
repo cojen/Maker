@@ -248,7 +248,7 @@ public class UsageTest {
     @Test
     public void tooMuchCode() {
         MethodMaker mm = mClassMaker.addMethod(null, "test");
-        var a = mm.var(int.class);
+        var a = mm.var(int.class).clear();
         for (int i=0; i<100_000; i++) {
             a.inc(1);
         }
@@ -744,10 +744,41 @@ public class UsageTest {
 
     @Test
     public void unassigned() throws Exception {
+        unassigned(0);
+    }
+
+    @Test
+    public void unassignedInc() throws Exception {
+        unassigned(1);
+    }
+
+    @Test
+    public void unassignedDec() throws Exception {
+        unassigned(2);
+    }
+
+    private void unassigned(int mode) throws Exception {
         mClassMaker = ClassMaker.begin(null, MethodHandles.lookup());
 
         MethodMaker mm = mClassMaker.addMethod(int.class, "test").public_().static_();
-        mm.return_(mm.var(int.class).name("foo"));
+
+        var v = mm.var(int.class).name("foo");
+
+        switch (mode) {
+            default -> {
+                mm.return_(v);
+            }
+
+            case 1 -> {
+                v.inc(1);
+                mm.return_(0);
+            }
+
+            case 2 -> {
+                v.dec(1);
+                mm.return_(0);
+            }
+        }
 
         if (!TheClassMaker.DEBUG) {
             try {

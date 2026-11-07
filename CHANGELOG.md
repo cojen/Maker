@@ -13,6 +13,7 @@ v2.9.1
 * Disallow automatic conversion of boolean and char to Number.
 * When selecting a method to bind to, primitive values should prefer a boxed parameter over a
   plain Object parameter. This eliminates a possible "No best matching method found" exception.
+* Detect when calling inc/dec on an unassigned variable.
 
 v2.9.0 (2026-10-17)
 ------

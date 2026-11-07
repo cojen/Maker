@@ -473,7 +473,7 @@ public class MathTest {
 
         try {
             for (int i=0; i<70_000; i++) {
-                mm.var(int.class).inc(1);
+                mm.var(int.class).clear().inc(1);
             }
             cm.finish();
             fail();

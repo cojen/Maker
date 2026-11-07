@@ -4250,6 +4250,22 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
             return mNext;
         }
+
+        Op unassigned(Flow flow, Op prev) {
+            IllegalStateException ex = mVar.methodMaker().finishFail
+                ("Accessing an unassigned variable: type=" + mVar.type().name() +
+                 ", name=" + mVar.name());
+
+            if (TheClassMaker.DEBUG) {
+                // Print the exception and allow the class to be defined, but it will
+                // produce a VerifyError. The DebugWriter will write a file in order for
+                // the class to be examined in detail.
+                ex.printStackTrace(System.out);
+                return super.flow(flow, prev);
+            }
+
+            throw ex;
+        }
     }
 
     /**
@@ -4283,19 +4299,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             int slot = mVar.mSlot;
 
             if (slot < 0) {
-                IllegalStateException ex = mVar.methodMaker().finishFail
-                    ("Accessing an unassigned variable: type=" + mVar.type().name() +
-                     ", name=" + mVar.name());
-
-                if (TheClassMaker.DEBUG) {
-                    // Print the exception and allow the class to be defined, but it will
-                    // produce a VerifyError. The DebugWriter will write a file in order for
-                    // the class to be examined in detail.
-                    ex.printStackTrace(System.out);
-                    return super.flow(flow, prev);
-                }
-
-                throw ex;
+                return unassigned(flow, prev);
             }
 
             flow.mVarUsage.set(slot);
@@ -4406,6 +4410,11 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                 m.appendShort(slot);
                 m.appendShort(mAmount);
             }
+        }
+
+        @Override
+        Op flow(Flow flow, Op prev) {
+            return (mVar.mSlot < 0) ? unassigned(flow, prev) : super.flow(flow, prev);
         }
     }
 
