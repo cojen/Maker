@@ -4792,8 +4792,8 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
 
             BaseType typeCmp;
 
-            if (value instanceof LocalVar var) {
-                typeCmp = comparisonType(var.mType, eq);
+            if (value instanceof OwnedVar var) {
+                typeCmp = comparisonType(var.type(), eq);
                 push(typeCmp);
                 addPushOp(typeCmp, value);
             } else {
