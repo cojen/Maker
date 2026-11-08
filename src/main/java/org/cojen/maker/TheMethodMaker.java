@@ -3269,7 +3269,7 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                 return;
             }
 
-            while (true) {
+            flow: while (true) {
                 mDepth++;
 
                 // Track the previous op for supporting removal, but cannot remove Lab ops.
@@ -3301,15 +3301,21 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
                     op = next;
                 }
 
-                if (--mDepth > 0 || mOverflow == null) {
-                    mVarUsage = original;
-                    break;
+                if (--mDepth <= 0) {
+                    // Pop the overflow stack, skipping entries which are no longer valid.
+                    Overflow top;
+                    while ((top = mOverflow) != null) {
+                        mOverflow = top.mPrev;
+                        if (!top.isStale()) {
+                            op = top.mOp;
+                            mVarUsage = top.mVarUsage;
+                            continue flow;
+                        }
+                    }
                 }
 
-                // Pop the overflow stack.
-                op = mOverflow.mOp;
-                mVarUsage = mOverflow.mVarUsage;
-                mOverflow = mOverflow.mPrev;
+                mVarUsage = original;
+                break;
             }
         }
 
@@ -3366,6 +3372,18 @@ class TheMethodMaker extends ClassMember implements MethodMaker {
             mPrev = prev;
             mOp = op;
             mVarUsage = varUsage;
+        }
+
+        /**
+         * Returns true if the deferred label is no longer used as a branch target. This can
+         * happen if an optimization (flipping a conditional branch and removing the goto which
+         * follows it) removed the label from the op list after this entry was added. The
+         * label's next op is stale and must not be flowed, because it would flow into ops
+         * which are still in the list, and any optimizations which they perform would be
+         * applied a second time.
+         */
+        boolean isStale() {
+            return mOp instanceof Lab lab && !(lab instanceof HandlerLab) && !lab.isTarget();
         }
     }
 
