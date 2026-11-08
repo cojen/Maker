@@ -1,7 +1,7 @@
 Changelog
 =========
 
-v2.9.1
+v2.9.1 (2026-11-08)
 ------
 * Fixed the finally_ method when the last operation is a conditional branch.
 * Fixed switch statement which has an upper bound of Integer.MAX_VALUE. An
