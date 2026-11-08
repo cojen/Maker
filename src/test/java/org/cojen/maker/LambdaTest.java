@@ -184,6 +184,16 @@ public class LambdaTest {
 
         assertEquals(4, methods.length);
 
+        /*
+          Older JDK versions didn't set the ACC_BRIDGES flag. It was fixed in:
+        
+            8294960: Convert java.base/java.lang.invoke package to use the Classfile API to
+            generate lambdas and method handles
+
+          There's no mention that the flag was missing on older versions.
+        */
+        org.junit.Assume.assumeTrue(Runtime.version().feature() >= 24);
+
         int numBridges = 0;
 
         for (Method m : methods) {
