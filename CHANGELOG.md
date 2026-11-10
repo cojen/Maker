@@ -1,6 +1,10 @@
 Changelog
 =========
 
+v2.9.2
+------
+* Fixed addLambdaFunction rejecting interfaces which redefine Object methods as abstract.
+
 v2.9.1 (2026-11-08)
 ------
 * Fixed the finally_ method when the last operation is a conditional branch.

@@ -517,15 +517,26 @@ final class TheClassMaker extends Attributed implements ClassMaker, Typed {
                 ("Not an interface type: " + actualFunctionType.name());
         }
 
+        Map<BaseType.MethodKey, BaseType.Method> objectMethods = typeFrom(Object.class).methods();
+
         BaseType.Method theOne = null;
 
         for (BaseType.Method m : actualFunctionType.methods().values()) {
             if (m.isAbstract()) {
+                var key = new BaseType.MethodKey(m.returnType(), m.name(), m.paramTypes());
+
+                if (objectMethods.containsKey(key)) {
+                    // An interface is allowed to redefine methods from Object as abstract.
+                    // They're not really abstract, so skip them.
+                    continue;
+                }
+
                 if (theOne != null) {
                     throw new IllegalArgumentException
                         ("More than one abstract method is defined in " +
                          actualFunctionType.name());
                 }
+
                 theOne = m;
             }
         }

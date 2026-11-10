@@ -21,6 +21,7 @@ import java.io.Serializable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.RandomAccess;
 
@@ -203,5 +204,12 @@ public class LambdaTest {
         }
 
         assertEquals(3, numBridges);
+    }
+
+    @Test
+    public void comparator() throws Exception {
+        // The Comparator interface redefines Object.equals as abstract, which should be okay.
+        ClassMaker cm = ClassMaker.begin().public_();
+        cm.addLambdaFunction(Comparator.class, null, "cmp", Object.class, Object.class);
     }
 }
