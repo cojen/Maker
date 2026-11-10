@@ -23,11 +23,11 @@ import java.lang.annotation.Annotation;
 import java.lang.invoke.MethodHandles;
 
 import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 
@@ -165,7 +165,7 @@ final class ExternalType extends BaseType.Clazz implements ClassMaker, Annotatio
         synchronized (this) {
             Set<BaseType> interfaces = mInterfaces;
             if (interfaces == null) {
-                mInterfaces = interfaces = new ConcurrentHashMap<BaseType, Boolean>().keySet(true);
+                mInterfaces = interfaces = new LinkedHashSet<BaseType>(1);
             }
             interfaces.add(type);
         }
@@ -185,21 +185,15 @@ final class ExternalType extends BaseType.Clazz implements ClassMaker, Annotatio
 
     @Override
     public FieldMaker addField(Object otype, String name) {
-        BaseType type = typeFrom(otype);
+        var field = new Field(0, typeFrom(otype), name);
 
-        Map<String, Field> fields = mFields;
-
-        if (fields == null) {
-            synchronized (this) {
-                fields = mFields;
-                if (fields == null) {
-                    mFields = fields = new ConcurrentHashMap<>();
-                }
+        synchronized (this) {
+            Map<String, Field> fields = mFields;
+            if (fields == null) {
+                mFields = fields = new LinkedHashMap<>();
             }
+            fields.put(name, field);
         }
-
-        var field = new Field(0, type, name);
-        fields.put(name, field);
 
         var maker = StubMaker.newInstance(MMaker.class);
         maker.member = field;
@@ -220,19 +214,15 @@ final class ExternalType extends BaseType.Clazz implements ClassMaker, Annotatio
     }
 
     private MethodMaker doAddMethod(BaseType retType, String name, BaseType... paramTypes) {
-        Map<MethodKey, Method> methods = mMethods;
-
-        if (methods == null) {
-            synchronized (this) {
-                methods = mMethods;
-                if (methods == null) {
-                    mMethods = methods = new ConcurrentHashMap<>();
-                }
-            }
-        }
-
         var method = new Method(0, retType, name, paramTypes);
-        methods.put(new MethodKey(retType, name, paramTypes), method);
+
+        synchronized (this) {
+            Map<MethodKey, Method> methods = mMethods;
+            if (methods == null) {
+                mMethods = methods = new LinkedHashMap<>();
+            }
+            methods.put(new MethodKey(retType, name, paramTypes), method);
+        }
 
         var maker = StubMaker.newInstance(MMaker.class);
         maker.member = method;
@@ -281,7 +271,7 @@ final class ExternalType extends BaseType.Clazz implements ClassMaker, Annotatio
     }
 
     @Override
-    public MethodMaker asRecord() {
+    public synchronized MethodMaker asRecord() {
         extend(Record.class).final_();
 
         Map<String, Field> fields = mFields;
@@ -403,7 +393,7 @@ final class ExternalType extends BaseType.Clazz implements ClassMaker, Annotatio
         doInit();
         Set<BaseType> interfaces = mInterfaces;
         if (interfaces == null) {
-            mInterfaces = interfaces = new ConcurrentHashMap<BaseType, Boolean>().keySet(true);
+            mInterfaces = interfaces = new LinkedHashSet<>(1);
         }
         return interfaces;
     }
@@ -423,7 +413,7 @@ final class ExternalType extends BaseType.Clazz implements ClassMaker, Annotatio
         Map<String, Field> fields = mFields;
 
         if (fields == null) {
-            mFields = fields = new ConcurrentHashMap<>();
+            mFields = fields = new LinkedHashMap<>();
         }
 
         return fields;
@@ -437,7 +427,7 @@ final class ExternalType extends BaseType.Clazz implements ClassMaker, Annotatio
         Map<MethodKey, Method> methods = mMethods;
 
         if (methods == null) {
-            mMethods = methods = new ConcurrentHashMap<>();
+            mMethods = methods = new LinkedHashMap<>();
         }
 
         return methods;

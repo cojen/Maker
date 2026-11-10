@@ -4,6 +4,7 @@ Changelog
 v2.9.2
 ------
 * Fixed addLambdaFunction rejecting interfaces which redefine Object methods as abstract.
+* External types now preserve interface, field, method, and constructor orderings.
 
 v2.9.1 (2026-11-08)
 ------
